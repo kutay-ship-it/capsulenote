@@ -166,7 +166,7 @@ model Delivery {
   @@index([userId])
   @@index([letterId])
   @@index([status])
-  @@index([deliverAt(sort: Asc)], where: { status: scheduled })
+  @@index([deliverAt])
   @@map("deliveries")
 }
 

@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    ppr: true, // Partial Prerendering
+    ppr: false, // Partial Prerendering (requires Next.js canary)
     serverActions: {
       bodySizeLimit: "2mb",
     },
