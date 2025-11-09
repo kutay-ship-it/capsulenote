@@ -1,0 +1,17 @@
+{
+  "name": "@dearme/types",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@dearme/config": "workspace:*",
+    "typescript": "^5.3.3"
+  }
+}

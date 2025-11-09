@@ -1,0 +1,287 @@
+// DearMe Database Schema
+// Provider: Neon Postgres with extensions
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pg_trgm, citext]
+}
+
+// ============================================================================
+// USERS & PROFILES
+// ============================================================================
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  clerkUserId  String   @unique @map("clerk_user_id")
+  email        String   @unique @db.Citext
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  profile          Profile?
+  letters          Letter[]
+  deliveries       Delivery[]
+  subscriptions    Subscription[]
+  shippingAddresses ShippingAddress[]
+  payments         Payment[]
+  auditEvents      AuditEvent[]
+
+  @@map("users")
+}
+
+model Profile {
+  userId          String   @id @map("user_id") @db.Uuid
+  displayName     String?  @map("display_name")
+  timezone        String   @default("America/New_York") // IANA timezone
+  marketingOptIn  Boolean  @default(false) @map("marketing_opt_in")
+  stripeCustomerId String? @unique @map("stripe_customer_id")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// ============================================================================
+// SUBSCRIPTIONS
+// ============================================================================
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+  paused
+
+  @@map("subscription_status")
+}
+
+enum SubscriptionPlan {
+  pro
+
+  @@map("subscription_plan")
+}
+
+model Subscription {
+  id                   String             @id @default(uuid()) @db.Uuid
+  userId               String             @map("user_id") @db.Uuid
+  stripeSubscriptionId String             @unique @map("stripe_subscription_id")
+  status               SubscriptionStatus @default(trialing)
+  plan                 SubscriptionPlan   @default(pro)
+  currentPeriodEnd     DateTime           @map("current_period_end") @db.Timestamptz(3)
+  cancelAtPeriodEnd    Boolean            @default(false) @map("cancel_at_period_end")
+  createdAt            DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ============================================================================
+// LETTERS
+// ============================================================================
+
+enum LetterVisibility {
+  private
+  link
+
+  @@map("letter_visibility")
+}
+
+model Letter {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @map("user_id") @db.Uuid
+  title      String
+  bodyRich   Json             @map("body_rich") // TipTap/ProseMirror JSON
+  bodyHtml   String           @map("body_html") @db.Text // Normalized HTML for email/print
+  visibility LetterVisibility @default(private)
+  tags       String[]         @default([])
+  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz(3)
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries Delivery[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([deletedAt])
+  // Full-text search on body_html using pg_trgm
+  @@map("letters")
+}
+
+// ============================================================================
+// DELIVERIES
+// ============================================================================
+
+enum DeliveryChannel {
+  email
+  mail
+
+  @@map("delivery_channel")
+}
+
+enum DeliveryStatus {
+  scheduled
+  processing
+  sent
+  failed
+  canceled
+
+  @@map("delivery_status")
+}
+
+model Delivery {
+  id                  String          @id @default(uuid()) @db.Uuid
+  userId              String          @map("user_id") @db.Uuid
+  letterId            String          @map("letter_id") @db.Uuid
+  channel             DeliveryChannel
+  deliverAt           DateTime        @map("deliver_at") @db.Timestamptz(3)
+  timezoneAtCreation  String          @map("timezone_at_creation") // IANA timezone
+  status              DeliveryStatus  @default(scheduled)
+  inngestRunId        String?         @map("inngest_run_id")
+  lastError           String?         @map("last_error") @db.Text
+  attemptCount        Int             @default(0) @map("attempt_count")
+  createdAt           DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  letter         Letter           @relation(fields: [letterId], references: [id], onDelete: Cascade)
+  emailDelivery  EmailDelivery?
+  mailDelivery   MailDelivery?
+
+  @@unique([letterId, channel, deliverAt])
+  @@index([userId])
+  @@index([letterId])
+  @@index([status])
+  @@index([deliverAt(sort: Asc)], where: { status: scheduled })
+  @@map("deliveries")
+}
+
+model EmailDelivery {
+  deliveryId       String   @id @map("delivery_id") @db.Uuid
+  toEmail          String   @map("to_email") @db.Citext
+  subject          String
+  resendMessageId  String?  @map("resend_message_id")
+  opens            Int      @default(0)
+  clicks           Int      @default(0)
+  bounces          Int      @default(0)
+  lastOpenedAt     DateTime? @map("last_opened_at") @db.Timestamptz(3)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+
+  @@index([resendMessageId])
+  @@map("email_deliveries")
+}
+
+model MailDelivery {
+  deliveryId         String   @id @map("delivery_id") @db.Uuid
+  shippingAddressId  String   @map("shipping_address_id") @db.Uuid
+  lobJobId           String?  @map("lob_job_id")
+  printOptions       Json     @map("print_options") // { color, doubleSided, etc. }
+  previewUrl         String?  @map("preview_url")
+  trackingStatus     String?  @map("tracking_status")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  delivery        Delivery         @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  shippingAddress ShippingAddress  @relation(fields: [shippingAddressId], references: [id])
+
+  @@index([lobJobId])
+  @@map("mail_deliveries")
+}
+
+// ============================================================================
+// SHIPPING ADDRESSES
+// ============================================================================
+
+model ShippingAddress {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String
+  line1       String
+  line2       String?
+  city        String
+  state       String
+  postalCode  String   @map("postal_code")
+  country     String   @db.Char(2) // ISO 3166-1 alpha-2
+  metadata    Json     @default("{}") // e.g., verification status from Lob
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mailDeliveries MailDelivery[]
+
+  @@index([userId])
+  @@map("shipping_addresses")
+}
+
+// ============================================================================
+// PAYMENTS
+// ============================================================================
+
+enum PaymentType {
+  subscription
+  shipping_addon
+
+  @@map("payment_type")
+}
+
+enum PaymentStatus {
+  succeeded
+  failed
+  pending
+  refunded
+
+  @@map("payment_status")
+}
+
+model Payment {
+  id                     String        @id @default(uuid()) @db.Uuid
+  userId                 String        @map("user_id") @db.Uuid
+  type                   PaymentType
+  amountCents            Int           @map("amount_cents")
+  currency               String        @default("usd") @db.Char(3)
+  stripePaymentIntentId  String?       @map("stripe_payment_intent_id")
+  status                 PaymentStatus @default(pending)
+  metadata               Json          @default("{}")
+  createdAt              DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([stripePaymentIntentId])
+  @@map("payments")
+}
+
+// ============================================================================
+// AUDIT LOG
+// ============================================================================
+
+model AuditEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid // Nullable for system events
+  type      String   // e.g., "letter.created", "delivery.sent"
+  data      Json     @default("{}")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("audit_events")
+}
