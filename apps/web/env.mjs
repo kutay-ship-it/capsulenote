@@ -36,6 +36,32 @@ export const env = createEnv({
 
     // Lob (Optional)
     LOB_API_KEY: z.string().optional(),
+
+    // ClickSend (Optional)
+    CLICKSEND_USERNAME: z.string().optional(),
+    CLICKSEND_API_KEY: z.string().optional(),
+
+    // Postmark (Optional email provider)
+    POSTMARK_SERVER_TOKEN: z.string().optional(),
+
+    // Encryption
+    CRYPTO_MASTER_KEY: z.string().min(32), // Base64 encoded 32-byte key
+
+    // Feature Flags (Unleash)
+    UNLEASH_API_URL: z.string().url().optional(),
+    UNLEASH_API_TOKEN: z.string().optional(),
+    UNLEASH_APP_NAME: z.string().default("dearme"),
+
+    // Analytics & Observability
+    POSTHOG_API_KEY: z.string().optional(),
+    POSTHOG_HOST: z.string().url().optional(),
+    OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
+    OTEL_EXPORTER_OTLP_HEADERS: z.string().optional(),
+
+    // Sentry
+    SENTRY_DSN: z.string().url().optional(),
+    SENTRY_ORG: z.string().optional(),
+    SENTRY_PROJECT: z.string().optional(),
   },
 
   /**
@@ -48,6 +74,8 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().default("/sign-up"),
     NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: z.string().default("/dashboard"),
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: z.string().default("/dashboard"),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
   },
 
   /**
@@ -70,6 +98,20 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     LOB_API_KEY: process.env.LOB_API_KEY,
+    CLICKSEND_USERNAME: process.env.CLICKSEND_USERNAME,
+    CLICKSEND_API_KEY: process.env.CLICKSEND_API_KEY,
+    POSTMARK_SERVER_TOKEN: process.env.POSTMARK_SERVER_TOKEN,
+    CRYPTO_MASTER_KEY: process.env.CRYPTO_MASTER_KEY,
+    UNLEASH_API_URL: process.env.UNLEASH_API_URL,
+    UNLEASH_API_TOKEN: process.env.UNLEASH_API_TOKEN,
+    UNLEASH_APP_NAME: process.env.UNLEASH_APP_NAME,
+    POSTHOG_API_KEY: process.env.POSTHOG_API_KEY,
+    POSTHOG_HOST: process.env.POSTHOG_HOST,
+    OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+    OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
+    SENTRY_DSN: process.env.SENTRY_DSN,
+    SENTRY_ORG: process.env.SENTRY_ORG,
+    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
 
     // Client
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
@@ -78,6 +120,8 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL,
     NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL,
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
 
   /**

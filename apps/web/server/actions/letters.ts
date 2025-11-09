@@ -5,18 +5,27 @@ import { createLetterSchema, updateLetterSchema } from "@dearme/types"
 import { requireUser } from "@/server/lib/auth"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
+import { encryptLetter, decryptLetter } from "@/server/lib/encryption"
 
 export async function createLetter(input: unknown) {
   const user = await requireUser()
 
   const validated = createLetterSchema.parse(input)
 
+  // Encrypt letter content
+  const encrypted = await encryptLetter({
+    bodyRich: validated.bodyRich,
+    bodyHtml: validated.bodyHtml,
+  })
+
   const letter = await prisma.letter.create({
     data: {
       userId: user.id,
       title: validated.title,
-      bodyRich: validated.bodyRich,
-      bodyHtml: validated.bodyHtml,
+      bodyCiphertext: encrypted.bodyCiphertext,
+      bodyNonce: encrypted.bodyNonce,
+      bodyFormat: "rich",
+      keyVersion: encrypted.keyVersion,
       tags: validated.tags,
       visibility: validated.visibility,
     },
@@ -49,9 +58,43 @@ export async function updateLetter(input: unknown) {
     throw new Error("Letter not found")
   }
 
+  // Prepare update data
+  const updateData: {
+    title?: string
+    bodyCiphertext?: Buffer
+    bodyNonce?: Buffer
+    keyVersion?: number
+    tags?: string[]
+    visibility?: "private" | "link"
+  } = {}
+
+  if (data.title !== undefined) updateData.title = data.title
+  if (data.tags !== undefined) updateData.tags = data.tags
+  if (data.visibility !== undefined) updateData.visibility = data.visibility
+
+  // If body content is being updated, re-encrypt
+  if (data.bodyRich || data.bodyHtml) {
+    const bodyRich = data.bodyRich || (await decryptLetter(
+      existing.bodyCiphertext,
+      existing.bodyNonce,
+      existing.keyVersion
+    )).bodyRich
+
+    const bodyHtml = data.bodyHtml || (await decryptLetter(
+      existing.bodyCiphertext,
+      existing.bodyNonce,
+      existing.keyVersion
+    )).bodyHtml
+
+    const encrypted = await encryptLetter({ bodyRich, bodyHtml })
+    updateData.bodyCiphertext = encrypted.bodyCiphertext
+    updateData.bodyNonce = encrypted.bodyNonce
+    updateData.keyVersion = encrypted.keyVersion
+  }
+
   const letter = await prisma.letter.update({
     where: { id },
-    data,
+    data: updateData,
   })
 
   await createAuditEvent({
@@ -113,6 +156,16 @@ export async function getLetters() {
         select: { deliveries: true },
       },
     },
+    select: {
+      id: true,
+      title: true,
+      tags: true,
+      visibility: true,
+      createdAt: true,
+      updatedAt: true,
+      _count: true,
+      // Don't select encrypted content in list view for performance
+    },
   })
 
   return letters
@@ -144,5 +197,16 @@ export async function getLetter(letterId: string) {
     throw new Error("Letter not found")
   }
 
-  return letter
+  // Decrypt content
+  const decrypted = await decryptLetter(
+    letter.bodyCiphertext,
+    letter.bodyNonce,
+    letter.keyVersion
+  )
+
+  return {
+    ...letter,
+    bodyRich: decrypted.bodyRich,
+    bodyHtml: decrypted.bodyHtml,
+  }
 }

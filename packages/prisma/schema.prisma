@@ -99,16 +99,18 @@ enum LetterVisibility {
 }
 
 model Letter {
-  id         String           @id @default(uuid()) @db.Uuid
-  userId     String           @map("user_id") @db.Uuid
-  title      String
-  bodyRich   Json             @map("body_rich") // TipTap/ProseMirror JSON
-  bodyHtml   String           @map("body_html") @db.Text // Normalized HTML for email/print
-  visibility LetterVisibility @default(private)
-  tags       String[]         @default([])
-  createdAt  DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt  DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
-  deletedAt  DateTime?        @map("deleted_at") @db.Timestamptz(3)
+  id              String           @id @default(uuid()) @db.Uuid
+  userId          String           @map("user_id") @db.Uuid
+  title           String
+  bodyCiphertext  Bytes            @map("body_ciphertext") // Encrypted content
+  bodyNonce       Bytes            @map("body_nonce") // Encryption nonce
+  bodyFormat      String           @default("rich") @map("body_format") // md|html|rich
+  keyVersion      Int              @default(1) @map("key_version") // For key rotation
+  visibility      LetterVisibility @default(private)
+  tags            String[]         @default([])
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz(3)
 
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   deliveries Delivery[]
@@ -116,7 +118,7 @@ model Letter {
   @@index([userId])
   @@index([createdAt])
   @@index([deletedAt])
-  // Full-text search on body_html using pg_trgm
+  @@index([keyVersion])
   @@map("letters")
 }
 
@@ -185,14 +187,25 @@ model EmailDelivery {
   @@map("email_deliveries")
 }
 
+enum MailDeliveryMode {
+  send_on   // Letter mailed on specific date
+  arrive_by // Letter arrives by specific date
+
+  @@map("mail_delivery_mode")
+}
+
 model MailDelivery {
-  deliveryId         String   @id @map("delivery_id") @db.Uuid
-  shippingAddressId  String   @map("shipping_address_id") @db.Uuid
-  lobJobId           String?  @map("lob_job_id")
-  printOptions       Json     @map("print_options") // { color, doubleSided, etc. }
-  previewUrl         String?  @map("preview_url")
-  trackingStatus     String?  @map("tracking_status")
-  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  deliveryId         String            @id @map("delivery_id") @db.Uuid
+  shippingAddressId  String            @map("shipping_address_id") @db.Uuid
+  deliveryMode       MailDeliveryMode  @default(send_on) @map("delivery_mode")
+  targetDate         DateTime?         @map("target_date") @db.Timestamptz(3) // User's desired date
+  sendDate           DateTime?         @map("send_date") @db.Timestamptz(3) // Calculated for arrive_by
+  transitDays        Int?              @map("transit_days") // Estimated from provider
+  lobJobId           String?           @map("lob_job_id")
+  printOptions       Json              @map("print_options") // { color, doubleSided, etc. }
+  previewUrl         String?           @map("preview_url")
+  trackingStatus     String?           @map("tracking_status")
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
 
   delivery        Delivery         @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
   shippingAddress ShippingAddress  @relation(fields: [shippingAddressId], references: [id])
@@ -284,4 +297,25 @@ model AuditEvent {
   @@index([type])
   @@index([createdAt])
   @@map("audit_events")
+}
+
+// ============================================================================
+// LETTER TEMPLATES
+// ============================================================================
+
+model LetterTemplate {
+  id            String   @id @default(uuid()) @db.Uuid
+  category      String   // reflections, goals, gratitude, therapy
+  title         String
+  description   String?  @db.Text
+  promptText    String   @map("prompt_text") @db.Text // Pre-written prompt
+  placeholders  Json     @default("{}") // Dynamic placeholders
+  isActive      Boolean  @default(true) @map("is_active")
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([category])
+  @@index([isActive])
+  @@map("letter_templates")
 }

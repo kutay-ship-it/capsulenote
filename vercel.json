@@ -3,5 +3,11 @@
   "devCommand": "pnpm dev",
   "installCommand": "pnpm install",
   "framework": "nextjs",
-  "outputDirectory": "apps/web/.next"
+  "outputDirectory": "apps/web/.next",
+  "crons": [
+    {
+      "path": "/api/cron/reconcile-deliveries",
+      "schedule": "*/5 * * * *"
+    }
+  ]
 }

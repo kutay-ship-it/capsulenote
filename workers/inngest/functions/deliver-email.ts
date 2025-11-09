@@ -4,6 +4,18 @@ import { Resend } from "resend"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+// Decrypt letter content
+// Note: In production monorepo, extract to shared package
+async function decryptLetter(
+  bodyCiphertext: Buffer,
+  bodyNonce: Buffer,
+  keyVersion: number
+): Promise<{ bodyRich: Record<string, unknown>; bodyHtml: string }> {
+  const { decrypt } = await import("../../../apps/web/server/lib/encryption")
+  const plaintext = await decrypt(bodyCiphertext, bodyNonce, keyVersion)
+  return JSON.parse(plaintext)
+}
+
 export const deliverEmail = inngest.createFunction(
   {
     id: "deliver-email",
@@ -43,8 +55,19 @@ export const deliverEmail = inngest.createFunction(
       })
     })
 
-    // Send email via Resend
+    // Decrypt letter content
+    const decryptedContent = await step.run("decrypt-letter", async () => {
+      return decryptLetter(
+        delivery.letter.bodyCiphertext,
+        delivery.letter.bodyNonce,
+        delivery.letter.keyVersion
+      )
+    })
+
+    // Send email via Resend with idempotency key
     const result = await step.run("send-email", async () => {
+      const idempotencyKey = `delivery-${deliveryId}-attempt-${delivery.attemptCount}`
+
       return resend.emails.send({
         from: process.env.EMAIL_FROM || "no-reply@mail.dearme.app",
         to: delivery.emailDelivery!.toEmail,
@@ -55,7 +78,7 @@ export const deliverEmail = inngest.createFunction(
             <p style="color: #666;">You scheduled this letter to be delivered on ${delivery.deliverAt.toLocaleDateString()}.</p>
             <div style="background: #f9f9f9; padding: 24px; border-radius: 8px; margin: 24px 0;">
               <h2 style="margin-top: 0;">${delivery.letter.title}</h2>
-              ${delivery.letter.bodyHtml}
+              ${decryptedContent.bodyHtml}
             </div>
             <p style="color: #999; font-size: 14px;">
               This letter was sent via DearMe.
@@ -63,6 +86,9 @@ export const deliverEmail = inngest.createFunction(
             </p>
           </div>
         `,
+        headers: {
+          "X-Idempotency-Key": idempotencyKey,
+        },
       })
     })
 
