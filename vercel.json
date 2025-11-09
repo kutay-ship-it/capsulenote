@@ -4,11 +4,4 @@
   "installCommand": "pnpm install",
   "framework": "nextjs",
   "outputDirectory": "apps/web/.next"
-  // Cron disabled for Hobby plan (requires Pro plan for */5 * * * * schedule)
-  // "crons": [
-  //   {
-  //     "path": "/api/cron/reconcile-deliveries",
-  //     "schedule": "*/5 * * * *"
-  //   }
-  // ]
 }
