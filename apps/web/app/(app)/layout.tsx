@@ -14,10 +14,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="mr-8 flex">
             <Link
               href="/dashboard"
-              className="mr-8 flex items-center space-x-2 transition-opacity hover:opacity-70"
+              className="mr-8 flex items-center gap-2 transition-transform hover:-translate-y-0.5"
             >
-              <span className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
-                DearMe
+              <div
+                className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-duck-yellow"
+                style={{ borderRadius: "2px" }}
+              >
+                <Mail className="h-5 w-5 text-charcoal" strokeWidth={2} />
+              </div>
+              <span className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal">
+                Capsule Note
               </span>
             </Link>
             <nav className="flex items-center space-x-8 font-mono text-base font-normal uppercase tracking-wide">

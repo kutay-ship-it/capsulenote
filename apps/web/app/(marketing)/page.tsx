@@ -199,17 +199,17 @@ export default function HomePage() {
         </section>
 
         {/* Try Letter Writing Section */}
-        <section id="write-letter" className="container py-20">
-          <div className="mx-auto max-w-4xl space-y-12">
+        <section id="write-letter" className="container px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+          <div className="mx-auto max-w-4xl space-y-8 sm:space-y-12">
             {/* Section Header */}
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-3 sm:space-y-4">
               <Badge variant="outline" className="text-xs uppercase tracking-wide">
                 Try it now
               </Badge>
-              <h2 className="font-mono text-4xl font-normal uppercase tracking-wide text-charcoal sm:text-5xl">
+              <h2 className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal sm:text-3xl md:text-4xl lg:text-5xl">
                 Write Your First Letter
               </h2>
-              <p className="font-mono text-base leading-relaxed text-gray-secondary sm:text-lg">
+              <p className="font-mono text-sm leading-relaxed text-gray-secondary sm:text-base md:text-lg">
                 Experience the calm ritual of writing to your future self. No account needed to
                 explore our brutalist letter editor.
               </p>
@@ -230,17 +230,17 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section className="container space-y-16 py-20">
+        <section className="container px-4 py-12 space-y-8 sm:px-6 sm:py-16 sm:space-y-12 md:py-20 md:space-y-16">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-mono text-4xl font-normal leading-tight text-charcoal sm:text-5xl">
+            <h2 className="font-mono text-2xl font-normal leading-tight text-charcoal sm:text-3xl md:text-4xl lg:text-5xl">
               Keep promises to future moments with calm, modern tools.
             </h2>
-            <p className="mt-6 font-mono text-base leading-relaxed text-gray-secondary sm:text-lg">
+            <p className="mt-4 font-mono text-sm leading-relaxed text-gray-secondary sm:mt-6 sm:text-base md:text-lg">
               Capsule Note wraps thoughtful writing, secure storage, and dependable delivery into one
               experience grounded in brutalist design.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
             {featureList.map((feature, index) => {
               const bgColors = [
                 "bg-bg-blue-light",
@@ -253,14 +253,15 @@ export default function HomePage() {
               return (
                 <Card
                   key={feature.title}
-                  className={`h-full border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 ${bgColors[index % bgColors.length]}`}
+                  className={`h-full border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 ${bgColors[index % bgColors.length]}`}
+                  style={{ borderRadius: "2px" }}
                 >
-                  <CardHeader className="space-y-3">
-                    <feature.icon className="h-8 w-8 text-charcoal" strokeWidth={2} />
-                    <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide">
+                  <CardHeader className="space-y-2 p-5 sm:space-y-3 sm:p-6">
+                    <feature.icon className="h-6 w-6 text-charcoal sm:h-8 sm:w-8" strokeWidth={2} />
+                    <CardTitle className="font-mono text-base font-normal uppercase tracking-wide sm:text-lg md:text-xl">
                       {feature.title}
                     </CardTitle>
-                    <CardDescription className="font-mono text-sm leading-relaxed text-charcoal">
+                    <CardDescription className="font-mono text-xs leading-relaxed text-charcoal sm:text-sm">
                       {feature.description}
                     </CardDescription>
                   </CardHeader>
@@ -270,20 +271,20 @@ export default function HomePage() {
           </div>
 
           {/* Sign Up Prompt */}
-          <div className="mx-auto max-w-3xl">
+          <div className="mx-auto max-w-3xl px-4 sm:px-0">
             <div
-              className="bg-bg-yellow-pale border-2 border-charcoal p-8 text-center"
+              className="bg-bg-yellow-pale border-2 border-charcoal p-6 text-center sm:p-8"
               style={{ borderRadius: "2px" }}
             >
-              <p className="font-mono text-base text-charcoal mb-4">
+              <p className="font-mono text-sm text-charcoal mb-3 sm:text-base sm:mb-4">
                 <strong className="uppercase">Ready to schedule your letter?</strong>
               </p>
-              <p className="font-mono text-sm text-gray-secondary mb-6">
+              <p className="font-mono text-xs text-gray-secondary mb-5 sm:text-sm sm:mb-6">
                 Create a free account to securely store your letters in our encrypted vault and
                 schedule deliveries to your future self.
               </p>
               <Link href="/sign-up">
-                <Button size="lg" className="w-full sm:w-auto">
+                <Button size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
                   Create Free Account
                 </Button>
               </Link>
@@ -292,71 +293,71 @@ export default function HomePage() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="container py-20">
-          <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
-            <Card className="h-full border-charcoal bg-duck-blue shadow-lg">
-              <CardHeader>
-                <Badge variant="secondary" className="w-fit uppercase tracking-wide">
+        <section id="how-it-works" className="container px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
+            <Card className="h-full border-2 border-charcoal bg-duck-blue shadow-lg" style={{ borderRadius: "2px" }}>
+              <CardHeader className="p-5 sm:p-6">
+                <Badge variant="secondary" className="w-fit uppercase tracking-wide text-xs">
                   How it works
                 </Badge>
-                <CardTitle className="font-mono text-4xl font-normal uppercase tracking-wide">
+                <CardTitle className="font-mono text-2xl font-normal uppercase tracking-wide sm:text-3xl md:text-4xl">
                   A calm ritual in three beats
                 </CardTitle>
-                <CardDescription className="font-mono text-base leading-relaxed text-charcoal">
+                <CardDescription className="font-mono text-sm leading-relaxed text-charcoal sm:text-base">
                   Every Capsule Note letter follows the same dependable cadence so you can focus on the
                   message, not the logistics.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 p-5 sm:space-y-6 sm:p-6">
                 {journey.map((step, index) => (
                   <div
                     key={step.title}
-                    className="flex gap-4 border-2 border-charcoal bg-white p-6"
+                    className="flex gap-3 border-2 border-charcoal bg-white p-4 sm:gap-4 sm:p-6"
                     style={{ borderRadius: "2px" }}
                   >
-                    <div className="flex h-14 w-14 items-center justify-center border-2 border-charcoal bg-duck-yellow font-mono text-2xl font-normal text-charcoal">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-charcoal bg-duck-yellow font-mono text-xl font-normal text-charcoal sm:h-14 sm:w-14 sm:text-2xl">
                       {index + 1}
                     </div>
-                    <div className="space-y-2 text-left">
+                    <div className="space-y-1 text-left sm:space-y-2">
                       <div className="flex items-center gap-2">
-                        <step.icon className="h-6 w-6 text-charcoal" strokeWidth={2} />
-                        <p className="font-mono font-normal uppercase tracking-wide text-charcoal">
+                        <step.icon className="h-5 w-5 text-charcoal sm:h-6 sm:w-6" strokeWidth={2} />
+                        <p className="font-mono text-xs font-normal uppercase tracking-wide text-charcoal sm:text-sm">
                           {step.title}
                         </p>
                       </div>
-                      <p className="font-mono text-sm text-gray-secondary">{step.description}</p>
-                      <p className="font-mono text-sm text-gray-secondary">{step.detail}</p>
+                      <p className="font-mono text-xs text-gray-secondary sm:text-sm">{step.description}</p>
+                      <p className="font-mono text-xs text-gray-secondary sm:text-sm">{step.detail}</p>
                     </div>
                   </div>
                 ))}
               </CardContent>
             </Card>
-            <Card className="h-full border-charcoal shadow-md">
-              <CardHeader>
-                <CardTitle className="font-mono text-3xl font-normal uppercase tracking-wide">
+            <Card className="h-full border-2 border-charcoal shadow-md" style={{ borderRadius: "2px" }}>
+              <CardHeader className="p-5 sm:p-6">
+                <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl md:text-3xl">
                   Moments our writers plan ahead
                 </CardTitle>
-                <CardDescription className="font-mono text-sm leading-relaxed text-gray-secondary">
+                <CardDescription className="font-mono text-xs leading-relaxed text-gray-secondary sm:text-sm">
                   Capsule Note letters show up exactly when emotions are highest and attention is lowest.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 p-5 sm:space-y-6 sm:p-6">
                 {scenarios.map((scenario) => (
                   <div
                     key={scenario.title}
-                    className="space-y-3 border-2 border-charcoal bg-off-white p-6"
+                    className="space-y-2 border-2 border-charcoal bg-off-white p-4 sm:space-y-3 sm:p-6"
                     style={{ borderRadius: "2px" }}
                   >
-                    <div className="flex items-center gap-3">
-                      <HeartHandshake className="h-6 w-6 text-charcoal" strokeWidth={2} />
-                      <p className="font-mono font-normal uppercase tracking-wide text-charcoal">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <HeartHandshake className="h-5 w-5 text-charcoal sm:h-6 sm:w-6" strokeWidth={2} />
+                      <p className="font-mono text-xs font-normal uppercase tracking-wide text-charcoal sm:text-sm">
                         {scenario.title}
                       </p>
                     </div>
-                    <ul className="space-y-2 font-mono text-sm text-gray-secondary">
+                    <ul className="space-y-1.5 font-mono text-xs text-gray-secondary sm:space-y-2 sm:text-sm">
                       {scenario.points.map((point) => (
                         <li key={point} className="flex items-start gap-2">
-                          <span className="mt-2 h-2 w-2 border-2 border-charcoal bg-charcoal" />
+                          <span className="mt-1.5 h-2 w-2 shrink-0 border-2 border-charcoal bg-charcoal sm:mt-2" />
                           <span>{point}</span>
                         </li>
                       ))}
@@ -369,40 +370,40 @@ export default function HomePage() {
         </section>
 
         {/* Testimonial Section */}
-        <section className="container py-20">
-          <Card className="mx-auto max-w-4xl border-charcoal shadow-lg">
-            <CardHeader className="text-center">
-              <Sparkles className="mx-auto h-12 w-12 text-charcoal" strokeWidth={2} />
-              <CardTitle className="font-mono text-4xl font-normal uppercase tracking-wide">
+        <section className="container px-4 py-12 sm:px-6 sm:py-16 md:py-20">
+          <Card className="mx-auto max-w-4xl border-2 border-charcoal shadow-lg" style={{ borderRadius: "2px" }}>
+            <CardHeader className="text-center p-5 sm:p-6">
+              <Sparkles className="mx-auto h-10 w-10 text-charcoal sm:h-12 sm:w-12" strokeWidth={2} />
+              <CardTitle className="font-mono text-2xl font-normal uppercase tracking-wide sm:text-3xl md:text-4xl">
                 Your words age well here
               </CardTitle>
-              <CardDescription className="font-mono text-base leading-relaxed text-charcoal">
+              <CardDescription className="font-mono text-sm leading-relaxed text-charcoal sm:text-base">
                 "I scheduled a letter for my sister before she left for med school. It landed on her
                 first overnight shift and she called me in tears. Capsule Note kept that moment from
                 slipping through the cracks."
               </CardDescription>
             </CardHeader>
-            <CardContent className="text-center font-mono text-sm text-gray-secondary">
+            <CardContent className="text-center font-mono text-xs text-gray-secondary p-5 sm:text-sm sm:p-6">
               — Margo L., Capsule Note writer since 2021
             </CardContent>
           </Card>
         </section>
 
         {/* CTA Section */}
-        <section className="container pb-20 pt-12">
-          <Card className="mx-auto max-w-3xl border-charcoal bg-duck-blue shadow-lg">
-            <CardHeader className="space-y-6 text-center">
-              <CardTitle className="font-mono text-4xl font-normal uppercase tracking-wide text-charcoal">
+        <section className="container px-4 pb-12 pt-8 sm:px-6 sm:pb-16 sm:pt-10 md:pb-20 md:pt-12">
+          <Card className="mx-auto max-w-3xl border-2 border-charcoal bg-duck-blue shadow-lg" style={{ borderRadius: "2px" }}>
+            <CardHeader className="space-y-4 text-center p-5 sm:space-y-6 sm:p-6">
+              <CardTitle className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal sm:text-3xl md:text-4xl">
                 Open a letter in your future inbox
               </CardTitle>
-              <CardDescription className="font-mono text-base text-charcoal">
+              <CardDescription className="font-mono text-sm text-charcoal sm:text-base">
                 Start for free, draft as many letters as you like, and only pay when something gets
                 scheduled for delivery.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <CardContent className="flex flex-col items-stretch gap-3 p-5 sm:flex-row sm:items-center sm:justify-center sm:gap-4 sm:p-6">
               <Link href="/sign-up" className="w-full sm:w-auto">
-                <Button variant="secondary" size="lg" className="w-full sm:w-auto">
+                <Button variant="secondary" size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
                   Create your first letter
                 </Button>
               </Link>
@@ -410,7 +411,8 @@ export default function HomePage() {
                 <Button
                   variant="ghost"
                   size="lg"
-                  className="w-full border-2 border-charcoal bg-transparent text-charcoal hover:bg-charcoal hover:text-white sm:w-auto"
+                  className="h-12 w-full border-2 border-charcoal bg-transparent text-base uppercase text-charcoal hover:bg-charcoal hover:text-white sm:h-auto sm:w-auto"
+                  style={{ borderRadius: "2px" }}
                 >
                   I already have an account
                 </Button>
@@ -421,17 +423,17 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t-2 border-charcoal bg-off-white py-8">
-        <div className="container flex flex-col items-center gap-4 text-center font-mono text-sm text-gray-secondary md:flex-row md:justify-between md:text-left">
-          <p>
+      <footer className="border-t-2 border-charcoal bg-off-white py-6 sm:py-8">
+        <div className="container px-4 flex flex-col items-center gap-3 text-center font-mono text-xs text-gray-secondary sm:gap-4 sm:text-sm md:flex-row md:justify-between md:text-left">
+          <p className="max-w-md sm:max-w-none">
             © {new Date().getFullYear()} Capsule Note™ Time-Capsule Letters. Built with intention and
             privacy in mind.
           </p>
-          <div className="flex gap-6">
-            <Link href="/privacy" className="uppercase hover:opacity-70">
+          <div className="flex gap-4 sm:gap-6">
+            <Link href="/privacy" className="uppercase tracking-wide hover:opacity-70 transition-opacity">
               Privacy
             </Link>
-            <Link href="/terms" className="uppercase hover:opacity-70">
+            <Link href="/terms" className="uppercase tracking-wide hover:opacity-70 transition-opacity">
               Terms
             </Link>
           </div>

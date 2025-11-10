@@ -11,8 +11,8 @@ export async function POST(req: Request) {
     throw new Error("Missing CLERK_WEBHOOK_SECRET")
   }
 
-  // Get headers
-  const headerPayload = headers()
+  // Get headers (Next.js 15 requires await)
+  const headerPayload = await headers()
   const svix_id = headerPayload.get("svix-id")
   const svix_timestamp = headerPayload.get("svix-timestamp")
   const svix_signature = headerPayload.get("svix-signature")
@@ -53,14 +53,15 @@ export async function POST(req: Request) {
           return new Response("No email found", { status: 400 })
         }
 
-        // Create user and profile
+        // Create user and profile with default timezone (user can update in settings)
         await prisma.user.create({
           data: {
             clerkUserId: id,
             email: email,
             profile: {
               create: {
-                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                // Default to UTC - user can update in settings
+                timezone: "UTC",
               },
             },
           },
@@ -94,21 +95,45 @@ export async function POST(req: Request) {
           return new Response("No user ID found", { status: 400 })
         }
 
-        // Soft delete or mark for deletion
-        await prisma.user.update({
-          where: { clerkUserId: id },
-          data: {
-            // Mark letters as deleted
-            letters: {
-              updateMany: {
-                where: {},
-                data: { deletedAt: new Date() },
-              },
+        // Soft delete user and cascade to related data
+        const deletedAt = new Date()
+
+        await prisma.$transaction(async (tx) => {
+          // First, find the user
+          const user = await tx.user.findUnique({
+            where: { clerkUserId: id },
+          })
+
+          if (!user) {
+            console.warn(`User not found for deletion: ${id}`)
+            return
+          }
+
+          // Mark all letters as deleted
+          await tx.letter.updateMany({
+            where: { userId: user.id },
+            data: { deletedAt },
+          })
+
+          // Cancel all scheduled deliveries
+          await tx.delivery.updateMany({
+            where: {
+              userId: user.id,
+              status: "scheduled",
             },
-          },
+            data: { status: "canceled" },
+          })
+
+          // Anonymize and mark user for data retention/audit purposes
+          await tx.user.update({
+            where: { clerkUserId: id },
+            data: {
+              email: `deleted_${id}@deleted.local`,
+            },
+          })
         })
 
-        console.log(`User marked for deletion: ${id}`)
+        console.log(`User deleted and data cleaned up: ${id}`)
         break
       }
 

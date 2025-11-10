@@ -2,7 +2,7 @@ import { auth as clerkAuth } from "@clerk/nextjs/server"
 import { prisma } from "./db"
 
 export async function getCurrentUser() {
-  const { userId: clerkUserId } = clerkAuth()
+  const { userId: clerkUserId } = await clerkAuth()
 
   if (!clerkUserId) {
     return null

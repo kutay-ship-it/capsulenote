@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { Mail } from "lucide-react"
 import { cn } from "@/lib/utils"
 import {
   Field,
@@ -162,7 +163,7 @@ export function LetterEditorForm({
     <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto">
       {/* Letter Paper Container */}
       <div
-        className="relative bg-white border-2 border-charcoal p-12 -translate-x-1 -translate-y-1"
+        className="relative bg-white border-2 border-charcoal p-5 sm:p-8 md:p-12 -translate-x-1 -translate-y-1"
         style={{
           borderRadius: "2px",
           boxShadow: "-8px 8px 0px 0px rgb(56, 56, 56)",
@@ -176,12 +177,12 @@ export function LetterEditorForm({
           style={{ borderRadius: "2px 2px 0 0" }}
         />
 
-        {/* Duck Stamp */}
+        {/* Mail Stamp */}
         <div
           className="absolute -top-3 -right-3 w-12 h-12 border-2 border-charcoal bg-duck-blue flex items-center justify-center rotate-12 transition-transform duration-300 hover:rotate-0"
           style={{ borderRadius: "2px" }}
         >
-          <span className="text-xl">🦆</span>
+          <Mail className="h-6 w-6 text-charcoal" strokeWidth={2} />
         </div>
 
         <FieldGroup>
@@ -207,11 +208,11 @@ export function LetterEditorForm({
 
           {/* Letter Content */}
           <Field data-invalid={!!errors.body}>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <FieldLabel htmlFor="letter-body">Letter Content</FieldLabel>
-              <div className="flex gap-4 font-mono text-xs text-gray-secondary uppercase">
-                <span>{wordCount} words</span>
-                <span>{characterCount} characters</span>
+              <div className="flex gap-2 font-mono text-[10px] text-gray-secondary uppercase sm:gap-3 sm:text-xs">
+                <span className="whitespace-nowrap">{wordCount} words</span>
+                <span className="whitespace-nowrap">{characterCount} chars</span>
               </div>
             </div>
             <Textarea
@@ -223,7 +224,7 @@ export function LetterEditorForm({
               }}
               placeholder="Dear Future Me,&#10;&#10;I'm writing this letter to remind you of..."
               aria-invalid={!!errors.body}
-              className="min-h-[400px]"
+              className="min-h-[280px] sm:min-h-[350px] md:min-h-[400px]"
             />
             <FieldDescription>
               Write your letter to your future self. Be honest, be kind, be you.
@@ -266,7 +267,7 @@ export function LetterEditorForm({
                 </FieldDescription>
 
                 {/* Date Preset Buttons */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
                   {datePresets.map((preset) => {
                     const isSelected = selectedPreset === preset.label
                     return (
@@ -275,7 +276,7 @@ export function LetterEditorForm({
                         type="button"
                         onClick={() => handlePresetDate(preset.months, preset.label)}
                         className={cn(
-                          "border-2 border-charcoal px-4 py-3 font-mono text-sm uppercase tracking-wide transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0",
+                          "border-2 border-charcoal px-3 py-2.5 font-mono text-xs uppercase tracking-wide transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0 sm:px-4 sm:py-3 sm:text-sm",
                           isSelected
                             ? "bg-duck-blue text-charcoal font-normal"
                             : "bg-white text-charcoal hover:bg-duck-yellow"
@@ -295,7 +296,7 @@ export function LetterEditorForm({
                     type="button"
                     onClick={handleCustomDateClick}
                     className={cn(
-                      "border-2 border-charcoal px-4 py-3 font-mono text-sm uppercase tracking-wide transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0",
+                      "border-2 border-charcoal px-3 py-2.5 font-mono text-xs uppercase tracking-wide transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0 sm:px-4 sm:py-3 sm:text-sm",
                       showCustomDate
                         ? "bg-duck-blue text-charcoal font-normal"
                         : "bg-white text-charcoal hover:bg-duck-blue"
@@ -325,8 +326,8 @@ export function LetterEditorForm({
 
                 {/* Selected Date Display */}
                 {deliveryDate && (
-                  <div className="mt-4 p-4 bg-bg-blue-pale border-2 border-duck-blue" style={{ borderRadius: "2px" }}>
-                    <p className="font-mono text-sm text-charcoal">
+                  <div className="mt-3 p-3 bg-bg-blue-pale border-2 border-duck-blue sm:mt-4 sm:p-4" style={{ borderRadius: "2px" }}>
+                    <p className="font-mono text-xs text-charcoal sm:text-sm">
                       <span className="uppercase text-duck-blue font-normal">Scheduled for:</span>{" "}
                       {deliveryDate.toLocaleDateString("en-US", {
                         weekday: "long",
@@ -347,14 +348,15 @@ export function LetterEditorForm({
         </FieldGroup>
 
         {/* Submit Button */}
-        <div className="mt-8 flex gap-4">
-          <Button type="submit" className="flex-1">
-            Schedule Letter 🦆
+        <div className="mt-6 flex gap-3 sm:mt-8 sm:gap-4">
+          <Button type="submit" className="flex-1 h-12 text-base sm:h-auto">
+            <Mail className="mr-2 h-4 w-4" strokeWidth={2} />
+            Schedule Letter
           </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" className="h-12 px-4 text-base sm:h-auto sm:px-6">
                 Clear
               </Button>
             </AlertDialogTrigger>

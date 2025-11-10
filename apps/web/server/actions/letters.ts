@@ -151,11 +151,6 @@ export async function getLetters() {
     orderBy: {
       createdAt: "desc",
     },
-    include: {
-      _count: {
-        select: { deliveries: true },
-      },
-    },
     select: {
       id: true,
       title: true,
@@ -163,7 +158,9 @@ export async function getLetters() {
       visibility: true,
       createdAt: true,
       updatedAt: true,
-      _count: true,
+      _count: {
+        select: { deliveries: true },
+      },
       // Don't select encrypted content in list view for performance
     },
   })

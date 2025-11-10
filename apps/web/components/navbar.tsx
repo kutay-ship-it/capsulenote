@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function Navbar() {
@@ -14,9 +15,9 @@ export function Navbar() {
             className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-duck-yellow"
             style={{ borderRadius: "2px" }}
           >
-            <span className="text-xl">🦆</span>
+            <Mail className="h-5 w-5 text-charcoal" strokeWidth={2} />
           </div>
-          <span className="font-mono text-xl font-normal uppercase tracking-wide text-charcoal">
+          <span className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal">
             Capsule Note
           </span>
         </Link>
