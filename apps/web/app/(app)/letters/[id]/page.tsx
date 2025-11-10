@@ -7,15 +7,16 @@ import { formatDateTime } from "@/lib/utils"
 import { Mail, Calendar, ArrowLeft } from "lucide-react"
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function LetterDetailPage({ params }: PageProps) {
+  const { id } = await params
   let letter
   try {
-    letter = await getLetter(params.id)
+    letter = await getLetter(id)
   } catch {
     notFound()
   }
@@ -39,7 +40,7 @@ export default async function LetterDetailPage({ params }: PageProps) {
               <CardDescription>Created {formatDateTime(letter.createdAt)}</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Link href={`/letters/${letter.id}/schedule`}>
+              <Link href={`/letters/${id}/schedule`}>
                 <Button>
                   <Calendar className="mr-2 h-4 w-4" />
                   Schedule Delivery

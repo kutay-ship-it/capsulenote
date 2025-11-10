@@ -12,57 +12,86 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's an overview of your letters.</p>
+    <div className="space-y-10">
+      <div className="flex items-start justify-between">
+        <div className="space-y-2">
+          <h1 className="font-mono text-4xl font-normal uppercase tracking-wide text-charcoal">
+            Dashboard
+          </h1>
+          <p className="font-mono text-base text-gray-secondary">
+            Welcome back! Here's an overview of your letters.
+          </p>
         </div>
         <Link href="/letters/new">
-          <Button>Write New Letter</Button>
+          <Button size="lg" className="uppercase">
+            Write New Letter
+          </Button>
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-bg-blue-light">
           <CardHeader>
-            <CardTitle>Total Letters</CardTitle>
-            <CardDescription>All letters you've written</CardDescription>
+            <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide">
+              Total Letters
+            </CardTitle>
+            <CardDescription className="font-mono text-sm text-gray-secondary">
+              All letters you've written
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">0</div>
+            <div className="font-mono text-5xl font-normal text-charcoal">0</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-bg-yellow-pale">
           <CardHeader>
-            <CardTitle>Scheduled</CardTitle>
-            <CardDescription>Waiting to be delivered</CardDescription>
+            <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide">
+              Scheduled
+            </CardTitle>
+            <CardDescription className="font-mono text-sm text-gray-secondary">
+              Waiting to be delivered
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">0</div>
+            <div className="font-mono text-5xl font-normal text-charcoal">0</div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-bg-green-light">
           <CardHeader>
-            <CardTitle>Delivered</CardTitle>
-            <CardDescription>Successfully sent</CardDescription>
+            <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide">
+              Delivered
+            </CardTitle>
+            <CardDescription className="font-mono text-sm text-gray-secondary">
+              Successfully sent
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">0</div>
+            <div className="font-mono text-5xl font-normal text-charcoal">0</div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="border-charcoal shadow-md">
         <CardHeader>
-          <CardTitle>Recent Letters</CardTitle>
-          <CardDescription>Your most recently created letters</CardDescription>
+          <CardTitle className="font-mono text-2xl font-normal uppercase tracking-wide">
+            Recent Letters
+          </CardTitle>
+          <CardDescription className="font-mono text-sm text-gray-secondary">
+            Your most recently created letters
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-sm text-muted-foreground">
-            No letters yet. Create your first letter to get started!
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="mb-6 font-mono text-sm text-gray-secondary">
+              No letters yet. Create your first letter to get started!
+            </p>
+            <Link href="/letters/new">
+              <Button variant="outline" size="lg" className="uppercase">
+                Create First Letter
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

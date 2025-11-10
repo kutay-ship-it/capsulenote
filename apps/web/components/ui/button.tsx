@@ -5,22 +5,26 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 font-mono text-base font-normal uppercase transition-all duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-duck-blue focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-60",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default:
+          "bg-duck-blue text-charcoal border-2 border-charcoal shadow-sm hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5",
+        destructive:
+          "bg-coral text-white border-2 border-charcoal shadow-sm hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5",
+        outline:
+          "border-2 border-charcoal bg-white text-charcoal shadow-sm hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5",
+        secondary:
+          "bg-off-white text-charcoal border-2 border-charcoal shadow-sm hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5",
+        ghost: "hover:bg-off-white hover:text-charcoal",
+        link: "text-charcoal underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-[50px] px-6 py-4",
+        sm: "h-[42px] px-5 py-3 text-sm",
+        lg: "h-[58px] px-8 py-5 text-lg",
+        icon: "h-[50px] w-[50px]",
       },
     },
     defaultVariants: {
@@ -40,7 +44,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        style={{ borderRadius: "2px" }}
+        ref={ref}
+        {...props}
+      />
     )
   }
 )

@@ -3,74 +3,138 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-  }
-}
-
-@layer base {
   * {
-    @apply border-border;
+    @apply border-charcoal;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-cream text-charcoal font-mono;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  h1 {
+    @apply font-mono text-6xl leading-tight tracking-wide;
+    font-weight: 400;
+  }
+
+  h2 {
+    @apply font-mono text-3xl leading-snug;
+    font-weight: 400;
+  }
+
+  h3 {
+    @apply font-mono text-2xl leading-snug;
+    font-weight: 400;
+  }
+
+  h4, h5, h6 {
+    @apply font-mono text-lg leading-snug;
+    font-weight: 400;
+  }
+
+  p {
+    @apply text-base leading-normal;
+  }
+
+  a {
+    @apply text-charcoal transition-opacity duration-200;
+  }
+
+  a:hover {
+    @apply opacity-70;
   }
 }
 
-/* TipTap Editor Styles */
+/* TipTap Editor Styles - MotherDuck brutalist edition */
 .ProseMirror {
-  @apply min-h-[200px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  @apply min-h-[200px] w-full border-2 border-charcoal bg-white px-6 py-4 text-base font-mono text-charcoal;
+  border-radius: 2px;
+  outline: none;
+}
+
+.ProseMirror:focus {
+  @apply border-duck-blue outline-none;
+  box-shadow: 0 0 0 3px rgba(111, 194, 255, 0.2);
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
-  @apply text-muted-foreground;
+  @apply text-gray-secondary;
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
 }
 
-.ProseMirror:focus {
-  @apply outline-none;
+.ProseMirror p {
+  @apply mb-4;
+}
+
+.ProseMirror h1 {
+  @apply text-3xl leading-tight mb-4;
+}
+
+.ProseMirror h2 {
+  @apply text-2xl leading-snug mb-3;
+}
+
+.ProseMirror h3 {
+  @apply text-xl leading-snug mb-3;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  @apply pl-6 mb-4;
+}
+
+.ProseMirror li {
+  @apply mb-1;
+}
+
+.ProseMirror blockquote {
+  @apply border-l-4 border-charcoal pl-4 italic my-4;
+}
+
+.ProseMirror code {
+  @apply bg-off-white px-1 py-0.5 rounded-sm font-mono text-sm;
+  border: 1px solid rgb(236, 239, 241);
+}
+
+.ProseMirror pre {
+  @apply bg-off-white p-4 rounded-sm overflow-x-auto my-4;
+  border: 2px solid rgb(56, 56, 56);
+}
+
+.ProseMirror pre code {
+  @apply bg-transparent border-0 p-0;
+}
+
+/* Brutalist utility classes */
+@layer utilities {
+  .brutalist-shadow-sm {
+    box-shadow: rgb(56, 56, 56) -4px 4px 0px 0px;
+  }
+
+  .brutalist-shadow-md {
+    box-shadow: rgb(56, 56, 56) -8px 8px 0px 0px;
+  }
+
+  .brutalist-shadow-lg {
+    box-shadow: rgb(56, 56, 56) -12px 12px 0px 0px;
+  }
+
+  .brutalist-hover-effect {
+    @apply transition-all duration-fast;
+    box-shadow: rgb(56, 56, 56) -4px 4px 0px 0px;
+  }
+
+  .brutalist-hover-effect:hover {
+    transform: translate(2px, -2px);
+    box-shadow: rgb(56, 56, 56) -8px 8px 0px 0px;
+  }
+
+  .brutalist-border {
+    @apply border-2 border-charcoal;
+    border-radius: 2px;
+  }
 }

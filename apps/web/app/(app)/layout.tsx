@@ -5,40 +5,48 @@ import { FileText, Home, Mail, Settings } from "lucide-react"
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <div className="mr-4 flex">
-            <Link href="/dashboard" className="mr-6 flex items-center space-x-2">
-              <span className="text-xl font-bold">DearMe</span>
+      {/* Navigation - MotherDuck brutalist style */}
+      <header
+        className="sticky top-0 z-50 w-full border-b-2 border-charcoal bg-off-white/70 backdrop-blur-md"
+        style={{ height: "90px" }}
+      >
+        <div className="container flex h-full items-center">
+          <div className="mr-8 flex">
+            <Link
+              href="/dashboard"
+              className="mr-8 flex items-center space-x-2 transition-opacity hover:opacity-70"
+            >
+              <span className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
+                DearMe
+              </span>
             </Link>
-            <nav className="flex items-center space-x-6 text-sm font-medium">
+            <nav className="flex items-center space-x-8 font-mono text-base font-normal uppercase tracking-wide">
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 transition-colors hover:text-foreground/80"
+                className="flex items-center gap-2 text-charcoal transition-opacity hover:opacity-70"
               >
-                <Home className="h-4 w-4" />
+                <Home className="h-5 w-5" />
                 Dashboard
               </Link>
               <Link
                 href="/letters"
-                className="flex items-center gap-2 transition-colors hover:text-foreground/80"
+                className="flex items-center gap-2 text-charcoal transition-opacity hover:opacity-70"
               >
-                <FileText className="h-4 w-4" />
+                <FileText className="h-5 w-5" />
                 Letters
               </Link>
               <Link
                 href="/deliveries"
-                className="flex items-center gap-2 transition-colors hover:text-foreground/80"
+                className="flex items-center gap-2 text-charcoal transition-opacity hover:opacity-70"
               >
-                <Mail className="h-4 w-4" />
+                <Mail className="h-5 w-5" />
                 Deliveries
               </Link>
               <Link
                 href="/settings"
-                className="flex items-center gap-2 transition-colors hover:text-foreground/80"
+                className="flex items-center gap-2 text-charcoal transition-opacity hover:opacity-70"
               >
-                <Settings className="h-4 w-4" />
+                <Settings className="h-5 w-5" />
                 Settings
               </Link>
             </nav>
@@ -51,7 +59,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="container py-6">{children}</div>
+        <div className="container py-12">{children}</div>
       </main>
     </div>
   )

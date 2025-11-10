@@ -1,11 +1,8 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import { ClerkProvider } from "@clerk/nextjs"
 
 import { Toaster } from "@/components/ui/toaster"
 import "@/styles/globals.css"
-
-const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "DearMe — Letters to Your Future Self",
@@ -22,7 +19,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en" suppressHydrationWarning>
-        <body className={inter.className}>
+        <body className="font-mono">
           {children}
           <Toaster />
         </body>

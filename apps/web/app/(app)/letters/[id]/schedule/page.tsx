@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { use, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,12 +10,13 @@ import { scheduleDelivery } from "@/server/actions/deliveries"
 import { useToast } from "@/hooks/use-toast"
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default function ScheduleDeliveryPage({ params }: PageProps) {
+  const { id } = use(params)
   const router = useRouter()
   const { toast } = useToast()
   const [channel, setChannel] = useState<"email" | "mail">("email")
@@ -43,7 +44,7 @@ export default function ScheduleDeliveryPage({ params }: PageProps) {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
       await scheduleDelivery({
-        letterId: params.id,
+        letterId: id,
         channel,
         deliverAt: dateTime,
         timezone,
@@ -54,7 +55,7 @@ export default function ScheduleDeliveryPage({ params }: PageProps) {
         description: "Your delivery has been scheduled",
       })
 
-      router.push(`/letters/${params.id}`)
+      router.push(`/letters/${id}`)
     } catch (error) {
       toast({
         variant: "destructive",
