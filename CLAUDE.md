@@ -79,6 +79,81 @@ workers/
 
 - **Framework**: Next.js 15 (App Router, Server Components, Server Actions, PPR)
 - **Language**: TypeScript 5.3+
+
+## Next.js 15 & React 19 Patterns (CRITICAL)
+
+**⚠️ BEFORE working on ANY page or component, you MUST:**
+
+1. **Read the patterns guide**: `.claude/skills/nextjs-15-react-19-patterns.md`
+2. **Check compliance report**: `apps/web/NEXTJS_15_COMPLIANCE_REPORT.md`
+3. **Follow the decision framework** documented in the patterns guide
+
+### Quick Reference: Server vs Client Components
+
+**✅ DEFAULT: Server Components** (no "use client")
+- All pages (page.tsx) should be Server Components
+- Use for static content, data fetching, SEO
+- Can be async functions
+- Zero JavaScript sent to client
+
+**🔴 ONLY add "use client" when component:**
+- Uses React hooks (useState, useEffect, etc.)
+- Has event handlers (onClick, onChange, etc.)
+- Uses browser APIs (window, localStorage, etc.)
+- Maintains local state
+
+**❌ NEVER:**
+- Mark entire pages as Client Components
+- Add "use client" to components that don't need it
+- Use hooks in Server Components
+- Import Server Components into Client Components
+
+### Pattern Enforcement
+
+**Before creating/modifying any page or component:**
+
+```bash
+# Check if similar patterns exist
+grep -r "use client" app/
+grep -r "use client" components/
+
+# Verify pattern compliance
+cat .claude/skills/nextjs-15-react-19-patterns.md
+
+# Run compliance check
+pnpm build  # Monitor First Load JS sizes
+```
+
+### Examples from This Codebase
+
+**✅ Correct Patterns:**
+- `app/(marketing)/page.tsx` - Server Component (marketing content)
+- `components/navbar.tsx` - Server Component (static navigation)
+- `components/letter-editor-form.tsx` - Client Component (uses useState)
+- `components/new-letter-form.tsx` - Client Component (uses router, toast)
+
+**Pattern Decision Tree:**
+```
+Need hooks/state/events? → YES → "use client"
+                         → NO → Server Component (default)
+```
+
+### Compliance Requirements
+
+**All new code MUST:**
+1. Follow patterns in `.claude/skills/nextjs-15-react-19-patterns.md`
+2. Maintain 100% compliance score (see NEXTJS_15_COMPLIANCE_REPORT.md)
+3. Keep First Load JS under 170 KB for interactive pages
+4. Use Server Components as default, Client Components only when necessary
+
+**Validation:**
+```bash
+# Build and check bundle sizes
+pnpm build
+
+# Look for route segment sizes
+# Goal: < 170 KB First Load JS for most routes
+```
 - **Database**: Neon Postgres + Prisma ORM (pg_trgm, citext extensions)
 - **Auth**: Clerk (OAuth, email, passkeys)
 - **Job Scheduling**: Inngest (durable workflows with sleep-until pattern)
@@ -173,6 +248,61 @@ await resend.emails.send({
 - Unique per delivery attempt (not per delivery)
 - Supported by Resend and Postmark
 - Prevents duplicate emails if Inngest retries
+
+### 4. Clerk User Sync (Hybrid Pattern)
+
+**Purpose**: Ensure users are always synced between Clerk and database, even if webhooks fail.
+
+**Implementation**: `apps/web/server/lib/auth.ts`
+
+**Strategy**: Webhooks (primary) + Auto-sync fallback (resilient)
+
+```typescript
+export async function getCurrentUser() {
+  const { userId: clerkUserId } = await clerkAuth()
+
+  let user = await prisma.user.findUnique({
+    where: { clerkUserId }
+  })
+
+  // Self-healing: Auto-create missing users
+  if (!user) {
+    const clerk = await clerkClient()
+    const clerkUser = await clerk.users.getUser(clerkUserId)
+
+    user = await prisma.user.create({
+      data: {
+        clerkUserId,
+        email: clerkUser.primaryEmail,
+        profile: { create: { timezone: "UTC" } }
+      }
+    })
+  }
+
+  return user
+}
+```
+
+**Why This Approach**:
+- ✅ Webhooks handle 99% of cases (efficient, real-time)
+- ✅ Auth middleware catches missed users (self-healing)
+- ✅ Works during development without webhook setup
+- ✅ No manual intervention needed for existing users
+- ✅ Resilient to webhook endpoint being down
+
+**When to Keep Webhooks**:
+- Production: Always use webhooks for real-time sync
+- User deletion: Webhooks handle cleanup (letters, deliveries)
+- User updates: Email changes synced automatically
+
+**When Webhooks Are Optional**:
+- Local development: Auto-sync covers missing users
+- Small projects: If not expecting user deletions/updates frequently
+
+**Sync Script**: For bulk migration or if webhooks weren't configured:
+```bash
+pnpm dotenv -e apps/web/.env.local -- tsx scripts/sync-clerk-user.ts
+```
 
 ## Provider Abstraction Pattern
 

@@ -138,16 +138,17 @@ export async function createLetter(formData: FormData) {
   // Get user details if needed
   const user = await currentUser()
 
-  // Your business logic here
-  const letter = await prisma.letter.create({
-    data: {
-      userId,
-      title: formData.get('title') as string,
-      // ... other fields
-    }
+  // IMPORTANT: Always use server actions for letter creation
+  // Letters require encryption - see apps/web/server/actions/letters.ts
+  const result = await createLetter({
+    title: formData.get('title') as string,
+    bodyRich: { /* TipTap JSON */ },
+    bodyHtml: '<p>Content</p>',
+    tags: [],
+    visibility: 'private'
   })
 
-  return letter
+  return result
 }
 ```
 
@@ -187,14 +188,17 @@ export async function POST(request: Request) {
 
   const data = await request.json()
 
-  const letter = await prisma.letter.create({
-    data: {
-      userId,
-      ...data
-    }
+  // IMPORTANT: Always use server actions for letter creation
+  // Letters require encryption - see apps/web/server/actions/letters.ts
+  const result = await createLetter({
+    title: data.title,
+    bodyRich: data.bodyRich,
+    bodyHtml: data.bodyHtml,
+    tags: data.tags || [],
+    visibility: data.visibility || 'private'
   })
 
-  return NextResponse.json(letter)
+  return NextResponse.json(result)
 }
 ```
 
@@ -277,12 +281,27 @@ export function UserProfile() {
 
 ### 4. Database Integration
 
-#### Syncing Clerk User with Database
+#### Hybrid Approach: Webhooks + Auto-sync Fallback
+
+**Strategy**: Use webhooks as primary mechanism, with auto-sync as resilient fallback.
+
 ```typescript
 // server/lib/auth.ts
-import { auth as clerkAuth } from '@clerk/nextjs/server'
+import { auth as clerkAuth, clerkClient } from '@clerk/nextjs/server'
 import { prisma } from './db'
 
+/**
+ * Get current user with auto-sync fallback
+ *
+ * This implements a hybrid approach:
+ * 1. Webhooks handle user creation in real-time (primary)
+ * 2. This function auto-creates missing users (fallback)
+ *
+ * This makes the system resilient to:
+ * - Webhook endpoint being down during signup
+ * - Webhooks not configured in development
+ * - Users created before webhook setup
+ */
 export async function getCurrentUser() {
   const { userId: clerkUserId } = await clerkAuth()
 
@@ -290,18 +309,53 @@ export async function getCurrentUser() {
     return null
   }
 
-  // Find or create user in database
-  const user = await prisma.user.upsert({
+  let user = await prisma.user.findUnique({
     where: { clerkUserId },
-    update: {}, // Update timestamp or other fields
-    create: {
-      clerkUserId,
-      // Initialize with default values
-    },
     include: {
       profile: true,
-    }
+    },
   })
+
+  // Self-healing: If user doesn't exist in DB, create them
+  if (!user) {
+    console.log(`[Auth] User ${clerkUserId} not found in DB, auto-syncing...`)
+
+    try {
+      // Fetch user details from Clerk
+      const clerk = await clerkClient()
+      const clerkUser = await clerk.users.getUser(clerkUserId)
+
+      const email = clerkUser.emailAddresses.find(
+        e => e.id === clerkUser.primaryEmailAddressId
+      )?.emailAddress
+
+      if (!email) {
+        console.error(`[Auth] No email found for Clerk user ${clerkUserId}`)
+        return null
+      }
+
+      // Create user with profile
+      user = await prisma.user.create({
+        data: {
+          clerkUserId,
+          email,
+          profile: {
+            create: {
+              timezone: 'UTC', // User can update in settings
+            },
+          },
+        },
+        include: {
+          profile: true,
+        },
+      })
+
+      console.log(`[Auth] Auto-synced user: ${email}`)
+    } catch (error) {
+      console.error(`[Auth] Failed to auto-sync user ${clerkUserId}:`, error)
+      return null
+    }
+  }
 
   return user
 }
@@ -316,6 +370,13 @@ export async function requireUser() {
   return user
 }
 ```
+
+**Why This Approach**:
+- ✅ Webhooks handle 99% of cases (efficient, real-time)
+- ✅ Auth middleware catches missed users (self-healing)
+- ✅ Works during development without webhook setup
+- ✅ No manual intervention needed
+- ✅ Resilient to webhook endpoint failures
 
 ### 5. Webhook Integration
 

@@ -109,7 +109,12 @@ export async function encryptLetter(content: {
   keyVersion: number
 }> {
   const plaintext = JSON.stringify(content)
-  return encrypt(plaintext)
+  const { ciphertext, nonce, keyVersion } = await encrypt(plaintext)
+  return {
+    bodyCiphertext: ciphertext,
+    bodyNonce: nonce,
+    keyVersion,
+  }
 }
 
 /**
