@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b-2 border-charcoal bg-cream">
+    <header className="sticky top-0 z-50 w-full border-b-2 border-charcoal bg-white">
       <nav className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 transition-transform hover:-translate-y-0.5">
@@ -40,9 +40,9 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <Link href="/sign-in" className="hidden sm:block">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="border-2 border-charcoal bg-transparent font-mono uppercase tracking-wide text-charcoal hover:bg-charcoal hover:text-white"
+              className="border-2 border-charcoal font-mono uppercase tracking-wide"
               style={{ borderRadius: "2px" }}
             >
               Sign In
