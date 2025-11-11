@@ -24,7 +24,10 @@ export const env = createEnv({
 
     // Email
     RESEND_API_KEY: z.string().min(1),
-    EMAIL_FROM: z.string().email().default("no-reply@mail.dearme.app"),
+    EMAIL_FROM_NOTIFICATION: z.string().min(1).optional(),
+    EMAIL_FROM_DELIVERY: z.string().min(1).optional(),
+    // Legacy email sender (backward compatibility)
+    EMAIL_FROM: z.string().min(1).optional().default("no-reply@mail.dearme.app"),
 
     // Inngest
     INNGEST_SIGNING_KEY: z.string().min(1),
@@ -92,6 +95,8 @@ export const env = createEnv({
     STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY,
     STRIPE_PRICE_PRO_ANNUAL: process.env.STRIPE_PRICE_PRO_ANNUAL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM_NOTIFICATION: process.env.EMAIL_FROM_NOTIFICATION,
+    EMAIL_FROM_DELIVERY: process.env.EMAIL_FROM_DELIVERY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
     INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,

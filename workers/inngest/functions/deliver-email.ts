@@ -1,6 +1,7 @@
 import { inngest } from "../client"
 import { prisma } from "@dearme/prisma"
 import { NonRetriableError } from "inngest"
+import { getEmailSender } from "../lib/email-config"
 import {
   WorkerError,
   InvalidDeliveryError,
@@ -69,9 +70,9 @@ async function getEmailProvider() {
  * Validate environment configuration
  */
 function validateConfig(): void {
-  if (!process.env.EMAIL_FROM) {
-    throw new ConfigurationError("EMAIL_FROM not configured")
-  }
+  // Validate delivery sender is configured
+  getEmailSender('delivery')
+
   if (!process.env.NEXT_PUBLIC_APP_URL) {
     throw new ConfigurationError("NEXT_PUBLIC_APP_URL not configured")
   }
@@ -311,10 +312,14 @@ export const deliverEmail = inngest.createFunction(
     // Send email via email provider with idempotency key
     const sendResult = await step.run("send-email", async () => {
       const idempotencyKey = `delivery-${deliveryId}-attempt-${delivery.attemptCount}`
+      const sender = getEmailSender('delivery')
 
       logger.info("Sending email", {
         deliveryId,
         to: delivery.emailDelivery!.toEmail,
+        from: sender.from,
+        senderEmail: sender.email,
+        senderDisplayName: sender.displayName,
         idempotencyKey,
         attempt: delivery.attemptCount,
       })
@@ -324,6 +329,7 @@ export const deliverEmail = inngest.createFunction(
 
         logger.info(`Using email provider: ${provider.getName()}`, {
           deliveryId,
+          provider: provider.getName(),
         })
 
         const emailHtml = `
@@ -335,14 +341,14 @@ export const deliverEmail = inngest.createFunction(
               ${decryptedContent.bodyHtml}
             </div>
             <p style="color: #999; font-size: 14px;">
-              This letter was sent via DearMe.
+              This letter was sent via Capsule Note.
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">View your dashboard</a>
             </p>
           </div>
         `
 
         const result = await provider.send({
-          from: process.env.EMAIL_FROM!,
+          from: sender.from,
           to: delivery.emailDelivery!.toEmail,
           subject: delivery.emailDelivery!.subject,
           html: emailHtml,

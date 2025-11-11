@@ -8,6 +8,7 @@ import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { encryptLetter, decryptLetter } from "@/server/lib/encryption"
 import { logger } from "@/server/lib/logger"
+import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 
 /**
  * Create a new letter with encrypted content
@@ -103,6 +104,25 @@ export async function createLetter(
       userId: user.id,
       letterId: letter.id,
     })
+
+    // Trigger confirmation email (non-blocking)
+    try {
+      await triggerInngestEvent("notification.letter.created", {
+        letterId: letter.id,
+        userId: user.id,
+        letterTitle: letter.title,
+      })
+      await logger.info('Letter confirmation email triggered', {
+        userId: user.id,
+        letterId: letter.id,
+      })
+    } catch (error) {
+      // Don't fail letter creation if email trigger fails
+      await logger.error('Failed to trigger confirmation email', error, {
+        userId: user.id,
+        letterId: letter.id,
+      })
+    }
 
     // Revalidate cached pages
     revalidatePath("/letters")
