@@ -10,28 +10,28 @@ export function NewLetterForm() {
   const { toast } = useToast()
 
   const handleSubmit = async (data: LetterFormData) => {
-    try {
-      // For now, we'll store the plain text body as both bodyRich and bodyHtml
-      // In a future update, this can be enhanced to support rich text
-      const result = await createLetter({
-        title: data.title,
-        bodyRich: { type: "doc", content: [{ type: "paragraph", text: data.body }] },
-        bodyHtml: `<p>${data.body}</p>`,
-        tags: [],
-        visibility: "private",
-      })
+    // For now, we'll store the plain text body as both bodyRich and bodyHtml
+    // In a future update, this can be enhanced to support rich text
+    const result = await createLetter({
+      title: data.title,
+      bodyRich: { type: "doc", content: [{ type: "paragraph", text: data.body }] },
+      bodyHtml: `<p>${data.body}</p>`,
+      tags: [],
+      visibility: "private",
+    })
 
+    if (result.success) {
       toast({
         title: "Letter Created Successfully",
         description: `Your letter "${data.title}" has been saved and will be delivered on ${new Date(data.deliveryDate).toLocaleDateString()}`,
       })
 
-      router.push(`/letters/${result.letterId}`)
-    } catch (error) {
+      router.push(`/letters/${result.data.letterId}`)
+    } else {
       toast({
         variant: "destructive",
         title: "Error Creating Letter",
-        description: error instanceof Error ? error.message : "Failed to create letter",
+        description: result.error.message,
       })
     }
   }

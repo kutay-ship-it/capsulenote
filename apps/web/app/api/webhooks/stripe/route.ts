@@ -6,7 +6,8 @@ import { env } from "@/env.mjs"
 
 export async function POST(req: Request) {
   const body = await req.text()
-  const signature = headers().get("stripe-signature")
+  const headerPayload = await headers()
+  const signature = headerPayload.get("stripe-signature")
 
   if (!signature) {
     return new Response("Missing signature", { status: 400 })

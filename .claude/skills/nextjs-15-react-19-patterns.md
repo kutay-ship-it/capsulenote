@@ -11,6 +11,7 @@ Comprehensive guide for building modern Next.js applications with proper Server 
 5. [Migration Strategy](#migration-strategy)
 6. [Performance Benefits](#performance-benefits)
 7. [Common Gotchas](#common-gotchas)
+8. [Error Boundaries & Error Handling](#error-boundaries--error-handling)
 
 ---
 
@@ -1202,6 +1203,494 @@ export function Component() {
   return <div>{state}</div>
 }
 ```
+
+---
+
+## Error Boundaries & Error Handling
+
+Error boundaries are critical for building resilient Next.js applications that gracefully handle errors without crashing the entire app.
+
+### What Are Error Boundaries?
+
+Error boundaries are React components that catch JavaScript errors in their child component tree, log errors, and display fallback UIs. In Next.js 15, error boundaries are implemented via:
+
+- **`error.tsx`**: Route-level error boundaries
+- **`global-error.tsx`**: Root-level error boundaries (for layout errors)
+
+### Key Rules for Error Boundaries
+
+1. **Must be Client Components**: All error boundaries require `"use client"` directive
+2. **Hierarchy**: Errors bubble up to nearest error boundary
+3. **Reset functionality**: Built-in `reset()` function for error recovery
+4. **Server Component errors**: Caught by nearest Client Component boundary
+
+### Error Boundary Fundamentals
+
+**What Error Boundaries CATCH:**
+- ✅ Errors during rendering
+- ✅ Errors in lifecycle methods
+- ✅ Errors in constructors
+- ✅ Errors from child components
+- ✅ Errors from Server Components
+
+**What Error Boundaries DON'T CATCH:**
+- ❌ Event handler errors (use try/catch)
+- ❌ Async code (setTimeout, promises)
+- ❌ Server-side rendering errors
+- ❌ Errors in the boundary itself
+- ❌ Server Action errors (use expected error pattern)
+
+### Route-Level Error Boundaries
+
+Create `error.tsx` in any route segment:
+
+```tsx
+// app/dashboard/error.tsx
+'use client'
+
+import { useEffect } from 'react'
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    // Log to error reporting service
+    console.error(error)
+  }, [error])
+
+  return (
+    <div className="flex min-h-[400px] flex-col items-center justify-center">
+      <h2 className="text-2xl font-semibold mb-4">
+        Something went wrong!
+      </h2>
+      <p className="text-gray-600 mb-4">
+        {process.env.NODE_ENV === 'development'
+          ? error.message
+          : 'An unexpected error occurred'}
+      </p>
+      <button
+        onClick={() => reset()}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Try again
+      </button>
+    </div>
+  )
+}
+```
+
+### Global Error Boundaries
+
+For root-level errors, create `app/global-error.tsx`:
+
+```tsx
+// app/global-error.tsx
+'use client'
+
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  return (
+    // global-error MUST include html and body tags
+    <html>
+      <body>
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold mb-4">
+              Critical Application Error
+            </h2>
+            <p className="mb-4">
+              The application encountered a critical error.
+            </p>
+            <button
+              onClick={() => reset()}
+              className="px-6 py-3 bg-red-500 text-white rounded"
+            >
+              Reload Application
+            </button>
+          </div>
+        </div>
+      </body>
+    </html>
+  )
+}
+```
+
+### Error Boundary Hierarchy
+
+Error boundaries create a hierarchy that catches errors at different levels:
+
+```
+app/
+  global-error.tsx        ← Catches root layout errors
+  layout.tsx
+  error.tsx              ← Catches page.tsx errors
+  page.tsx
+
+  dashboard/
+    error.tsx            ← Catches dashboard segment errors
+    layout.tsx
+    page.tsx
+
+    settings/
+      error.tsx          ← Catches settings page errors
+      page.tsx
+```
+
+### Server Component Error Handling
+
+Server Components can't have error boundaries, but errors bubble to nearest Client Component boundary:
+
+```tsx
+// app/data-page.tsx (Server Component - no "use client")
+async function DataPage() {
+  const data = await fetchData()
+
+  if (!data) {
+    // This will be caught by nearest error.tsx
+    throw new Error('Failed to load data')
+  }
+
+  return <div>{data.content}</div>
+}
+```
+
+### Server Action Error Handling
+
+Server Actions should use the **expected error pattern** (return errors, don't throw):
+
+```tsx
+// server/actions/letters.ts
+'use server'
+
+import { z } from 'zod'
+
+const schema = z.object({
+  title: z.string().min(1),
+  content: z.string().min(1),
+})
+
+export async function createLetter(formData: FormData) {
+  // Validate input
+  const validatedFields = schema.safeParse({
+    title: formData.get('title'),
+    content: formData.get('content'),
+  })
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Invalid form data',
+    }
+  }
+
+  try {
+    // Perform action
+    await db.letter.create({ data: validatedFields.data })
+    return { success: true }
+  } catch (error) {
+    // Return error state instead of throwing
+    return {
+      message: 'Failed to create letter. Please try again.',
+    }
+  }
+}
+```
+
+**Client Component consuming Server Action:**
+
+```tsx
+// components/letter-form.tsx
+'use client'
+
+import { useActionState } from 'react'
+import { createLetter } from '@/server/actions/letters'
+
+export function LetterForm() {
+  const [state, formAction, pending] = useActionState(createLetter, {})
+
+  return (
+    <form action={formAction}>
+      <input name="title" required />
+      {state?.errors?.title && (
+        <p className="text-red-500">{state.errors.title}</p>
+      )}
+
+      <textarea name="content" required />
+      {state?.errors?.content && (
+        <p className="text-red-500">{state.errors.content}</p>
+      )}
+
+      {state?.message && (
+        <p className="text-red-500">{state.message}</p>
+      )}
+
+      <button disabled={pending}>
+        {pending ? 'Creating...' : 'Create Letter'}
+      </button>
+    </form>
+  )
+}
+```
+
+### Event Handler Error Handling
+
+Event handlers require try/catch (not caught by error boundaries):
+
+```tsx
+// ❌ WRONG: Error not caught by boundary
+'use client'
+
+function Button() {
+  return (
+    <button onClick={() => {
+      throw new Error('Click error') // Not caught!
+    }}>
+      Click me
+    </button>
+  )
+}
+
+// ✅ CORRECT: Use try/catch
+'use client'
+
+function Button() {
+  const [error, setError] = useState<Error | null>(null)
+
+  const handleClick = () => {
+    try {
+      riskyOperation()
+    } catch (error) {
+      // Set error state to trigger boundary
+      setError(error)
+    }
+  }
+
+  if (error) throw error // Now caught by boundary
+
+  return <button onClick={handleClick}>Click me</button>
+}
+```
+
+### Standardized Error Response Type
+
+Create a consistent error response format:
+
+```tsx
+// types/action-result.ts
+export type ActionResult<T = void> =
+  | { success: true; data: T }
+  | {
+      success: false
+      error: {
+        code: string
+        message: string
+        details?: unknown
+      }
+    }
+
+// Usage in Server Actions
+export async function createLetter(data: LetterInput): Promise<ActionResult<Letter>> {
+  try {
+    const letter = await db.letter.create({ data })
+    return { success: true, data: letter }
+  } catch (error) {
+    return {
+      success: false,
+      error: {
+        code: 'CREATION_FAILED',
+        message: 'Failed to create letter',
+        details: error
+      }
+    }
+  }
+}
+```
+
+### Production Error Tracking
+
+Integrate with error tracking services:
+
+```tsx
+// app/error.tsx
+'use client'
+
+import * as Sentry from '@sentry/nextjs'
+import { useEffect } from 'react'
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    // Report to Sentry with context
+    Sentry.captureException(error, {
+      contexts: {
+        react: {
+          componentStack: error.digest,
+        },
+      },
+      tags: {
+        section: 'error-boundary',
+      },
+    })
+  }, [error])
+
+  return (
+    <div>
+      <h2>An error occurred</h2>
+      <p>Our team has been notified.</p>
+      <button onClick={reset}>Try again</button>
+    </div>
+  )
+}
+```
+
+### Smart Error Recovery
+
+Implement automatic retry with exponential backoff:
+
+```tsx
+// app/smart-error.tsx
+'use client'
+
+import { useState, useEffect } from 'react'
+
+export default function SmartError({
+  error,
+  reset,
+}: {
+  error: Error
+  reset: () => void
+}) {
+  const [retryCount, setRetryCount] = useState(0)
+  const maxRetries = 3
+
+  useEffect(() => {
+    // Auto-retry for transient errors
+    if (error.message.includes('Network') && retryCount < maxRetries) {
+      const timer = setTimeout(() => {
+        setRetryCount(prev => prev + 1)
+        reset()
+      }, 1000 * Math.pow(2, retryCount)) // Exponential backoff
+
+      return () => clearTimeout(timer)
+    }
+  }, [error, reset, retryCount])
+
+  return (
+    <div>
+      {retryCount > 0 && (
+        <p>Retry attempt {retryCount} of {maxRetries}...</p>
+      )}
+      <h2>Something went wrong</h2>
+      <p>{error.message}</p>
+      <button onClick={reset}>Try again</button>
+    </div>
+  )
+}
+```
+
+### Common Error Boundary Pitfalls
+
+**1. Infinite Loop Prevention**
+
+```tsx
+// ❌ WRONG: Can cause infinite loop
+export default function Error({ error }) {
+  useEffect(() => {
+    riskyLoggingFunction(error) // Might throw
+  }, [error])
+
+  return <div>Error</div>
+}
+
+// ✅ CORRECT: Wrap in try/catch
+export default function Error({ error }) {
+  useEffect(() => {
+    try {
+      riskyLoggingFunction(error)
+    } catch (loggingError) {
+      console.error('Failed to log:', loggingError)
+    }
+  }, [error])
+
+  return <div>Error</div>
+}
+```
+
+**2. Missing Context**
+
+```tsx
+// ✅ CORRECT: Log with context
+import { usePathname, useSearchParams } from 'next/navigation'
+
+export default function Error({ error, reset }) {
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    logError({
+      error,
+      url: pathname,
+      params: Object.fromEntries(searchParams),
+      timestamp: new Date().toISOString(),
+    })
+  }, [error, pathname, searchParams])
+
+  return (
+    <div>
+      <h2>Error on {pathname}</h2>
+      <button onClick={reset}>Try again</button>
+    </div>
+  )
+}
+```
+
+### Error Handling Checklist
+
+**For Production:**
+- [ ] Add `app/global-error.tsx` for root-level errors
+- [ ] Add `app/error.tsx` for general page errors
+- [ ] Add route-specific `error.tsx` for critical sections
+- [ ] Implement error tracking (Sentry, etc.)
+- [ ] Use expected error pattern in Server Actions
+- [ ] Sanitize error messages (no sensitive data)
+- [ ] Test error boundaries with production build
+- [ ] Implement retry logic for transient failures
+- [ ] Add context to error logs (URL, params, user)
+
+**Best Practices:**
+- Default to Server Components, add error boundaries as Client Components
+- Place error boundaries strategically (don't over-nest)
+- Provide user-friendly messages in production
+- Log errors with full context for debugging
+- Test error scenarios during development
+- Use `reset()` for recoverable errors
+- Never expose sensitive information in error messages
+
+### Quick Error Handling Reference
+
+| Scenario | Solution |
+|----------|----------|
+| Page rendering error | Add `error.tsx` in route |
+| Root layout error | Add `global-error.tsx` |
+| Server Component error | Bubbles to nearest `error.tsx` |
+| Server Action error | Return error object, don't throw |
+| Event handler error | Use try/catch, throw to trigger boundary |
+| Async operation error | Use try/catch or error state |
+| API call error | Handle in try/catch or Server Action |
 
 ---
 

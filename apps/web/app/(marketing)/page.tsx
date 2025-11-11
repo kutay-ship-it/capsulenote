@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link"
 import {
   ArrowRight,
@@ -35,17 +37,6 @@ const proofHighlights = [
     description: "Choose an instant inbox drop or a sealed envelope.",
   },
 ]
-
-const handleLetterSubmit = (data: LetterFormData) => {
-  // For non-logged-in users, show what they created and prompt to sign up
-  console.log("Letter preview:", data)
-  alert(
-    `✅ Your letter "${data.title}" is ready!\n\n` +
-    `📬 Scheduled for: ${new Date(data.deliveryDate).toLocaleDateString()}\n` +
-    `📧 Recipient: ${data.recipientEmail}\n\n` +
-    `Sign up to schedule your delivery and keep your letters safe in our encrypted vault.`
-  )
-}
 
 const featureList = [
   {
@@ -129,6 +120,17 @@ const scenarios = [
 ]
 
 export default function HomePage() {
+  const handleLetterSubmit = (data: LetterFormData) => {
+    // For non-logged-in users, show what they created and prompt to sign up
+    console.log("Letter preview:", data)
+    alert(
+      `✅ Your letter "${data.title}" is ready!\n\n` +
+      `📬 Scheduled for: ${new Date(data.deliveryDate).toLocaleDateString()}\n` +
+      `📧 Recipient: ${data.recipientEmail}\n\n` +
+      `Sign up to schedule your delivery and keep your letters safe in our encrypted vault.`
+    )
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-cream">
       <Navbar />

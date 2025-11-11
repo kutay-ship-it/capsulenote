@@ -3,7 +3,8 @@ import { prisma } from "@/server/lib/db"
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const signature = headers().get("svix-signature")
+  const headerPayload = await headers()
+  const signature = headerPayload.get("svix-signature")
 
   // TODO: Verify webhook signature with Resend
 

@@ -19,7 +19,7 @@ export async function createAuditEvent({
     data: {
       userId,
       type,
-      data,
+      data: data as Record<string, never>, // Type assertion to satisfy Prisma JsonValue
       ipAddress,
       userAgent,
     },
