@@ -12,6 +12,7 @@ import { requireUser } from "@/server/lib/auth"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { logger } from "@/server/lib/logger"
+import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 
 /**
  * Schedule a new delivery for a letter
@@ -135,8 +136,21 @@ export async function scheduleDelivery(
       }
     }
 
-    // TODO: Trigger Inngest workflow to schedule delivery
-    // await inngest.send({ name: "delivery.scheduled", data: { deliveryId: delivery.id } })
+    // Trigger Inngest workflow to schedule delivery
+    try {
+      await triggerInngestEvent("delivery.scheduled", { deliveryId: delivery.id })
+      await logger.info('Inngest event sent successfully', {
+        deliveryId: delivery.id,
+        event: 'delivery.scheduled',
+      })
+    } catch (inngestError) {
+      await logger.error('Failed to send Inngest event', inngestError, {
+        deliveryId: delivery.id,
+        event: 'delivery.scheduled',
+      })
+      // Don't fail the entire operation - delivery is still created
+      // The backstop reconciler will catch this
+    }
 
     await createAuditEvent({
       userId: user.id,
@@ -364,7 +378,16 @@ export async function cancelDelivery(
       }
     }
 
-    // TODO: Cancel Inngest workflow
+    // Cancel Inngest workflow
+    try {
+      await triggerInngestEvent("delivery.canceled", { deliveryId })
+    } catch (error) {
+      // Log but don't fail the cancellation if Inngest send fails
+      await logger.warn('Failed to send Inngest cancel event', {
+        deliveryId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
 
     await createAuditEvent({
       userId: user.id,
