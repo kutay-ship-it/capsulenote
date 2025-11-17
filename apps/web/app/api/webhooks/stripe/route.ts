@@ -1,8 +1,25 @@
+/**
+ * Stripe Webhook Handler (Async via Inngest)
+ *
+ * Security Architecture:
+ * 1. Signature verification (prevents forgery)
+ * 2. Event age validation (rejects >5min old events)
+ * 3. Async processing via Inngest (fast response to Stripe)
+ *
+ * Design Philosophy:
+ * - Minimal processing in this endpoint (<100ms)
+ * - Queue to Inngest immediately
+ * - Return 200 to Stripe (<500ms response time SLO)
+ * - Let Inngest handle retries, idempotency, and failures
+ *
+ * @see workers/inngest/functions/billing/process-stripe-webhook.ts
+ */
+
 import { headers } from "next/headers"
 import Stripe from "stripe"
-import { stripe } from "@/server/providers/stripe"
-import { prisma } from "@/server/lib/db"
+import { stripe } from "@/server/providers/stripe/client"
 import { env } from "@/env.mjs"
+import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -10,127 +27,60 @@ export async function POST(req: Request) {
   const signature = headerPayload.get("stripe-signature")
 
   if (!signature) {
+    console.error("[Stripe Webhook] Missing stripe-signature header")
     return new Response("Missing signature", { status: 400 })
   }
 
   let event: Stripe.Event
 
+  // 1. Verify Stripe signature
   try {
     event = stripe.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
-    console.error("Webhook signature verification failed:", err)
-    return new Response("Invalid signature", { status: 400 })
+    const error = err as Error
+    console.error("[Stripe Webhook] Signature verification failed:", {
+      error: error.message,
+      signature: signature.substring(0, 20) + "...", // Log partial signature for debugging
+    })
+    return new Response(`Invalid signature: ${error.message}`, { status: 400 })
   }
 
+  // 2. Validate event age (reject >5 minutes old)
+  const eventAge = Date.now() - event.created * 1000
+  const MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
+
+  if (eventAge > MAX_AGE_MS) {
+    console.warn("[Stripe Webhook] Event too old, rejecting", {
+      eventId: event.id,
+      eventType: event.type,
+      age: Math.floor(eventAge / 1000) + "s",
+      maxAge: "300s",
+    })
+    return new Response("Event too old", { status: 400 })
+  }
+
+  // 3. Queue to Inngest for async processing
   try {
-    switch (event.type) {
-      case "customer.created": {
-        const customer = event.data.object as Stripe.Customer
-        // Handled in user creation flow
-        console.log(`Customer created: ${customer.id}`)
-        break
-      }
+    await triggerInngestEvent("stripe/webhook.received", { event })
 
-      case "customer.subscription.created":
-      case "customer.subscription.updated": {
-        const subscription = event.data.object as Stripe.Subscription
-        const customerId = subscription.customer as string
+    console.log("[Stripe Webhook] Event queued successfully", {
+      eventId: event.id,
+      eventType: event.type,
+      age: Math.floor(eventAge / 1000) + "s",
+    })
 
-        // Find user by Stripe customer ID
-        const profile = await prisma.profile.findUnique({
-          where: { stripeCustomerId: customerId },
-          include: { user: true },
-        })
-
-        if (!profile) {
-          console.error(`User not found for customer: ${customerId}`)
-          break
-        }
-
-        // Upsert subscription
-        await prisma.subscription.upsert({
-          where: { stripeSubscriptionId: subscription.id },
-          create: {
-            userId: profile.userId,
-            stripeSubscriptionId: subscription.id,
-            status: subscription.status as any,
-            plan: "pro",
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          },
-          update: {
-            status: subscription.status as any,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          },
-        })
-
-        console.log(`Subscription updated: ${subscription.id}`)
-        break
-      }
-
-      case "customer.subscription.deleted": {
-        const subscription = event.data.object as Stripe.Subscription
-
-        await prisma.subscription.update({
-          where: { stripeSubscriptionId: subscription.id },
-          data: { status: "canceled" },
-        })
-
-        console.log(`Subscription canceled: ${subscription.id}`)
-        break
-      }
-
-      case "payment_intent.succeeded": {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent
-
-        // Record payment
-        if (paymentIntent.metadata.userId) {
-          await prisma.payment.create({
-            data: {
-              userId: paymentIntent.metadata.userId,
-              type: paymentIntent.metadata.type as any,
-              amountCents: paymentIntent.amount,
-              currency: paymentIntent.currency,
-              stripePaymentIntentId: paymentIntent.id,
-              status: "succeeded",
-              metadata: paymentIntent.metadata,
-            },
-          })
-        }
-
-        console.log(`Payment succeeded: ${paymentIntent.id}`)
-        break
-      }
-
-      case "payment_intent.payment_failed": {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent
-
-        if (paymentIntent.metadata.userId) {
-          await prisma.payment.create({
-            data: {
-              userId: paymentIntent.metadata.userId,
-              type: paymentIntent.metadata.type as any,
-              amountCents: paymentIntent.amount,
-              currency: paymentIntent.currency,
-              stripePaymentIntentId: paymentIntent.id,
-              status: "failed",
-              metadata: paymentIntent.metadata,
-            },
-          })
-        }
-
-        console.log(`Payment failed: ${paymentIntent.id}`)
-        break
-      }
-
-      default:
-        console.log(`Unhandled event type: ${event.type}`)
-    }
-
-    return new Response("Webhook processed", { status: 200 })
+    // 4. Return 200 immediately (don't block Stripe)
+    return new Response("Webhook queued", { status: 200 })
   } catch (error) {
-    console.error("Error processing Stripe webhook:", error)
-    return new Response("Webhook processing failed", { status: 500 })
+    const err = error as Error
+    console.error("[Stripe Webhook] Failed to queue event to Inngest", {
+      eventId: event.id,
+      eventType: event.type,
+      error: err.message,
+      stack: err.stack,
+    })
+
+    // Return 500 so Stripe retries
+    return new Response("Failed to queue webhook", { status: 500 })
   }
 }

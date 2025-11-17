@@ -13,6 +13,7 @@ import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
+import { getEntitlements, trackEmailDelivery, deductMailCredit } from "@/server/lib/entitlements"
 
 /**
  * Schedule a new delivery for a letter
@@ -43,6 +44,67 @@ export async function scheduleDelivery(
     }
 
     const data = validated.data
+
+    // Check subscription entitlements
+    const entitlements = await getEntitlements(user.id)
+
+    // Check if user can schedule deliveries
+    if (!entitlements.features.canScheduleDeliveries) {
+      await logger.warn('User attempted to schedule delivery without Pro subscription', {
+        userId: user.id,
+        plan: entitlements.plan,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.SUBSCRIPTION_REQUIRED,
+          message: 'Scheduling deliveries requires a Pro subscription',
+          details: {
+            requiredPlan: 'pro',
+            currentPlan: entitlements.plan,
+            upgradeUrl: '/pricing'
+          }
+        }
+      }
+    }
+
+    // For physical mail, check credits
+    if (data.channel === 'mail') {
+      if (!entitlements.features.canSchedulePhysicalMail) {
+        await logger.warn('User attempted to schedule physical mail without Pro subscription', {
+          userId: user.id,
+          plan: entitlements.plan,
+        })
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.SUBSCRIPTION_REQUIRED,
+            message: 'Physical mail requires Pro subscription'
+          }
+        }
+      }
+
+      if (entitlements.limits.mailCreditsExhausted) {
+        await logger.warn('User attempted to schedule mail without credits', {
+          userId: user.id,
+          mailCreditsRemaining: entitlements.usage.mailCreditsRemaining,
+        })
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.INSUFFICIENT_CREDITS,
+            message: 'No mail credits remaining',
+            details: {
+              action: 'purchase_credits',
+              url: '/settings/billing'
+            }
+          }
+        }
+      }
+    }
 
     // Verify letter ownership
     const letter = await prisma.letter.findFirst({
@@ -134,6 +196,23 @@ export async function scheduleDelivery(
           details: error,
         },
       }
+    }
+
+    // Track usage and deduct credits
+    try {
+      if (data.channel === 'email') {
+        await trackEmailDelivery(user.id)
+      } else if (data.channel === 'mail') {
+        await deductMailCredit(user.id)
+      }
+    } catch (error) {
+      // Non-critical - log but don't fail delivery
+      await logger.warn('Failed to track usage', {
+        userId: user.id,
+        deliveryId: delivery.id,
+        channel: data.channel,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
 
     // Trigger Inngest workflow to schedule delivery

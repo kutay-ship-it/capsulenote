@@ -23,13 +23,14 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  profile          Profile?
-  letters          Letter[]
-  deliveries       Delivery[]
-  subscriptions    Subscription[]
+  profile           Profile?
+  letters           Letter[]
+  deliveries        Delivery[]
+  subscriptions     Subscription[]
+  subscriptionUsage SubscriptionUsage[]
   shippingAddresses ShippingAddress[]
-  payments         Payment[]
-  auditEvents      AuditEvent[]
+  payments          Payment[]
+  auditEvents       AuditEvent[]
 
   @@map("users")
 }
@@ -64,7 +65,9 @@ enum SubscriptionStatus {
 }
 
 enum SubscriptionPlan {
-  pro
+  free        // Free tier with limited features
+  pro         // Paid tier with unlimited features
+  enterprise  // Future: For growth
 
   @@map("subscription_plan")
 }
@@ -318,4 +321,84 @@ model LetterTemplate {
   @@index([category])
   @@index([isActive])
   @@map("letter_templates")
+}
+
+// ============================================================================
+// SUBSCRIPTION USAGE TRACKING
+// ============================================================================
+
+model SubscriptionUsage {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  period         DateTime @map("period") @db.Timestamptz(3) // Billing period start
+  lettersCreated Int      @default(0) @map("letters_created")
+  emailsSent     Int      @default(0) @map("emails_sent")
+  mailsSent      Int      @default(0) @map("mails_sent")
+  mailCredits    Int      @default(0) @map("mail_credits") // Physical mail credits
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period], map: "subscription_usage_user_period_unique")
+  @@index([userId])
+  @@index([period])
+  @@map("subscription_usage")
+}
+
+// ============================================================================
+// WEBHOOK EVENT TRACKING
+// ============================================================================
+
+model WebhookEvent {
+  id          String   @id // Use Stripe event.id for natural idempotency
+  type        String   // event.type
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
+  data        Json     @default("{}") // Full event payload for debugging
+
+  @@index([type])
+  @@index([processedAt])
+  @@map("webhook_events")
+}
+
+// ============================================================================
+// PRICING PLANS
+// ============================================================================
+
+model PricingPlan {
+  id              String           @id @default(uuid()) @db.Uuid
+  stripeProductId String           @unique @map("stripe_product_id")
+  stripePriceId   String           @unique @map("stripe_price_id")
+  name            String           // "Pro Monthly"
+  plan            SubscriptionPlan
+  interval        String           // "month" | "year"
+  amountCents     Int              @map("amount_cents")
+  currency        String           @default("usd") @db.Char(3)
+  features        Json             @default("{}") // Feature matrix
+  isActive        Boolean          @default(true) @map("is_active")
+  sortOrder       Int              @default(0) @map("sort_order")
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([plan])
+  @@index([isActive])
+  @@map("pricing_plans")
+}
+
+// ============================================================================
+// FAILED WEBHOOKS - Dead Letter Queue
+// ============================================================================
+
+model FailedWebhook {
+  id         String    @id @default(uuid()) @db.Uuid
+  eventId    String    @map("event_id")
+  eventType  String    @map("event_type")
+  payload    Json
+  error      String    @db.Text
+  retriedAt  DateTime  @default(now()) @map("retried_at") @db.Timestamptz(3)
+  resolvedAt DateTime? @map("resolved_at") @db.Timestamptz(3)
+
+  @@index([eventType])
+  @@index([retriedAt])
+  @@map("failed_webhooks")
 }

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { User, Bell, Globe, Lock, CreditCard, AlertTriangle } from "lucide-react"
+import Link from "next/link"
 
 export default async function SettingsPage() {
   const user = await getCurrentUser()
@@ -154,40 +155,42 @@ export default async function SettingsPage() {
       </Card>
 
       {/* Subscription */}
-      <Card
-        className="border-2 border-charcoal shadow-sm bg-bg-purple-light"
-        style={{ borderRadius: "2px" }}
-      >
-        <CardHeader className="space-y-3 p-5 sm:p-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white"
+      <Link href="/settings/billing">
+        <Card
+          className="border-2 border-charcoal shadow-sm bg-bg-purple-light hover:shadow-md transition-shadow cursor-pointer"
+          style={{ borderRadius: "2px" }}
+        >
+          <CardHeader className="space-y-3 p-5 sm:p-6">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white"
+                style={{ borderRadius: "2px" }}
+              >
+                <CreditCard className="h-5 w-5 text-charcoal" strokeWidth={2} />
+              </div>
+              <div>
+                <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl">
+                  Billing & Subscription
+                </CardTitle>
+                <CardDescription className="font-mono text-xs text-gray-secondary sm:text-sm">
+                  Manage your subscription, usage, and payments
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
+            <p className="font-mono text-sm text-gray-secondary">
+              View your subscription status, track usage, manage payment methods, and access invoices.
+            </p>
+            <Badge
+              className="border-2 border-charcoal bg-lavender font-mono text-xs uppercase"
               style={{ borderRadius: "2px" }}
             >
-              <CreditCard className="h-5 w-5 text-charcoal" strokeWidth={2} />
-            </div>
-            <div>
-              <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl">
-                Subscription
-              </CardTitle>
-              <CardDescription className="font-mono text-xs text-gray-secondary sm:text-sm">
-                Manage your Capsule Note Pro subscription
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
-          <p className="font-mono text-sm text-gray-secondary">
-            Upgrade to Pro for unlimited letters, physical mail delivery, and priority support.
-          </p>
-          <Badge
-            className="border-2 border-charcoal bg-lavender font-mono text-xs uppercase"
-            style={{ borderRadius: "2px" }}
-          >
-            Subscription management coming soon
-          </Badge>
-        </CardContent>
-      </Card>
+              View Billing Settings →
+            </Badge>
+          </CardContent>
+        </Card>
+      </Link>
 
       {/* Privacy & Data */}
       <Card

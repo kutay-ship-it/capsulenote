@@ -9,6 +9,7 @@ import { createAuditEvent } from "@/server/lib/audit"
 import { encryptLetter, decryptLetter } from "@/server/lib/encryption"
 import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
+import { getEntitlements, trackLetterCreation } from "@/server/lib/entitlements"
 
 /**
  * Create a new letter with encrypted content
@@ -40,6 +41,32 @@ export async function createLetter(
     }
 
     const data = validated.data
+
+    // Check subscription entitlements
+    const entitlements = await getEntitlements(user.id)
+
+    // Check letter creation quota
+    if (!entitlements.features.canCreateLetters) {
+      await logger.warn('User attempted to create letter beyond quota', {
+        userId: user.id,
+        plan: entitlements.plan,
+        lettersThisMonth: entitlements.usage.lettersThisMonth,
+        limit: entitlements.features.maxLettersPerMonth,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.QUOTA_EXCEEDED,
+          message: `Free plan limit reached (${entitlements.features.maxLettersPerMonth} letters/month)`,
+          details: {
+            currentUsage: entitlements.usage.lettersThisMonth,
+            limit: entitlements.features.maxLettersPerMonth,
+            upgradeUrl: '/pricing'
+          }
+        }
+      }
+    }
 
     // Encrypt letter content
     let encrypted: Awaited<ReturnType<typeof encryptLetter>>
@@ -91,6 +118,18 @@ export async function createLetter(
           details: error,
         },
       }
+    }
+
+    // Track usage
+    try {
+      await trackLetterCreation(user.id)
+    } catch (error) {
+      // Non-critical - log but don't fail letter creation
+      await logger.warn('Failed to track letter creation', {
+        userId: user.id,
+        letterId: letter.id,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
 
     // Create audit event

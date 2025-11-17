@@ -72,7 +72,7 @@ importers:
         specifier: ^1.1.15
         version: 1.1.15(@types/react-dom@18.3.7)(@types/react@18.3.26)(react-dom@19.0.0-rc.0)(react@19.0.0-rc.0)
       '@radix-ui/react-scroll-area':
-        specifier: ^1.0.5
+        specifier: ^1.2.10
         version: 1.2.10(@types/react-dom@18.3.7)(@types/react@18.3.26)(react-dom@19.0.0-rc.0)(react@19.0.0-rc.0)
       '@radix-ui/react-select':
         specifier: ^2.0.0
@@ -90,7 +90,7 @@ importers:
         specifier: ^1.2.6
         version: 1.2.6(@types/react-dom@18.3.7)(@types/react@18.3.26)(react-dom@19.0.0-rc.0)(react@19.0.0-rc.0)
       '@radix-ui/react-tabs':
-        specifier: ^1.0.4
+        specifier: ^1.1.13
         version: 1.1.13(@types/react-dom@18.3.7)(@types/react@18.3.26)(react-dom@19.0.0-rc.0)(react@19.0.0-rc.0)
       '@radix-ui/react-toast':
         specifier: ^1.1.5
