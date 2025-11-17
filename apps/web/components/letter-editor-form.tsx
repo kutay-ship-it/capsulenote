@@ -30,6 +30,7 @@ import {
 
 interface LetterEditorFormProps {
   onSubmit?: (data: LetterFormData) => void
+  onClear?: () => void
   initialData?: Partial<LetterFormData>
   accentColor?: "yellow" | "blue" | "teal" | "lavender" | "peach" | "lime"
 }
@@ -43,6 +44,7 @@ export interface LetterFormData {
 
 export function LetterEditorForm({
   onSubmit,
+  onClear,
   initialData,
   accentColor = "yellow",
 }: LetterEditorFormProps) {
@@ -103,6 +105,7 @@ export function LetterEditorForm({
     setSelectedPreset(null)
     setShowCustomDate(false)
     setErrors({})
+    onClear?.()
   }
 
   const accentColors = {

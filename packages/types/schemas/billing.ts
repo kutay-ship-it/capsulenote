@@ -393,3 +393,114 @@ export const subscriptionAnalyticsSchema = z.object({
 })
 
 export type SubscriptionAnalytics = z.infer<typeof subscriptionAnalyticsSchema>
+
+// ============================================================================
+// ANONYMOUS CHECKOUT & PENDING SUBSCRIPTIONS
+// ============================================================================
+
+/**
+ * Pending subscription status values
+ */
+export const pendingSubscriptionStatusSchema = z.enum([
+  'awaiting_payment', // Checkout created, payment pending
+  'payment_complete', // Payment succeeded, awaiting signup
+  'linked',           // Successfully linked to user account
+  'expired',          // Expired without signup
+  'refunded'          // Refunded due to expiry
+])
+
+export type PendingSubscriptionStatus = z.infer<typeof pendingSubscriptionStatusSchema>
+
+/**
+ * Anonymous checkout session creation input
+ */
+export const anonymousCheckoutSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  priceId: z.string().startsWith('price_', 'Invalid Stripe price ID'),
+  letterId: z.string().uuid().optional(),
+  metadata: z.record(z.unknown()).optional()
+})
+
+export type AnonymousCheckoutInput = z.infer<typeof anonymousCheckoutSchema>
+
+/**
+ * Checkout session response (with customer ID)
+ */
+export const anonymousCheckoutResponseSchema = z.object({
+  sessionId: z.string(),
+  sessionUrl: z.string().url(),
+  customerId: z.string()
+})
+
+export type AnonymousCheckoutResponse = z.infer<typeof anonymousCheckoutResponseSchema>
+
+/**
+ * Pending subscription from database
+ */
+export const pendingSubscriptionSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  stripeCustomerId: z.string(),
+  stripeSessionId: z.string(),
+  stripeSubscriptionId: z.string().optional(),
+  priceId: z.string(),
+  plan: subscriptionPlanSchema,
+  amountCents: z.number().int().min(0),
+  currency: z.string().length(3),
+  status: pendingSubscriptionStatusSchema,
+  paymentStatus: z.string().optional(),
+  metadata: z.record(z.unknown()),
+  expiresAt: z.date(),
+  linkedAt: z.date().optional(),
+  linkedUserId: z.string().uuid().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date()
+})
+
+export type PendingSubscription = z.infer<typeof pendingSubscriptionSchema>
+
+/**
+ * Link pending subscription input
+ */
+export const linkPendingSubscriptionSchema = z.object({
+  userId: z.string().uuid(),
+  email: z.string().email(),
+  emailVerified: z.boolean()
+})
+
+export type LinkPendingSubscriptionInput = z.infer<typeof linkPendingSubscriptionSchema>
+
+/**
+ * Link pending subscription result
+ */
+export const linkPendingSubscriptionResultSchema = z.object({
+  success: z.boolean(),
+  subscriptionId: z.string().uuid().optional(),
+  error: z.string().optional()
+})
+
+export type LinkPendingSubscriptionResult = z.infer<typeof linkPendingSubscriptionResultSchema>
+
+/**
+ * Resume checkout input
+ */
+export const resumeCheckoutSchema = z.object({
+  sessionId: z.string()
+})
+
+export type ResumeCheckoutInput = z.infer<typeof resumeCheckoutSchema>
+
+/**
+ * Subscription error codes (extended for anonymous checkout)
+ */
+export const anonymousCheckoutErrorCodes = {
+  ...billingErrorCodes,
+  ALREADY_PAID: 'ALREADY_PAID',
+  SESSION_EXPIRED: 'SESSION_EXPIRED',
+  EMAIL_MISMATCH: 'EMAIL_MISMATCH',
+  EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
+  PENDING_SUBSCRIPTION_NOT_FOUND: 'PENDING_SUBSCRIPTION_NOT_FOUND',
+  CHECKOUT_CREATION_FAILED: 'CHECKOUT_CREATION_FAILED'
+} as const
+
+export type AnonymousCheckoutErrorCode = (typeof anonymousCheckoutErrorCodes)[keyof typeof anonymousCheckoutErrorCodes]

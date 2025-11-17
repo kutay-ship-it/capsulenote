@@ -2,7 +2,7 @@
  * Checkout Event Handlers
  *
  * Handles checkout.session.* webhook events from Stripe:
- * - checkout.session.completed
+ * - checkout.session.completed (includes anonymous checkout support)
  * - checkout.session.expired
  */
 
@@ -12,12 +12,19 @@ import {
   recordBillingAudit,
 } from "../../../../../apps/web/server/lib/stripe-helpers"
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
+import { prisma } from "../../../../../apps/web/server/lib/db"
+import { linkPendingSubscription } from "../../../../../apps/web/app/subscribe/actions"
 
 /**
  * Handle checkout.session.completed event
  *
- * Logs successful checkout completion.
- * Subscription creation is handled by subscription.created event.
+ * Supports both authenticated and anonymous checkout flows:
+ * 1. If user exists → log completion audit event
+ * 2. If no user (anonymous checkout):
+ *    - Update PendingSubscription to payment_complete
+ *    - Store subscription ID
+ *    - Check if user already exists with email (auto-link)
+ *    - If no user, trigger signup reminder email
  *
  * @param session - Stripe Checkout Session object
  */
@@ -28,7 +35,6 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
     subscriptionId: session.subscription,
   })
 
-  // Find user
   const customerId = session.customer as string
   if (!customerId) {
     console.warn("[Checkout Handler] No customer ID in checkout session", {
@@ -37,27 +43,98 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
     return
   }
 
+  // Try to find existing user
   const user = await getUserByStripeCustomer(customerId)
-  if (!user) {
-    console.warn("[Checkout Handler] User not found for checkout completion", {
+
+  if (user) {
+    // Authenticated checkout - just log completion
+    await recordBillingAudit(user.id, AuditEventType.CHECKOUT_COMPLETED, {
+      sessionId: session.id,
+      subscriptionId: session.subscription,
+      amountTotal: session.amount_total,
+      currency: session.currency,
+    })
+
+    console.log("[Checkout Handler] Checkout completion logged for existing user", {
+      sessionId: session.id,
+      userId: user.id,
+    })
+    return
+  }
+
+  // Anonymous checkout flow - find PendingSubscription
+  const pending = await prisma.pendingSubscription.findFirst({
+    where: {
+      OR: [
+        { stripeCustomerId: customerId },
+        { stripeSessionId: session.id },
+      ],
+    },
+  })
+
+  if (!pending) {
+    console.warn("[Checkout Handler] No PendingSubscription found for anonymous checkout", {
       customerId,
       sessionId: session.id,
     })
     return
   }
 
-  // Record audit event
-  await recordBillingAudit(user.id, AuditEventType.CHECKOUT_COMPLETED, {
-    sessionId: session.id,
-    subscriptionId: session.subscription,
-    amountTotal: session.amount_total,
-    currency: session.currency,
+  console.log("[Checkout Handler] Found PendingSubscription for anonymous checkout", {
+    pendingId: pending.id,
+    email: pending.email,
   })
 
-  console.log("[Checkout Handler] Checkout completion logged", {
-    sessionId: session.id,
-    userId: user.id,
+  // Update PendingSubscription to payment_complete
+  await prisma.pendingSubscription.update({
+    where: { id: pending.id },
+    data: {
+      status: "payment_complete",
+      stripeSubscriptionId: session.subscription as string,
+      paymentStatus: session.payment_status,
+    },
   })
+
+  // Check if user already exists with this email (race condition: user signed up before webhook)
+  const existingUser = await prisma.user.findUnique({
+    where: { email: pending.email },
+  })
+
+  if (existingUser) {
+    console.log("[Checkout Handler] User already exists, auto-linking subscription", {
+      userId: existingUser.id,
+      email: pending.email,
+    })
+
+    // Auto-link immediately
+    const result = await linkPendingSubscription(existingUser.id)
+
+    if (result.success) {
+      console.log("[Checkout Handler] Successfully auto-linked subscription", {
+        userId: existingUser.id,
+        subscriptionId: result.subscriptionId,
+      })
+    } else {
+      console.error("[Checkout Handler] Failed to auto-link subscription", {
+        userId: existingUser.id,
+        error: result.error,
+      })
+    }
+  } else {
+    console.log("[Checkout Handler] No user exists yet, awaiting signup", {
+      email: pending.email,
+    })
+
+    // TODO: Trigger signup reminder email (Phase 6)
+    // await inngest.send({
+    //   name: "billing.send-signup-reminder",
+    //   data: {
+    //     pendingSubscriptionId: pending.id,
+    //     email: pending.email,
+    //     immediate: true,
+    //   },
+    // })
+  }
 }
 
 /**

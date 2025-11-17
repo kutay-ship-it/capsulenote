@@ -84,12 +84,12 @@ export function AuditLogFilters() {
           {/* Event Type Filter */}
           <div className="space-y-2">
             <Label htmlFor="type">Event Type</Label>
-            <Select value={type} onValueChange={setType}>
+            <Select value={type || "all"} onValueChange={(value) => setType(value === "all" ? "" : value)}>
               <SelectTrigger id="type">
                 <SelectValue placeholder="All types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All types</SelectItem>
+                <SelectItem value="all">All types</SelectItem>
                 {Object.entries(eventCategories).map(([category, types]) =>
                   types.length > 0 ? (
                     <div key={category}>

@@ -402,3 +402,54 @@ model FailedWebhook {
   @@index([retriedAt])
   @@map("failed_webhooks")
 }
+
+// ============================================================================
+// PENDING SUBSCRIPTIONS - Anonymous Checkout Support
+// ============================================================================
+
+enum PendingSubscriptionStatus {
+  awaiting_payment // Checkout created, payment pending
+  payment_complete // Payment succeeded, awaiting signup
+  linked           // Successfully linked to user account
+  expired          // Expired without signup
+  refunded         // Refunded due to expiry
+
+  @@map("pending_subscription_status")
+}
+
+model PendingSubscription {
+  id                   String                    @id @default(uuid()) @db.Uuid
+  email                String                    @db.Citext // Case-insensitive, links to User.email
+
+  // Stripe references
+  stripeCustomerId     String                    @unique @map("stripe_customer_id")
+  stripeSessionId      String                    @unique @map("stripe_session_id")
+  stripeSubscriptionId String?                   @unique @map("stripe_subscription_id") // Null until payment
+
+  // Plan details
+  priceId              String                    @map("price_id")
+  plan                 SubscriptionPlan
+  amountCents          Int                       @map("amount_cents")
+  currency             String                    @default("usd") @db.Char(3)
+
+  // Status tracking
+  status               PendingSubscriptionStatus @default(awaiting_payment)
+  paymentStatus        String?                   @map("payment_status") // From Stripe
+
+  // Metadata
+  metadata             Json                      @default("{}") // { letterId, source, etc }
+
+  // Lifecycle
+  expiresAt            DateTime                  @map("expires_at") @db.Timestamptz(3) // 30 days from creation
+  linkedAt             DateTime?                 @map("linked_at") @db.Timestamptz(3)
+  linkedUserId         String?                   @db.Uuid @map("linked_user_id") // Audit trail
+
+  createdAt            DateTime                  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([email])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([email, status])
+  @@map("pending_subscriptions")
+}

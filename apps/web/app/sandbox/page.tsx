@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CinematicHero } from "@/components/sandbox/cinematic-hero"
+import { CinematicHeroFull } from "@/components/sandbox/cinematic-hero-full"
 import { MiniDemoLoop } from "@/components/sandbox/mini-demo-loop"
 import { EnhancedEditor } from "@/components/sandbox/enhanced-editor"
 import { TrustVisualization } from "@/components/sandbox/trust-visualization"
@@ -31,7 +31,7 @@ const featurePillars = [
 export default function SandboxPage() {
   return (
     <div className="space-y-20 pb-16 pt-10">
-      <CinematicHero />
+      <CinematicHeroFull />
 
       <Separator className="border-2 border-dashed border-charcoal" />
 

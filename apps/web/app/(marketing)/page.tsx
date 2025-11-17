@@ -1,8 +1,6 @@
-"use client"
-
 import Link from "next/link"
+import { auth } from "@clerk/nextjs/server"
 import {
-  ArrowRight,
   Clock,
   Mail,
   ShieldCheck,
@@ -14,12 +12,11 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { Navbar } from "@/components/navbar"
 import { CinematicHero } from "@/components/sandbox/cinematic-hero"
 import { HowItWorks } from "@/components/marketing/how-it-works"
 import { MiniDemoLoop } from "@/components/sandbox/mini-demo-loop"
+import { HeroLetterEditor } from "./_components/hero-letter-editor"
 
 const proofHighlights = [
   {
@@ -72,21 +69,14 @@ const featureList = [
   },
 ]
 
-export default function HomePage() {
-  const handleLetterSubmit = (data: LetterFormData) => {
-    // For non-logged-in users, show what they created and prompt to sign up
-    console.log("Letter preview:", data)
-    alert(
-      `✅ Your letter "${data.title}" is ready!\n\n` +
-      `📬 Scheduled for: ${new Date(data.deliveryDate).toLocaleDateString()}\n` +
-      `📧 Recipient: ${data.recipientEmail}\n\n` +
-      `Sign up to schedule your delivery and keep your letters safe in our encrypted vault.`
-    )
-  }
+export default async function HomePage() {
+  const { userId } = await auth()
+  const isSignedIn = Boolean(userId)
+  const currentYear = new Date().getFullYear()
 
   return (
     <div className="flex min-h-screen flex-col bg-cream">
-      <Navbar />
+      <Navbar isSignedIn={isSignedIn} />
       <main className="flex-1">
         {/* Hero Section - Cinematic */}
         <section className="container px-4 pb-12 pt-16 sm:px-6 sm:pb-16 sm:pt-20 md:pt-32">
@@ -124,16 +114,7 @@ export default function HomePage() {
             </div>
 
             {/* Letter Editor */}
-            <LetterEditorForm
-              accentColor="blue"
-              onSubmit={handleLetterSubmit}
-              initialData={{
-                title: "",
-                body: "",
-                recipientEmail: "",
-                deliveryDate: "",
-              }}
-            />
+            <HeroLetterEditor />
           </div>
         </section>
 
@@ -188,14 +169,23 @@ export default function HomePage() {
                 <strong className="uppercase">Ready to schedule your letter?</strong>
               </p>
               <p className="font-mono text-xs text-gray-secondary mb-5 sm:text-sm sm:mb-6">
-                Create a free account to securely store your letters in our encrypted vault and
-                schedule deliveries to your future self.
+                {isSignedIn
+                  ? "Jump back into your dashboard to keep drafting or scheduling future deliveries."
+                  : "Create a free account to securely store your letters in our encrypted vault and schedule deliveries to your future self."}
               </p>
-              <Link href="/sign-up">
-                <Button size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
-                  Create Free Account
-                </Button>
-              </Link>
+              {isSignedIn ? (
+                <Link href="/dashboard">
+                  <Button size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/sign-up">
+                  <Button size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
+                    Create Free Account
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -236,21 +226,31 @@ export default function HomePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-stretch gap-3 p-5 sm:flex-row sm:items-center sm:justify-center sm:gap-4 sm:p-6">
-              <Link href="/sign-up" className="w-full sm:w-auto">
-                <Button variant="secondary" size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
-                  Create your first letter
-                </Button>
-              </Link>
-              <Link href="/sign-in" className="w-full sm:w-auto">
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="h-12 w-full border-2 border-charcoal bg-transparent text-base uppercase text-charcoal hover:bg-charcoal hover:text-white sm:h-auto sm:w-auto"
-                  style={{ borderRadius: "2px" }}
-                >
-                  I already have an account
-                </Button>
-              </Link>
+              {isSignedIn ? (
+                <Link href="/dashboard" className="w-full sm:w-auto">
+                  <Button variant="secondary" size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/sign-up" className="w-full sm:w-auto">
+                    <Button variant="secondary" size="lg" className="h-12 w-full text-base uppercase sm:h-auto sm:w-auto">
+                      Create your first letter
+                    </Button>
+                  </Link>
+                  <Link href="/sign-in" className="w-full sm:w-auto">
+                    <Button
+                      variant="ghost"
+                      size="lg"
+                      className="h-12 w-full border-2 border-charcoal bg-transparent text-base uppercase text-charcoal hover:bg-charcoal hover:text-white sm:h-auto sm:w-auto"
+                      style={{ borderRadius: "2px" }}
+                    >
+                      I already have an account
+                    </Button>
+                  </Link>
+                </>
+              )}
             </CardContent>
           </Card>
         </section>
@@ -260,8 +260,7 @@ export default function HomePage() {
       <footer className="border-t-2 border-charcoal bg-off-white py-6 sm:py-8">
         <div className="container px-4 flex flex-col items-center gap-3 text-center font-mono text-xs text-gray-secondary sm:gap-4 sm:text-sm md:flex-row md:justify-between md:text-left">
           <p className="max-w-md sm:max-w-none">
-            © {new Date().getFullYear()} Capsule Note™ Time-Capsule Letters. Built with intention and
-            privacy in mind.
+            © {currentYear} Capsule Note™ Time-Capsule Letters. Built with intention and privacy in mind.
           </p>
           <div className="flex gap-4 sm:gap-6">
             <Link href="/privacy" className="uppercase tracking-wide hover:opacity-70 transition-opacity">

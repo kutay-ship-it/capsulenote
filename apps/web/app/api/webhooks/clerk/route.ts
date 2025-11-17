@@ -3,6 +3,7 @@ import { headers } from "next/headers"
 import { WebhookEvent } from "@clerk/nextjs/server"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
+import { linkPendingSubscription } from "@/app/subscribe/actions"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
         }
 
         // Create user and profile with default timezone (user can update in settings)
-        await prisma.user.create({
+        const user = await prisma.user.create({
           data: {
             clerkUserId: id,
             email: email,
@@ -68,6 +69,39 @@ export async function POST(req: Request) {
         })
 
         console.log(`User created: ${id}`)
+
+        // Check for pending subscription (anonymous checkout flow)
+        const pendingSubscription = await prisma.pendingSubscription.findFirst({
+          where: {
+            email: email,
+            status: "payment_complete",
+            expiresAt: { gt: new Date() },
+          },
+        })
+
+        if (pendingSubscription) {
+          console.log(`[Clerk Webhook] Found pending subscription for new user`, {
+            userId: user.id,
+            email: email,
+            pendingId: pendingSubscription.id,
+          })
+
+          // Auto-link the pending subscription
+          const result = await linkPendingSubscription(user.id)
+
+          if (result.success) {
+            console.log(`[Clerk Webhook] Successfully linked pending subscription`, {
+              userId: user.id,
+              subscriptionId: result.subscriptionId,
+            })
+          } else {
+            console.error(`[Clerk Webhook] Failed to link pending subscription`, {
+              userId: user.id,
+              error: result.error,
+            })
+          }
+        }
+
         break
       }
 
