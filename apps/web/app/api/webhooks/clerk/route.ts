@@ -55,20 +55,61 @@ export async function POST(req: Request) {
         }
 
         // Create user and profile with default timezone (user can update in settings)
-        const user = await prisma.user.create({
-          data: {
-            clerkUserId: id,
-            email: email,
-            profile: {
-              create: {
-                // Default to UTC - user can update in settings
-                timezone: "UTC",
-              },
-            },
-          },
-        })
+        // Handle race condition: concurrent webhook deliveries or retries
+        let user
+        let attempts = 0
+        const maxAttempts = 3
 
-        console.log(`User created: ${id}`)
+        while (attempts < maxAttempts) {
+          try {
+            user = await prisma.user.create({
+              data: {
+                clerkUserId: id,
+                email: email,
+                profile: {
+                  create: {
+                    // Default to UTC - user can update in settings
+                    timezone: "UTC",
+                  },
+                },
+              },
+            })
+
+            console.log(`[Clerk Webhook] ✅ User created: ${id}`)
+            break
+          } catch (error: any) {
+            // Handle race condition: another webhook delivery created the user
+            if (error?.code === 'P2002') {
+              attempts++
+              console.log(`[Clerk Webhook] 🔄 Race condition detected (attempt ${attempts}/${maxAttempts})`)
+
+              // Add jitter to prevent thundering herd
+              await new Promise(resolve => setTimeout(resolve, 20 * attempts + Math.random() * 10))
+
+              // Try to fetch the user that was created by concurrent request
+              user = await prisma.user.findUnique({
+                where: { clerkUserId: id },
+              })
+
+              if (user) {
+                console.log(`[Clerk Webhook] ✅ User already created by concurrent webhook`)
+                break
+              }
+
+              // If still not found and we have attempts left, try again
+              if (attempts >= maxAttempts) {
+                throw new Error(`Failed to create or find user after ${maxAttempts} attempts`)
+              }
+            } else {
+              // Different error, not a race condition
+              throw error
+            }
+          }
+        }
+
+        if (!user) {
+          throw new Error('Failed to get or create user')
+        }
 
         // Check for pending subscription (anonymous checkout flow)
         const pendingSubscription = await prisma.pendingSubscription.findFirst({

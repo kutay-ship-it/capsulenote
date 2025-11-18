@@ -14,6 +14,8 @@ import {
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
 import { prisma } from "../../../../../apps/web/server/lib/db"
 import { linkPendingSubscription } from "../../../../../apps/web/app/subscribe/actions"
+import { sendPaymentConfirmationEmail } from "../../../../../apps/web/server/lib/emails/payment-confirmation"
+import { env } from "../../../../../apps/web/env.mjs"
 
 /**
  * Handle checkout.session.completed event
@@ -86,18 +88,86 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
   })
 
   // Update PendingSubscription to payment_complete
-  await prisma.pendingSubscription.update({
-    where: { id: pending.id },
+  // Use conditional update to prevent double-processing from concurrent webhooks
+  const updatedPending = await prisma.pendingSubscription.updateMany({
+    where: {
+      id: pending.id,
+      status: { not: "payment_complete" }, // Only update if not already processed
+    },
     data: {
       status: "payment_complete",
       stripeSubscriptionId: session.subscription as string,
       paymentStatus: session.payment_status,
+      webhookProcessedAt: new Date(),
     },
   })
 
+  // Check if update succeeded (count > 0)
+  if (updatedPending.count === 0) {
+    console.log("[Checkout Handler] PendingSubscription already processed by concurrent webhook", {
+      pendingId: pending.id,
+    })
+    return // Idempotent - already processed
+  }
+
+  // Fetch the updated record for email sending
+  const updatedPendingRecord = await prisma.pendingSubscription.findUnique({
+    where: { id: pending.id },
+  })
+
+  if (!updatedPendingRecord) {
+    throw new Error("PendingSubscription not found after update")
+  }
+
+  // Send payment confirmation email (non-blocking)
+  sendPaymentConfirmationEmail({
+    email: updatedPendingRecord.email,
+    plan: updatedPendingRecord.plan,
+    amountCents: updatedPendingRecord.amountCents,
+    currency: updatedPendingRecord.currency,
+    nextSteps: {
+      signUpUrl: `${env.NEXT_PUBLIC_APP_URL}/sign-up?email=${encodeURIComponent(updatedPendingRecord.email)}`,
+      supportEmail: "support@dearme.app",
+    },
+  })
+    .then((result) => {
+      if (result.success) {
+        // Update confirmationEmailSentAt timestamp
+        prisma.pendingSubscription
+          .update({
+            where: { id: updatedPendingRecord.id },
+            data: { confirmationEmailSentAt: new Date() },
+          })
+          .catch((error) => {
+            console.warn("[Checkout Handler] Failed to update confirmationEmailSentAt", {
+              pendingId: updatedPendingRecord.id,
+              error: error instanceof Error ? error.message : String(error),
+            })
+          })
+
+        console.log("[Checkout Handler] Payment confirmation email sent", {
+          pendingId: updatedPendingRecord.id,
+          email: updatedPendingRecord.email,
+          emailId: result.emailId,
+        })
+      } else {
+        console.error("[Checkout Handler] Failed to send payment confirmation email", {
+          pendingId: updatedPendingRecord.id,
+          email: updatedPendingRecord.email,
+          error: result.error,
+        })
+      }
+    })
+    .catch((error) => {
+      console.error("[Checkout Handler] Unexpected error sending confirmation email", {
+        pendingId: updatedPendingRecord.id,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    })
+
   // Check if user already exists with this email (race condition: user signed up before webhook)
   const existingUser = await prisma.user.findUnique({
-    where: { email: pending.email },
+    where: { email: updatedPendingRecord.email },
   })
 
   if (existingUser) {

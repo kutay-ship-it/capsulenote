@@ -439,6 +439,10 @@ model PendingSubscription {
   // Metadata
   metadata             Json                      @default("{}") // { letterId, source, etc }
 
+  // Communication tracking (P0 fixes)
+  webhookProcessedAt      DateTime? @map("webhook_processed_at") @db.Timestamptz(3)
+  confirmationEmailSentAt DateTime? @map("confirmation_email_sent_at") @db.Timestamptz(3)
+
   // Lifecycle
   expiresAt            DateTime                  @map("expires_at") @db.Timestamptz(3) // 30 days from creation
   linkedAt             DateTime?                 @map("linked_at") @db.Timestamptz(3)
@@ -452,4 +456,32 @@ model PendingSubscription {
   @@index([expiresAt])
   @@index([email, status])
   @@map("pending_subscriptions")
+}
+
+// ============================================================================
+// ANONYMOUS DRAFTS - Letter Draft Restoration Support
+// ============================================================================
+
+model AnonymousDraft {
+  id             String    @id @default(uuid()) @db.Uuid
+  sessionId      String    // From cookie middleware
+  email          String    @db.Citext // Case-insensitive
+
+  // Letter content (unencrypted for anonymous users)
+  title          String
+  body           String    @db.Text
+  recipientEmail String    @db.Citext
+  deliveryDate   String    // ISO string format
+
+  // Lifecycle
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(3) // 7 days from creation
+  claimedAt      DateTime? @map("claimed_at") @db.Timestamptz(3)
+  claimedByUserId String?  @db.Uuid @map("claimed_by_user_id")
+
+  @@unique([sessionId, email], map: "anonymous_drafts_session_email_unique")
+  @@index([email, claimedAt])
+  @@index([sessionId, expiresAt])
+  @@index([expiresAt]) // For cleanup job
+  @@map("anonymous_drafts")
 }

@@ -1,4 +1,5 @@
 import { auth as clerkAuth, clerkClient } from "@clerk/nextjs/server"
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { prisma } from "./db"
 
 /**
@@ -45,26 +46,110 @@ export async function getCurrentUser() {
         return null
       }
 
-      // Create user with profile
-      user = await prisma.user.create({
-        data: {
-          clerkUserId,
-          email,
-          profile: {
-            create: {
-              timezone: "UTC", // User can update in settings
-            },
-          },
-        },
-        include: {
-          profile: true,
-        },
-      })
+      // Use findFirst + create pattern with retry to handle race conditions
+      // This is more reliable than instanceof checks across module boundaries
+      let attempts = 0
+      const maxAttempts = 3
 
-      console.log(`[Auth] Auto-synced user: ${email}`)
+      while (attempts < maxAttempts) {
+        try {
+          // Try to create user
+          user = await prisma.user.create({
+            data: {
+              clerkUserId,
+              email,
+              profile: {
+                create: {
+                  timezone: "UTC", // User can update in settings
+                },
+              },
+            },
+            include: {
+              profile: true,
+            },
+          })
+
+          console.log(`[Auth] ✅ Auto-synced user: ${email}`)
+          break
+        } catch (createError: any) {
+          // Check if it's a unique constraint violation
+          if (createError?.code === 'P2002') {
+            attempts++
+            console.log(`[Auth] 🔄 Race condition detected (attempt ${attempts}/${maxAttempts}), retrying...`)
+
+            // Small delay to ensure the other transaction committed
+            await new Promise(resolve => setTimeout(resolve, 50 * attempts))
+
+            // Try to fetch the user that was created by another request
+            user = await prisma.user.findUnique({
+              where: { clerkUserId },
+              include: {
+                profile: true,
+              },
+            })
+
+            if (user) {
+              console.log(`[Auth] ✅ Found user created by concurrent request: ${user.email}`)
+              break
+            }
+
+            // If still not found and we have attempts left, try again
+            if (attempts < maxAttempts) {
+              continue
+            } else {
+              console.error(`[Auth] ❌ Failed to create or find user after ${maxAttempts} attempts`)
+              return null
+            }
+          } else {
+            // Different error, not a race condition
+            throw createError
+          }
+        }
+      }
     } catch (error) {
-      console.error(`[Auth] Failed to auto-sync user ${clerkUserId}:`, error)
+      console.error(`[Auth] ❌ Failed to auto-sync user ${clerkUserId}:`, error)
       return null
+    }
+  }
+
+  // Auto-link pending subscription if user was just created
+  if (user && !user.profile?.stripeCustomerId) {
+    // Check for pending subscription
+    const pending = await prisma.pendingSubscription.findFirst({
+      where: {
+        email: user.email,
+        status: "payment_complete",
+        linkedAt: null,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    })
+
+    if (pending) {
+      console.log(`[Auth] 🔗 Found pending subscription for ${user.email}, auto-linking...`)
+
+      try {
+        // Import the linking function dynamically to avoid circular dependencies
+        const { linkPendingSubscription } = await import("../../app/subscribe/actions")
+        const result = await linkPendingSubscription(user.id)
+
+        if (result.success) {
+          console.log(`[Auth] ✅ Successfully auto-linked subscription: ${result.subscriptionId}`)
+
+          // Refresh user data to include the new subscription
+          user = await prisma.user.findUnique({
+            where: { id: user.id },
+            include: {
+              profile: true,
+            },
+          })
+        } else {
+          console.error(`[Auth] ❌ Failed to auto-link subscription:`, result.error)
+        }
+      } catch (linkError) {
+        console.error(`[Auth] ❌ Error during subscription auto-linking:`, linkError)
+      }
     }
   }
 

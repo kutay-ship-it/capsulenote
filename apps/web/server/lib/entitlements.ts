@@ -318,20 +318,61 @@ async function getCurrentUsage(userId: string): Promise<UsageData> {
   const period = getStartOfMonth(new Date())
 
   // Get or create usage record for this period
-  const usage = await prisma.subscriptionUsage.upsert({
-    where: {
-      userId_period: { userId, period }
-    },
-    create: {
-      userId,
-      period,
-      lettersCreated: 0,
-      emailsSent: 0,
-      mailsSent: 0,
-      mailCredits: PRO_MAIL_CREDITS_PER_MONTH // Initialize with monthly allocation
-    },
-    update: {} // No-op if exists
-  })
+  // Use retry loop to handle race conditions when multiple requests try to create the same record
+  let usage
+  let attempts = 0
+  const maxAttempts = 3
+
+  while (attempts < maxAttempts) {
+    try {
+      usage = await prisma.subscriptionUsage.upsert({
+        where: {
+          userId_period: { userId, period }
+        },
+        create: {
+          userId,
+          period,
+          lettersCreated: 0,
+          emailsSent: 0,
+          mailsSent: 0,
+          mailCredits: PRO_MAIL_CREDITS_PER_MONTH // Initialize with monthly allocation
+        },
+        update: {} // No-op if exists
+      })
+      break // Success, exit loop
+    } catch (error: any) {
+      // Handle race condition: another request created the record
+      if (error?.code === 'P2002') {
+        attempts++
+
+        // Small delay to ensure the other transaction committed
+        await new Promise(resolve => setTimeout(resolve, 20 * attempts))
+
+        // Try to fetch the record that was created by another request
+        usage = await prisma.subscriptionUsage.findUnique({
+          where: {
+            userId_period: { userId, period }
+          }
+        })
+
+        if (usage) {
+          break // Found it, exit loop
+        }
+
+        // If still not found and we have attempts left, try again
+        if (attempts >= maxAttempts) {
+          throw new Error(`Failed to get or create usage record after ${maxAttempts} attempts`)
+        }
+      } else {
+        // Different error, not a race condition
+        throw error
+      }
+    }
+  }
+
+  if (!usage) {
+    throw new Error('Failed to get usage record')
+  }
 
   return {
     lettersCreated: usage.lettersCreated,
