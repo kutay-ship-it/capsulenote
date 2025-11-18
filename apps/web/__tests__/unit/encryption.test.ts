@@ -33,13 +33,13 @@ describe('Encryption', () => {
 
       const result = await encryptLetter(plaintext)
 
-      expect(result).toHaveProperty('ciphertext')
-      expect(result).toHaveProperty('nonce')
+      expect(result).toHaveProperty('bodyCiphertext')
+      expect(result).toHaveProperty('bodyNonce')
       expect(result).toHaveProperty('keyVersion')
-      expect(result.ciphertext).toBeInstanceOf(Buffer)
-      expect(result.nonce).toBeInstanceOf(Buffer)
+      expect(result.bodyCiphertext).toBeInstanceOf(Buffer)
+      expect(result.bodyNonce).toBeInstanceOf(Buffer)
       expect(result.keyVersion).toBe(1)
-      expect(result.nonce.length).toBe(12) // 96 bits
+      expect(result.bodyNonce.length).toBe(12) // 96 bits
     })
 
     it('should generate unique nonces for each encryption', async () => {
@@ -51,8 +51,8 @@ describe('Encryption', () => {
       const result1 = await encryptLetter(plaintext)
       const result2 = await encryptLetter(plaintext)
 
-      expect(result1.nonce).not.toEqual(result2.nonce)
-      expect(result1.ciphertext).not.toEqual(result2.ciphertext)
+      expect(result1.bodyNonce).not.toEqual(result2.bodyNonce)
+      expect(result1.bodyCiphertext).not.toEqual(result2.bodyCiphertext)
     })
 
     it('should throw error if master key is missing', async () => {
@@ -77,8 +77,8 @@ describe('Encryption', () => {
 
       const result = await encryptLetter(plaintext)
 
-      expect(result.ciphertext).toBeInstanceOf(Buffer)
-      expect(result.nonce).toBeInstanceOf(Buffer)
+      expect(result.bodyCiphertext).toBeInstanceOf(Buffer)
+      expect(result.bodyNonce).toBeInstanceOf(Buffer)
     })
 
     it('should handle large content (>10KB)', async () => {
@@ -90,8 +90,8 @@ describe('Encryption', () => {
 
       const result = await encryptLetter(plaintext)
 
-      expect(result.ciphertext).toBeInstanceOf(Buffer)
-      expect(result.ciphertext.length).toBeGreaterThan(50000)
+      expect(result.bodyCiphertext).toBeInstanceOf(Buffer)
+      expect(result.bodyCiphertext.length).toBeGreaterThan(50000)
     })
   })
 
@@ -104,8 +104,8 @@ describe('Encryption', () => {
 
       const encrypted = await encryptLetter(plaintext)
       const decrypted = await decryptLetter(
-        encrypted.ciphertext,
-        encrypted.nonce,
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
         encrypted.keyVersion
       )
 
@@ -121,11 +121,11 @@ describe('Encryption', () => {
       const encrypted = await encryptLetter(plaintext)
 
       // Corrupt the ciphertext
-      const corruptedCiphertext = Buffer.from(encrypted.ciphertext)
+      const corruptedCiphertext = Buffer.from(encrypted.bodyCiphertext)
       corruptedCiphertext[0] = corruptedCiphertext[0] ^ 0xFF
 
       await expect(
-        decryptLetter(corruptedCiphertext, encrypted.nonce, encrypted.keyVersion)
+        decryptLetter(corruptedCiphertext, encrypted.bodyNonce, encrypted.keyVersion)
       ).rejects.toThrow()
     })
 
@@ -139,7 +139,7 @@ describe('Encryption', () => {
       const wrongNonce = Buffer.alloc(12) // All zeros
 
       await expect(
-        decryptLetter(encrypted.ciphertext, wrongNonce, encrypted.keyVersion)
+        decryptLetter(encrypted.bodyCiphertext, wrongNonce, encrypted.keyVersion)
       ).rejects.toThrow()
     })
 
@@ -153,7 +153,7 @@ describe('Encryption', () => {
 
       // Try to decrypt with wrong key version
       await expect(
-        decryptLetter(encrypted.ciphertext, encrypted.nonce, 999)
+        decryptLetter(encrypted.bodyCiphertext, encrypted.bodyNonce, 999)
       ).rejects.toThrow()
     })
 
@@ -165,8 +165,8 @@ describe('Encryption', () => {
 
       const encrypted = await encryptLetter(plaintext)
       const decrypted = await decryptLetter(
-        encrypted.ciphertext,
-        encrypted.nonce,
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
         encrypted.keyVersion
       )
 
@@ -213,8 +213,8 @@ describe('Encryption', () => {
 
       const encrypted = await encryptLetter(plaintext)
       const decrypted = await decryptLetter(
-        encrypted.ciphertext,
-        encrypted.nonce,
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
         encrypted.keyVersion
       )
 
@@ -229,8 +229,8 @@ describe('Encryption', () => {
 
       const encrypted = await encryptLetter(plaintext)
       const decrypted = await decryptLetter(
-        encrypted.ciphertext,
-        encrypted.nonce,
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
         encrypted.keyVersion
       )
 
@@ -252,8 +252,8 @@ describe('Encryption', () => {
 
       const encrypted = await encryptLetter(plaintext)
       const decrypted = await decryptLetter(
-        encrypted.ciphertext,
-        encrypted.nonce,
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
         encrypted.keyVersion
       )
 
@@ -287,8 +287,8 @@ describe('Encryption', () => {
 
       // Verify we can still decrypt with keyVersion=1
       const decrypted = await decryptLetter(
-        encrypted.ciphertext,
-        encrypted.nonce,
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
         1 // Explicitly use keyVersion=1
       )
 
@@ -328,7 +328,7 @@ describe('Encryption', () => {
       const start = Date.now()
 
       // Now decrypt all 100
-      const promises = encrypted.map(e => decryptLetter(e.ciphertext, e.nonce, e.keyVersion))
+      const promises = encrypted.map(e => decryptLetter(e.bodyCiphertext, e.bodyNonce, e.keyVersion))
       await Promise.all(promises)
 
       const duration = Date.now() - start
@@ -349,12 +349,12 @@ describe('Encryption', () => {
       const encrypted2 = await encryptLetter(plaintext)
 
       // Same plaintext should produce different ciphertext (due to unique nonces)
-      expect(encrypted1.ciphertext).not.toEqual(encrypted2.ciphertext)
-      expect(encrypted1.nonce).not.toEqual(encrypted2.nonce)
+      expect(encrypted1.bodyCiphertext).not.toEqual(encrypted2.bodyCiphertext)
+      expect(encrypted1.bodyNonce).not.toEqual(encrypted2.bodyNonce)
 
       // But both should decrypt to same plaintext
-      const decrypted1 = await decryptLetter(encrypted1.ciphertext, encrypted1.nonce, encrypted1.keyVersion)
-      const decrypted2 = await decryptLetter(encrypted2.ciphertext, encrypted2.nonce, encrypted2.keyVersion)
+      const decrypted1 = await decryptLetter(encrypted1.bodyCiphertext, encrypted1.bodyNonce, encrypted1.keyVersion)
+      const decrypted2 = await decryptLetter(encrypted2.bodyCiphertext, encrypted2.bodyNonce, encrypted2.keyVersion)
 
       expect(decrypted1).toEqual(plaintext)
       expect(decrypted2).toEqual(plaintext)
@@ -369,13 +369,13 @@ describe('Encryption', () => {
       const encrypted = await encryptLetter(plaintext)
 
       // Tamper with ciphertext (flip one bit)
-      const tamperedCiphertext = Buffer.from(encrypted.ciphertext)
+      const tamperedCiphertext = Buffer.from(encrypted.bodyCiphertext)
       const tamperedIndex = Math.floor(tamperedCiphertext.length / 2)
       tamperedCiphertext[tamperedIndex] = tamperedCiphertext[tamperedIndex] ^ 0x01
 
       // AES-256-GCM should detect the tampering and reject
       await expect(
-        decryptLetter(tamperedCiphertext, encrypted.nonce, encrypted.keyVersion)
+        decryptLetter(tamperedCiphertext, encrypted.bodyNonce, encrypted.keyVersion)
       ).rejects.toThrow()
     })
 
@@ -388,7 +388,7 @@ describe('Encryption', () => {
           bodyRich: { type: 'doc', content: [] },
           bodyHtml: ''
         })
-        const nonceHex = encrypted.nonce.toString('hex')
+        const nonceHex = encrypted.bodyNonce.toString('hex')
 
         // No duplicate nonces should exist
         expect(nonces.has(nonceHex)).toBe(false)

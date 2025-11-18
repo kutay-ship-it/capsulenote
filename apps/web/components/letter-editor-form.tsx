@@ -33,6 +33,7 @@ interface LetterEditorFormProps {
   onClear?: () => void
   initialData?: Partial<LetterFormData>
   accentColor?: "yellow" | "blue" | "teal" | "lavender" | "peach" | "lime"
+  isSubmitting?: boolean
 }
 
 export interface LetterFormData {
@@ -47,6 +48,7 @@ export function LetterEditorForm({
   onClear,
   initialData,
   accentColor = "yellow",
+  isSubmitting = false,
 }: LetterEditorFormProps) {
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [body, setBody] = React.useState(initialData?.body || "")
@@ -352,9 +354,13 @@ export function LetterEditorForm({
 
         {/* Submit Button */}
         <div className="mt-6 flex gap-3 sm:mt-8 sm:gap-4">
-          <Button type="submit" className="flex-1 h-12 text-base sm:h-auto">
+          <Button
+            type="submit"
+            className="flex-1 h-12 text-base sm:h-auto"
+            disabled={isSubmitting}
+          >
             <Mail className="mr-2 h-4 w-4" strokeWidth={2} />
-            Schedule Letter
+            {isSubmitting ? "Creating..." : "Schedule Letter"}
           </Button>
 
           <AlertDialog>
