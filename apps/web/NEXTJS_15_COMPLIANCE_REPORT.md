@@ -3,7 +3,7 @@
 **Date**: 2025-11-10
 **Project**: DearMe (Capsule Note)
 **Next.js Version**: 15.5.6
-**React Version**: 19.0.0-rc.0
+**React Version**: 19.2.0 (stable)
 
 ## Executive Summary
 
