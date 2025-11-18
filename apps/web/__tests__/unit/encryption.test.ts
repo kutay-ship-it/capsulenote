@@ -15,8 +15,8 @@ describe('Encryption', () => {
   const originalEnv = process.env.CRYPTO_MASTER_KEY
 
   beforeAll(() => {
-    // Set test encryption key
-    process.env.CRYPTO_MASTER_KEY = Buffer.from('test-master-key-32-bytes-long!!').toString('base64')
+    // Set test encryption key (exactly 32 bytes)
+    process.env.CRYPTO_MASTER_KEY = Buffer.from('test_master_key_32bytes_exactly').toString('base64')
   })
 
   afterAll(() => {
