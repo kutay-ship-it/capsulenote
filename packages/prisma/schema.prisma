@@ -36,13 +36,14 @@ model User {
 }
 
 model Profile {
-  userId          String   @id @map("user_id") @db.Uuid
-  displayName     String?  @map("display_name")
-  timezone        String   @default("America/New_York") // IANA timezone
-  marketingOptIn  Boolean  @default(false) @map("marketing_opt_in")
-  stripeCustomerId String? @unique @map("stripe_customer_id")
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  userId              String   @id @map("user_id") @db.Uuid
+  displayName         String?  @map("display_name")
+  timezone            String   @default("America/New_York") // IANA timezone
+  marketingOptIn      Boolean  @default(false) @map("marketing_opt_in")
+  onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
+  stripeCustomerId    String?  @unique @map("stripe_customer_id")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

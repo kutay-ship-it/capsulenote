@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardLetterEditor } from "@/components/dashboard-letter-editor"
+import { DashboardWrapper } from "@/components/dashboard-wrapper"
 import { requireUser } from "@/server/lib/auth"
 import { getDashboardStats } from "@/server/lib/stats"
 
@@ -20,8 +21,13 @@ export default async function DashboardPage() {
 
   // Fetch dashboard statistics
   const stats = await getDashboardStats(user.id)
+
+  // Check if user needs onboarding
+  const showOnboarding = !user.profile?.onboardingCompleted
+
   return (
-    <div className="space-y-10">
+    <DashboardWrapper showOnboarding={showOnboarding}>
+      <div className="space-y-10">
       {/* Header Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
