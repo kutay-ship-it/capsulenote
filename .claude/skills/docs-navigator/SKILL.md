@@ -36,6 +36,7 @@ Activate this skill when:
 | `ERROR_HANDLING_IMPLEMENTATION_SUMMARY.md` | General error patterns | Developers |
 | `ERROR_HANDLING_QUICK_REFERENCE.md` | Quick error handling guide | Developers |
 | `SERVER_CLIENT_REFACTOR_SUMMARY.md` | Refactor notes | Developers |
+| `MOTHERDUCK_STYLEGUIDE.md` | **Design system reference** | Designers, Frontend devs |
 
 ### 📁 **Implementation Docs** (`/docs/`)
 **Purpose**: Deep-dive technical documentation and guides
@@ -175,6 +176,13 @@ Activate this skill when:
 - **Compliance Report**: `apps/web/NEXTJS_15_COMPLIANCE_REPORT.md`
 - **Branding**: `.claude/documents/capsule-note-branding.md`
 - **Sandbox**: All files in `/sandbox/`
+
+### 🎨 **Design System & Styling**
+- **Style Guide**: `MOTHERDUCK_STYLEGUIDE.md` - Complete design system (colors, typography, spacing, components)
+- **Implementation**: `apps/web/tailwind.config.ts` - Tailwind config using MotherDuck palette
+- **Global Styles**: `apps/web/styles/globals.css` - Custom styles and editor theme
+- **Style Extractor Agent**: `.claude/agents/style-extractor.md` - Extract styles from websites
+- **How it works**: The MotherDuck design system was extracted and adapted for DearMe's brutalist aesthetic
 
 ### 🧪 **Testing**
 - **Webhook Testing**: `claudedocs/STRIPE_WEBHOOK_TESTING_GUIDE.md`

@@ -9,6 +9,7 @@
 **Quick Links:**
 - **Latest Updates**: `ENTERPRISE_IMPROVEMENTS.md` - Recent enterprise-grade improvements
 - **Next.js/React Patterns**: `.claude/skills/nextjs-15-react-19-patterns.md` - Server/Client Component patterns
+- **Design System**: `MOTHERDUCK_STYLEGUIDE.md` - Complete style guide (colors, typography, components)
 - **Security Procedures**: `docs/ENCRYPTION_KEY_ROTATION.md` - Key rotation guide
 - **Database Migrations**: `packages/prisma/CREATE_MIGRATIONS.md` - Migration procedures
 - **Implementation Status**: See Implementation Status section below
