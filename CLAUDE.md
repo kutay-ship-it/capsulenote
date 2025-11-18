@@ -2,6 +2,17 @@
 
 > Privacy-first platform for writing letters to your future self via email or physical mail.
 
+## Documentation Navigation
+
+**📚 Complete Documentation Index**: See `.claude/skills/docs-navigator/SKILL.md` for comprehensive documentation map.
+
+**Quick Links:**
+- **Latest Updates**: `ENTERPRISE_IMPROVEMENTS.md` - Recent enterprise-grade improvements
+- **Next.js/React Patterns**: `.claude/skills/nextjs-15-react-19-patterns.md` - Server/Client Component patterns
+- **Security Procedures**: `docs/ENCRYPTION_KEY_ROTATION.md` - Key rotation guide
+- **Database Migrations**: `packages/prisma/CREATE_MIGRATIONS.md` - Migration procedures
+- **Implementation Status**: See Implementation Status section below
+
 ## Quick Start Commands
 
 ```bash
@@ -77,83 +88,31 @@ workers/
 
 ### Tech Stack
 
-- **Framework**: Next.js 15 (App Router, Server Components, Server Actions, PPR)
+- **Framework**: Next.js 15.5.6 (App Router, Server Components, Server Actions, PPR)
 - **Language**: TypeScript 5.3+
+- **UI Library**: React 19.2.0 (Stable - Released Dec 5, 2024)
 
 ## Next.js 15 & React 19 Patterns (CRITICAL)
 
-**⚠️ BEFORE working on ANY page or component, you MUST:**
+**⚠️ BEFORE working on ANY page or component:**
 
-1. **Read the patterns guide**: `.claude/skills/nextjs-15-react-19-patterns.md`
-2. **Check compliance report**: `apps/web/NEXTJS_15_COMPLIANCE_REPORT.md`
-3. **Follow the decision framework** documented in the patterns guide
+**Read the complete patterns guide**: `.claude/skills/nextjs-15-react-19-patterns.md`
 
-### Quick Reference: Server vs Client Components
-
-**✅ DEFAULT: Server Components** (no "use client")
-- All pages (page.tsx) should be Server Components
-- Use for static content, data fetching, SEO
-- Can be async functions
-- Zero JavaScript sent to client
-
-**🔴 ONLY add "use client" when component:**
-- Uses React hooks (useState, useEffect, etc.)
-- Has event handlers (onClick, onChange, etc.)
-- Uses browser APIs (window, localStorage, etc.)
-- Maintains local state
-
-**❌ NEVER:**
-- Mark entire pages as Client Components
-- Add "use client" to components that don't need it
-- Use hooks in Server Components
-- Import Server Components into Client Components
-
-### Pattern Enforcement
-
-**Before creating/modifying any page or component:**
-
-```bash
-# Check if similar patterns exist
-grep -r "use client" app/
-grep -r "use client" components/
-
-# Verify pattern compliance
-cat .claude/skills/nextjs-15-react-19-patterns.md
-
-# Run compliance check
-pnpm build  # Monitor First Load JS sizes
-```
-
-### Examples from This Codebase
-
-**✅ Correct Patterns:**
-- `app/(marketing)/page.tsx` - Server Component (marketing content)
-- `components/navbar.tsx` - Server Component (static navigation)
-- `components/letter-editor-form.tsx` - Client Component (uses useState)
-- `components/new-letter-form.tsx` - Client Component (uses router, toast)
-
-**Pattern Decision Tree:**
+**Quick Decision Tree:**
 ```
 Need hooks/state/events? → YES → "use client"
-                         → NO → Server Component (default)
+                         → NO  → Server Component (default)
 ```
 
-### Compliance Requirements
+**Key Rules:**
+- ✅ **DEFAULT**: Server Components (no "use client") - async, zero JS to client
+- 🔴 **USE "use client"** ONLY for: hooks, event handlers, browser APIs, local state
+- ❌ **NEVER**: Mark entire pages as Client Components or use hooks in Server Components
 
-**All new code MUST:**
-1. Follow patterns in `.claude/skills/nextjs-15-react-19-patterns.md`
-2. Maintain 100% compliance score (see NEXTJS_15_COMPLIANCE_REPORT.md)
-3. Keep First Load JS under 170 KB for interactive pages
-4. Use Server Components as default, Client Components only when necessary
-
-**Validation:**
-```bash
-# Build and check bundle sizes
-pnpm build
-
-# Look for route segment sizes
-# Goal: < 170 KB First Load JS for most routes
-```
+**Compliance:**
+- Follow patterns in `.claude/skills/nextjs-15-react-19-patterns.md`
+- Keep First Load JS < 170 KB (verify with `pnpm build`)
+- See `apps/web/NEXTJS_15_COMPLIANCE_REPORT.md` for compliance status
 - **Database**: Neon Postgres + Prisma ORM (pg_trgm, citext extensions)
 - **Auth**: Clerk (OAuth, email, passkeys)
 - **Job Scheduling**: Inngest (durable workflows with sleep-until pattern)
@@ -645,11 +604,11 @@ pnpm test:watch        # Watch mode
 
 **Branch Previews**: Neon branch databases automatically created for preview deployments.
 
-## Implementation Status (as of last commit)
+## Implementation Status
 
-**✅ Completed (11/17 features)**:
-- Letter content encryption (AES-256-GCM)
-- Backstop reconciler cron job
+**✅ Completed (15/20 features)**:
+- Letter content encryption (AES-256-GCM) with key rotation support
+- Backstop reconciler cron job (fully functional)
 - Idempotency keys for delivery
 - Email provider abstraction layer
 - Postmark fallback provider
@@ -657,21 +616,25 @@ pnpm test:watch        # Watch mode
 - All environment variables configured
 - Database schema updates (encryption, arrive-by, templates)
 - Inngest decryption flow
+- **GDPR DSR flows** (data export + account deletion)
+- **Rate limiting** (Upstash Redis, tiered limits)
+- **React 19.2.0** (stable upgrade completed)
+- **Database migration procedures** (documented)
+- **Encryption key rotation** (full procedures documented)
+- **Payment confirmation emails**
 
-**🟡 Partially Completed (2/17)**:
+**🟡 Partially Completed (2/20)**:
 - Letter templates (schema ready, UI pending)
 - Arrive-by mode (schema ready, calculation logic pending)
 
-**❌ Not Started (4/17)**:
+**❌ Not Started (3/20)**:
 - DST safety checks
 - ClickSend mail provider
-- OpenTelemetry tracing
+- OpenTelemetry tracing + Sentry
 - PostHog analytics
-- E2E tests
-- Admin dashboard
-- GDPR DSR flows
+- Comprehensive E2E test coverage
 
-See `PHASE_IMPLEMENTATION.md` for detailed tracking.
+**📚 See `ENTERPRISE_IMPROVEMENTS.md` for latest updates and detailed audit.**
 
 ## SLO Targets
 
