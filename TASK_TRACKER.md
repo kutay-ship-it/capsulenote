@@ -401,11 +401,12 @@ LIMIT 5
 
 ---
 
-#### 1.3 Split Letter Creation into 2-Step Flow
+#### 1.3 Split Letter Creation into 2-Step Flow ✅ CODE COMPLETE - PENDING MANUAL VALIDATION
 
 **Priority:** P0 - CRITICAL
 **Estimated Time:** 12 hours
-**Status:** 🔴 NOT STARTED
+**Assigned To:** Claude
+**Status:** 🟡 CODE COMPLETE (Manual validation required)
 
 **Problem Statement:**
 The current letter creation form (400+ lines) conflates creative writing with logistical scheduling, causing cognitive overload and 70-80% abandonment rate.
@@ -448,9 +449,63 @@ Split into two distinct steps:
 1. **Step 1: Write** (Pure creative focus - save as draft)
 2. **Step 2: Schedule** (Focused scheduling decision)
 
+**Implementation Status:**
+
+✅ **Completed:**
+1. Created `apps/web/components/letter-draft-form.tsx` (NEW - 417 lines):
+   - Write-only form (title optional, body required)
+   - Auto-save every 30 seconds with debounce
+   - Character count + word count display
+   - 6 writing prompts in sidebar (clickable to insert)
+   - "Save Draft" button (explicit save)
+   - "Continue to Schedule" button (navigates to /letters/[id]/schedule)
+   - Last saved timestamp with relative time ("30s ago", "2m ago")
+   - Visual indicators: "Saving..." → "Saved Xs ago"
+   - Validation: requires body content before save
+   - MotherDuck design system styling (brutalist, monospace)
+
+2. Enhanced `apps/web/components/schedule-delivery-form.tsx` (370 lines):
+   - Added letter preview card (first 100 chars, HTML stripped)
+   - Date presets: 6 Months, 1 Year, 3 Years, 5 Years, 10 Years
+   - Custom date picker with date + time inputs
+   - Pre-filled recipient email (user's email)
+   - Delivery time preview: "Will arrive: January 15, 2026 at 9:00 AM PST"
+   - "Back to Edit" button (navigates to letter detail)
+   - "Schedule Delivery" button (disabled until date selected)
+   - Channel selection: Email (active) | Physical Mail (disabled, "Soon")
+   - MotherDuck design system styling
+
+3. Updated `apps/web/app/(app)/letters/new/page.tsx`:
+   - Replaced NewLetterForm with LetterDraftForm
+   - Updated header: "Step 1: Write"
+   - Updated description: "Focus on your thoughts. You'll schedule delivery in the next step."
+   - Increased max-width to max-w-6xl (for sidebar layout)
+
+4. Updated `apps/web/app/(app)/letters/[id]/schedule/page.tsx`:
+   - Added Server Component data fetching (requireUser + prisma)
+   - Fetches letter with user ownership check
+   - Decrypts letter for preview display
+   - Passes props to ScheduleDeliveryForm: letterId, letterTitle, letterPreview, userEmail
+   - Updated header: "Step 2: Schedule"
+   - MotherDuck design system styling
+
+5. Verified compilation:
+   - No TypeScript errors
+   - Dev server builds successfully (Ready in 15.9s)
+   - All components follow Next.js 15 + React 19 patterns
+   - Client Components use "use client" directive
+   - Server Components remain async
+
+❌ **Requires Manual Validation:**
+- Browser testing (14 validation steps below)
+- Auto-save functionality testing
+- Complete flow testing (Write → Schedule → Verify)
+- Mobile responsiveness testing
+- Back navigation testing
+
 **Implementation Steps:**
 
-1. [ ] **Create LetterDraftForm component** (3h)
+1. [x] **Create LetterDraftForm component** (3h) ✅
    - File: `apps/web/components/letter-draft-form.tsx` (NEW)
    - Fields: title (optional), body (required)
    - Auto-save to database every 30 seconds
@@ -459,8 +514,8 @@ Split into two distinct steps:
    - Buttons: "Save Draft" (explicit) | "Continue to Schedule"
    - Full focus on writing experience
 
-2. [ ] **Create ScheduleDeliveryWizard component** (3h)
-   - File: `apps/web/components/schedule-delivery-wizard.tsx` (NEW)
+2. [x] **Enhance ScheduleDeliveryForm component** (3h) ✅
+   - File: `apps/web/components/schedule-delivery-form.tsx` (ENHANCED)
    - Shows letter preview (first 100 chars)
    - Recipient email field (pre-filled with user's email)
    - Delivery channel toggle (Email | Mail)
@@ -469,27 +524,27 @@ Split into two distinct steps:
    - Clear preview: "Will arrive at January 15, 2026 at 9:00 AM PST"
    - Buttons: "← Back to Edit" | "Schedule Delivery"
 
-3. [ ] **Update /letters/new route** (2h)
+3. [x] **Update /letters/new route** (2h) ✅
    - File: `apps/web/app/(app)/letters/new/page.tsx`
    - Use new LetterDraftForm component
    - Remove old LetterEditorForm
    - Handle draft creation
    - Redirect to schedule page after "Continue"
 
-4. [ ] **Create /letters/[id]/schedule route** (2h)
+4. [x] **Update /letters/[id]/schedule route** (2h) ✅
    - File: `apps/web/app/(app)/letters/[id]/schedule/page.tsx` (ALREADY EXISTS)
-   - Update to use ScheduleDeliveryWizard
+   - Update to use enhanced ScheduleDeliveryForm
    - Fetch letter data (server component)
    - Handle scheduling submission
    - Redirect to letter detail after success
 
-5. [ ] **Implement auto-save for drafts** (1h)
+5. [x] **Implement auto-save for drafts** (1h) ✅
    - Client-side debounced save (30s intervals)
    - Visual indicator: "Saving..." → "Saved"
    - Handle network errors gracefully
    - Use optimistic UI updates
 
-6. [ ] **Test complete flow** (1h)
+6. [ ] **Test complete flow** (1h) ⏳ PENDING MANUAL VALIDATION
    - Manual test: Write letter → Schedule → Verify
    - Test auto-save functionality
    - Test back navigation
