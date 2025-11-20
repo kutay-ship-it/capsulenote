@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { scheduleDelivery } from "@/server/actions/deliveries"
 import { useToast } from "@/hooks/use-toast"
+import { TimezoneTooltip, DSTTooltip } from "@/components/timezone-tooltip"
+import { formatDateTimeWithTimezone, getUserTimezone, isDST } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 interface ScheduleDeliveryFormProps {
@@ -83,25 +85,7 @@ export function ScheduleDeliveryForm({
     const [hours, minutes] = deliverTime.split(':')
     dateTime.setHours(parseInt(hours), parseInt(minutes))
 
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-    const formatted = dateTime.toLocaleDateString('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    })
-    const timeFormatted = dateTime.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    })
-
-    // Get timezone abbreviation
-    const timezoneParts = new Intl.DateTimeFormat('en-US', {
-      timeZoneName: 'short',
-    }).formatToParts(dateTime)
-    const timezoneName = timezoneParts.find(part => part.type === 'timeZoneName')?.value || timezone
-
-    return `${formatted} at ${timeFormatted} ${timezoneName}`
+    return formatDateTimeWithTimezone(dateTime)
   }
 
   // Handle form submission
@@ -313,9 +297,12 @@ export function ScheduleDeliveryForm({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="customTime" className="font-mono text-xs">
-                    Time
-                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="customTime" className="font-mono text-xs">
+                      Time
+                    </Label>
+                    <TimezoneTooltip variant="clock" />
+                  </div>
                   <Input
                     id="customTime"
                     type="time"
@@ -332,11 +319,32 @@ export function ScheduleDeliveryForm({
           {/* Delivery Time Preview */}
           {deliveryDate && (
             <div className="rounded-sm border-2 border-charcoal bg-bg-green-light p-4">
-              <p className="font-mono text-sm text-charcoal">
-                <strong className="font-normal">Will arrive:</strong>
-                <br />
-                {formatDeliveryTime()}
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1">
+                  <p className="font-mono text-sm text-charcoal">
+                    <strong className="font-normal">Will arrive:</strong>
+                    <br />
+                    {formatDeliveryTime()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <TimezoneTooltip
+                    deliveryDate={(() => {
+                      const dt = new Date(deliveryDate)
+                      const [hours, minutes] = deliverTime.split(':')
+                      dt.setHours(parseInt(hours), parseInt(minutes))
+                      return dt
+                    })()}
+                    variant="globe"
+                  />
+                  {isDST((() => {
+                    const dt = new Date(deliveryDate)
+                    const [hours, minutes] = deliverTime.split(':')
+                    dt.setHours(parseInt(hours), parseInt(minutes))
+                    return dt
+                  })()) && <DSTTooltip />}
+                </div>
+              </div>
             </div>
           )}
         </CardContent>

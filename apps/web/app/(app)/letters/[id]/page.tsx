@@ -3,7 +3,8 @@ import { notFound } from "next/navigation"
 import { getLetter } from "@/server/actions/letters"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatDateTime } from "@/lib/utils"
+import { formatDateTime, formatDateTimeWithTimezone } from "@/lib/utils"
+import { TimezoneTooltip } from "@/components/timezone-tooltip"
 import { Mail, Calendar, ArrowLeft } from "lucide-react"
 
 interface PageProps {
@@ -68,9 +69,12 @@ export default async function LetterDetailPage({ params }: PageProps) {
                           <p className="font-medium">
                             {delivery.channel === "email" ? "Email" : "Physical Mail"}
                           </p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatDateTime(delivery.deliverAt)} ({delivery.timezoneAtCreation})
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-sm text-muted-foreground">
+                              {formatDateTimeWithTimezone(delivery.deliverAt)}
+                            </p>
+                            <TimezoneTooltip deliveryDate={delivery.deliverAt} variant="clock" />
+                          </div>
                         </div>
                       </div>
                       <div>

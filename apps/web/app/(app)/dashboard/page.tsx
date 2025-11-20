@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardLetterEditor } from "@/components/dashboard-letter-editor"
 import { DashboardWrapper } from "@/components/dashboard-wrapper"
+import { TimezoneChangeWarning } from "@/components/timezone-change-warning"
 import { requireUser } from "@/server/lib/auth"
 import { getDashboardStats } from "@/server/lib/stats"
 
@@ -39,6 +40,17 @@ export default async function DashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Timezone Change Warning */}
+      {user.profile?.timezone && (
+        <TimezoneChangeWarning
+          savedTimezone={user.profile.timezone}
+          onUpdateTimezone={() => {
+            // Redirect to settings to update timezone
+            window.location.href = "/settings/profile"
+          }}
+        />
+      )}
 
       {/* Stats Cards */}
       <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
