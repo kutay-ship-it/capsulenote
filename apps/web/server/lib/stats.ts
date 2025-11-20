@@ -5,6 +5,7 @@ import { prisma } from "./db"
  */
 export interface DashboardStats {
   totalLetters: number
+  draftCount: number
   scheduledDeliveries: number
   deliveredCount: number
   recentLetters: RecentLetter[]
@@ -34,7 +35,7 @@ export interface RecentLetter {
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   try {
     // Run queries in parallel for performance
-    const [totalLetters, scheduledDeliveries, deliveredCount, recentLettersData] =
+    const [totalLetters, draftCount, scheduledDeliveries, deliveredCount, recentLettersData] =
       await Promise.all([
         // Query 1: Total letters (exclude soft-deleted)
         prisma.letter.count({
@@ -44,7 +45,18 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
           },
         }),
 
-        // Query 2: Scheduled deliveries (future deliveries only)
+        // Query 2: Draft letters (no deliveries)
+        prisma.letter.count({
+          where: {
+            userId,
+            deletedAt: null,
+            deliveries: {
+              none: {},
+            },
+          },
+        }),
+
+        // Query 3: Scheduled deliveries (future deliveries only)
         prisma.delivery.count({
           where: {
             userId,
@@ -55,7 +67,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
           },
         }),
 
-        // Query 3: Delivered count
+        // Query 4: Delivered count
         prisma.delivery.count({
           where: {
             userId,
@@ -63,7 +75,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
           },
         }),
 
-        // Query 4: Recent 5 letters with delivery counts
+        // Query 5: Recent 5 letters with delivery counts
         prisma.letter.findMany({
           where: {
             userId,
@@ -96,6 +108,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
 
     return {
       totalLetters,
+      draftCount,
       scheduledDeliveries,
       deliveredCount,
       recentLetters,
@@ -107,6 +120,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
     // Better UX than throwing - user still sees UI with 0s
     return {
       totalLetters: 0,
+      draftCount: 0,
       scheduledDeliveries: 0,
       deliveredCount: 0,
       recentLetters: [],

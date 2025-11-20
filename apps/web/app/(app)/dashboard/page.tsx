@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 sm:gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card
           className="border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-bg-blue-light"
           style={{ borderRadius: "2px" }}
@@ -61,8 +61,29 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
+        <Link href="/letters/drafts">
+          <Card
+            className="border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-bg-yellow-pale cursor-pointer h-full"
+            style={{ borderRadius: "2px" }}
+          >
+            <CardHeader className="p-5 sm:p-6">
+              <CardTitle className="font-mono text-lg font-normal uppercase tracking-wide sm:text-xl">
+                Drafts
+              </CardTitle>
+              <CardDescription className="font-mono text-xs text-gray-secondary sm:text-sm">
+                Unscheduled letters
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-5 pt-0 sm:p-6 sm:pt-0">
+              <div className="font-mono text-4xl font-normal text-charcoal sm:text-5xl">
+                {stats.draftCount}
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
         <Card
-          className="border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-bg-yellow-pale"
+          className="border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-bg-peach-light"
           style={{ borderRadius: "2px" }}
         >
           <CardHeader className="p-5 sm:p-6">
@@ -179,5 +200,6 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
     </div>
+    </DashboardWrapper>
   )
 }
