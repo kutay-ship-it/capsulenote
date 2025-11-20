@@ -2,7 +2,7 @@
 
 **Created:** 2025-11-18
 **Status:** Phase 2 In Progress
-**Overall Progress:** 25/70 tasks complete (36%)
+**Overall Progress:** 26/70 tasks complete (37%)
 
 ---
 
@@ -11,11 +11,11 @@
 | Phase | Tasks | Complete | In Progress | Blocked | Total Hours |
 |-------|-------|----------|-------------|---------|-------------|
 | **Phase 1: Critical Fixes** | 26 | 21 | 0 | 0 | 70h |
-| **Phase 2: High-Priority UX** | 23 | 4 | 0 | 0 | 35h |
+| **Phase 2: High-Priority UX** | 23 | 5 | 0 | 0 | 35h |
 | **Phase 3: Quality & Polish** | 21 | 0 | 0 | 0 | 40h |
-| **TOTAL** | 70 | 25 | 0 | 0 | 145h |
+| **TOTAL** | 70 | 26 | 0 | 0 | 145h |
 
-**Completion Rate:** 36% ✅
+**Completion Rate:** 37% ✅
 **Estimated Completion:** 4 weeks (1 developer)
 
 ---
@@ -1765,9 +1765,86 @@ After scheduling a delivery, users have no confirmation that it was successful. 
 
 ---
 
-### 2.6-2.23 Additional High-Priority Tasks
+### 2.6 Error Recovery UX ✅ CODE COMPLETE
 
-(Tasks 2.6-2.23 to be detailed - see UX_AUDIT_REPORT.md for remaining HIGH priority issues)
+**Priority:** HIGH #2 (UX_AUDIT_REPORT.md)
+**Estimated Time:** 6 hours
+**Assigned To:** Claude
+**Status:** ✅ CODE COMPLETE
+
+**Problem Statement:**
+When deliveries fail, users see status "failed" with no explanation, recovery actions, or way to retry. This creates frustration and increases support burden. Users don't know if the error is temporary (retryable) or permanent (requires action).
+
+**Implementation Details:**
+
+**Changes Made:**
+
+1. **Error Recovery Utilities** (`apps/web/lib/error-recovery.ts`, 220 lines):
+   - `getErrorRecoveryInfo()` - Maps error codes to user-friendly messages
+   - `isRetryableError()` - Determines if error can be automatically retried
+   - `getErrorCategory()` - Categorizes as retryable/permanent/user_action_required
+   - `parseDeliveryError()` - Parses "ERROR_CODE: message" format from DB
+   - Error code classification:
+     * Retryable: EMAIL_SEND_FAILED, NETWORK_ERROR, INTERNAL_ERROR, PROVIDER_TIMEOUT
+     * User Action Required: SUBSCRIPTION_REQUIRED, QUOTA_EXCEEDED, INSUFFICIENT_CREDITS
+     * Permanent: NOT_FOUND, INVALID_ADDRESS, RECIPIENT_BLOCKED, FORBIDDEN
+
+2. **Retry Server Action** (`apps/web/server/actions/deliveries.ts`):
+   - `retryDelivery(deliveryId)` - Resets failed delivery to scheduled status
+   - Increments `attemptCount` for tracking retry attempts
+   - Clears `lastError` field
+   - Re-triggers Inngest `delivery.scheduled` event
+   - Audit logging with `delivery.retried` event
+   - Non-blocking Inngest trigger (backstop reconciler catches failures)
+
+3. **Error Display Component** (`apps/web/components/delivery-error-card.tsx`, 160 lines):
+   - User-friendly error message (not technical jargon)
+   - Error category badge (temporary/action required/permanent)
+   - Retry button (only for retryable errors, with loading state)
+   - Support contact mailto link (pre-filled with delivery details)
+   - Suggested actions based on error type
+   - Attempt count display
+   - Coral color scheme for visual consistency
+
+4. **UI Integration**:
+   - Deliveries page: Error cards shown below failed delivery cards
+   - Letter detail page: Error cards in scheduled deliveries section
+   - Non-intrusive design (doesn't block navigation to letter)
+
+**Error Message Examples**:
+- Retryable: "Network error while sending delivery. This is usually temporary. Try again in a few minutes."
+- User Action: "You've reached your delivery limit for this period. Upgrade your plan or wait until next period."
+- Permanent: "The shipping address is invalid. Update the shipping address and try again."
+
+**Files Changed**:
+- `apps/web/lib/error-recovery.ts` (new, 220 lines)
+- `apps/web/components/delivery-error-card.tsx` (new, 160 lines)
+- `apps/web/server/actions/deliveries.ts` (added retryDelivery function)
+- `apps/web/app/(app)/deliveries/page.tsx` (show error cards for failed deliveries)
+- `apps/web/app/(app)/letters/[id]/page.tsx` (show error cards in delivery list)
+
+**User Impact**:
+- Clear understanding of why delivery failed
+- One-click retry for temporary failures (no re-scheduling needed)
+- Guided actions for fixing user-caused failures
+- Direct support contact with pre-filled details
+- Reduced frustration and support ticket volume
+
+**Acceptance Criteria**:
+- ✅ Failed deliveries show user-friendly error message
+- ✅ Error categorized as retryable/permanent/user_action_required
+- ✅ Retry button shown only for retryable errors
+- ✅ Support contact link with pre-filled details
+- ✅ Suggested actions displayed based on error type
+- ✅ Attempt count shown for tracking
+- ✅ Retry increments attemptCount and triggers delivery
+- ⏳ Browser testing required (manual validation)
+
+---
+
+### 2.7-2.23 Additional High-Priority Tasks
+
+(Tasks 2.7-2.23 to be detailed - see UX_AUDIT_REPORT.md for remaining HIGH priority issues)
 
 ---
 
