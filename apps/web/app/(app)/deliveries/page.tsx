@@ -1,7 +1,8 @@
 import { getDeliveries } from "@/server/actions/deliveries"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatDateTime } from "@/lib/utils"
+import { formatDateTimeWithTimezone } from "@/lib/utils"
+import { TimezoneTooltip } from "@/components/timezone-tooltip"
 import Link from "next/link"
 import { Mail, Package, Clock, CheckCircle2, XCircle, Calendar } from "lucide-react"
 
@@ -105,19 +106,15 @@ export default async function DeliveriesPage() {
                             {delivery.letter.title}
                           </h3>
                           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs text-gray-secondary sm:text-sm">
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1.5">
                               <Calendar className="h-4 w-4" strokeWidth={2} />
-                              {formatDateTime(delivery.deliverAt)}
+                              {formatDateTimeWithTimezone(delivery.deliverAt)}
+                              <TimezoneTooltip deliveryDate={delivery.deliverAt} variant="clock" />
                             </span>
                             <span className="flex items-center gap-1">
                               {getChannelIcon(delivery.channel)}
                               {delivery.channel === "email" ? "Email" : "Physical Mail"}
                             </span>
-                            {delivery.timezoneAtCreation && (
-                              <span className="text-xs">
-                                {delivery.timezoneAtCreation}
-                              </span>
-                            )}
                           </div>
                         </div>
                       </div>
