@@ -41,6 +41,20 @@ export async function POST(req: Request) {
     return new Response("Invalid signature", { status: 400 })
   }
 
+  // Validate event age (prevent replay attacks)
+  const svix_timestamp_ms = parseInt(svix_timestamp, 10) * 1000
+  const eventAge = Date.now() - svix_timestamp_ms
+  const MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
+
+  if (eventAge > MAX_AGE_MS) {
+    console.warn("Clerk webhook too old, rejecting", {
+      eventType: evt.type,
+      age: Math.floor(eventAge / 1000) + "s",
+      maxAge: "300s",
+    })
+    return new Response("Event too old", { status: 400 })
+  }
+
   // Handle the webhook
   const eventType = evt.type
 
@@ -174,14 +188,48 @@ export async function POST(req: Request) {
         const deletedAt = new Date()
 
         await prisma.$transaction(async (tx) => {
-          // First, find the user
+          // First, find the user with subscription data
           const user = await tx.user.findUnique({
             where: { clerkUserId: id },
+            include: {
+              profile: true,
+              subscriptions: {
+                where: {
+                  status: { in: ['active', 'trialing', 'past_due'] }
+                }
+              }
+            },
           })
 
           if (!user) {
             console.warn(`User not found for deletion: ${id}`)
             return
+          }
+
+          // Cancel active Stripe subscriptions and delete customer
+          if (user.profile?.stripeCustomerId) {
+            try {
+              const { stripe } = await import("@/server/providers/stripe")
+
+              // Cancel all active subscriptions
+              for (const sub of user.subscriptions) {
+                try {
+                  await stripe.subscriptions.cancel(sub.stripeSubscriptionId, {
+                    prorate: true, // Issue prorated refund
+                  })
+                  console.log(`Canceled subscription: ${sub.stripeSubscriptionId}`)
+                } catch (subError) {
+                  console.error(`Failed to cancel subscription ${sub.stripeSubscriptionId}:`, subError)
+                }
+              }
+
+              // Delete Stripe customer (removes payment methods and PII)
+              await stripe.customers.del(user.profile.stripeCustomerId)
+              console.log(`Deleted Stripe customer: ${user.profile.stripeCustomerId}`)
+            } catch (stripeError) {
+              console.error(`Failed to cleanup Stripe data for user ${id}:`, stripeError)
+              // Continue with local deletion even if Stripe cleanup fails
+            }
           }
 
           // Mark all letters as deleted

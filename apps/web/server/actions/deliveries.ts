@@ -130,23 +130,48 @@ export async function scheduleDelivery(
       }
     }
 
-    // Create delivery
+    // Create delivery and channel-specific record in transaction
     let delivery
     try {
-      delivery = await prisma.delivery.create({
-        data: {
-          userId: user.id,
-          letterId: data.letterId,
-          channel: data.channel,
-          deliverAt: data.deliverAt,
-          timezoneAtCreation: data.timezone,
-          status: "scheduled",
-        },
+      delivery = await prisma.$transaction(async (tx) => {
+        // Create delivery
+        const newDelivery = await tx.delivery.create({
+          data: {
+            userId: user.id,
+            letterId: data.letterId,
+            channel: data.channel,
+            deliverAt: data.deliverAt,
+            timezoneAtCreation: data.timezone,
+            status: "scheduled",
+          },
+        })
+
+        // Create channel-specific delivery record (atomic with delivery)
+        if (data.channel === "email") {
+          await tx.emailDelivery.create({
+            data: {
+              deliveryId: newDelivery.id,
+              toEmail: data.toEmail ?? user.email,
+              subject: `Letter to your future self: ${letter.title}`,
+            },
+          })
+        } else if (data.channel === "mail" && data.shippingAddressId) {
+          await tx.mailDelivery.create({
+            data: {
+              deliveryId: newDelivery.id,
+              shippingAddressId: data.shippingAddressId,
+              printOptions: data.printOptions ?? { color: false, doubleSided: false },
+            },
+          })
+        }
+
+        return newDelivery
       })
     } catch (error) {
-      await logger.error('Delivery creation database error', error, {
+      await logger.error('Delivery creation error', error, {
         userId: user.id,
         letterId: data.letterId,
+        channel: data.channel,
       })
 
       return {
@@ -154,45 +179,6 @@ export async function scheduleDelivery(
         error: {
           code: ErrorCodes.CREATION_FAILED,
           message: 'Failed to schedule delivery. Please try again.',
-          details: error,
-        },
-      }
-    }
-
-    // Create channel-specific delivery record
-    try {
-      if (data.channel === "email") {
-        await prisma.emailDelivery.create({
-          data: {
-            deliveryId: delivery.id,
-            toEmail: data.toEmail ?? user.email,
-            subject: `Letter to your future self: ${letter.title}`,
-          },
-        })
-      } else if (data.channel === "mail" && data.shippingAddressId) {
-        await prisma.mailDelivery.create({
-          data: {
-            deliveryId: delivery.id,
-            shippingAddressId: data.shippingAddressId,
-            printOptions: data.printOptions ?? { color: false, doubleSided: false },
-          },
-        })
-      }
-    } catch (error) {
-      await logger.error('Channel-specific delivery creation error', error, {
-        userId: user.id,
-        deliveryId: delivery.id,
-        channel: data.channel,
-      })
-
-      // Rollback delivery creation
-      await prisma.delivery.delete({ where: { id: delivery.id } })
-
-      return {
-        success: false,
-        error: {
-          code: ErrorCodes.CREATION_FAILED,
-          message: 'Failed to configure delivery channel. Please try again.',
           details: error,
         },
       }
@@ -215,20 +201,48 @@ export async function scheduleDelivery(
       })
     }
 
-    // Trigger Inngest workflow to schedule delivery
+    // Trigger Inngest workflow - CRITICAL: must succeed
+    let runId: string | null = null
     try {
-      await triggerInngestEvent("delivery.scheduled", { deliveryId: delivery.id })
+      runId = await triggerInngestEvent("delivery.scheduled", { deliveryId: delivery.id })
+
+      if (!runId) {
+        throw new Error("Inngest did not return a run ID")
+      }
+
+      // Store run ID for cancellation support
+      await prisma.delivery.update({
+        where: { id: delivery.id },
+        data: { inngestRunId: runId }
+      })
+
       await logger.info('Inngest event sent successfully', {
         deliveryId: delivery.id,
+        runId,
         event: 'delivery.scheduled',
       })
     } catch (inngestError) {
-      await logger.error('Failed to send Inngest event', inngestError, {
+      // CRITICAL: If Inngest fails, rollback the delivery
+      await logger.error('Failed to schedule Inngest job - rolling back delivery', {
         deliveryId: delivery.id,
-        event: 'delivery.scheduled',
+        error: inngestError,
       })
-      // Don't fail the entire operation - delivery is still created
-      // The backstop reconciler will catch this
+
+      // Delete the delivery we just created
+      await prisma.delivery.delete({ where: { id: delivery.id } })
+
+      // Return error to user - delivery was NOT created
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.SERVICE_UNAVAILABLE,
+          message: 'Failed to schedule delivery. Please try again.',
+          details: {
+            service: 'inngest',
+            error: inngestError instanceof Error ? inngestError.message : String(inngestError),
+          }
+        }
+      }
     }
 
     await createAuditEvent({
@@ -326,13 +340,75 @@ export async function updateDelivery(
 
     // Update delivery
     try {
-      await prisma.delivery.update({
-        where: { id: deliveryId },
-        data: {
-          ...(data.deliverAt && { deliverAt: data.deliverAt }),
-          ...(data.timezone && { timezoneAtCreation: data.timezone }),
-        },
-      })
+      // Check if delivery time is being changed
+      const isRescheduling = data.deliverAt && data.deliverAt.getTime() !== existing.deliverAt.getTime()
+
+      if (isRescheduling && existing.inngestRunId) {
+        // Cancel old Inngest run
+        try {
+          const { inngest } = await import("@dearme/inngest")
+          await inngest.cancel(existing.inngestRunId)
+          await logger.info('Canceled old Inngest run for rescheduling', {
+            deliveryId,
+            oldRunId: existing.inngestRunId,
+          })
+        } catch (cancelError) {
+          await logger.warn('Failed to cancel old Inngest run', {
+            deliveryId,
+            error: cancelError instanceof Error ? cancelError.message : String(cancelError),
+          })
+        }
+
+        // Update delivery with new time and clear run ID
+        await prisma.delivery.update({
+          where: { id: deliveryId },
+          data: {
+            deliverAt: data.deliverAt,
+            inngestRunId: null,
+            ...(data.timezone && { timezoneAtCreation: data.timezone }),
+          },
+        })
+
+        // Re-schedule with new time
+        try {
+          const runId = await triggerInngestEvent("delivery.scheduled", { deliveryId })
+
+          if (runId) {
+            await prisma.delivery.update({
+              where: { id: deliveryId },
+              data: { inngestRunId: runId }
+            })
+          }
+
+          await logger.info('Delivery rescheduled successfully', {
+            deliveryId,
+            newRunId: runId,
+            newDeliverAt: data.deliverAt,
+          })
+        } catch (rescheduleError) {
+          await logger.error('Failed to reschedule delivery', rescheduleError, {
+            deliveryId,
+          })
+
+          return {
+            success: false,
+            error: {
+              code: ErrorCodes.UPDATE_FAILED,
+              message: 'Failed to reschedule delivery. Please try again.',
+              details: rescheduleError,
+            },
+          }
+        }
+      } else {
+        // Just update metadata (no rescheduling needed)
+        await prisma.delivery.update({
+          where: { id: deliveryId },
+          data: {
+            ...(data.deliverAt && { deliverAt: data.deliverAt }),
+            ...(data.timezone && { timezoneAtCreation: data.timezone }),
+          },
+        })
+      }
     } catch (error) {
       await logger.error('Delivery update database error', error, {
         userId: user.id,
@@ -457,15 +533,23 @@ export async function cancelDelivery(
       }
     }
 
-    // Cancel Inngest workflow
-    try {
-      await triggerInngestEvent("delivery.canceled", { deliveryId })
-    } catch (error) {
-      // Log but don't fail the cancellation if Inngest send fails
-      await logger.warn('Failed to send Inngest cancel event', {
-        deliveryId,
-        error: error instanceof Error ? error.message : String(error),
-      })
+    // Cancel Inngest workflow if it has a run ID
+    if (existing.inngestRunId) {
+      try {
+        const { inngest } = await import("@dearme/inngest")
+        await inngest.cancel(existing.inngestRunId)
+        await logger.info('Inngest workflow canceled', {
+          deliveryId,
+          runId: existing.inngestRunId
+        })
+      } catch (cancelError) {
+        // Log but don't fail the cancellation if Inngest cancel fails
+        await logger.warn('Failed to cancel Inngest workflow', {
+          deliveryId,
+          runId: existing.inngestRunId,
+          error: cancelError instanceof Error ? cancelError.message : String(cancelError),
+        })
+      }
     }
 
     await createAuditEvent({

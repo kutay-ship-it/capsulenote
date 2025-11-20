@@ -50,6 +50,9 @@ export const env = createEnv({
     // Encryption
     CRYPTO_MASTER_KEY: z.string().min(32), // Base64 encoded 32-byte key
 
+    // Cron
+    CRON_SECRET: z.string().min(32),
+
     // Feature Flags (Unleash)
     UNLEASH_API_URL: z.string().url().optional(),
     UNLEASH_API_TOKEN: z.string().optional(),
@@ -107,6 +110,7 @@ export const env = createEnv({
     CLICKSEND_API_KEY: process.env.CLICKSEND_API_KEY,
     POSTMARK_SERVER_TOKEN: process.env.POSTMARK_SERVER_TOKEN,
     CRYPTO_MASTER_KEY: process.env.CRYPTO_MASTER_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
     UNLEASH_API_URL: process.env.UNLEASH_API_URL,
     UNLEASH_API_TOKEN: process.env.UNLEASH_API_TOKEN,
     UNLEASH_APP_NAME: process.env.UNLEASH_APP_NAME,

@@ -189,52 +189,40 @@ export const processStripeWebhook = inngest.createFunction(
       eventType: stripeEvent.type,
     })
 
-    // Step 1: Idempotency check
-    const exists = await step.run("check-idempotency", async () => {
-      const existing = await prisma.webhookEvent.findUnique({
-        where: { id: stripeEvent.id },
-      })
-
-      if (existing) {
-        console.log("[Webhook Processor] Event already processed (idempotency)", {
-          eventId: stripeEvent.id,
-          processedAt: existing.processedAt,
+    // Step 1: Claim idempotency (create record FIRST to prevent race condition)
+    await step.run("claim-idempotency", async () => {
+      try {
+        await prisma.webhookEvent.create({
+          data: {
+            id: stripeEvent.id,
+            type: stripeEvent.type,
+            data: stripeEvent as any,
+          },
         })
-      }
 
-      return existing
+        console.log("[Webhook Processor] Idempotency claimed", {
+          eventId: stripeEvent.id,
+        })
+      } catch (error: any) {
+        // Check if it's a unique constraint violation
+        if (error?.code === 'P2002') {
+          // Already processed by another webhook delivery
+          console.log("[Webhook Processor] Event already processed (idempotency)", {
+            eventId: stripeEvent.id,
+          })
+          throw new NonRetriableError("Event already processed")
+        }
+        throw error
+      }
     })
 
-    if (exists) {
-      return {
-        message: "Event already processed",
-        eventId: stripeEvent.id,
-        processedAt: exists.processedAt,
-      }
-    }
-
-    // Step 2: Process event
+    // Step 2: Process event (now safe, idempotency guaranteed)
     await step.run("process-event", async () => {
       await routeWebhookEvent(stripeEvent)
 
       console.log("[Webhook Processor] Event processed successfully", {
         eventId: stripeEvent.id,
         eventType: stripeEvent.type,
-      })
-    })
-
-    // Step 3: Mark as processed
-    await step.run("mark-processed", async () => {
-      await prisma.webhookEvent.create({
-        data: {
-          id: stripeEvent.id,
-          type: stripeEvent.type,
-          data: stripeEvent as any,
-        },
-      })
-
-      console.log("[Webhook Processor] Event marked as processed", {
-        eventId: stripeEvent.id,
       })
     })
 

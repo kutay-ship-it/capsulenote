@@ -170,6 +170,7 @@ model Delivery {
   @@index([letterId])
   @@index([status])
   @@index([deliverAt])
+  @@index([status, deliverAt])
   @@map("deliveries")
 }
 

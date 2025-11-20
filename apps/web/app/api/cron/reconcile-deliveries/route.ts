@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
+import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 
 /**
  * Backstop reconciler for stuck deliveries
@@ -10,7 +11,9 @@ import { createAuditEvent } from "@/server/lib/audit"
 export async function GET(request: NextRequest) {
   // Verify cron secret (Vercel Cron sends this header)
   const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET
+
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -33,6 +36,7 @@ export async function GET(request: NextRequest) {
           inngest_run_id IS NULL
           OR updated_at < NOW() - INTERVAL '1 hour'
         )
+      ORDER BY deliver_at ASC, attempt_count ASC
       LIMIT 100
       FOR UPDATE SKIP LOCKED
     `
@@ -66,11 +70,10 @@ export async function GET(request: NextRequest) {
 
     for (const delivery of stuckDeliveries) {
       try {
-        // TODO: Trigger Inngest job here
-        // await inngest.send({
-        //   name: "delivery.scheduled",
-        //   data: { deliveryId: delivery.id }
-        // })
+        // Trigger Inngest job to re-process delivery
+        await triggerInngestEvent("delivery.scheduled", {
+          deliveryId: delivery.id
+        })
 
         // Update delivery to mark reconciliation attempt
         await prisma.delivery.update({

@@ -309,7 +309,7 @@ export const deliverEmail = inngest.createFunction(
       }
     })
 
-    // Send email via email provider with idempotency key
+    // Send email via email provider with runtime fallback support
     const sendResult = await step.run("send-email", async () => {
       const idempotencyKey = `delivery-${deliveryId}-attempt-${delivery.attemptCount}`
       const sender = getEmailSender('delivery')
@@ -324,30 +324,33 @@ export const deliverEmail = inngest.createFunction(
         attempt: delivery.attemptCount,
       })
 
-      try {
-        const provider = await getEmailProvider()
+      const emailHtml = `
+        <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #1a1a1a;">A Letter from Your Past Self</h1>
+          <p style="color: #666;">You scheduled this letter to be delivered on ${new Date(delivery.deliverAt).toLocaleDateString()}.</p>
+          <div style="background: #f9f9f9; padding: 24px; border-radius: 8px; margin: 24px 0;">
+            <h2 style="margin-top: 0;">${delivery.letter.title}</h2>
+            ${decryptedContent.bodyHtml}
+          </div>
+          <p style="color: #999; font-size: 14px;">
+            This letter was sent via Capsule Note.
+            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">View your dashboard</a>
+          </p>
+        </div>
+      `
 
-        logger.info(`Using email provider: ${provider.getName()}`, {
+      // Try primary provider
+      let primaryProvider = await getEmailProvider()
+      const primaryName = primaryProvider.getName()
+
+      try {
+        logger.info("Sending email with primary provider", {
           deliveryId,
-          provider: provider.getName(),
+          provider: primaryName,
+          idempotencyKey,
         })
 
-        const emailHtml = `
-          <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #1a1a1a;">A Letter from Your Past Self</h1>
-            <p style="color: #666;">You scheduled this letter to be delivered on ${new Date(delivery.deliverAt).toLocaleDateString()}.</p>
-            <div style="background: #f9f9f9; padding: 24px; border-radius: 8px; margin: 24px 0;">
-              <h2 style="margin-top: 0;">${delivery.letter.title}</h2>
-              ${decryptedContent.bodyHtml}
-            </div>
-            <p style="color: #999; font-size: 14px;">
-              This letter was sent via Capsule Note.
-              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">View your dashboard</a>
-            </p>
-          </div>
-        `
-
-        const result = await provider.send({
+        const result = await primaryProvider.send({
           from: sender.from,
           to: delivery.emailDelivery!.toEmail,
           subject: delivery.emailDelivery!.subject,
@@ -359,65 +362,90 @@ export const deliverEmail = inngest.createFunction(
 
         // Check if send was successful
         if (!result.success) {
-          logger.error("Email provider returned error", {
+          throw new Error(result.error || "Provider returned error")
+        }
+
+        if (!result.id) {
+          throw new Error("No message ID returned from email provider")
+        }
+
+        logger.info("Email sent successfully with primary provider", {
+          deliveryId,
+          provider: primaryName,
+          messageId: result.id,
+        })
+
+        return result
+      } catch (primaryError) {
+        logger.warn(`Primary provider ${primaryName} failed, attempting fallback`, {
+          deliveryId,
+          error: primaryError instanceof Error ? primaryError.message : String(primaryError),
+        })
+
+        // Try fallback provider (opposite of primary)
+        const { ResendEmailProvider } = await import("../../../apps/web/server/providers/email/resend-provider")
+        const { PostmarkEmailProvider } = await import("../../../apps/web/server/providers/email/postmark-provider")
+
+        const fallbackProvider = primaryName === 'Resend'
+          ? new PostmarkEmailProvider()
+          : new ResendEmailProvider()
+
+        try {
+          logger.info("Sending email with fallback provider", {
             deliveryId,
-            provider: provider.getName(),
-            error: result.error,
+            provider: fallbackProvider.getName(),
           })
 
-          const classified = classifyProviderError(
-            new Error(result.error || "Unknown provider error")
-          )
+          const result = await fallbackProvider.send({
+            from: sender.from,
+            to: delivery.emailDelivery!.toEmail,
+            subject: delivery.emailDelivery!.subject,
+            html: emailHtml,
+            headers: {
+              "X-Idempotency-Key": idempotencyKey,
+            },
+          })
 
+          if (!result.success) {
+            throw new Error(result.error || "Fallback provider also failed")
+          }
+
+          if (!result.id) {
+            throw new Error("No message ID returned from fallback provider")
+          }
+
+          logger.info("Email sent successfully with fallback provider", {
+            deliveryId,
+            provider: fallbackProvider.getName(),
+            messageId: result.id,
+          })
+
+          return result
+        } catch (fallbackError) {
+          logger.error('Both email providers failed', {
+            deliveryId,
+            primaryProvider: primaryName,
+            fallbackProvider: fallbackProvider.getName(),
+            primaryError: primaryError instanceof Error ? primaryError.message : String(primaryError),
+            fallbackError: fallbackError instanceof Error ? fallbackError.message : String(fallbackError),
+          })
+
+          // Classify the error for retry logic
+          if (fallbackError instanceof WorkerError) {
+            throw fallbackError
+          }
+
+          if (fallbackError instanceof NonRetriableError) {
+            throw fallbackError
+          }
+
+          const classified = classifyProviderError(fallbackError)
           if (!classified.retryable) {
             throw new NonRetriableError(classified.message)
           }
 
           throw classified
         }
-
-        if (!result.id) {
-          logger.error("Email provider did not return message ID", {
-            deliveryId,
-            provider: provider.getName(),
-            result,
-          })
-
-          throw classifyProviderError(
-            new Error("No message ID returned from email provider")
-          )
-        }
-
-        logger.info("Email sent successfully", {
-          deliveryId,
-          provider: provider.getName(),
-          messageId: result.id,
-        })
-
-        return result
-      } catch (error) {
-        // Classify provider errors
-        if (error instanceof WorkerError) {
-          throw error
-        }
-
-        if (error instanceof NonRetriableError) {
-          throw error
-        }
-
-        const classified = classifyProviderError(error)
-        logger.error("Email send failed", {
-          deliveryId,
-          errorCode: classified.code,
-          errorMessage: classified.message,
-          retryable: classified.retryable,
-        })
-
-        if (!classified.retryable) {
-          throw new NonRetriableError(classified.message)
-        }
-
-        throw classified
       }
     })
 
