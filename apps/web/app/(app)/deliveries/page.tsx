@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { formatDateTimeWithTimezone } from "@/lib/utils"
 import { TimezoneTooltip } from "@/components/timezone-tooltip"
+import { DownloadCalendarButton } from "@/components/download-calendar-button"
 import Link from "next/link"
 import { Mail, Package, Clock, CheckCircle2, XCircle, Calendar } from "lucide-react"
 
@@ -120,8 +121,16 @@ export default async function DeliveriesPage() {
                       </div>
                     </div>
 
-                    {/* Right Side - Status Badge */}
+                    {/* Right Side - Status Badge and Actions */}
                     <div className="flex items-center gap-3">
+                      <div onClick={(e) => e.preventDefault()}>
+                        <DownloadCalendarButton
+                          letterTitle={delivery.letter.title}
+                          deliveryDate={new Date(delivery.deliverAt)}
+                          deliveryMethod={delivery.channel}
+                          recipientEmail={delivery.channel === "email" ? (delivery.emailDelivery?.toEmail ?? "") : ""}
+                        />
+                      </div>
                       <Badge
                         className={`border-2 border-charcoal font-mono text-xs uppercase ${getStatusColor(delivery.status)}`}
                         style={{ borderRadius: "2px" }}

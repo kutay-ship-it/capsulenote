@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatDateTime, formatDateTimeWithTimezone } from "@/lib/utils"
 import { TimezoneTooltip } from "@/components/timezone-tooltip"
+import { DownloadCalendarButton } from "@/components/download-calendar-button"
 import { Mail, Calendar, ArrowLeft } from "lucide-react"
 
 interface PageProps {
@@ -77,7 +78,13 @@ export default async function LetterDetailPage({ params }: PageProps) {
                           </div>
                         </div>
                       </div>
-                      <div>
+                      <div className="flex items-center gap-2">
+                        <DownloadCalendarButton
+                          letterTitle={letter.title}
+                          deliveryDate={new Date(delivery.deliverAt)}
+                          deliveryMethod={delivery.channel}
+                          recipientEmail={delivery.channel === "email" ? (delivery.emailDelivery?.toEmail ?? "") : ""}
+                        />
                         <span
                           className={`rounded-full px-3 py-1 text-xs font-medium ${
                             delivery.status === "scheduled"

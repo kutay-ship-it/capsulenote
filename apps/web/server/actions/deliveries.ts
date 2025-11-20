@@ -242,6 +242,26 @@ export async function scheduleDelivery(
       },
     })
 
+    // Trigger confirmation email (non-blocking)
+    try {
+      await triggerInngestEvent("notification.delivery.scheduled", {
+        deliveryId: delivery.id,
+        userId: user.id,
+        letterTitle: letter.title,
+      })
+      await logger.info('Confirmation email event triggered', {
+        deliveryId: delivery.id,
+        event: 'notification.delivery.scheduled',
+      })
+    } catch (error) {
+      // Log but don't fail delivery creation
+      await logger.warn('Failed to trigger confirmation email event', {
+        userId: user.id,
+        deliveryId: delivery.id,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+
     await logger.info('Delivery scheduled successfully', {
       userId: user.id,
       deliveryId: delivery.id,
