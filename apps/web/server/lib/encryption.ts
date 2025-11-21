@@ -99,6 +99,7 @@ export function generateEncryptionKey(): string {
 
 /**
  * Encrypt letter content (includes both rich and HTML formats)
+ * Includes validation to ensure encryption succeeded correctly
  */
 export async function encryptLetter(content: {
   bodyRich: Record<string, unknown>
@@ -110,6 +111,35 @@ export async function encryptLetter(content: {
 }> {
   const plaintext = JSON.stringify(content)
   const { ciphertext, nonce, keyVersion } = await encrypt(plaintext)
+
+  // VALIDATION: Ensure encryption produced valid output
+  if (!ciphertext || ciphertext.length === 0) {
+    throw new Error("Encryption produced empty ciphertext - data would be lost")
+  }
+
+  if (!nonce || nonce.length !== 12) {
+    throw new Error(`Encryption produced invalid nonce (expected 12 bytes, got ${nonce?.length || 0})`)
+  }
+
+  // VALIDATION: Round-trip test to ensure data can be decrypted
+  try {
+    const decrypted = await decrypt(ciphertext, nonce, keyVersion)
+    const parsed = JSON.parse(decrypted)
+
+    // Verify structure matches original
+    if (!parsed.bodyRich || !parsed.bodyHtml) {
+      throw new Error("Decryption produced invalid structure - missing bodyRich or bodyHtml")
+    }
+
+    // Verify content matches (basic sanity check on HTML length)
+    if (typeof parsed.bodyHtml !== 'string' || Math.abs(parsed.bodyHtml.length - content.bodyHtml.length) > 10) {
+      throw new Error("Decryption produced corrupted data - HTML length mismatch")
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    throw new Error(`Encryption validation failed (round-trip test): ${message}`)
+  }
+
   return {
     bodyCiphertext: ciphertext,
     bodyNonce: nonce,

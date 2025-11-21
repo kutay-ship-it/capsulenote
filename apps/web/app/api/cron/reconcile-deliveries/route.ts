@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
+import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 
 /**
  * Backstop reconciler for stuck deliveries
@@ -59,18 +60,18 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Re-enqueue each delivery
-    // In production, this would trigger Inngest jobs
-    // For now, we'll mark them for retry
+    // Re-enqueue each delivery by triggering Inngest jobs
     const results = []
 
     for (const delivery of stuckDeliveries) {
       try {
-        // TODO: Trigger Inngest job here
-        // await inngest.send({
-        //   name: "delivery.scheduled",
-        //   data: { deliveryId: delivery.id }
-        // })
+        // Trigger Inngest job to re-process delivery
+        await triggerInngestEvent("delivery.scheduled", {
+          deliveryId: delivery.id,
+          reconciled: true,
+          originalDeliverAt: delivery.deliver_at.toISOString(),
+          reconciliationAttempt: delivery.attempt_count + 1,
+        })
 
         // Update delivery to mark reconciliation attempt
         await prisma.delivery.update({

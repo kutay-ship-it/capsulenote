@@ -130,23 +130,49 @@ export async function scheduleDelivery(
       }
     }
 
-    // Create delivery
+    // Create delivery and channel-specific record in a transaction
     let delivery
     try {
-      delivery = await prisma.delivery.create({
-        data: {
-          userId: user.id,
-          letterId: data.letterId,
-          channel: data.channel,
-          deliverAt: data.deliverAt,
-          timezoneAtCreation: data.timezone,
-          status: "scheduled",
-        },
+      delivery = await prisma.$transaction(async (tx) => {
+        // Create main delivery record
+        const del = await tx.delivery.create({
+          data: {
+            userId: user.id,
+            letterId: data.letterId,
+            channel: data.channel,
+            deliverAt: data.deliverAt,
+            timezoneAtCreation: data.timezone,
+            status: "scheduled",
+          },
+        })
+
+        // Create channel-specific delivery record (in same transaction)
+        if (data.channel === "email") {
+          await tx.emailDelivery.create({
+            data: {
+              deliveryId: del.id,
+              toEmail: data.toEmail ?? user.email,
+              subject: `Letter to your future self: ${letter.title}`,
+            },
+          })
+        } else if (data.channel === "mail" && data.shippingAddressId) {
+          await tx.mailDelivery.create({
+            data: {
+              deliveryId: del.id,
+              shippingAddressId: data.shippingAddressId,
+              printOptions: data.printOptions ?? { color: false, doubleSided: false },
+            },
+          })
+        }
+
+        return del // Return delivery from transaction
       })
     } catch (error) {
-      await logger.error('Delivery creation database error', error, {
+      // Transaction automatically rolls back on error
+      await logger.error('Delivery creation failed', error, {
         userId: user.id,
         letterId: data.letterId,
+        channel: data.channel,
       })
 
       return {
@@ -154,45 +180,6 @@ export async function scheduleDelivery(
         error: {
           code: ErrorCodes.CREATION_FAILED,
           message: 'Failed to schedule delivery. Please try again.',
-          details: error,
-        },
-      }
-    }
-
-    // Create channel-specific delivery record
-    try {
-      if (data.channel === "email") {
-        await prisma.emailDelivery.create({
-          data: {
-            deliveryId: delivery.id,
-            toEmail: data.toEmail ?? user.email,
-            subject: `Letter to your future self: ${letter.title}`,
-          },
-        })
-      } else if (data.channel === "mail" && data.shippingAddressId) {
-        await prisma.mailDelivery.create({
-          data: {
-            deliveryId: delivery.id,
-            shippingAddressId: data.shippingAddressId,
-            printOptions: data.printOptions ?? { color: false, doubleSided: false },
-          },
-        })
-      }
-    } catch (error) {
-      await logger.error('Channel-specific delivery creation error', error, {
-        userId: user.id,
-        deliveryId: delivery.id,
-        channel: data.channel,
-      })
-
-      // Rollback delivery creation
-      await prisma.delivery.delete({ where: { id: delivery.id } })
-
-      return {
-        success: false,
-        error: {
-          code: ErrorCodes.CREATION_FAILED,
-          message: 'Failed to configure delivery channel. Please try again.',
           details: error,
         },
       }

@@ -253,17 +253,19 @@ export async function updateLetter(
     // If body content is being updated, re-encrypt
     if (data.bodyRich || data.bodyHtml) {
       try {
-        const bodyRich = data.bodyRich || (await decryptLetter(
-          existing.bodyCiphertext,
-          existing.bodyNonce,
-          existing.keyVersion
-        )).bodyRich
+        // Decrypt existing content ONCE only if needed
+        let existingContent: { bodyRich: any; bodyHtml: string } | null = null
+        if (!data.bodyRich || !data.bodyHtml) {
+          existingContent = await decryptLetter(
+            existing.bodyCiphertext,
+            existing.bodyNonce,
+            existing.keyVersion
+          )
+        }
 
-        const bodyHtml = data.bodyHtml || (await decryptLetter(
-          existing.bodyCiphertext,
-          existing.bodyNonce,
-          existing.keyVersion
-        )).bodyHtml
+        // Use provided values or fall back to decrypted existing values
+        const bodyRich = data.bodyRich ?? existingContent!.bodyRich
+        const bodyHtml = data.bodyHtml ?? existingContent!.bodyHtml
 
         const encrypted = await encryptLetter({ bodyRich, bodyHtml })
         updateData.bodyCiphertext = encrypted.bodyCiphertext

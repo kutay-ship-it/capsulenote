@@ -75,6 +75,16 @@ export const AuditEventType = {
   DELIVERY_SENT: "delivery.sent",
   DELIVERY_FAILED: "delivery.failed",
   DELIVERY_CANCELED: "delivery.canceled",
+  DELIVERY_UPDATED: "delivery.updated",
+  DELIVERY_RECONCILED: "delivery.reconciled",
+
+  // System events
+  SYSTEM_RECONCILER_HIGH_VOLUME: "system.reconciler_high_volume",
+  SUBSCRIPTION_USAGE_ROLLOVER: "subscription.usage_rollover",
+  SUBSCRIPTION_CLEANUP: "subscription.cleanup",
+  SUBSCRIPTION_LINKED: "subscription.linked",
+  SYSTEM_ROLLOVER_SLOW: "system.rollover_slow",
+  SYSTEM_ROLLOVER_HIGH_ERROR_RATE: "system.rollover_high_error_rate",
 } as const
 
 export type AuditEventTypeValue =

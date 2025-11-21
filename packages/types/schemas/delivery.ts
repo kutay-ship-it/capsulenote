@@ -12,7 +12,12 @@ export const deliveryStatusSchema = z.enum([
 export const scheduleDeliverySchema = z.object({
   letterId: z.string().uuid(),
   channel: deliveryChannelSchema,
-  deliverAt: z.date(),
+  deliverAt: z.date().refine(
+    (date) => date > new Date(),
+    {
+      message: "Delivery date must be in the future. You cannot schedule deliveries for past dates.",
+    }
+  ),
   timezone: z.string(), // IANA timezone
   toEmail: z.string().email().optional(),
   shippingAddressId: z.string().uuid().optional(),
@@ -26,7 +31,12 @@ export const scheduleDeliverySchema = z.object({
 
 export const updateDeliverySchema = z.object({
   deliveryId: z.string().uuid(),
-  deliverAt: z.date().optional(),
+  deliverAt: z.date().refine(
+    (date) => date > new Date(),
+    {
+      message: "Delivery date must be in the future. You cannot schedule deliveries for past dates.",
+    }
+  ).optional(),
   timezone: z.string().optional(),
 })
 

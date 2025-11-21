@@ -65,6 +65,9 @@ export const env = createEnv({
     SENTRY_DSN: z.string().url().optional(),
     SENTRY_ORG: z.string().optional(),
     SENTRY_PROJECT: z.string().optional(),
+
+    // Cron Job Security
+    CRON_SECRET: z.string().min(32), // Secret for authenticating cron endpoints
   },
 
   /**
@@ -117,6 +120,7 @@ export const env = createEnv({
     SENTRY_DSN: process.env.SENTRY_DSN,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+    CRON_SECRET: process.env.CRON_SECRET,
 
     // Client
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

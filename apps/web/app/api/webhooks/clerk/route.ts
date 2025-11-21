@@ -47,11 +47,21 @@ export async function POST(req: Request) {
   try {
     switch (eventType) {
       case "user.created": {
-        const { id, email_addresses } = evt.data
-        const email = email_addresses[0]?.email_address
+        const { id, email_addresses, primary_email_address_id } = evt.data
+
+        // Find the PRIMARY email address (not just the first one)
+        const primaryEmail = email_addresses.find(
+          (e) => e.id === primary_email_address_id
+        )
+        const email = primaryEmail?.email_address
 
         if (!email) {
-          return new Response("No email found", { status: 400 })
+          console.error("[Clerk Webhook] No primary email found", {
+            userId: id,
+            emailCount: email_addresses.length,
+            primaryEmailAddressId: primary_email_address_id,
+          })
+          return new Response("No primary email found", { status: 400 })
         }
 
         // Create user and profile with default timezone (user can update in settings)
@@ -147,11 +157,21 @@ export async function POST(req: Request) {
       }
 
       case "user.updated": {
-        const { id, email_addresses } = evt.data
-        const email = email_addresses[0]?.email_address
+        const { id, email_addresses, primary_email_address_id } = evt.data
+
+        // Find the PRIMARY email address (not just the first one)
+        const primaryEmail = email_addresses.find(
+          (e) => e.id === primary_email_address_id
+        )
+        const email = primaryEmail?.email_address
 
         if (!email) {
-          return new Response("No email found", { status: 400 })
+          console.error("[Clerk Webhook] No primary email found", {
+            userId: id,
+            emailCount: email_addresses.length,
+            primaryEmailAddressId: primary_email_address_id,
+          })
+          return new Response("No primary email found", { status: 400 })
         }
 
         await prisma.user.update({
