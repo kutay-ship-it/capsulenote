@@ -10,8 +10,9 @@
   "dependencies": {
     "@dearme/prisma": "workspace:*",
     "inngest": "^3.15.11",
-    "resend": "^3.0.0",
-    "react-email": "^2.0.0"
+    "isomorphic-dompurify": "^2.32.0",
+    "react-email": "^2.0.0",
+    "resend": "^3.0.0"
   },
   "devDependencies": {
     "@dearme/config": "workspace:*",

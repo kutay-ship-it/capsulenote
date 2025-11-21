@@ -2,6 +2,7 @@ import { inngest } from "../client"
 import { prisma } from "@dearme/prisma"
 import { NonRetriableError } from "inngest"
 import { getEmailSender } from "../lib/email-config"
+import DOMPurify from "isomorphic-dompurify"
 import {
   WorkerError,
   InvalidDeliveryError,
@@ -332,13 +333,25 @@ export const deliverEmail = inngest.createFunction(
           provider: provider.getName(),
         })
 
+        // Sanitize HTML content to prevent XSS attacks
+        // Allow safe HTML tags but strip dangerous scripts and event handlers
+        const sanitizedTitle = DOMPurify.sanitize(delivery.letter.title, {
+          ALLOWED_TAGS: [], // Convert to plain text
+          KEEP_CONTENT: true,
+        })
+        const sanitizedBodyHtml = DOMPurify.sanitize(decryptedContent.bodyHtml, {
+          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'span', 'div'],
+          ALLOWED_ATTR: ['href', 'style', 'class'],
+          ALLOW_DATA_ATTR: false,
+        })
+
         const emailHtml = `
           <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #1a1a1a;">A Letter from Your Past Self</h1>
             <p style="color: #666;">You scheduled this letter to be delivered on ${new Date(delivery.deliverAt).toLocaleDateString()}.</p>
             <div style="background: #f9f9f9; padding: 24px; border-radius: 8px; margin: 24px 0;">
-              <h2 style="margin-top: 0;">${delivery.letter.title}</h2>
-              ${decryptedContent.bodyHtml}
+              <h2 style="margin-top: 0;">${sanitizedTitle}</h2>
+              ${sanitizedBodyHtml}
             </div>
             <p style="color: #999; font-size: 14px;">
               This letter was sent via Capsule Note.
