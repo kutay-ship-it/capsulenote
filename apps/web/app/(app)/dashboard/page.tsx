@@ -43,13 +43,7 @@ export default async function DashboardPage() {
 
       {/* Timezone Change Warning */}
       {user.profile?.timezone && (
-        <TimezoneChangeWarning
-          savedTimezone={user.profile.timezone}
-          onUpdateTimezone={() => {
-            // Redirect to settings to update timezone
-            window.location.href = "/settings/profile"
-          }}
-        />
+        <TimezoneChangeWarning savedTimezone={user.profile.timezone} />
       )}
 
       {/* Stats Cards */}

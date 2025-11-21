@@ -8,7 +8,6 @@ import { getUserTimezone, getTimezoneAbbr } from "@/lib/utils"
 
 interface TimezoneChangeWarningProps {
   savedTimezone: string // Timezone from user's profile
-  onUpdateTimezone?: () => void
 }
 
 /**
@@ -24,7 +23,6 @@ interface TimezoneChangeWarningProps {
  */
 export function TimezoneChangeWarning({
   savedTimezone,
-  onUpdateTimezone,
 }: TimezoneChangeWarningProps) {
   const [currentTimezone, setCurrentTimezone] = useState<string | null>(null)
   const [dismissed, setDismissed] = useState(false)
@@ -47,6 +45,11 @@ export function TimezoneChangeWarning({
     if (currentTimezone) {
       sessionStorage.setItem(`timezone-warning-dismissed-${currentTimezone}`, "true")
     }
+  }
+
+  const handleUpdateTimezone = () => {
+    // Client-side navigation to settings
+    window.location.href = "/settings/profile"
   }
 
   // Don't show if timezones match or if dismissed
@@ -76,16 +79,14 @@ export function TimezoneChangeWarning({
           but this will be a different time in your new timezone.
         </p>
         <div className="flex flex-wrap gap-3">
-          {onUpdateTimezone && (
-            <Button
-              onClick={onUpdateTimezone}
-              size="sm"
-              className="border-2 border-charcoal bg-charcoal font-mono text-xs uppercase hover:bg-gray-800"
-              style={{ borderRadius: "2px" }}
-            >
-              Update Timezone in Settings
-            </Button>
-          )}
+          <Button
+            onClick={handleUpdateTimezone}
+            size="sm"
+            className="border-2 border-charcoal bg-charcoal font-mono text-xs uppercase hover:bg-gray-800"
+            style={{ borderRadius: "2px" }}
+          >
+            Update Timezone in Settings
+          </Button>
           <Button
             onClick={handleDismiss}
             variant="outline"
