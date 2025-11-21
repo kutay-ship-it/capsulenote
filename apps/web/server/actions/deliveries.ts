@@ -242,6 +242,26 @@ export async function scheduleDelivery(
       },
     })
 
+    // Trigger confirmation email (non-blocking)
+    try {
+      await triggerInngestEvent("notification.delivery.scheduled", {
+        deliveryId: delivery.id,
+        userId: user.id,
+        letterTitle: letter.title,
+      })
+      await logger.info('Confirmation email event triggered', {
+        deliveryId: delivery.id,
+        event: 'notification.delivery.scheduled',
+      })
+    } catch (error) {
+      // Log but don't fail delivery creation
+      await logger.warn('Failed to trigger confirmation email event', {
+        userId: user.id,
+        deliveryId: delivery.id,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
+
     await logger.info('Delivery scheduled successfully', {
       userId: user.id,
       deliveryId: delivery.id,
@@ -489,6 +509,119 @@ export async function cancelDelivery(
     }
   } catch (error) {
     await logger.error('Unexpected error in cancelDelivery', error)
+
+    return {
+      success: false,
+      error: {
+        code: ErrorCodes.INTERNAL_ERROR,
+        message: 'An unexpected error occurred. Please try again.',
+        details: error,
+      },
+    }
+  }
+}
+
+/**
+ * Retry a failed delivery
+ * Returns error instead of throwing for predictable error handling
+ */
+export async function retryDelivery(
+  deliveryId: string
+): Promise<ActionResult<void>> {
+  try {
+    const user = await requireUser()
+
+    // Verify ownership and status
+    const existing = await prisma.delivery.findFirst({
+      where: {
+        id: deliveryId,
+        userId: user.id,
+        status: "failed",
+      },
+    })
+
+    if (!existing) {
+      await logger.warn('Delivery not found or cannot be retried', {
+        userId: user.id,
+        deliveryId,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.NOT_FOUND,
+          message: 'Delivery not found or cannot be retried. Only failed deliveries can be retried.',
+        },
+      }
+    }
+
+    // Reset delivery to scheduled status
+    try {
+      await prisma.delivery.update({
+        where: { id: deliveryId },
+        data: {
+          status: "scheduled",
+          lastError: null,
+          attemptCount: existing.attemptCount + 1,
+        },
+      })
+    } catch (error) {
+      await logger.error('Delivery retry database error', error, {
+        userId: user.id,
+        deliveryId,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.UPDATE_FAILED,
+          message: 'Failed to retry delivery. Please try again.',
+          details: error,
+        },
+      }
+    }
+
+    // Re-trigger Inngest workflow
+    try {
+      await triggerInngestEvent("delivery.scheduled", { deliveryId })
+      await logger.info('Inngest retry event sent successfully', {
+        deliveryId,
+        event: 'delivery.scheduled',
+        attemptCount: existing.attemptCount + 1,
+      })
+    } catch (inngestError) {
+      await logger.error('Failed to send Inngest retry event', inngestError, {
+        deliveryId,
+        event: 'delivery.scheduled',
+      })
+      // Don't fail the entire operation - backstop reconciler will catch this
+    }
+
+    await createAuditEvent({
+      userId: user.id,
+      type: "delivery.retried",
+      data: {
+        deliveryId,
+        attemptCount: existing.attemptCount + 1,
+      },
+    })
+
+    await logger.info('Delivery retried successfully', {
+      userId: user.id,
+      deliveryId,
+      attemptCount: existing.attemptCount + 1,
+    })
+
+    revalidatePath(`/deliveries/${deliveryId}`)
+    revalidatePath("/deliveries")
+    revalidatePath("/dashboard")
+
+    return {
+      success: true,
+      data: undefined,
+    }
+  } catch (error) {
+    await logger.error('Unexpected error in retryDelivery', error)
 
     return {
       success: false,

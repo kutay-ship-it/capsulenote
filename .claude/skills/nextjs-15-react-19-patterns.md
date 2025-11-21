@@ -2,6 +2,11 @@
 
 Comprehensive guide for building modern Next.js applications with proper Server and Client Component composition.
 
+**React 19 Status**: ✅ **STABLE** (Released December 5, 2024)
+- **Latest Version**: React 19.2.0 (October 1, 2025)
+- **Next.js Support**: Full support in Next.js 15.5.6+ and Next.js 16
+- **Production Ready**: Yes - stable and recommended for new projects
+
 ## Table of Contents
 
 1. [Core Concepts](#core-concepts)
