@@ -68,13 +68,19 @@ export const AuditEventType = {
   LETTER_CREATED: "letter.created",
   LETTER_UPDATED: "letter.updated",
   LETTER_DELETED: "letter.deleted",
+  LETTER_AUTO_DELETED: "letter.auto_deleted",
   LETTER_SHARED: "letter.shared",
+  LETTER_MIGRATED_FROM_ANONYMOUS: "letter.migrated_from_anonymous",
 
   // Delivery events
   DELIVERY_SCHEDULED: "delivery.scheduled",
   DELIVERY_SENT: "delivery.sent",
   DELIVERY_FAILED: "delivery.failed",
   DELIVERY_CANCELED: "delivery.canceled",
+  DELIVERY_RECONCILED: "delivery.reconciled",
+
+  // System events
+  SYSTEM_RECONCILER_HIGH_VOLUME: "system.reconciler_high_volume",
 } as const
 
 export type AuditEventTypeValue =

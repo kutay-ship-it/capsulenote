@@ -153,32 +153,28 @@ export async function saveAnonymousDraft(
 }
 
 /**
- * Get anonymous drafts for current session or email
+ * Get anonymous drafts for current session ONLY
+ *
+ * Security: Session-bound retrieval prevents unauthorized access.
+ * Multi-device restoration requires email verification (future feature).
  *
  * Used by:
  * - Dashboard on mount (check for drafts to restore)
  * - Landing page on return (continue editing)
  */
-export async function getAnonymousDrafts(
-  email?: string
-): Promise<{ drafts: Array<{ id: string; content: DraftContent; createdAt: Date }> }> {
+export async function getAnonymousDrafts(): Promise<{
+  drafts: Array<{ id: string; content: DraftContent; createdAt: Date }>
+}> {
   try {
     const sessionId = await getSessionId()
 
-    // Find unclaimed drafts by sessionId OR email
-    const whereClause: any = {
-      claimedAt: null,
-      expiresAt: { gt: new Date() }, // Not expired
-    }
-
-    if (email) {
-      whereClause.OR = [{ sessionId }, { email: email.toLowerCase() }]
-    } else {
-      whereClause.sessionId = sessionId
-    }
-
+    // Find unclaimed drafts by sessionId only (secure, device-bound)
     const drafts = await prisma.anonymousDraft.findMany({
-      where: whereClause,
+      where: {
+        sessionId,
+        claimedAt: null,
+        expiresAt: { gt: new Date() }, // Not expired
+      },
       orderBy: { createdAt: "desc" },
       take: 5, // Limit to 5 most recent
     })

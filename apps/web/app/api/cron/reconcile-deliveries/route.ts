@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
 
       // Create system audit event
       await createAuditEvent({
+        userId: null,
         type: "system.reconciler_high_volume",
         data: {
           count: stuckDeliveries.length,
@@ -89,6 +90,7 @@ export async function GET(request: NextRequest) {
 
         // Log audit event
         await createAuditEvent({
+          userId: null,
           type: "delivery.reconciled",
           data: {
             deliveryId: delivery.id,

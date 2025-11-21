@@ -206,7 +206,7 @@ export async function cleanupExpiredDrafts(): Promise<number> {
         createAuditEvent({
           userId: draft.userId,
           type: "letter.auto_deleted",
-          metadata: {
+          data: {
             letterId: draft.id,
             title: draft.title,
             reason: "draft_expired",

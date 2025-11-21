@@ -104,7 +104,7 @@ export async function migrateAnonymousDraft(
     await createAuditEvent({
       userId: user.id,
       type: 'letter.migrated_from_anonymous',
-      metadata: {
+      data: {
         letterId: letter.id,
         wordCount: input.body.split(/\s+/).length,
         hadTitle: input.title.length > 0,
