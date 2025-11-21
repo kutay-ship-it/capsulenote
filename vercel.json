@@ -16,6 +16,14 @@
     {
       "path": "/api/cron/cleanup-pending-subscriptions",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-expired-drafts",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-anonymous-drafts",
+      "schedule": "0 4 * * *"
     }
   ]
 }

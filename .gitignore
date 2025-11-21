@@ -46,3 +46,6 @@ pnpm-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Archive (historical documentation - local reference only)
+.archive/
