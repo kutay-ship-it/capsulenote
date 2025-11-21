@@ -42,33 +42,7 @@ export async function createLetter(
 
     const data = validated.data
 
-    // Check subscription entitlements
-    const entitlements = await getEntitlements(user.id)
-
-    // Check letter creation quota
-    if (!entitlements.features.canCreateLetters) {
-      await logger.warn('User attempted to create letter beyond quota', {
-        userId: user.id,
-        plan: entitlements.plan,
-        lettersThisMonth: entitlements.usage.lettersThisMonth,
-        limit: entitlements.features.maxLettersPerMonth,
-      })
-
-      return {
-        success: false,
-        error: {
-          code: ErrorCodes.QUOTA_EXCEEDED,
-          message: `Free plan limit reached (${entitlements.features.maxLettersPerMonth} letters/month)`,
-          details: {
-            currentUsage: entitlements.usage.lettersThisMonth,
-            limit: entitlements.features.maxLettersPerMonth,
-            upgradeUrl: '/pricing'
-          }
-        }
-      }
-    }
-
-    // Encrypt letter content
+    // Encrypt letter content before transaction
     let encrypted: Awaited<ReturnType<typeof encryptLetter>>
     try {
       encrypted = await encryptLetter({
@@ -90,22 +64,74 @@ export async function createLetter(
       }
     }
 
-    // Create letter in database
+    // Check and enforce quotas atomically in transaction
     let letter
     try {
-      letter = await prisma.letter.create({
-        data: {
-          userId: user.id,
-          title: data.title,
-          bodyCiphertext: encrypted.bodyCiphertext,
-          bodyNonce: encrypted.bodyNonce,
-          bodyFormat: "rich",
-          keyVersion: encrypted.keyVersion,
-          tags: data.tags,
-          visibility: data.visibility,
-        },
+      letter = await prisma.$transaction(async (tx) => {
+        // For Pro users, we don't need to check quotas
+        const entitlements = await getEntitlements(user.id)
+
+        if (entitlements.plan === 'none' || entitlements.plan === 'free') {
+          // For free tier, atomically count and check quota within transaction
+          const period = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1, 0, 0, 0, 0))
+
+          // Count current letters this month (within transaction)
+          const lettersThisMonth = await tx.letter.count({
+            where: {
+              userId: user.id,
+              createdAt: { gte: period },
+              deletedAt: null
+            }
+          })
+
+          const FREE_TIER_LIMIT = 5
+          if (lettersThisMonth >= FREE_TIER_LIMIT) {
+            throw new Error('QUOTA_EXCEEDED')
+          }
+        }
+
+        // Create letter (within same transaction)
+        const newLetter = await tx.letter.create({
+          data: {
+            userId: user.id,
+            title: data.title,
+            bodyCiphertext: encrypted.bodyCiphertext,
+            bodyNonce: encrypted.bodyNonce,
+            bodyFormat: "rich",
+            keyVersion: encrypted.keyVersion,
+            tags: data.tags,
+            visibility: data.visibility,
+          },
+        })
+
+        return newLetter
       })
     } catch (error) {
+      // Handle quota exceeded error
+      if (error instanceof Error && error.message === 'QUOTA_EXCEEDED') {
+        const entitlements = await getEntitlements(user.id)
+        await logger.warn('User attempted to create letter beyond quota', {
+          userId: user.id,
+          plan: entitlements.plan,
+          lettersThisMonth: entitlements.usage.lettersThisMonth,
+          limit: entitlements.features.maxLettersPerMonth,
+        })
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.QUOTA_EXCEEDED,
+            message: `Free plan limit reached (${entitlements.features.maxLettersPerMonth} letters/month)`,
+            details: {
+              currentUsage: entitlements.usage.lettersThisMonth,
+              limit: entitlements.features.maxLettersPerMonth,
+              upgradeUrl: '/pricing'
+            }
+          }
+        }
+      }
+
+      // Handle other database errors
       await logger.error('Letter creation database error', error, {
         userId: user.id,
       })
@@ -253,17 +279,15 @@ export async function updateLetter(
     // If body content is being updated, re-encrypt
     if (data.bodyRich || data.bodyHtml) {
       try {
-        const bodyRich = data.bodyRich || (await decryptLetter(
+        // Decrypt once to avoid race conditions
+        const decrypted = await decryptLetter(
           existing.bodyCiphertext,
           existing.bodyNonce,
           existing.keyVersion
-        )).bodyRich
+        )
 
-        const bodyHtml = data.bodyHtml || (await decryptLetter(
-          existing.bodyCiphertext,
-          existing.bodyNonce,
-          existing.keyVersion
-        )).bodyHtml
+        const bodyRich = data.bodyRich || decrypted.bodyRich
+        const bodyHtml = data.bodyHtml || decrypted.bodyHtml
 
         const encrypted = await encryptLetter({ bodyRich, bodyHtml })
         updateData.bodyCiphertext = encrypted.bodyCiphertext
@@ -371,11 +395,28 @@ export async function deleteLetter(
       }
     }
 
-    // Soft delete
+    // Soft delete letter and cancel associated deliveries
     try {
-      await prisma.letter.update({
-        where: { id: letterId },
-        data: { deletedAt: new Date() },
+      await prisma.$transaction(async (tx) => {
+        // Soft delete letter
+        await tx.letter.update({
+          where: { id: letterId },
+          data: { deletedAt: new Date() },
+        })
+
+        // Cancel all scheduled/failed deliveries for this letter
+        await tx.delivery.updateMany({
+          where: {
+            letterId,
+            status: { in: ["scheduled", "failed"] }
+          },
+          data: { status: "canceled" }
+        })
+      })
+
+      await logger.info('Letter deleted and deliveries canceled', {
+        userId: user.id,
+        letterId,
       })
     } catch (error) {
       await logger.error('Letter deletion database error', error, {

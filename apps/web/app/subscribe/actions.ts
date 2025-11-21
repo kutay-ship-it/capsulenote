@@ -202,111 +202,73 @@ export async function createAnonymousCheckout(
 export async function linkPendingSubscription(
   userId: string
 ): Promise<LinkPendingSubscriptionResult> {
-  // 1. Get user with email
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: { profile: true },
-  })
+  // Acquire advisory lock to serialize linking for same user
+  // This prevents concurrent webhook + auth.ts + manual linking
+  try {
+    // Acquire lock (Postgres-specific)
+    await prisma.$executeRaw`SELECT pg_advisory_lock(hashtext(${userId}))`
 
-  if (!user) {
-    return { success: false, error: "User not found" }
-  }
-
-  // 2. Find pending subscription with matching email
-  const pending = await prisma.pendingSubscription.findFirst({
-    where: {
-      email: user.email,
-      status: "payment_complete",
-      expiresAt: { gt: new Date() },
-    },
-  })
-
-  if (!pending) {
-    // No pending subscription found (not an error, just nothing to link)
-    return { success: true }
-  }
-
-  console.log("[linkPendingSubscription] Found pending subscription", {
-    userId: user.id,
-    email: user.email,
-    pendingId: pending.id,
-  })
-
-  // 3. Verify email is verified in Clerk
-  const clerk = await clerkClient()
-  const clerkUser = await clerk.users.getUser(user.clerkUserId)
-
-  const primaryEmail = clerkUser.emailAddresses.find(
-    (e) => e.id === clerkUser.primaryEmailAddressId
-  )
-
-  if (primaryEmail?.verification?.status !== "verified") {
-    console.warn("[linkPendingSubscription] Email not verified", {
-      userId: user.id,
-      email: user.email,
-    })
-    return { success: false, error: "Email not verified" }
-  }
-
-  // 4. Idempotency check: verify subscription doesn't already exist
-  const existingSubscription = await prisma.subscription.findUnique({
-    where: { stripeSubscriptionId: pending.stripeSubscriptionId! },
-  })
-
-  if (existingSubscription) {
-    // Subscription already linked - this is idempotent success
-    console.log("[linkPendingSubscription] Subscription already exists (idempotent)", {
-      userId: user.id,
-      subscriptionId: existingSubscription.id,
-      stripeSubscriptionId: pending.stripeSubscriptionId,
+    // 1. Get user with email
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
     })
 
-    // Ensure pending is marked as linked
-    await prisma.pendingSubscription.update({
-      where: { id: pending.id },
-      data: {
-        status: "linked",
-        linkedAt: new Date(),
-        linkedUserId: user.id,
+    if (!user) {
+      return { success: false, error: "User not found" }
+    }
+
+    // 2. Find pending subscription with matching email
+    const pending = await prisma.pendingSubscription.findFirst({
+      where: {
+        email: user.email,
+        status: "payment_complete",
+        expiresAt: { gt: new Date() },
       },
     })
 
-    return {
-      success: true,
-      subscriptionId: existingSubscription.id,
+    if (!pending) {
+      // No pending subscription found (not an error, just nothing to link)
+      return { success: true }
     }
-  }
 
-  // 5. Get subscription from Stripe to get accurate period end
-  const stripeSubscription = await stripe.subscriptions.retrieve(
-    pending.stripeSubscriptionId!
-  )
+    console.log("[linkPendingSubscription] Found pending subscription", {
+      userId: user.id,
+      email: user.email,
+      pendingId: pending.id,
+    })
 
-  // 6. Create Subscription record and update Profile (transaction)
-  // Wrap in try-catch to handle race conditions when multiple requests try to link same subscription
-  let subscription
-  try {
-    subscription = await prisma.$transaction(async (tx) => {
-      // Create subscription
-      const sub = await tx.subscription.create({
-        data: {
-          userId: user.id,
-          stripeSubscriptionId: pending.stripeSubscriptionId!,
-          status: stripeSubscription.status as any, // Will be updated by webhook if different
-          plan: pending.plan,
-          currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
-          cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-        },
+    // 3. Verify email is verified in Clerk
+    const clerk = await clerkClient()
+    const clerkUser = await clerk.users.getUser(user.clerkUserId)
+
+    const primaryEmail = clerkUser.emailAddresses.find(
+      (e) => e.id === clerkUser.primaryEmailAddressId
+    )
+
+    if (primaryEmail?.verification?.status !== "verified") {
+      console.warn("[linkPendingSubscription] Email not verified", {
+        userId: user.id,
+        email: user.email,
+      })
+      return { success: false, error: "Email not verified" }
+    }
+
+    // 4. Idempotency check: verify subscription doesn't already exist
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { stripeSubscriptionId: pending.stripeSubscriptionId! },
+    })
+
+    if (existingSubscription) {
+      // Subscription already linked - this is idempotent success
+      console.log("[linkPendingSubscription] Subscription already exists (idempotent)", {
+        userId: user.id,
+        subscriptionId: existingSubscription.id,
+        stripeSubscriptionId: pending.stripeSubscriptionId,
       })
 
-      // Update profile with Stripe customer ID
-      await tx.profile.update({
-        where: { userId: user.id },
-        data: { stripeCustomerId: pending.stripeCustomerId },
-      })
-
-      // Update pending subscription status
-      await tx.pendingSubscription.update({
+      // Ensure pending is marked as linked
+      await prisma.pendingSubscription.update({
         where: { id: pending.id },
         data: {
           status: "linked",
@@ -315,75 +277,130 @@ export async function linkPendingSubscription(
         },
       })
 
-      return sub
-    })
-  } catch (error: any) {
-    // Handle race condition: another request already created this subscription
-    if (error?.code === 'P2002') {
-      console.log("[linkPendingSubscription] Race condition detected, checking for existing subscription")
+      return {
+        success: true,
+        subscriptionId: existingSubscription.id,
+      }
+    }
 
-      // Small delay to ensure the other transaction committed
-      await new Promise(resolve => setTimeout(resolve, 50))
+    // 5. Get subscription from Stripe to get accurate period end
+    const stripeSubscription = await stripe.subscriptions.retrieve(
+      pending.stripeSubscriptionId!
+    )
 
-      // Check if subscription was created by concurrent request
-      const existingSub = await prisma.subscription.findUnique({
-        where: { stripeSubscriptionId: pending.stripeSubscriptionId! },
-      })
-
-      if (existingSub) {
-        console.log("[linkPendingSubscription] Found subscription created by concurrent request", {
-          subscriptionId: existingSub.id,
+    // 6. Create Subscription record and update Profile (transaction)
+    // Wrap in try-catch to handle race conditions when multiple requests try to link same subscription
+    let subscription
+    try {
+      subscription = await prisma.$transaction(async (tx) => {
+        // Create subscription
+        const sub = await tx.subscription.create({
+          data: {
+            userId: user.id,
+            stripeSubscriptionId: pending.stripeSubscriptionId!,
+            status: stripeSubscription.status as any, // Will be updated by webhook if different
+            plan: pending.plan,
+            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+            cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+          },
         })
 
-        // Ensure pending is marked as linked (might already be done by other request)
-        await prisma.pendingSubscription.update({
+        // Update profile with Stripe customer ID
+        await tx.profile.update({
+          where: { userId: user.id },
+          data: { stripeCustomerId: pending.stripeCustomerId },
+        })
+
+        // Update pending subscription status
+        await tx.pendingSubscription.update({
           where: { id: pending.id },
           data: {
             status: "linked",
             linkedAt: new Date(),
             linkedUserId: user.id,
           },
-        }).catch(() => {
-          // Ignore if already updated by concurrent request
         })
 
-        subscription = existingSub
+        return sub
+      })
+    } catch (error: any) {
+      // Handle race condition: another request already created this subscription
+      if (error?.code === 'P2002') {
+        console.log("[linkPendingSubscription] Race condition detected, checking for existing subscription")
+
+        // Small delay to ensure the other transaction committed
+        await new Promise(resolve => setTimeout(resolve, 50))
+
+        // Check if subscription was created by concurrent request
+        const existingSub = await prisma.subscription.findUnique({
+          where: { stripeSubscriptionId: pending.stripeSubscriptionId! },
+        })
+
+        if (existingSub) {
+          console.log("[linkPendingSubscription] Found subscription created by concurrent request", {
+            subscriptionId: existingSub.id,
+          })
+
+          // Ensure pending is marked as linked (might already be done by other request)
+          await prisma.pendingSubscription.update({
+            where: { id: pending.id },
+            data: {
+              status: "linked",
+              linkedAt: new Date(),
+              linkedUserId: user.id,
+            },
+          }).catch(() => {
+            // Ignore if already updated by concurrent request
+          })
+
+          subscription = existingSub
+        } else {
+          // Subscription still doesn't exist after delay - unexpected
+          throw new Error("Race condition: subscription creation failed and not found")
+        }
       } else {
-        // Subscription still doesn't exist after delay - unexpected
-        throw new Error("Race condition: subscription creation failed and not found")
+        // Different error, not a race condition
+        throw error
       }
-    } else {
-      // Different error, not a race condition
-      throw error
     }
-  }
 
-  console.log("[linkPendingSubscription] Subscription linked successfully", {
-    userId: user.id,
-    subscriptionId: subscription.id,
-    pendingId: pending.id,
-  })
-
-  // 6. Invalidate entitlements cache
-  await invalidateEntitlementsCache(user.id)
-
-  // 7. Create usage record (Pro plan gets 2 mail credits)
-  await createUsageRecord(user.id, new Date(), 2)
-
-  // 8. Audit event
-  await createAuditEvent({
-    userId: user.id,
-    type: "subscription.linked",
-    data: {
+    console.log("[linkPendingSubscription] Subscription linked successfully", {
+      userId: user.id,
       subscriptionId: subscription.id,
-      pendingSubscriptionId: pending.id,
-      plan: pending.plan,
-      email: user.email,
-    },
-  })
+      pendingId: pending.id,
+    })
 
-  return {
-    success: true,
-    subscriptionId: subscription.id,
+    // 6. Invalidate entitlements cache
+    await invalidateEntitlementsCache(user.id)
+
+    // 7. Create usage record (Pro plan gets 2 mail credits)
+    await createUsageRecord(user.id, new Date(), 2)
+
+    // 8. Audit event
+    await createAuditEvent({
+      userId: user.id,
+      type: "subscription.linked",
+      data: {
+        subscriptionId: subscription.id,
+        pendingSubscriptionId: pending.id,
+        plan: pending.plan,
+        email: user.email,
+      },
+    })
+
+    return {
+      success: true,
+      subscriptionId: subscription.id,
+    }
+  } finally {
+    // Always release lock, even if error occurred
+    try {
+      await prisma.$executeRaw`SELECT pg_advisory_unlock(hashtext(${userId}))`
+    } catch (unlockError) {
+      console.error('Failed to release advisory lock', {
+        userId,
+        error: unlockError instanceof Error ? unlockError.message : String(unlockError),
+      })
+    }
   }
 }

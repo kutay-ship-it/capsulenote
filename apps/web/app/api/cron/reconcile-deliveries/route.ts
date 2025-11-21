@@ -11,7 +11,9 @@ import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 export async function GET(request: NextRequest) {
   // Verify cron secret (Vercel Cron sends this header)
   const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET
+
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -34,6 +36,7 @@ export async function GET(request: NextRequest) {
           inngest_run_id IS NULL
           OR updated_at < NOW() - INTERVAL '1 hour'
         )
+      ORDER BY deliver_at ASC, attempt_count ASC
       LIMIT 100
       FOR UPDATE SKIP LOCKED
     `
@@ -65,9 +68,9 @@ export async function GET(request: NextRequest) {
 
     for (const delivery of stuckDeliveries) {
       try {
-        // Trigger Inngest job to process the delivery
+        // Trigger Inngest job to re-process delivery
         await triggerInngestEvent("delivery.scheduled", {
-          deliveryId: delivery.id,
+          deliveryId: delivery.id
         })
 
         // Update delivery to mark reconciliation attempt
