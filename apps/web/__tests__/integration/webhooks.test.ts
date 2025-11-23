@@ -581,6 +581,10 @@ describe('Webhook Integration Tests', () => {
 
     it('should reject webhook with missing svix headers', async () => {
       mockHeadersContext({})
+
+      // Mock verify to avoid undefined evt (though handler should reject before reaching this)
+      mockVerify.mockReturnValueOnce(buildClerkEvent())
+
       const request = new Request('http://localhost:3000/api/webhooks/clerk', {
         method: 'POST',
         headers: {},
