@@ -10,6 +10,9 @@ import { UsageIndicator } from "./_components/usage-indicator"
 import { ManageSubscriptionButton } from "./_components/manage-subscription-button"
 import { InvoiceHistory } from "./_components/invoice-history"
 
+// Force dynamic rendering - billing must always show fresh subscription data
+export const revalidate = 0
+
 export default async function BillingSettingsPage() {
   const user = await getCurrentUser()
 

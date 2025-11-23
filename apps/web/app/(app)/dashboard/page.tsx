@@ -9,6 +9,9 @@ import { TimezoneChangeWarning } from "@/components/timezone-change-warning"
 import { requireUser } from "@/server/lib/auth"
 import { getDashboardStats } from "@/server/lib/stats"
 
+// Force dynamic rendering - dashboard must always show fresh data
+export const revalidate = 0
+
 export default async function DashboardPage() {
   // Get current user (includes auth check)
   const user = await requireUser().catch(() => {

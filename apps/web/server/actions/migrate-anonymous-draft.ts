@@ -9,6 +9,7 @@
  * This completes the progressive disclosure pattern.
  */
 
+import { revalidatePath } from "next/cache"
 import { requireUser } from "@/server/lib/auth"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
@@ -115,6 +116,10 @@ export async function migrateAnonymousDraft(
       userId: user.id,
       letterId: letter.id,
     })
+
+    // Revalidate cached pages
+    revalidatePath("/letters")
+    revalidatePath("/dashboard")
 
     return {
       success: true,

@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { formatDate } from "@/lib/utils"
 
+// Force dynamic rendering - drafts list must always show fresh data
+export const revalidate = 0
+
 export default async function DraftsPage() {
   const user = await requireUser()
   const drafts = await getDrafts(user.id)

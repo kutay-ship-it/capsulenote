@@ -8,6 +8,9 @@ import { DeliveryErrorCard } from "@/components/delivery-error-card"
 import Link from "next/link"
 import { Mail, Package, Clock, CheckCircle2, XCircle, Calendar } from "lucide-react"
 
+// Force dynamic rendering - deliveries list must always show fresh data
+export const revalidate = 0
+
 export default async function DeliveriesPage() {
   const deliveries = await getDeliveries()
 

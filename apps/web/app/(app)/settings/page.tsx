@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge"
 import { User, Bell, Globe, Lock, CreditCard, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 
+// Force dynamic rendering - settings must always show fresh user data
+export const revalidate = 0
+
 export default async function SettingsPage() {
   const user = await getCurrentUser()
 

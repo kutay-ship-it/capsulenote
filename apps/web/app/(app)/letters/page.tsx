@@ -7,6 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { formatDate } from "@/lib/utils"
 
+// Force dynamic rendering - letters list must always show fresh data
+export const revalidate = 0
+
 interface LettersPageProps {
   searchParams: Promise<{ filter?: string }>
 }

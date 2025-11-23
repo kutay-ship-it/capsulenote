@@ -9,6 +9,9 @@ import { DownloadCalendarButton } from "@/components/download-calendar-button"
 import { DeliveryErrorCard } from "@/components/delivery-error-card"
 import { Mail, Calendar, ArrowLeft } from "lucide-react"
 
+// Force dynamic rendering - letter detail must always show fresh data
+export const revalidate = 0
+
 interface PageProps {
   params: Promise<{
     id: string

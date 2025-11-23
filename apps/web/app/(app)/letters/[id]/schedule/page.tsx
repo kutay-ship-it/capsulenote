@@ -5,6 +5,9 @@ import { requireUser } from "@/server/lib/auth"
 import { prisma } from "@/server/lib/db"
 import { decryptLetter } from "@/server/lib/encryption"
 
+// Force dynamic rendering - schedule page must always show fresh letter data
+export const revalidate = 0
+
 interface PageProps {
   params: Promise<{
     id: string
