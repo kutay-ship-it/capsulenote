@@ -51,6 +51,12 @@ const baseUser = {
 }
 
 describe("Entitlements (paid-only)", () => {
+  it("smoke: entitlements functions available", () => {
+    expect(getEntitlements).toBeDefined()
+    expect(trackEmailDelivery).toBeDefined()
+    expect(deductMailCredit).toBeDefined()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
     mockRedis.get.mockResolvedValue(null)

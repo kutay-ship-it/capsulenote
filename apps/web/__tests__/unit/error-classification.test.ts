@@ -21,6 +21,11 @@ import {
 } from '../../../workers/inngest/lib/errors'
 
 describe('Error Classification', () => {
+  it('smoke: error helpers available', () => {
+    expect(classifyProviderError).toBeDefined()
+    expect(shouldRetry).toBeDefined()
+  })
+
   describe('WorkerError Base Class', () => {
     it('should create error with correct properties', () => {
       const error = new WorkerError('Test error', 'TEST_CODE', true, { foo: 'bar' })

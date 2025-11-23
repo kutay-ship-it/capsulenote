@@ -19,6 +19,7 @@ const mockPrisma = {
     findUnique: vi.fn(),
     findFirst: vi.fn(),
     update: vi.fn(),
+    create: vi.fn(),
   },
   user: {
     findFirst: vi.fn(),
@@ -292,30 +293,30 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       const eventId = "evt_test123"
 
       // @ts-ignore
-      prisma.webhookEvent.findUnique.mockResolvedValueOnce(null) // First time
-      // @ts-ignore
-      prisma.webhookEvent.findUnique.mockResolvedValueOnce({ id: eventId }) // Second time
+      prisma.webhookEvent.findUnique
+        .mockResolvedValueOnce(null) // First time
+        .mockResolvedValueOnce({ id: eventId }) // Second time
       // @ts-ignore
       prisma.webhookEvent.create.mockResolvedValue({ id: eventId })
 
-      // Act: Process same event twice
-      const firstAttempt = await prisma.webhookEvent.findUnique({
-        where: { id: eventId },
-      })
-
-      if (!firstAttempt) {
-        await prisma.webhookEvent.create({
-          data: { id: eventId, type: "checkout.session.completed", processed: true },
+      // Act: Process same event twice using transaction wrapper to mimic handler flow
+      const processEvent = async () => {
+        const existing = await prisma.webhookEvent.findUnique({ where: { id: eventId } })
+        if (existing) return existing
+        return prisma.$transaction(async () => {
+          return prisma.webhookEvent.create({
+            data: { id: eventId, type: "checkout.session.completed", processed: true },
+          })
         })
       }
 
-      const secondAttempt = await prisma.webhookEvent.findUnique({
-        where: { id: eventId },
-      })
+      const firstAttempt = await processEvent()
+      const secondAttempt = await processEvent()
 
-      // Assert: Second attempt should find existing event and skip processing
-      expect(firstAttempt).toBeNull()
+      // Assert: Second attempt should find existing event and skip creation
+      expect(firstAttempt).toBeTruthy()
       expect(secondAttempt).toBeTruthy()
+      expect(prisma.webhookEvent.create).toHaveBeenCalledTimes(1)
     })
 
     it("should handle duplicate Clerk webhook events", async () => {
@@ -403,11 +404,11 @@ describe("Webhook Integration: Edge Cases", () => {
     vi.clearAllMocks()
   })
 
-  it("should handle expired PendingSubscription", async () => {
-    // Arrange
-    const email = "test@example.com"
-    const expiredPending = {
-      id: "pending_123",
+    it("should handle expired PendingSubscription", async () => {
+      // Arrange
+      const email = "test@example.com"
+      const expiredPending = {
+        id: "pending_123",
       email,
       status: "payment_complete",
       expiresAt: new Date(Date.now() - 86400000), // Yesterday (expired)
@@ -435,10 +436,10 @@ describe("Webhook Integration: Edge Cases", () => {
     expect(pendingFound).toBeNull()
   })
 
-  it("should handle email mismatch between Clerk and Stripe", async () => {
-    // Arrange
-    const stripeEmail = "stripe@example.com"
-    const clerkEmail = "clerk@example.com"
+    it("should handle email mismatch between Clerk and Stripe", async () => {
+      // Arrange
+      const stripeEmail = "stripe@example.com"
+      const clerkEmail = "clerk@example.com"
 
     const mockPending = {
       id: "pending_123",
@@ -464,10 +465,10 @@ describe("Webhook Integration: Edge Cases", () => {
     expect(pendingFound).toBeNull()
   })
 
-  it("should handle subscription already linked", async () => {
-    // Arrange
-    const email = "test@example.com"
-    const linkedPending = {
+    it("should handle subscription already linked", async () => {
+      // Arrange
+      const email = "test@example.com"
+      const linkedPending = {
       id: "pending_123",
       email,
       status: "linked", // Already linked

@@ -72,6 +72,13 @@ vi.mock("next/cache", () => ({
 }))
 
 describe("Letters CRUD", () => {
+  it("smoke: letters actions available", () => {
+    expect(createLetter).toBeDefined()
+    expect(updateLetter).toBeDefined()
+    expect(deleteLetter).toBeDefined()
+    expect(getLetterById).toBeDefined()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })

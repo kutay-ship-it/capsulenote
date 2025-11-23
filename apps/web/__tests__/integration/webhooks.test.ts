@@ -11,6 +11,33 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mockHeadersContext } from '../utils/next-context'
 
+// Helpers to build realistic webhook payloads
+const buildStripeEvent = (overrides: Partial<any> = {}) => ({
+  id: 'evt_test_123',
+  type: 'checkout.session.completed',
+  created: Math.floor(Date.now() / 1000),
+  data: { object: { id: 'cs_test_123' } },
+  ...overrides,
+})
+
+const buildClerkEvent = (overrides: Partial<any> = {}) => ({
+  type: 'user.created',
+  data: {
+    id: 'clerk_user_123',
+    email_addresses: [{ email_address: 'test@example.com' }],
+    primary_email_address_id: 'email_1',
+  },
+  ...overrides,
+})
+
+const buildResendEvent = (type: string, overrides: Partial<any> = {}) => ({
+  type,
+  data: {
+    email_id: 'msg_resend_123',
+    ...overrides,
+  },
+})
+
 // Mock all dependencies
 vi.mock('@/server/lib/db', () => ({
   prisma: {
@@ -101,12 +128,7 @@ describe('Webhook Integration Tests', () => {
       })
 
       // Mock successful signature verification
-      const mockEvent = {
-        id: 'evt_test_123',
-        type: 'checkout.session.completed',
-        created: Math.floor(Date.now() / 1000),
-        data: { object: { id: 'cs_test_123' } },
-      }
+      const mockEvent = buildStripeEvent()
 
       vi.mocked(stripe.webhooks.constructEvent).mockReturnValueOnce(mockEvent as any)
 
@@ -165,8 +187,8 @@ describe('Webhook Integration Tests', () => {
       // Mock event created 6 minutes ago
       const sixMinutesAgo = Math.floor((Date.now() - 6 * 60 * 1000) / 1000)
       const mockEvent = {
+        ...buildStripeEvent(),
         id: 'evt_old_123',
-        type: 'checkout.session.completed',
         created: sixMinutesAgo,
         data: { object: {} },
       }
@@ -249,13 +271,7 @@ describe('Webhook Integration Tests', () => {
 
       // Mock Svix verification
       const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce({
-        type: 'user.created',
-        data: {
-          id: 'clerk_user_123',
-          email_addresses: [{ email_address: 'test@example.com' }],
-        },
-      } as any)
+      vi.mocked(mockWebhook.verify).mockReturnValueOnce(buildClerkEvent() as any)
 
       vi.mocked(prisma.user.create).mockResolvedValueOnce({
         id: 'user_123',
@@ -313,13 +329,7 @@ describe('Webhook Integration Tests', () => {
       })
 
       const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce({
-        type: 'user.created',
-        data: {
-          id: 'clerk_user_123',
-          email_addresses: [{ email_address: 'test@example.com' }],
-        },
-      } as any)
+      vi.mocked(mockWebhook.verify).mockReturnValueOnce(buildClerkEvent() as any)
 
       vi.mocked(prisma.user.create).mockResolvedValueOnce({
         id: 'user_123',
@@ -376,13 +386,7 @@ describe('Webhook Integration Tests', () => {
       })
 
       const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce({
-        type: 'user.created',
-        data: {
-          id: 'clerk_user_123',
-          email_addresses: [{ email_address: 'test@example.com' }],
-        },
-      } as any)
+      vi.mocked(mockWebhook.verify).mockReturnValueOnce(buildClerkEvent() as any)
 
       // First attempt: race condition (P2002 = unique constraint violation)
       vi.mocked(prisma.user.create).mockRejectedValueOnce({
@@ -439,13 +443,15 @@ describe('Webhook Integration Tests', () => {
       })
 
       const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce({
-        type: 'user.updated',
-        data: {
-          id: 'clerk_user_123',
-          email_addresses: [{ email_address: 'newemail@example.com' }],
-        },
-      } as any)
+      vi.mocked(mockWebhook.verify).mockReturnValueOnce(
+        buildClerkEvent({
+          type: 'user.updated',
+          data: {
+            id: 'clerk_user_123',
+            email_addresses: [{ email_address: 'newemail@example.com' }],
+          },
+        }) as any
+      )
 
       vi.mocked(prisma.user.update).mockResolvedValueOnce({
         id: 'user_123',
@@ -631,11 +637,7 @@ describe('Webhook Integration Tests', () => {
           'svix-signature': 'signature_hash',
         },
         body: JSON.stringify({
-          type: 'email.bounced',
-          data: {
-            email_id: 'msg_resend_123',
-            reason: 'Mailbox does not exist',
-          },
+          ...buildResendEvent('email.bounced', { reason: 'Mailbox does not exist' }),
         }),
       })
 
@@ -687,10 +689,7 @@ describe('Webhook Integration Tests', () => {
           'svix-signature': 'signature_hash',
         },
         body: JSON.stringify({
-          type: 'email.opened',
-          data: {
-            email_id: 'msg_resend_123',
-          },
+          ...buildResendEvent('email.opened'),
         }),
       })
 
@@ -736,10 +735,7 @@ describe('Webhook Integration Tests', () => {
           'svix-signature': 'signature_hash',
         },
         body: JSON.stringify({
-          type: 'email.clicked',
-          data: {
-            email_id: 'msg_resend_123',
-          },
+          ...buildResendEvent('email.clicked'),
         }),
       })
 
@@ -773,10 +769,7 @@ describe('Webhook Integration Tests', () => {
           'svix-signature': 'signature_hash',
         },
         body: JSON.stringify({
-          type: 'email.opened',
-          data: {
-            email_id: 'msg_resend_123',
-          },
+          ...buildResendEvent('email.opened'),
         }),
       })
 

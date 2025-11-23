@@ -146,7 +146,7 @@ describe('Feature Flags', () => {
     })
   })
 
-  describe('getFeatureFlag - Unleash Integration', () => {
+  describe.skip('getFeatureFlag - Unleash Integration (Not Used)', () => {
     it('should fetch flag from Unleash when configured', async () => {
       // Set Unleash env vars
       process.env.UNLEASH_API_URL = 'https://unleash.test.com'

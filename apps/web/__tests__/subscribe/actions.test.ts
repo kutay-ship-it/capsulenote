@@ -38,6 +38,11 @@ vi.mock("@/server/providers/stripe/client", () => ({
 }))
 
 describe("createAnonymousCheckout", () => {
+  it("smoke: module imports", () => {
+    expect(createAnonymousCheckout).toBeDefined()
+    expect(linkPendingSubscription).toBeDefined()
+  })
+
   const mockedIsValidPriceId = vi.mocked(isValidPriceId)
 
   beforeEach(() => {

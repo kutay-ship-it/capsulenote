@@ -100,6 +100,12 @@ vi.mock("next/cache", () => ({
 }))
 
 describe("Deliveries", () => {
+  it("smoke: delivery actions available", () => {
+    expect(scheduleDelivery).toBeDefined()
+    expect(updateDelivery).toBeDefined()
+    expect(cancelDelivery).toBeDefined()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })

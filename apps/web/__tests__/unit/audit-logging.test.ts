@@ -23,6 +23,11 @@ vi.mock('../../server/lib/db', () => ({
 }))
 
 describe('Audit Logging System', () => {
+  it('smoke: audit module loads', () => {
+    expect(createAuditEvent).toBeDefined()
+    expect(redactSensitiveData).toBeDefined()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
   })

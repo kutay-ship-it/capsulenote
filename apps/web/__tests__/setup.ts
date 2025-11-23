@@ -19,13 +19,15 @@ process.env.NODE_ENV = "test"
 process.env.SKIP_ENV_VALIDATION = "true"
 process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000"
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_mock"
-process.env.CRYPTO_MASTER_KEY = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=" // Base64 test key (exactly 32 bytes)
+process.env.CRYPTO_MASTER_KEY_V1 = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=" // Base64 test key (exactly 32 bytes)
+process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY = "true" // Force runtime-only mode (bypass env.mjs snapshot)
 process.env.STRIPE_SECRET_KEY = "sk_test_mock"
 process.env.STRIPE_PUBLISHABLE_KEY = "pk_test_mock"
 process.env.CLERK_SECRET_KEY = "sk_test_mock"
 process.env.CLERK_WEBHOOK_SECRET = "whsec_test_mock"
 process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_mock"
 process.env.RESEND_API_KEY = "re_test_mock"
+process.env.RESEND_WEBHOOK_SECRET = "whsec_XAPoE+wn99ZKZC50ia725EC/aEDjei3a"
 process.env.POSTMARK_SERVER_TOKEN = "pm_test_mock"
 process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/dearme_test"
 process.env.CRON_SECRET = "test_cron_secret"
@@ -47,7 +49,7 @@ function assertValidBase64Key(key: string, expectedBytes: number, label: string)
   }
 }
 
-assertValidBase64Key(process.env.CRYPTO_MASTER_KEY!, 32, "CRYPTO_MASTER_KEY")
+assertValidBase64Key(process.env.CRYPTO_MASTER_KEY_V1!, 32, "CRYPTO_MASTER_KEY_V1")
 
 // ============================================================================
 // Next.js Mocks
@@ -82,6 +84,19 @@ vi.mock("next/cache", () => ({
 
 // Mock Next.js server components
 vi.mock("server-only", () => ({}))
+
+// ============================================================================
+// Environment Variables Mock (env.mjs)
+// ============================================================================
+
+vi.mock("@/env.mjs", () => ({
+  env: new Proxy({}, {
+    get: (target, prop) => {
+      // Return from process.env for test values
+      return process.env[prop as string]
+    }
+  })
+}))
 
 // ============================================================================
 // Upstash Redis Mock

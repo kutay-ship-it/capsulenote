@@ -33,7 +33,11 @@ export function calculatePresetDate(preset: '6m' | '1y' | '3y' | '5y'): Date {
     targetYear += 1
   }
 
-  return new Date(Date.UTC(targetYear, targetMonth, day, hours, minutes, seconds, ms))
+  // Clamp day to end of target month to handle shorter months/leap-year rollovers
+  const endOfTargetMonth = new Date(Date.UTC(targetYear, targetMonth + 1, 0)).getUTCDate()
+  const safeDay = Math.min(day, endOfTargetMonth)
+
+  return new Date(Date.UTC(targetYear, targetMonth, safeDay, hours, minutes, seconds, ms))
 }
 
 export function formatDate(date: Date | null): string {
