@@ -13,7 +13,11 @@ import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
-import { getEntitlements, trackEmailDelivery, deductMailCredit } from "@/server/lib/entitlements"
+import { getEntitlements, trackEmailDelivery, deductMailCredit, QuotaExceededError } from "@/server/lib/entitlements"
+
+const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
+const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
+const MAX_DELAY_YEARS = 100
 
 /**
  * Schedule a new delivery for a letter
@@ -44,13 +48,37 @@ export async function scheduleDelivery(
     }
 
     const data = validated.data
+    const now = Date.now()
+    const minDate = new Date(now + MIN_DELAY_MS)
+    const maxDate = new Date()
+    maxDate.setUTCFullYear(maxDate.getUTCFullYear() + MAX_DELAY_YEARS)
+
+    if (data.deliverAt < minDate) {
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.VALIDATION_FAILED,
+          message: "Delivery must be at least 5 minutes from now",
+        },
+      }
+    }
+
+    if (data.deliverAt > maxDate) {
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.VALIDATION_FAILED,
+          message: "Delivery cannot be more than 100 years in the future",
+        },
+      }
+    }
 
     // Check subscription entitlements
     const entitlements = await getEntitlements(user.id)
 
     // Check if user can schedule deliveries
     if (!entitlements.features.canScheduleDeliveries) {
-      await logger.warn('User attempted to schedule delivery without Pro subscription', {
+      await logger.warn('User attempted to schedule delivery without active subscription', {
         userId: user.id,
         plan: entitlements.plan,
       })
@@ -59,9 +87,9 @@ export async function scheduleDelivery(
         success: false,
         error: {
           code: ErrorCodes.SUBSCRIPTION_REQUIRED,
-          message: 'Scheduling deliveries requires a Pro subscription',
+          message: 'Scheduling deliveries requires an active subscription',
           details: {
-            requiredPlan: 'pro',
+            requiredPlan: 'DIGITAL_CAPSULE or PAPER_PIXELS',
             currentPlan: entitlements.plan,
             upgradeUrl: '/pricing'
           }
@@ -72,7 +100,7 @@ export async function scheduleDelivery(
     // For physical mail, check credits
     if (data.channel === 'mail') {
       if (!entitlements.features.canSchedulePhysicalMail) {
-        await logger.warn('User attempted to schedule physical mail without Pro subscription', {
+        await logger.warn('User attempted to schedule physical mail without Paper & Pixels', {
           userId: user.id,
           plan: entitlements.plan,
         })
@@ -81,7 +109,7 @@ export async function scheduleDelivery(
           success: false,
           error: {
             code: ErrorCodes.SUBSCRIPTION_REQUIRED,
-            message: 'Physical mail requires Pro subscription'
+            message: 'Physical mail requires the Paper & Pixels plan'
           }
         }
       }
@@ -130,10 +158,60 @@ export async function scheduleDelivery(
       }
     }
 
+    let reservedChannel: "email" | "mail" | null = null
+    const refundReservedCredit = async () => {
+      try {
+        if (reservedChannel === "email") {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { emailCredits: { increment: 1 } },
+          })
+        } else if (reservedChannel === "mail") {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { physicalCredits: { increment: 1 } },
+          })
+        }
+      } catch (error) {
+        await logger.error("Failed to refund reserved credit", error, { userId: user.id })
+      }
+    }
+
+    // Reserve credits before creating delivery
+    try {
+      if (data.channel === "email") {
+        await trackEmailDelivery(user.id)
+        reservedChannel = "email"
+      } else if (data.channel === "mail") {
+        await deductMailCredit(user.id)
+        reservedChannel = "mail"
+      }
+    } catch (error) {
+      if (error instanceof QuotaExceededError) {
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.INSUFFICIENT_CREDITS,
+            message: "Not enough credits to schedule this delivery",
+          },
+        }
+      }
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.INTERNAL_ERROR,
+          message: "Failed to reserve credits for this delivery",
+        },
+      }
+    }
+
     // Create delivery and channel-specific record in transaction
     let delivery
     try {
       delivery = await prisma.$transaction(async (tx) => {
+        const isLocked = data.deliverAt.getTime() - Date.now() <= LOCK_WINDOW_MS
+
         // Create delivery
         const newDelivery = await tx.delivery.create({
           data: {
@@ -165,9 +243,24 @@ export async function scheduleDelivery(
           })
         }
 
+        // Update letter scheduling metadata
+        await tx.letter.update({
+          where: { id: data.letterId },
+          data: {
+            type: data.channel === "email" ? "email" : "physical",
+            status: isLocked ? "LOCKED" : "SCHEDULED",
+            scheduledFor: data.deliverAt,
+            timezone: data.timezone,
+            lockedAt: isLocked ? new Date() : new Date(data.deliverAt.getTime() - LOCK_WINDOW_MS),
+          },
+        })
+
         return newDelivery
       })
     } catch (error) {
+      if (reservedChannel) {
+        await refundReservedCredit()
+      }
       await logger.error('Delivery creation error', error, {
         userId: user.id,
         letterId: data.letterId,
@@ -182,23 +275,6 @@ export async function scheduleDelivery(
           details: error,
         },
       }
-    }
-
-    // Track usage and deduct credits
-    try {
-      if (data.channel === 'email') {
-        await trackEmailDelivery(user.id)
-      } else if (data.channel === 'mail') {
-        await deductMailCredit(user.id)
-      }
-    } catch (error) {
-      // Non-critical - log but don't fail delivery
-      await logger.warn('Failed to track usage', {
-        userId: user.id,
-        deliveryId: delivery.id,
-        channel: data.channel,
-        error: error instanceof Error ? error.message : String(error),
-      })
     }
 
     // Trigger Inngest workflow - CRITICAL: must succeed
@@ -230,6 +306,9 @@ export async function scheduleDelivery(
 
       // Delete the delivery we just created
       await prisma.delivery.delete({ where: { id: delivery.id } })
+      if (reservedChannel) {
+        await refundReservedCredit()
+      }
 
       // Return error to user - delivery was NOT created
       return {
@@ -340,6 +419,11 @@ export async function updateDelivery(
         id: deliveryId,
         userId: user.id,
         status: { in: ["scheduled", "failed"] },
+      },
+      include: {
+        letter: {
+          select: { id: true },
+        },
       },
     })
 
@@ -516,11 +600,38 @@ export async function cancelDelivery(
       }
     }
 
+    const isLocked = existing.deliverAt.getTime() - Date.now() <= LOCK_WINDOW_MS
+    const shouldRefundEmail = existing.channel === "email" && !isLocked
+    const shouldRefundPhysical = existing.channel === "mail" && !isLocked
+
     // Cancel delivery
     try {
-      await prisma.delivery.update({
-        where: { id: deliveryId },
-        data: { status: "canceled" },
+      await prisma.$transaction(async (tx) => {
+        await tx.delivery.update({
+          where: { id: deliveryId },
+          data: { status: "canceled" },
+        })
+
+        if (existing.letter) {
+          await tx.letter.update({
+            where: { id: existing.letter.id },
+            data: { status: "CANCELLED" },
+          })
+        }
+
+        if (shouldRefundEmail) {
+          await tx.user.update({
+            where: { id: user.id },
+            data: { emailCredits: { increment: 1 } },
+          })
+        }
+
+        if (shouldRefundPhysical) {
+          await tx.user.update({
+            where: { id: user.id },
+            data: { physicalCredits: { increment: 1 } },
+          })
+        }
       })
     } catch (error) {
       await logger.error('Delivery cancellation database error', error, {

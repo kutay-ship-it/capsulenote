@@ -14,6 +14,7 @@
  * - Comprehensive audit trail
  */
 
+import type { PlanType } from "@prisma/client"
 import { stripe } from "@/server/providers/stripe"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
@@ -27,6 +28,11 @@ import {
   type AnonymousCheckoutResponse,
   type LinkPendingSubscriptionResult,
 } from "@dearme/types"
+
+const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
+  DIGITAL_CAPSULE: { email: 6, physical: 0 },
+  PAPER_PIXELS: { email: 24, physical: 3 },
+}
 
 /**
  * Create anonymous checkout session
@@ -140,12 +146,12 @@ export async function createAnonymousCheckout(
   })
 
   // 7. Determine plan from product name
-  const planMap: Record<string, "free" | "pro" | "enterprise"> = {
-    free: "free",
-    pro: "pro",
-    enterprise: "enterprise",
+  const planMap: Record<string, PlanType> = {
+    "digital capsule": "DIGITAL_CAPSULE",
+    "paper & pixels": "PAPER_PIXELS",
+    "paper and pixels": "PAPER_PIXELS",
   }
-  const plan = planMap[product.name.toLowerCase()] || "pro"
+  const plan = planMap[product.name.toLowerCase()] || "DIGITAL_CAPSULE"
 
   // 8. Create PendingSubscription record
   await prisma.pendingSubscription.create({
@@ -305,6 +311,18 @@ export async function linkPendingSubscription(
           },
         })
 
+        // Update user plan and credit buckets
+        const credits = PLAN_CREDITS[pending.plan] || { email: 0, physical: 0 }
+        await tx.user.update({
+          where: { id: user.id },
+          data: {
+            planType: pending.plan,
+            emailCredits: credits.email,
+            physicalCredits: credits.physical,
+            creditExpiresAt: new Date(stripeSubscription.current_period_end * 1000),
+          },
+        })
+
         // Update profile with Stripe customer ID
         await tx.profile.update({
           where: { userId: user.id },
@@ -373,8 +391,8 @@ export async function linkPendingSubscription(
     // 6. Invalidate entitlements cache
     await invalidateEntitlementsCache(user.id)
 
-    // 7. Create usage record (Pro plan gets 2 mail credits)
-    await createUsageRecord(user.id, new Date(), 2)
+    // 7. Create usage record (allocate physical credits for current period)
+    await createUsageRecord(user.id, new Date(), PLAN_CREDITS[pending.plan]?.physical ?? 0)
 
     // 8. Audit event
     await createAuditEvent({

@@ -19,8 +19,10 @@ export const env = createEnv({
     // Stripe
     STRIPE_SECRET_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
-    STRIPE_PRICE_PRO_MONTHLY: z.string().min(1),
-    STRIPE_PRICE_PRO_ANNUAL: z.string().min(1),
+    STRIPE_PRICE_DIGITAL_ANNUAL: z.string().min(1),
+    STRIPE_PRICE_PAPER_ANNUAL: z.string().min(1),
+    STRIPE_PRICE_ADDON_EMAIL: z.string().min(1).optional(),
+    STRIPE_PRICE_ADDON_PHYSICAL: z.string().min(1).optional(),
 
     // Email
     RESEND_API_KEY: z.string().min(1),
@@ -96,8 +98,10 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-    STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY,
-    STRIPE_PRICE_PRO_ANNUAL: process.env.STRIPE_PRICE_PRO_ANNUAL,
+    STRIPE_PRICE_DIGITAL_ANNUAL: process.env.STRIPE_PRICE_DIGITAL_ANNUAL,
+    STRIPE_PRICE_PAPER_ANNUAL: process.env.STRIPE_PRICE_PAPER_ANNUAL,
+    STRIPE_PRICE_ADDON_EMAIL: process.env.STRIPE_PRICE_ADDON_EMAIL,
+    STRIPE_PRICE_ADDON_PHYSICAL: process.env.STRIPE_PRICE_ADDON_PHYSICAL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
     EMAIL_FROM_NOTIFICATION: process.env.EMAIL_FROM_NOTIFICATION,

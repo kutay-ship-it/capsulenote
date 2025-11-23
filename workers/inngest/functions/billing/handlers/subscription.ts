@@ -12,6 +12,7 @@
 
 import Stripe from "stripe"
 import { prisma } from "@dearme/prisma"
+import type { PlanType } from "@prisma/client"
 import {
   getUserByStripeCustomer,
   invalidateEntitlementsCache,
@@ -20,6 +21,11 @@ import {
   recordBillingAudit,
 } from "../../../../../apps/web/server/lib/stripe-helpers"
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
+
+const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
+  DIGITAL_CAPSULE: { email: 6, physical: 0 },
+  PAPER_PIXELS: { email: 24, physical: 3 },
+}
 
 /**
  * Handle subscription.created or subscription.updated event
@@ -45,6 +51,11 @@ export async function handleSubscriptionCreatedOrUpdated(
     throw new Error(`User not found for customer: ${customerId}`)
   }
 
+  const plan =
+    (subscription.metadata?.plan as PlanType | undefined) ||
+    (subscription.items?.data?.[0]?.price?.metadata?.plan as PlanType | undefined) ||
+    "DIGITAL_CAPSULE"
+
   // Upsert subscription
   await prisma.subscription.upsert({
     where: { stripeSubscriptionId: subscription.id },
@@ -52,12 +63,13 @@ export async function handleSubscriptionCreatedOrUpdated(
       userId: user.id,
       stripeSubscriptionId: subscription.id,
       status: subscription.status as any,
-      plan: "pro", // TODO: Derive from subscription metadata/price
+      plan,
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
     update: {
       status: subscription.status as any,
+      plan,
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
@@ -71,15 +83,24 @@ export async function handleSubscriptionCreatedOrUpdated(
     await createUsageRecord(
       user.id,
       new Date(subscription.current_period_start * 1000),
-      2 // Pro plan: 2 mail credits/month
+      PLAN_CREDITS[plan]?.physical ?? 0
     )
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        planType: plan,
+        emailCredits: PLAN_CREDITS[plan]?.email ?? 0,
+        physicalCredits: PLAN_CREDITS[plan]?.physical ?? 0,
+        creditExpiresAt: new Date(subscription.current_period_end * 1000),
+      },
+    })
   }
 
   // Record audit event
   await recordBillingAudit(user.id, AuditEventType.SUBSCRIPTION_UPDATED, {
     subscriptionId: subscription.id,
     status: subscription.status,
-    plan: "pro",
+    plan,
     currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
   })
 
@@ -116,6 +137,10 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
   if (sub) {
     // Invalidate entitlements cache
     await invalidateEntitlementsCache(sub.userId)
+    await prisma.user.updateMany({
+      where: { id: sub.userId },
+      data: { planType: null, emailCredits: 0, physicalCredits: 0, creditExpiresAt: null },
+    })
 
     // Send cancellation email
     const user = await prisma.user.findUnique({

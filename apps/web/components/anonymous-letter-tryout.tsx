@@ -28,7 +28,7 @@ import {
   formatLastSaved,
   shouldShowSignUpPrompt,
 } from "@/lib/localStorage-letter"
-import { cn } from "@/lib/utils"
+import { cn, getUserTimezone } from "@/lib/utils"
 
 export function AnonymousLetterTryout() {
   const router = useRouter()
@@ -113,9 +113,12 @@ export function AnonymousLetterTryout() {
       setShowSignUpPrompt(true)
       return
     }
-    saveAnonymousDraft(title, body, trimmedEmail)
+    const timezone = getUserTimezone()
+    saveAnonymousDraft(title, body, trimmedEmail, undefined, "email", timezone)
     const params = new URLSearchParams()
     params.set("email", trimmedEmail)
+    params.set("deliveryType", "email")
+    params.set("timezone", timezone)
     router.push(`/subscribe?${params.toString()}`)
   }
 

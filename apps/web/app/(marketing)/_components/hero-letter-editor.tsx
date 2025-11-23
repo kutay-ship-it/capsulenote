@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@clerk/nextjs"
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { saveAnonymousDraft, getAnonymousDraft } from "@/lib/localStorage-letter"
+import { getUserTimezone } from "@/lib/utils"
 
 export function HeroLetterEditor() {
   const router = useRouter()
@@ -35,12 +36,25 @@ export function HeroLetterEditor() {
       return
     }
 
-    // Anonymous user flow: Persist draft + email locally for resume/checkout
-    saveAnonymousDraft(data.title, data.body, data.recipientEmail, data.deliveryDate)
+    const timezone = getUserTimezone()
+    const deliveryType = "email"
 
-    // Send to paywall with locked email
+    // Anonymous user flow: Persist draft + email locally for resume/checkout
+    saveAnonymousDraft(
+      data.title,
+      data.body,
+      data.recipientEmail,
+      data.deliveryDate,
+      deliveryType,
+      timezone
+    )
+
+    // Send to paywall with locked email and delivery metadata
     const params = new URLSearchParams()
     params.set("email", data.recipientEmail)
+    if (data.deliveryDate) params.set("deliveryDate", data.deliveryDate)
+    params.set("deliveryType", deliveryType)
+    params.set("timezone", timezone)
     router.push(`/subscribe?${params.toString()}`)
   }
 

@@ -8,7 +8,7 @@
  *   pnpm dotenv -e apps/web/.env.local -- tsx scripts/sync-stripe-products.ts
  */
 
-import { PrismaClient, SubscriptionPlan } from '@prisma/client'
+import { PrismaClient, PlanType } from '@prisma/client'
 import Stripe from 'stripe'
 
 const prisma = new PrismaClient()
@@ -42,24 +42,27 @@ async function main() {
     }
 
     // Map product name to plan enum
-    let plan: SubscriptionPlan
-    if (product.name.toLowerCase().includes('pro')) {
-      plan = 'pro'
-    } else if (product.name.toLowerCase().includes('enterprise')) {
-      plan = 'enterprise'
-    } else {
+    const name = product.name.toLowerCase()
+    let plan: PlanType | null = null
+    if (name.includes('digital')) {
+      plan = 'DIGITAL_CAPSULE'
+    } else if (name.includes('paper')) {
+      plan = 'PAPER_PIXELS'
+    }
+
+    if (!plan) {
       console.log(`⏭️  Skipping ${product.name} (unknown plan type)`)
       continue
     }
 
     // Extract features from product metadata or description
     const features = {
-      maxLettersPerMonth: plan === 'pro' ? 'unlimited' : 'unlimited',
-      emailDeliveriesIncluded: 'unlimited',
-      mailCreditsPerMonth: plan === 'pro' ? 2 : plan === 'enterprise' ? 10 : 0,
+      maxLettersPerMonth: 'unlimited',
+      emailDeliveriesIncluded: plan === 'DIGITAL_CAPSULE' ? 6 : 24,
+      mailCreditsPerMonth: plan === 'PAPER_PIXELS' ? 3 : 0,
       canScheduleDeliveries: true,
-      canSchedulePhysicalMail: true,
-      supportLevel: plan === 'enterprise' ? 'priority' : 'standard'
+      canSchedulePhysicalMail: plan === 'PAPER_PIXELS',
+      supportLevel: 'standard'
     }
 
     // Upsert pricing plan

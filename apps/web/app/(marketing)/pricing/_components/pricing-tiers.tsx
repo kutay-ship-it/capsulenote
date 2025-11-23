@@ -2,81 +2,39 @@ import * as React from "react"
 import { PricingCard } from "./pricing-card"
 import { env } from "@/env.mjs"
 
-interface PricingTiersProps {
-  interval?: "month" | "year"
-}
-
-export function PricingTiers({ interval = "month" }: PricingTiersProps) {
-  const isAnnual = interval === "year"
-
-  // Pricing configuration
-  const monthlyPrice = 19
-  const annualPrice = 189 // 17% savings
-  const annualMonthlyEquivalent = Math.round(annualPrice / 12)
-
-  // Stripe price IDs from environment
-  const priceId = isAnnual
-    ? env.STRIPE_PRICE_PRO_ANNUAL
-    : env.STRIPE_PRICE_PRO_MONTHLY
-
+export function PricingTiers() {
   return (
-    <div className="grid gap-8 lg:grid-cols-3 lg:gap-6">
-      {/* Free Tier */}
+    <div className="grid gap-8 lg:grid-cols-2 lg:gap-6">
       <PricingCard
-        name="Free"
-        price="$0"
-        description="Perfect for trying out Capsule Note and writing your first letters."
+        name="Digital Capsule"
+        price={9}
+        interval="year"
+        description="For personal letters to yourself—purely digital delivery."
         features={[
-          "3 letters per month",
-          "Email delivery only",
-          "Basic scheduling",
-          "Community support",
+          "6 email deliveries / year",
+          "Schedule up to 100 years out",
+          "Timezone-aware reminders",
           "Encrypted storage",
         ]}
-        cta="Start Free"
-        ctaHref="/sign-up"
+        cta="Choose Digital"
+        priceId={env.STRIPE_PRICE_DIGITAL_ANNUAL}
       />
 
-      {/* Pro Tier - Highlighted */}
       <PricingCard
-        name="Pro"
-        price={isAnnual ? annualMonthlyEquivalent : monthlyPrice}
-        interval="month"
-        description="For serious letter writers who want unlimited letters and premium features."
+        name="Paper & Pixels"
+        price={29}
+        interval="year"
+        description="For gifting and tangible keepsakes—email plus premium mail."
         features={[
-          "Unlimited letters",
-          "Email + Physical mail delivery",
-          "2 free physical mails/month",
-          "Advanced scheduling (arrive-by mode)",
-          "Premium templates",
-          "Priority support",
-          "Unlimited encrypted storage",
-          "Cancel anytime",
+          "24 email deliveries / year",
+          "3 physical letters / year",
+          "Address confirmation reminders",
+          "Priority delivery routing",
         ]}
-        cta="Start Free Trial"
-        priceId={priceId}
+        cta="Choose Paper & Pixels"
+        priceId={env.STRIPE_PRICE_PAPER_ANNUAL}
         highlighted
         popular
-        badge={isAnnual ? "Save 17%" : undefined}
-      />
-
-      {/* Enterprise Tier */}
-      <PricingCard
-        name="Enterprise"
-        price="Custom"
-        description="For organizations that want white-label solutions and custom integrations."
-        features={[
-          "Everything in Pro",
-          "White-label solution",
-          "Custom integrations",
-          "Dedicated account manager",
-          "SLA guarantees",
-          "Volume discounts",
-          "Custom branding",
-          "Advanced analytics",
-        ]}
-        cta="Contact Sales"
-        ctaHref="mailto:sales@capsulenote.com"
       />
     </div>
   )

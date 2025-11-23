@@ -74,22 +74,22 @@ export default function PricingPage() {
 
         {/* Pricing Tiers */}
         <section className="container px-4 pb-16 sm:px-6 sm:pb-20 md:pb-24">
-          <PricingTiers interval="month" />
+          <PricingTiers />
         </section>
 
         {/* Trust Signals Bar */}
         <section className="border-y-2 border-charcoal bg-off-white py-8">
           <div className="container px-4 sm:px-6">
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {/* 14-day trial */}
+              {/* Yearly credits */}
               <div className="flex items-center gap-3">
                 <Zap className="h-6 w-6 flex-shrink-0 text-charcoal" strokeWidth={2} />
                 <div>
                   <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                    14-Day Free Trial
+                    Yearly Credits
                   </p>
                   <p className="font-mono text-xs text-gray-secondary">
-                    No credit card required
+                    Use within your plan year
                   </p>
                 </div>
               </div>

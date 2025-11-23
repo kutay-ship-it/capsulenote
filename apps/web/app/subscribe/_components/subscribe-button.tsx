@@ -26,6 +26,8 @@ interface SubscribeButtonProps {
   planName: string
   /** Optional letter ID */
   letterId?: string
+  /** Optional metadata to forward to checkout */
+  metadata?: Record<string, unknown>
   /** Button variant */
   variant?: "default" | "secondary" | "outline" | "ghost" | "link"
   /** Button size */
@@ -39,6 +41,7 @@ export function SubscribeButton({
   priceId,
   planName,
   letterId,
+  metadata,
   variant = "secondary",
   size = "lg",
   className,
@@ -57,6 +60,7 @@ export function SubscribeButton({
         metadata: {
           source: "subscribe_page",
           plan: planName,
+          ...metadata,
         },
       })
 

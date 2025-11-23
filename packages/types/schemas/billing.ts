@@ -14,10 +14,10 @@ import { z } from "zod"
 // ============================================================================
 
 /**
- * Subscription plan tiers
+ * Subscription plan tiers (Capsule Note)
  */
-export const subscriptionPlanSchema = z.enum(['free', 'pro', 'enterprise'])
-export type SubscriptionPlan = z.infer<typeof subscriptionPlanSchema>
+export const planTypeSchema = z.enum(['DIGITAL_CAPSULE', 'PAPER_PIXELS'])
+export type PlanType = z.infer<typeof planTypeSchema>
 
 /**
  * Subscription status values
@@ -93,7 +93,7 @@ export const limitsSchema = z.object({
  */
 export const entitlementsSchema = z.object({
   userId: z.string().uuid(),
-  plan: z.union([subscriptionPlanSchema, z.literal('none')]),
+  plan: z.union([planTypeSchema, z.literal('none')]),
   status: subscriptionStatusSchema,
   features: featuresSchema,
   usage: usageSchema,
@@ -119,7 +119,7 @@ export const pricingPlanSchema = z.object({
   stripeProductId: z.string(),
   stripePriceId: z.string(),
   name: z.string(),
-  plan: subscriptionPlanSchema,
+  plan: planTypeSchema,
   interval: z.enum(['month', 'year']),
   amountCents: z.number().int().min(0),
   currency: z.string().length(3).default('usd'),
@@ -203,7 +203,7 @@ export const subscriptionSchema = z.object({
   userId: z.string().uuid(),
   stripeSubscriptionId: z.string(),
   status: subscriptionStatusSchema,
-  plan: subscriptionPlanSchema,
+  plan: planTypeSchema,
   currentPeriodEnd: z.date(),
   cancelAtPeriodEnd: z.boolean(),
   createdAt: z.date(),
@@ -370,7 +370,7 @@ export type BillingError = z.infer<typeof billingErrorSchema>
  */
 export const adminUpdateSubscriptionSchema = z.object({
   userId: z.string().uuid(),
-  plan: subscriptionPlanSchema.optional(),
+  plan: planTypeSchema.optional(),
   status: subscriptionStatusSchema.optional(),
   addCredits: z.number().int().min(0).optional(),
   reason: z.string().max(500).optional()
@@ -444,7 +444,7 @@ export const pendingSubscriptionSchema = z.object({
   stripeSessionId: z.string(),
   stripeSubscriptionId: z.string().optional(),
   priceId: z.string(),
-  plan: subscriptionPlanSchema,
+  plan: planTypeSchema,
   amountCents: z.number().int().min(0),
   currency: z.string().length(3),
   status: pendingSubscriptionStatusSchema,

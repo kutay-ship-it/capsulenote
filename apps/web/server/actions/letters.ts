@@ -9,7 +9,7 @@ import { createAuditEvent } from "@/server/lib/audit"
 import { encryptLetter, decryptLetter } from "@/server/lib/encryption"
 import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
-import { getEntitlements, trackLetterCreation } from "@/server/lib/entitlements"
+import { trackLetterCreation } from "@/server/lib/entitlements"
 
 /**
  * Create a new letter with encrypted content
@@ -64,74 +64,22 @@ export async function createLetter(
       }
     }
 
-    // Check and enforce quotas atomically in transaction
+    // Create letter (no free-tier limits)
     let letter
     try {
-      letter = await prisma.$transaction(async (tx) => {
-        // For Pro users, we don't need to check quotas
-        const entitlements = await getEntitlements(user.id)
-
-        if (entitlements.plan === 'none' || entitlements.plan === 'free') {
-          // For free tier, atomically count and check quota within transaction
-          const period = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1, 0, 0, 0, 0))
-
-          // Count current letters this month (within transaction)
-          const lettersThisMonth = await tx.letter.count({
-            where: {
-              userId: user.id,
-              createdAt: { gte: period },
-              deletedAt: null
-            }
-          })
-
-          const FREE_TIER_LIMIT = 5
-          if (lettersThisMonth >= FREE_TIER_LIMIT) {
-            throw new Error('QUOTA_EXCEEDED')
-          }
-        }
-
-        // Create letter (within same transaction)
-        const newLetter = await tx.letter.create({
-          data: {
-            userId: user.id,
-            title: data.title,
-            bodyCiphertext: encrypted.bodyCiphertext,
-            bodyNonce: encrypted.bodyNonce,
-            bodyFormat: "rich",
-            keyVersion: encrypted.keyVersion,
-            tags: data.tags,
-            visibility: data.visibility,
-          },
-        })
-
-        return newLetter
+      letter = await prisma.letter.create({
+        data: {
+          userId: user.id,
+          title: data.title,
+          bodyCiphertext: encrypted.bodyCiphertext,
+          bodyNonce: encrypted.bodyNonce,
+          bodyFormat: "rich",
+          keyVersion: encrypted.keyVersion,
+          tags: data.tags,
+          visibility: data.visibility,
+        },
       })
     } catch (error) {
-      // Handle quota exceeded error
-      if (error instanceof Error && error.message === 'QUOTA_EXCEEDED') {
-        const entitlements = await getEntitlements(user.id)
-        await logger.warn('User attempted to create letter beyond quota', {
-          userId: user.id,
-          plan: entitlements.plan,
-          lettersThisMonth: entitlements.usage.lettersThisMonth,
-          limit: entitlements.features.maxLettersPerMonth,
-        })
-
-        return {
-          success: false,
-          error: {
-            code: ErrorCodes.QUOTA_EXCEEDED,
-            message: `Free plan limit reached (${entitlements.features.maxLettersPerMonth} letters/month)`,
-            details: {
-              currentUsage: entitlements.usage.lettersThisMonth,
-              limit: entitlements.features.maxLettersPerMonth,
-              upgradeUrl: '/pricing'
-            }
-          }
-        }
-      }
-
-      // Handle other database errors
       await logger.error('Letter creation database error', error, {
         userId: user.id,
       })

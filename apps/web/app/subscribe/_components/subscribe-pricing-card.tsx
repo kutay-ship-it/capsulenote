@@ -29,6 +29,8 @@ interface SubscribePricingCardProps {
   priceId: string
   /** Optional letter ID */
   letterId?: string
+  /** Optional checkout metadata */
+  metadata?: Record<string, unknown>
   /** Highlight this card */
   highlighted?: boolean
   /** Show "Most Popular" badge */
@@ -48,6 +50,7 @@ export function SubscribePricingCard({
   features,
   priceId,
   letterId,
+  metadata,
   highlighted = false,
   popular = false,
   badge,
@@ -133,6 +136,7 @@ export function SubscribePricingCard({
           priceId={priceId}
           planName={name}
           letterId={letterId}
+          metadata={metadata}
           variant={highlighted ? "secondary" : "outline"}
           size="lg"
           className="w-full"

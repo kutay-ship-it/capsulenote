@@ -5,6 +5,7 @@ const isPublicRoute = createRouteMatcher([
   "/write-letter(.*)", // Try-before-signup editor
   "/pricing(.*)",
   "/demo-letter(.*)",
+  "/view(.*)",
   "/subscribe(.*)", // Paywall/anonymous checkout
   "/checkout(.*)", // Stripe success/cancel redirects
   "/sign-in(.*)",

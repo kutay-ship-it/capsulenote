@@ -38,9 +38,11 @@ export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
  */
 export function getAllowedPriceIds(): string[] {
   return [
-    env.STRIPE_PRICE_PRO_MONTHLY,
-    env.STRIPE_PRICE_PRO_ANNUAL,
-  ]
+    env.STRIPE_PRICE_DIGITAL_ANNUAL,
+    env.STRIPE_PRICE_PAPER_ANNUAL,
+    env.STRIPE_PRICE_ADDON_EMAIL,
+    env.STRIPE_PRICE_ADDON_PHYSICAL,
+  ].filter(Boolean) as string[]
 }
 
 /**
