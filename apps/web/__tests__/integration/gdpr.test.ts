@@ -74,15 +74,12 @@ vi.mock('../../server/lib/audit', () => ({
   },
 }))
 
-const mockClerk = {
-  users: {
-    deleteUser: vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' })),
-  },
-}
-const mockClerkFactory = vi.fn(() => Promise.resolve(mockClerk))
-
 vi.mock('@clerk/nextjs/server', () => ({
-  clerkClient: mockClerkFactory,
+  clerkClient: vi.fn(() => Promise.resolve({
+    users: {
+      deleteUser: vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' })),
+    },
+  })),
 }))
 
 vi.mock('../../server/providers/stripe/client', () => ({

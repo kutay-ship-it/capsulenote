@@ -18,18 +18,16 @@ import {
   invalidateEntitlementsCache,
 } from "../../server/lib/entitlements"
 
-const mockPrisma = {
-  user: {
-    findUnique: vi.fn(),
-    update: vi.fn(),
-  },
-  letter: {
-    count: vi.fn(),
-  },
-}
-
 vi.mock("../../server/lib/db", () => ({
-  prisma: mockPrisma,
+  prisma: {
+    user: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    letter: {
+      count: vi.fn(),
+    },
+  },
 }))
 
 const mockRedis = {

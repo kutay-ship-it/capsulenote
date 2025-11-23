@@ -50,34 +50,35 @@ const mockEntitlementsModule = {
 
 vi.mock("../../server/lib/entitlements", () => mockEntitlementsModule)
 
-const mockPrisma = {
-  letter: {
-    findFirst: vi.fn(),
-  },
-  delivery: {
-    create: vi.fn(),
-    findUnique: vi.fn(),
-    update: vi.fn(),
-  },
-  emailDelivery: {
-    create: vi.fn(),
-  },
-  mailDelivery: {
-    create: vi.fn(),
-  },
-  user: {
-    update: vi.fn(),
-  },
-  $transaction: vi.fn(async (cb: any) =>
-    cb({
-      delivery: mockPrisma.delivery,
-      emailDelivery: mockPrisma.emailDelivery,
-      mailDelivery: mockPrisma.mailDelivery,
-    })
-  ),
-}
-
-vi.mock("../../server/lib/db", () => ({ prisma: mockPrisma }))
+vi.mock("../../server/lib/db", () => {
+  const mockPrisma = {
+    letter: {
+      findFirst: vi.fn(),
+    },
+    delivery: {
+      create: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    emailDelivery: {
+      create: vi.fn(),
+    },
+    mailDelivery: {
+      create: vi.fn(),
+    },
+    user: {
+      update: vi.fn(),
+    },
+    $transaction: vi.fn(async (cb: any) => {
+      return cb({
+        delivery: mockPrisma.delivery,
+        emailDelivery: mockPrisma.emailDelivery,
+        mailDelivery: mockPrisma.mailDelivery,
+      })
+    }),
+  }
+  return { prisma: mockPrisma }
+})
 
 vi.mock("../../server/lib/audit", () => ({
   createAuditEvent: vi.fn(() => Promise.resolve({ id: "audit_123" })),

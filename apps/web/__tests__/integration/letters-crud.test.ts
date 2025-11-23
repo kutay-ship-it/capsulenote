@@ -40,16 +40,16 @@ vi.mock("../../server/lib/entitlements", () => ({
   trackLetterCreation: vi.fn(() => Promise.resolve()),
 }))
 
-const mockPrisma = {
-  letter: {
-    create: vi.fn(),
-    findFirst: vi.fn(),
-    findUnique: vi.fn(),
-    update: vi.fn(),
+vi.mock("../../server/lib/db", () => ({
+  prisma: {
+    letter: {
+      create: vi.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
   },
-}
-
-vi.mock("../../server/lib/db", () => ({ prisma: mockPrisma }))
+}))
 
 vi.mock("../../server/lib/audit", () => ({
   createAuditEvent: vi.fn(() => Promise.resolve({ id: "audit_123" })),
