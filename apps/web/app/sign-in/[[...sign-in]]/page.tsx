@@ -1,6 +1,23 @@
-import { SignIn } from "@clerk/nextjs"
+import { redirect } from "next/navigation"
+import { auth } from "@clerk/nextjs/server"
+import { CustomSignInForm } from "@/components/auth/custom-sign-in"
 
-export default function SignInPage() {
+interface PageProps {
+  searchParams: Promise<{
+    email?: string
+  }>
+}
+
+export default async function SignInPage({ searchParams }: PageProps) {
+  // Redirect if already signed in
+  const { userId } = await auth()
+  if (userId) {
+    redirect("/dashboard")
+  }
+
+  const params = await searchParams
+  const prefillEmail = params.email
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20">
       <div className="w-full max-w-md px-4">
@@ -10,21 +27,7 @@ export default function SignInPage() {
             Sign in to continue writing letters to your future self
           </p>
         </div>
-        <SignIn
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-lg",
-              formButtonPrimary:
-                "bg-primary text-primary-foreground hover:bg-primary/90",
-              footerActionLink: "text-primary hover:text-primary/80",
-            },
-          }}
-          routing="path"
-          path="/sign-in"
-          redirectUrl="/dashboard"
-          signUpUrl="/sign-up"
-        />
+        <CustomSignInForm prefillEmail={prefillEmail} />
       </div>
     </div>
   )

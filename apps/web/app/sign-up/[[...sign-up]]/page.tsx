@@ -1,6 +1,24 @@
-import { SignUp } from "@clerk/nextjs"
+import { redirect } from "next/navigation"
+import { auth } from "@clerk/nextjs/server"
+import { Card, CardContent } from "@/components/ui/card"
+import { CustomSignUpForm } from "@/components/auth/custom-sign-up"
 
-export default function SignUpPage() {
+interface PageProps {
+  searchParams: Promise<{
+    email?: string
+  }>
+}
+
+export default async function SignUpPage({ searchParams }: PageProps) {
+  // Redirect if already signed in
+  const { userId } = await auth()
+  if (userId) {
+    redirect("/dashboard")
+  }
+
+  const params = await searchParams
+  const lockedEmail = params.email
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20">
       <div className="w-full max-w-md px-4">
@@ -10,21 +28,17 @@ export default function SignUpPage() {
             Start writing letters to your future self today
           </p>
         </div>
-        <SignUp
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-lg",
-              formButtonPrimary:
-                "bg-primary text-primary-foreground hover:bg-primary/90",
-              footerActionLink: "text-primary hover:text-primary/80",
-            },
-          }}
-          routing="path"
-          path="/sign-up"
-          redirectUrl="/dashboard"
-          signInUrl="/sign-in"
-        />
+        {lockedEmail && (
+          <Card className="mb-6 border-2 border-charcoal">
+            <CardContent className="p-4">
+              <p className="font-mono text-xs text-charcoal">
+                Signing up with <strong>{lockedEmail}</strong>. This email was used at checkout and
+                cannot be changed for this account.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+        <CustomSignUpForm lockedEmail={lockedEmail} />
       </div>
     </div>
   )
