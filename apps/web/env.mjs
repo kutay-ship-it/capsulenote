@@ -24,6 +24,7 @@ export const env = createEnv({
 
     // Email
     RESEND_API_KEY: z.string().min(1),
+    RESEND_WEBHOOK_SECRET: z.string().min(1), // Webhook signature verification
     EMAIL_FROM_NOTIFICATION: z.string().min(1).optional(),
     EMAIL_FROM_DELIVERY: z.string().min(1).optional(),
     // Legacy email sender (backward compatibility)
@@ -98,6 +99,7 @@ export const env = createEnv({
     STRIPE_PRICE_PRO_MONTHLY: process.env.STRIPE_PRICE_PRO_MONTHLY,
     STRIPE_PRICE_PRO_ANNUAL: process.env.STRIPE_PRICE_PRO_ANNUAL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
     EMAIL_FROM_NOTIFICATION: process.env.EMAIL_FROM_NOTIFICATION,
     EMAIL_FROM_DELIVERY: process.env.EMAIL_FROM_DELIVERY,
     EMAIL_FROM: process.env.EMAIL_FROM,

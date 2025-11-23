@@ -522,10 +522,35 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 pnpm db:generate
 pnpm db:migrate
 
+# Set up local webhooks (Stripe + Resend)
+./scripts/setup-local-webhooks.sh
+# Follow prompts to authenticate Stripe CLI and ngrok
+
 # Start development
 pnpm dev
 # Web app: http://localhost:3000
 # Inngest UI: http://localhost:8288
+```
+
+### Local Webhook Testing
+
+**Quick Start**: See `docs/WEBHOOK_TESTING_QUICK_START.md`
+
+**Full Guide**: See `docs/LOCAL_WEBHOOK_TESTING.md`
+
+**Daily workflow** (4 terminals):
+```bash
+# Terminal 1: Next.js + Inngest
+pnpm dev
+
+# Terminal 2: Stripe webhooks
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+
+# Terminal 3: ngrok (for Resend)
+ngrok http 3000
+
+# Terminal 4: Testing
+stripe trigger payment_intent.succeeded
 ```
 
 ### Making Changes

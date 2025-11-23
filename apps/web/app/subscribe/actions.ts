@@ -239,7 +239,7 @@ export async function linkPendingSubscription(
     })
 
     // 3. Verify email is verified in Clerk
-    const clerk = await clerkClient()
+    const clerk = clerkClient
     const clerkUser = await clerk.users.getUser(user.clerkUserId)
 
     const primaryEmail = clerkUser.emailAddresses.find(

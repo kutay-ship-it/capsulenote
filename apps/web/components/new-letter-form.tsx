@@ -3,7 +3,10 @@
 import { useRouter } from "next/navigation"
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { createLetter } from "@/server/actions/letters"
+import { scheduleDelivery } from "@/server/actions/deliveries"
 import { useToast } from "@/hooks/use-toast"
+import { zonedTimeToUtc } from "date-fns-tz"
+import { getUserTimezone } from "@/lib/utils"
 
 export function NewLetterForm() {
   const router = useRouter()
@@ -21,12 +24,35 @@ export function NewLetterForm() {
     })
 
     if (result.success) {
-      toast({
-        title: "Letter Created Successfully",
-        description: `Your letter "${data.title}" has been saved and will be delivered on ${new Date(data.deliveryDate).toLocaleDateString()}`,
-      })
+      const letterId = result.data.letterId
+      const timezone = getUserTimezone()
+      const deliverAt = zonedTimeToUtc(`${data.deliveryDate}T09:00`, timezone)
 
-      router.push(`/letters/${result.data.letterId}`)
+      try {
+        await scheduleDelivery({
+          letterId,
+          channel: "email",
+          deliverAt,
+          timezone,
+          toEmail: data.recipientEmail,
+        })
+
+        toast({
+          title: "Letter Scheduled",
+          description: `Your letter "${data.title}" is set for ${deliverAt.toLocaleString()}.`,
+        })
+      } catch (scheduleError) {
+        toast({
+          variant: "destructive",
+          title: "Delivery Not Scheduled",
+          description:
+            scheduleError instanceof Error
+              ? scheduleError.message
+              : "We saved your letter, but scheduling failed. Please try again from the letter page.",
+        })
+      }
+
+      router.push(`/letters/${letterId}`)
     } else {
       toast({
         variant: "destructive",

@@ -3,6 +3,7 @@ import {
   inngest,
   deliverEmail,
   sendLetterCreatedEmail,
+  sendDeliveryScheduledEmail,
   processStripeWebhook,
   sendBillingNotification,
   handleDunning,
@@ -14,6 +15,7 @@ export const { GET, POST, PUT } = serve({
     // Letter delivery
     deliverEmail,
     sendLetterCreatedEmail,
+    sendDeliveryScheduledEmail,
 
     // Billing & payments
     processStripeWebhook,

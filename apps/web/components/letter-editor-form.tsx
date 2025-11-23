@@ -73,6 +73,16 @@ export function LetterEditorForm({
     { label: "10 Years", months: 120 },
   ]
 
+  // Sync with updated initial data (e.g., resume draft)
+  React.useEffect(() => {
+    if (initialData) {
+      setTitle(initialData.title ?? "")
+      setBody(initialData.body ?? "")
+      setRecipientEmail(initialData.recipientEmail ?? "")
+      setDeliveryDate(initialData.deliveryDate ? new Date(initialData.deliveryDate) : undefined)
+    }
+  }, [initialData?.title, initialData?.body, initialData?.recipientEmail, initialData?.deliveryDate])
+
   const handlePresetDate = (months: number, label: string) => {
     const today = new Date()
     const futureDate = new Date(today.setMonth(today.getMonth() + months))

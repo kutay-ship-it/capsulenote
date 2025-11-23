@@ -1,10 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { createLetter } from "@/server/actions/letters"
-import { useToast } from "@/components/ui/use-toast"
+import { scheduleDelivery } from "@/server/actions/deliveries"
+import { useToast } from "@/hooks/use-toast"
+import { fromZonedTime } from "date-fns-tz"
+import { getUserTimezone } from "@/lib/utils"
+import { getAnonymousDraft, clearAnonymousDraft } from "@/lib/localStorage-letter"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 
 /**
  * Dashboard Letter Editor Component
@@ -16,6 +22,37 @@ export function DashboardLetterEditor() {
   const router = useRouter()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [draftData, setDraftData] = useState<LetterFormData | null>(null)
+  const [showResumePrompt, setShowResumePrompt] = useState(false)
+  const [activeInitialData, setActiveInitialData] = useState<LetterFormData>(() => ({
+    title: "",
+    body: "",
+    recipientEmail: "",
+    deliveryDate: "",
+  }))
+
+  const defaultInitialData = useMemo(
+    () => ({
+      title: "",
+      body: "",
+      recipientEmail: "",
+      deliveryDate: "",
+    }),
+    []
+  )
+
+  useEffect(() => {
+    const draft = getAnonymousDraft()
+    if (draft) {
+      setDraftData({
+        title: draft.title || "",
+        body: draft.body || "",
+        recipientEmail: draft.recipientEmail || "",
+        deliveryDate: draft.deliveryDate || "",
+      })
+      setShowResumePrompt(true)
+    }
+  }, [])
 
   const handleLetterSubmit = async (data: LetterFormData) => {
     // Prevent double submission
@@ -55,14 +92,38 @@ export function DashboardLetterEditor() {
       })
 
       if (result.success) {
+        const letterId = result.data.letterId
+        const timezone = getUserTimezone()
+        const deliverAt = fromZonedTime(`${data.deliveryDate}T09:00`, timezone)
+
+        try {
+          await scheduleDelivery({
+            letterId,
+            channel: 'email',
+            deliverAt,
+            timezone,
+            toEmail: data.recipientEmail,
+          })
+        } catch (scheduleError) {
+          toast({
+            variant: "destructive",
+            title: "Delivery Not Scheduled",
+            description: scheduleError instanceof Error
+              ? scheduleError.message
+              : "Letter saved, but scheduling failed. Please try again from the letter page.",
+          })
+        }
+
+        clearAnonymousDraft()
+
         // Show success toast
         toast({
           title: "Letter Created",
-          description: `"${data.title}" has been saved to your encrypted vault.`,
+          description: `"${data.title}" has been saved to your encrypted vault${data.deliveryDate ? " and scheduled." : "."}`,
         })
 
         // Redirect to letter detail page
-        router.push(`/letters/${result.data.letterId}`)
+        router.push(`/letters/${letterId}`)
       } else {
         // Handle error cases
         if (result.error.code === 'QUOTA_EXCEEDED') {
@@ -103,17 +164,49 @@ export function DashboardLetterEditor() {
   }
 
   return (
-    <LetterEditorForm
-      accentColor="teal"
-      onSubmit={handleLetterSubmit}
-      initialData={{
-        title: "",
-        body: "",
-        recipientEmail: "",
-        deliveryDate: "",
-      }}
-      isSubmitting={isSubmitting}
-    />
+    <div className="space-y-4">
+      {showResumePrompt && draftData && (
+        <Alert>
+          <AlertTitle>Continue where you left off?</AlertTitle>
+          <AlertDescription className="flex flex-wrap items-center gap-3">
+            We found a saved draft from your last visit.
+            <Button
+              size="sm"
+              onClick={() => {
+                setActiveInitialData(draftData)
+                setShowResumePrompt(false)
+              }}
+              className="border-2 border-charcoal bg-charcoal text-cream hover:bg-gray-800"
+            >
+              Resume draft
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                clearAnonymousDraft()
+                setDraftData(null)
+                setActiveInitialData(defaultInitialData)
+                setShowResumePrompt(false)
+              }}
+              className="border-2 border-charcoal"
+            >
+              Start fresh
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <LetterEditorForm
+        accentColor="teal"
+        onSubmit={(data) => {
+          setShowResumePrompt(false)
+          return handleLetterSubmit(data)
+        }}
+        initialData={activeInitialData}
+        isSubmitting={isSubmitting}
+      />
+    </div>
   )
 }
 

@@ -202,23 +202,23 @@ export async function scheduleDelivery(
     }
 
     // Trigger Inngest workflow - CRITICAL: must succeed
-    let runId: string | null = null
+    let eventId: string | null = null
     try {
-      runId = await triggerInngestEvent("delivery.scheduled", { deliveryId: delivery.id })
+      eventId = await triggerInngestEvent("delivery.scheduled", { deliveryId: delivery.id })
 
-      if (!runId) {
-        throw new Error("Inngest did not return a run ID")
+      if (!eventId) {
+        throw new Error("Inngest did not return an event ID")
       }
 
-      // Store run ID for cancellation support
+      // Store event ID for audit/debugging
       await prisma.delivery.update({
         where: { id: delivery.id },
-        data: { inngestRunId: runId }
+        data: { inngestRunId: eventId }
       })
 
       await logger.info('Inngest event sent successfully', {
         deliveryId: delivery.id,
-        runId,
+        eventId,
         event: 'delivery.scheduled',
       })
     } catch (inngestError) {
@@ -363,22 +363,7 @@ export async function updateDelivery(
       // Check if delivery time is being changed
       const isRescheduling = data.deliverAt && data.deliverAt.getTime() !== existing.deliverAt.getTime()
 
-      if (isRescheduling && existing.inngestRunId) {
-        // Cancel old Inngest run
-        try {
-          const { inngest } = await import("@dearme/inngest")
-          await inngest.cancel(existing.inngestRunId)
-          await logger.info('Canceled old Inngest run for rescheduling', {
-            deliveryId,
-            oldRunId: existing.inngestRunId,
-          })
-        } catch (cancelError) {
-          await logger.warn('Failed to cancel old Inngest run', {
-            deliveryId,
-            error: cancelError instanceof Error ? cancelError.message : String(cancelError),
-          })
-        }
-
+      if (isRescheduling) {
         // Update delivery with new time and clear run ID
         await prisma.delivery.update({
           where: { id: deliveryId },
@@ -391,18 +376,18 @@ export async function updateDelivery(
 
         // Re-schedule with new time
         try {
-          const runId = await triggerInngestEvent("delivery.scheduled", { deliveryId })
+          const eventId = await triggerInngestEvent("delivery.scheduled", { deliveryId })
 
-          if (runId) {
+          if (eventId) {
             await prisma.delivery.update({
               where: { id: deliveryId },
-              data: { inngestRunId: runId }
+              data: { inngestRunId: eventId }
             })
           }
 
           await logger.info('Delivery rescheduled successfully', {
             deliveryId,
-            newRunId: runId,
+            eventId,
             newDeliverAt: data.deliverAt,
           })
         } catch (rescheduleError) {
@@ -550,25 +535,6 @@ export async function cancelDelivery(
           message: 'Failed to cancel delivery. Please try again.',
           details: error,
         },
-      }
-    }
-
-    // Cancel Inngest workflow if it has a run ID
-    if (existing.inngestRunId) {
-      try {
-        const { inngest } = await import("@dearme/inngest")
-        await inngest.cancel(existing.inngestRunId)
-        await logger.info('Inngest workflow canceled', {
-          deliveryId,
-          runId: existing.inngestRunId
-        })
-      } catch (cancelError) {
-        // Log but don't fail the cancellation if Inngest cancel fails
-        await logger.warn('Failed to cancel Inngest workflow', {
-          deliveryId,
-          runId: existing.inngestRunId,
-          error: cancelError instanceof Error ? cancelError.message : String(cancelError),
-        })
       }
     }
 

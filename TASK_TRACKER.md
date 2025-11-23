@@ -76,6 +76,14 @@
 **Total Hours:** 70h
 **Deadline:** Week 2 End
 
+### 🔥 New Critical Tasks (2025-11-23)
+- [ ] Unblock marketing/paywall routes in middleware (public access for pricing/write-letter/subscribe/checkout).
+- [ ] Secure admin audit log (role/allowlist guard).
+- [ ] Fix Stripe webhook replay guard and undefined `eventAge` reference.
+- [ ] Fix Clerk client invocation in subscription linking (pending subscriptions).
+- [ ] Harden Resend webhook with secret presence and replay window.
+- [ ] Surface scheduleDelivery errors in schedule form UI.
+
 ---
 
 ### Week 1: Core UX Fixes (30 hours)

@@ -40,6 +40,22 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
   const params = await searchParams
   const { email, letterId } = params
 
+  // If email already belongs to active subscriber, prompt sign-in instead of paywall
+  if (email) {
+    const existingUser = await prisma.user.findFirst({
+      where: { email },
+      include: {
+        subscriptions: {
+          where: { status: { in: ["active", "trialing"] } },
+        },
+      },
+    })
+
+    if (existingUser && existingUser.subscriptions.length > 0) {
+      redirect(`/sign-in?email=${encodeURIComponent(email)}&intent=resume`)
+    }
+  }
+
   // Check for pending subscriptions if email provided
   let pendingSubscription: any = null
   if (email) {

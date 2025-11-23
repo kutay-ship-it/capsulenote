@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Calendar, Mail as MailIcon } from "lucide-react"
+import { fromZonedTime } from "date-fns-tz"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -81,11 +82,11 @@ export function ScheduleDeliveryForm({
   const formatDeliveryTime = (): string | null => {
     if (!deliveryDate) return null
 
-    const dateTime = new Date(deliveryDate)
-    const [hours, minutes] = deliverTime.split(':')
-    dateTime.setHours(parseInt(hours), parseInt(minutes))
+    const timezone = getUserTimezone()
+    const dateOnly = deliveryDate.toISOString().split('T')[0]
+    const deliverAt = fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
 
-    return formatDateTimeWithTimezone(dateTime)
+    return formatDateTimeWithTimezone(deliverAt)
   }
 
   // Handle form submission
@@ -113,20 +114,31 @@ export function ScheduleDeliveryForm({
     setIsSubmitting(true)
 
     try {
-      // Combine date and time
-      const dateTime = new Date(deliveryDate)
-      const [hours, minutes] = deliverTime.split(':')
-      dateTime.setHours(parseInt(hours), parseInt(minutes))
+      const timezone = getUserTimezone()
+      const dateOnly = deliveryDate.toISOString().split('T')[0]
+      const deliverAt = fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
 
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-      await scheduleDelivery({
+      const result = await scheduleDelivery({
         letterId,
         channel,
-        deliverAt: dateTime,
+        deliverAt,
         timezone,
         toEmail: recipientEmail,
       })
+
+      if (!result.success) {
+        const message =
+          result.error?.message ||
+          (result.error?.code === "SUBSCRIPTION_REQUIRED"
+            ? "Scheduling requires a subscription."
+            : "Failed to schedule delivery.")
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: message,
+        })
+        return
+      }
 
       toast({
         title: "✓ Delivery Scheduled",
@@ -330,18 +342,16 @@ export function ScheduleDeliveryForm({
                 <div className="flex items-center gap-1">
                   <TimezoneTooltip
                     deliveryDate={(() => {
-                      const dt = new Date(deliveryDate)
-                      const [hours, minutes] = deliverTime.split(':')
-                      dt.setHours(parseInt(hours), parseInt(minutes))
-                      return dt
+                      const timezone = getUserTimezone()
+                      const dateOnly = deliveryDate.toISOString().split('T')[0]
+                      return fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
                     })()}
                     variant="globe"
                   />
                   {isDST((() => {
-                    const dt = new Date(deliveryDate)
-                    const [hours, minutes] = deliverTime.split(':')
-                    dt.setHours(parseInt(hours), parseInt(minutes))
-                    return dt
+                    const timezone = getUserTimezone()
+                    const dateOnly = deliveryDate.toISOString().split('T')[0]
+                    return fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
                   })()) && <DSTTooltip />}
                 </div>
               </div>

@@ -45,28 +45,27 @@ export async function POST(req: Request) {
     return new Response(`Invalid signature: ${error.message}`, { status: 400 })
   }
 
-  // 2. Validate event age (reject >5 minutes old)
-  const eventAge = Date.now() - event.created * 1000
-  const MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
+  // Validate event age (prevent replay attacks)
+  const eventAgeMs = Math.abs(Date.now() - (event.created * 1000))
+  const MAX_AGE_MS = 5 * 60 * 1000
 
-  if (eventAge > MAX_AGE_MS) {
-    console.warn("[Stripe Webhook] Event too old, rejecting", {
+  if (eventAgeMs > MAX_AGE_MS) {
+    console.error("[Stripe Webhook] Event too old, rejecting", {
       eventId: event.id,
       eventType: event.type,
-      age: Math.floor(eventAge / 1000) + "s",
-      maxAge: "300s",
+      ageSeconds: Math.floor(eventAgeMs / 1000),
     })
     return new Response("Event too old", { status: 400 })
   }
 
-  // 3. Queue to Inngest for async processing
+  // 2. Queue to Inngest for async processing
   try {
     await triggerInngestEvent("stripe/webhook.received", { event })
 
     console.log("[Stripe Webhook] Event queued successfully", {
       eventId: event.id,
       eventType: event.type,
-      age: Math.floor(eventAge / 1000) + "s",
+      age: Math.floor(eventAgeMs / 1000) + "s",
     })
 
     // 4. Return 200 immediately (don't block Stripe)

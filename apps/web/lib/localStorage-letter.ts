@@ -10,6 +10,8 @@
 export interface AnonymousDraft {
   title: string
   body: string
+  recipientEmail?: string
+  deliveryDate?: string
   wordCount: number
   lastSaved: string // ISO 8601 timestamp
   createdAt: string // ISO 8601 timestamp
@@ -21,7 +23,12 @@ const DRAFT_EXPIRY_DAYS = 7 // Auto-delete after 7 days
 /**
  * Save draft to localStorage with timestamp
  */
-export function saveAnonymousDraft(title: string, body: string): void {
+export function saveAnonymousDraft(
+  title: string,
+  body: string,
+  recipientEmail?: string,
+  deliveryDate?: string
+): void {
   try {
     const wordCount = countWords(body)
     const now = new Date().toISOString()
@@ -30,6 +37,8 @@ export function saveAnonymousDraft(title: string, body: string): void {
     const draft: AnonymousDraft = {
       title,
       body,
+      recipientEmail,
+      deliveryDate,
       wordCount,
       lastSaved: now,
       createdAt: existing?.createdAt || now,

@@ -4,6 +4,7 @@ import { WebhookEvent } from "@clerk/nextjs/server"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
 import { linkPendingSubscription } from "@/app/subscribe/actions"
+import { clerkClient } from "@clerk/nextjs/server"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET
@@ -63,9 +64,23 @@ export async function POST(req: Request) {
       case "user.created": {
         const { id, email_addresses } = evt.data
         const email = email_addresses[0]?.email_address
+        const lockedEmail =
+          (evt.data.unsafe_metadata as { lockedEmail?: string } | undefined)?.lockedEmail ||
+          (evt.data.public_metadata as { lockedEmail?: string } | undefined)?.lockedEmail
 
         if (!email) {
           return new Response("No email found", { status: 400 })
+        }
+
+        // Enforce locked email if provided
+        if (lockedEmail && lockedEmail.toLowerCase() !== email.toLowerCase()) {
+          console.error(`[Clerk Webhook] Locked email mismatch. Expected ${lockedEmail}, got ${email}`)
+          try {
+            await clerkClient.users.deleteUser(id)
+          } catch (deleteErr) {
+            console.error(`[Clerk Webhook] Failed to delete user after mismatch`, deleteErr)
+          }
+          return new Response("Email mismatch for locked signup", { status: 400 })
         }
 
         // Create user and profile with default timezone (user can update in settings)

@@ -11,6 +11,8 @@
  * @module app/admin/audit
  */
 
+import { redirect } from "next/navigation"
+import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/server/lib/db"
 import { AuditLogTable } from "./_components/audit-log-table"
 import { AuditLogFilters } from "./_components/audit-log-filters"
@@ -32,11 +34,25 @@ interface PageProps {
 }
 
 export default async function AdminAuditPage({ searchParams }: PageProps) {
-  // TODO: Add admin authentication check
-  // const user = await requireUser()
-  // if (!user.isAdmin) {
-  //   redirect('/dashboard')
-  // }
+  const { userId: clerkUserId, sessionClaims } = await auth()
+  if (!clerkUserId) {
+    redirect("/dashboard")
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId },
+    select: { id: true, email: true },
+  })
+
+  const allowlist =
+    process.env.ADMIN_EMAILS?.split(",").map((email) => email.trim().toLowerCase()).filter(Boolean) ?? []
+
+  const hasAdminRole = sessionClaims?.metadata?.role === "admin"
+  const isAllowlisted = user?.email ? allowlist.includes(user.email.toLowerCase()) : false
+
+  if (!hasAdminRole && !isAllowlisted) {
+    redirect("/dashboard")
+  }
 
   const page = parseInt(searchParams.page || "1", 10)
   const limit = 50

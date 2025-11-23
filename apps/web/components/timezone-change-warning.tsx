@@ -82,7 +82,7 @@ export function TimezoneChangeWarning({
           <Button
             onClick={handleUpdateTimezone}
             size="sm"
-            className="border-2 border-charcoal bg-charcoal font-mono text-xs uppercase hover:bg-gray-800"
+            className="border-2 border-charcoal bg-charcoal font-mono text-xs uppercase text-white hover:bg-gray-800"
             style={{ borderRadius: "2px" }}
           >
             Update Timezone in Settings

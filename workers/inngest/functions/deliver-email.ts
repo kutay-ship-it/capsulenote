@@ -184,7 +184,7 @@ export const deliverEmail = inngest.createFunction(
     }
 
     // Fetch delivery details
-    const delivery = await step.run("fetch-delivery", async () => {
+    let delivery = await step.run("fetch-delivery", async () => {
       try {
         const result = await prisma.delivery.findUnique({
           where: { id: deliveryId },
@@ -257,6 +257,48 @@ export const deliverEmail = inngest.createFunction(
 
     // Check if delivery time has arrived
     await step.sleepUntil("wait-for-delivery-time", delivery.deliverAt)
+
+    // Refresh delivery after any potential reschedule/cancel while waiting
+    const refreshed = await step.run("refresh-delivery-after-wait", async () => {
+      const current = await prisma.delivery.findUnique({
+        where: { id: deliveryId },
+        include: {
+          letter: true,
+          emailDelivery: true,
+          user: {
+            include: { profile: true },
+          },
+        },
+      })
+
+      if (!current) {
+        throw new NonRetriableError("Delivery no longer exists")
+      }
+
+      return current
+    })
+
+    // If canceled while waiting, abort
+    if (refreshed.status === "canceled") {
+      logger.warn("Delivery canceled while waiting", { deliveryId })
+      throw new NonRetriableError("Delivery was canceled")
+    }
+
+    // If rescheduled to a future date, wait until the new deliverAt
+    if (refreshed.deliverAt.getTime() !== delivery.deliverAt.getTime()) {
+      logger.info("Delivery was rescheduled while waiting, adjusting", {
+        deliveryId,
+        previousDeliverAt: delivery.deliverAt,
+        newDeliverAt: refreshed.deliverAt,
+      })
+
+      if (refreshed.deliverAt > new Date()) {
+        await step.sleepUntil("wait-for-updated-time", refreshed.deliverAt)
+      }
+    }
+
+    // Use the freshest copy for the remainder of the flow
+    delivery = refreshed
 
     // Update status to processing
     await step.run("update-status-processing", async () => {

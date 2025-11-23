@@ -12,6 +12,7 @@
  */
 
 import { inngest } from "../../client"
+import { NonRetriableError } from "inngest"
 import { prisma } from "@dearme/prisma"
 import Stripe from "stripe"
 import {
@@ -189,7 +190,21 @@ export const processStripeWebhook = inngest.createFunction(
       eventType: stripeEvent.type,
     })
 
-    // Step 1: Claim idempotency (create record FIRST to prevent race condition)
+    /**
+     * Step 1: Claim idempotency (create record FIRST to prevent race condition)
+     *
+     * Enterprise idempotency pattern:
+     * - Use webhook_events table as distributed lock
+     * - P2002 (unique constraint) = already processed by another delivery
+     * - NonRetriableError prevents Inngest from retrying duplicate events
+     * - Graceful deduplication without polluting retry queue or DLQ
+     *
+     * Why NonRetriableError?
+     * - Duplicate webhooks are expected behavior (network retries, load balancers)
+     * - Retry would fail again with same P2002 error
+     * - Avoids unnecessary retry attempts and DLQ pollution
+     * - Maintains clean observability in Inngest dashboard
+     */
     await step.run("claim-idempotency", async () => {
       try {
         await prisma.webhookEvent.create({
@@ -204,14 +219,19 @@ export const processStripeWebhook = inngest.createFunction(
           eventId: stripeEvent.id,
         })
       } catch (error: any) {
-        // Check if it's a unique constraint violation
+        // Check if it's a unique constraint violation (Prisma error code P2002)
         if (error?.code === 'P2002') {
-          // Already processed by another webhook delivery
+          // Already processed by another webhook delivery - this is EXPECTED behavior
           console.log("[Webhook Processor] Event already processed (idempotency)", {
             eventId: stripeEvent.id,
+            eventType: stripeEvent.type,
           })
-          throw new NonRetriableError("Event already processed")
+          // Use NonRetriableError to exit gracefully without retries
+          throw new NonRetriableError(
+            `Event ${stripeEvent.id} already processed - duplicate delivery detected`
+          )
         }
+        // Other errors should be retried
         throw error
       }
     })

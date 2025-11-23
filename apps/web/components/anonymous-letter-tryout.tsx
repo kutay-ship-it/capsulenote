@@ -34,6 +34,7 @@ export function AnonymousLetterTryout() {
   const router = useRouter()
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
+  const [email, setEmail] = useState("")
   const [wordCount, setWordCount] = useState(0)
   const [lastSaved, setLastSaved] = useState<string | null>(null)
   const [showSaveIndicator, setShowSaveIndicator] = useState(false)
@@ -46,6 +47,7 @@ export function AnonymousLetterTryout() {
     if (draft) {
       setTitle(draft.title)
       setBody(draft.body)
+      setEmail(draft.recipientEmail || "")
       setWordCount(draft.wordCount)
       setLastSaved(draft.lastSaved)
     }
@@ -54,7 +56,7 @@ export function AnonymousLetterTryout() {
   // Auto-save function with debounce
   const performAutoSave = useCallback(() => {
     if (body.trim().length > 0) {
-      saveAnonymousDraft(title, body)
+      saveAnonymousDraft(title, body, email)
       setLastSaved(new Date().toISOString())
       setShowSaveIndicator(true)
 
@@ -103,6 +105,18 @@ export function AnonymousLetterTryout() {
   const handleSignUp = () => {
     // Draft will be automatically loaded after sign-up via migration
     router.push('/sign-up?intent=save-draft')
+  }
+
+  const handleSendAndSchedule = () => {
+    const trimmedEmail = email.trim()
+    if (!trimmedEmail) {
+      setShowSignUpPrompt(true)
+      return
+    }
+    saveAnonymousDraft(title, body, trimmedEmail)
+    const params = new URLSearchParams()
+    params.set("email", trimmedEmail)
+    router.push(`/subscribe?${params.toString()}`)
   }
 
   return (
@@ -202,6 +216,23 @@ export function AnonymousLetterTryout() {
             />
           </div>
 
+          {/* Email Input */}
+          <div className="space-y-2">
+            <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+              Your Email (for scheduling)
+            </Label>
+            <Input
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border-2 border-charcoal font-mono focus-visible:ring-0 focus-visible:ring-offset-0"
+              style={{ borderRadius: "2px" }}
+            />
+            <p className="font-mono text-xs text-gray-secondary">
+              We’ll lock this email for checkout and sign-up so your delivery is tied to you.
+            </p>
+          </div>
+
           {/* Body Textarea */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -232,7 +263,7 @@ export function AnonymousLetterTryout() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between border-t-2 border-charcoal pt-6">
+          <div className="flex flex-col gap-3 border-t-2 border-charcoal pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <p className="font-mono text-xs text-gray-secondary">
                 ✓ Auto-saves every 10 seconds
@@ -241,7 +272,7 @@ export function AnonymousLetterTryout() {
                 ✓ Draft kept for 7 days
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
                 onClick={handleManualSave}
@@ -252,13 +283,21 @@ export function AnonymousLetterTryout() {
                 <Save className="mr-2 h-4 w-4" />
                 Save Now
               </Button>
+              <Button
+                onClick={handleSendAndSchedule}
+                disabled={body.trim().length === 0}
+                className="border-2 border-charcoal bg-charcoal font-mono text-sm uppercase hover:bg-gray-800"
+                style={{ borderRadius: "2px" }}
+              >
+                Send & Schedule →
+              </Button>
               {wordCount >= 10 && (
                 <Button
                   onClick={handleSignUp}
-                  className="border-2 border-charcoal bg-charcoal font-mono text-sm uppercase hover:bg-gray-800"
+                  className="border-2 border-charcoal font-mono text-sm uppercase"
                   style={{ borderRadius: "2px" }}
                 >
-                  Sign Up to Schedule →
+                  Sign Up First
                 </Button>
               )}
             </div>

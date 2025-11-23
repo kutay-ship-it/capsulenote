@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { createLetter } from "@/server/actions/letters"
 import { useToast } from "@/hooks/use-toast"
+import { getAnonymousDraft, saveAnonymousDraft, clearAnonymousDraft } from "@/lib/localStorage-letter"
 
 interface LetterDraftFormProps {
   initialData?: {
@@ -43,6 +44,7 @@ export function LetterDraftForm({
   const [isSaving, setIsSaving] = React.useState(false)
   const [lastSaved, setLastSaved] = React.useState<Date | null>(null)
   const [errors, setErrors] = React.useState<{ title?: string; body?: string }>({})
+  const [restoredDraft, setRestoredDraft] = React.useState(false)
 
   // Auto-save timer ref
   const autoSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -60,6 +62,16 @@ export function LetterDraftForm({
     peach: "bg-bg-peach-light border-peach-500",
     lime: "bg-bg-lime-light border-lime-500",
   }
+
+  // Load saved draft from localStorage (anonymous flow)
+  React.useEffect(() => {
+    const draft = getAnonymousDraft()
+    if (draft) {
+      setTitle(draft.title || "")
+      setBody(draft.body || "")
+      setRestoredDraft(true)
+    }
+  }, [])
 
   // Auto-save function
   const autoSave = React.useCallback(async () => {
@@ -101,6 +113,8 @@ export function LetterDraftForm({
         .filter(p => p.trim())
         .map(p => `<p>${escapeHtml(p)}</p>`)
         .join('')
+
+      saveAnonymousDraft(title, body)
 
       // Call createLetter action
       const result = await createLetter({
@@ -233,6 +247,9 @@ export function LetterDraftForm({
         letterId = result.data.letterId
       }
 
+      // Clear local draft since it is now persisted
+      clearAnonymousDraft()
+
       // Navigate to schedule page
       router.push(`/letters/${letterId}/schedule`)
     } catch (error) {
@@ -318,13 +335,18 @@ export function LetterDraftForm({
               {errors.body && (
                 <FieldError className="font-mono text-xs">{errors.body}</FieldError>
               )}
-              <div className="flex items-center justify-between">
-                <FieldDescription className="font-mono text-xs">
-                  {characterCount} characters · {wordCount} words
+            <div className="flex items-center justify-between">
+              <FieldDescription className="font-mono text-xs">
+                {characterCount} characters · {wordCount} words
+              </FieldDescription>
+              {restoredDraft && (
+                <FieldDescription className="font-mono text-xs text-green-700">
+                  Draft restored from last visit
                 </FieldDescription>
-                {lastSaved && !isSaving && (
-                  <FieldDescription className="font-mono text-xs text-green-600">
-                    ✓ Saved {formatLastSaved()}
+              )}
+              {lastSaved && !isSaving && (
+                <FieldDescription className="font-mono text-xs text-green-600">
+                  ✓ Saved {formatLastSaved()}
                   </FieldDescription>
                 )}
                 {isSaving && (

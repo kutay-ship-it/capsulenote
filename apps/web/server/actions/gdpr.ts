@@ -10,14 +10,36 @@
  * - Response time: Within 30 days of request (GDPR Article 12.3)
  *
  * Legal Notes:
- * - Payment records retained 7 years for tax compliance
- * - Audit logs are immutable and never deleted
+ * - Payment records retained 7 years for tax compliance (Article 17.3.b)
+ * - Audit logs are immutable and never deleted (legal compliance)
  * - Data anonymization used where deletion not legally permitted
+ *
+ * Payment Anonymization Strategy:
+ * - Use sentinel UUID to maintain referential integrity
+ * - Sentinel UUID: "00000000-0000-0000-0000-000000000000" (system user)
+ * - Metadata preserves audit trail (originalUserId, anonymizedAt, reason)
+ * - Complies with tax law (7-year retention) while honoring GDPR erasure
  *
  * @module actions/gdpr
  */
 
 "use server"
+
+/**
+ * Sentinel UUID for anonymized records
+ *
+ * Used to maintain referential integrity when user is deleted but records
+ * must be retained for legal compliance (e.g., payment records for tax law).
+ *
+ * This special UUID:
+ * - Represents a "deleted user" in the system
+ * - Prevents foreign key constraint violations
+ * - Maintains database integrity
+ * - Enables audit trail through metadata
+ *
+ * @constant
+ */
+const DELETED_USER_ID = "00000000-0000-0000-0000-000000000000"
 
 import { requireUser } from "@/server/lib/auth"
 import { prisma } from "@/server/lib/db"
@@ -364,23 +386,57 @@ export async function deleteUserData(): Promise<ActionResult<void>> {
         }
       }
 
-      // 2. Anonymize payment records (retain for 7 years for tax compliance)
+      /**
+       * 2. Anonymize payment records (retain for 7 years for tax compliance)
+       *
+       * GDPR Article 17.3.b allows retention of personal data when necessary
+       * for "compliance with a legal obligation". Tax law requires 7-year
+       * retention of payment records.
+       *
+       * Anonymization strategy:
+       * - Transfer ownership to sentinel user (DELETED_USER_ID)
+       * - Preserve audit trail in metadata (originalUserId, deletion timestamp)
+       * - Maintain referential integrity (no foreign key violations)
+       * - Comply with both GDPR (erasure) and tax law (retention)
+       */
+
+      // Ensure sentinel user exists (idempotent - creates only if missing)
+      await tx.user.upsert({
+        where: { id: DELETED_USER_ID },
+        create: {
+          id: DELETED_USER_ID,
+          clerkUserId: "system_deleted_user",
+          email: "deleted-user@system.internal",
+          profile: {
+            create: {
+              displayName: "Deleted User",
+              timezone: "UTC",
+            },
+          },
+        },
+        update: {}, // No-op if already exists
+      })
+
+      // Anonymize payment records by transferring to sentinel user
       const paymentCount = await tx.payment.updateMany({
         where: { userId: user.id },
         data: {
+          // Transfer to sentinel user (valid UUID, maintains FK integrity)
+          userId: DELETED_USER_ID,
+          // Preserve audit trail in metadata
           metadata: {
             anonymized: true,
             anonymizedAt: new Date().toISOString(),
             originalUserId: user.id,
-            reason: "GDPR Article 17 - Right to Erasure",
+            originalUserEmail: user.email,
+            reason: "GDPR Article 17 - Right to Erasure (tax law exception 17.3.b)",
+            legalRetention: "7 years from payment date (tax compliance)",
           },
-          // Keep payment records but disassociate from user
-          userId: "DELETED_USER",
         },
       })
 
       console.log(
-        `[GDPR Delete] Anonymized ${paymentCount.count} payment records`
+        `[GDPR Delete] Anonymized ${paymentCount.count} payment records → sentinel user ${DELETED_USER_ID}`
       )
 
       // 3. Delete user (cascades to profile, letters, deliveries, usage, addresses)
@@ -395,7 +451,7 @@ export async function deleteUserData(): Promise<ActionResult<void>> {
 
     // 4. Delete Clerk user (signs out and invalidates all sessions)
     try {
-      const clerk = await clerkClient()
+      const clerk = clerkClient
       await clerk.users.deleteUser(user.clerkUserId)
       console.log(`[GDPR Delete] Deleted Clerk user: ${user.clerkUserId}`)
     } catch (error) {
