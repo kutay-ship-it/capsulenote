@@ -15,14 +15,14 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
 import { stripe } from "@/server/providers/stripe"
-import { prisma } from "@/server/lib/db"
+import { getCurrentUser } from "@/server/lib/auth"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, AlertCircle, Loader2 } from "lucide-react"
+import { CheckCircle, AlertCircle } from "lucide-react"
 
-import { SuccessSignupForm } from "../_components/success-signup-form"
+import { SuccessSignupForm } from "../../_components/success-signup-form"
 
 export const metadata: Metadata = {
   title: "Payment Successful - Capsule Note",
@@ -103,6 +103,13 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const user = await currentUser()
 
   if (user) {
+    // Ensure local user is created and pending subscription is linked before redirect
+    try {
+      await getCurrentUser()
+    } catch (error) {
+      console.error("[Success Page] Failed to sync user post-checkout", error)
+    }
+
     // User is authenticated - show success and redirect to dashboard
     // The webhook or dashboard mount will link the subscription
     return (

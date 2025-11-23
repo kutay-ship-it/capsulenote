@@ -3,6 +3,8 @@
  *
  * Tests worker error classification and retry logic.
  * Critical for determining which errors should be retried vs permanently failed.
+ *
+ * Note: Keep active; if error taxonomy changes, update fixtures instead of disabling.
  */
 
 import { describe, it, expect } from 'vitest'

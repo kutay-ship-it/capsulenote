@@ -26,17 +26,23 @@ function getCurrentKeyVersion(): number {
  */
 function getMasterKey(keyVersion?: number): Uint8Array {
   const version = keyVersion ?? getCurrentKeyVersion()
+  const runtimeOnly = process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY === "true"
 
   // Map of key versions to environment variable names
   const keyEnvVars: Record<number, string | undefined> = {
-    1: process.env.CRYPTO_MASTER_KEY_V1 || env.CRYPTO_MASTER_KEY, // Backward compatibility
+    1: process.env.CRYPTO_MASTER_KEY_V1 || process.env.CRYPTO_MASTER_KEY,
     2: process.env.CRYPTO_MASTER_KEY_V2,
     3: process.env.CRYPTO_MASTER_KEY_V3,
     4: process.env.CRYPTO_MASTER_KEY_V4,
     5: process.env.CRYPTO_MASTER_KEY_V5,
   }
 
-  const base64Key = keyEnvVars[version]
+  let base64Key = keyEnvVars[version]
+
+  // Allow fallback to env snapshot unless explicitly disabled
+  if (!base64Key && !runtimeOnly && version === 1) {
+    base64Key = env.CRYPTO_MASTER_KEY
+  }
 
   if (!base64Key) {
     throw new Error(

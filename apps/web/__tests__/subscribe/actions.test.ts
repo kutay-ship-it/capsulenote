@@ -7,6 +7,8 @@
  * - Happy path scenarios
  * - Error cases (validation, duplicate payments, missing data)
  * - Edge cases (race conditions, expired sessions)
+ *
+ * Note: Retain to guard anonymous checkout flow post paid-only migration; adjust fixtures as flows evolve.
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest"
@@ -24,9 +26,10 @@ const mockClerk = {
     deleteUser: vi.fn(),
   },
 }
+const mockClerkFactory = vi.fn(() => Promise.resolve(mockClerk))
 
 vi.mock("@clerk/nextjs/server", () => ({
-  clerkClient: mockClerk,
+  clerkClient: mockClerkFactory,
 }))
 vi.mock("@/server/lib/audit")
 vi.mock("@/server/lib/stripe-helpers")
@@ -496,6 +499,66 @@ describe("linkPendingSubscription", () => {
       expect(result.success).toBe(true)
       // Should not attempt to link again
       expect(prisma.subscription.create).not.toHaveBeenCalled()
+    })
+
+    it("should return existing subscription without duplicating", async () => {
+      const userId = "user_123"
+      const mockUser = {
+        id: userId,
+        email: "test@example.com",
+        clerkUserId: "clerk_123",
+        profile: {},
+      }
+
+      const mockPending = {
+        id: "pending_123",
+        email: mockUser.email,
+        status: "payment_complete",
+        stripeCustomerId: "cus_123",
+        stripeSubscriptionId: "sub_existing_123",
+        plan: "pro",
+        expiresAt: new Date(Date.now() + 86400000),
+      }
+
+      const mockClerkUser = {
+        id: "clerk_123",
+        primaryEmailAddressId: "email_123",
+        emailAddresses: [
+          {
+            id: "email_123",
+            emailAddress: mockUser.email,
+            verification: { status: "verified" },
+          },
+        ],
+      }
+
+      const existingSubscription = {
+        id: "subscription_existing",
+        stripeSubscriptionId: mockPending.stripeSubscriptionId,
+      }
+
+      // @ts-ignore
+      prisma.user.findUnique.mockResolvedValue(mockUser)
+      // @ts-ignore
+      prisma.pendingSubscription.findFirst.mockResolvedValue(mockPending)
+      // @ts-ignore
+      mockClerk.users.getUser.mockResolvedValue(mockClerkUser)
+      // @ts-ignore
+      prisma.subscription.findUnique.mockResolvedValue(existingSubscription)
+      // @ts-ignore
+      prisma.pendingSubscription.update.mockResolvedValue({})
+
+      // Ensure retrieve is mocked for expectation
+      // @ts-ignore
+      stripe.subscriptions.retrieve.mockResolvedValue({})
+
+      const result = await linkPendingSubscription(userId)
+
+      expect(result.success).toBe(true)
+      expect(result.subscriptionId).toBe(existingSubscription.id)
+      expect(prisma.subscription.create).not.toHaveBeenCalled()
+      // @ts-ignore
+      expect(stripe.subscriptions.retrieve).not.toHaveBeenCalled()
     })
   })
 })

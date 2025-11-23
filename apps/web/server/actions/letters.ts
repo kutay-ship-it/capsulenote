@@ -120,7 +120,7 @@ export async function createLetter(
 
     // Trigger confirmation email (non-blocking)
     try {
-      await triggerInngestEvent("notification.letter.created", {
+      await triggerInngestEvent("letter/created", {
         letterId: letter.id,
         userId: user.id,
         letterTitle: letter.title,
@@ -478,6 +478,34 @@ export async function getLetter(letterId: string) {
   }
 
   // Decrypt content
+  const decrypted = await decryptLetter(
+    letter.bodyCiphertext,
+    letter.bodyNonce,
+    letter.keyVersion
+  )
+
+  return {
+    ...letter,
+    bodyRich: decrypted.bodyRich,
+    bodyHtml: decrypted.bodyHtml,
+  }
+}
+
+/**
+ * Get a letter by ID for the current user (nullable)
+ * Gracefully returns null if letter is missing or belongs to another user.
+ */
+export async function getLetterById(letterId: string) {
+  const user = await requireUser()
+
+  const letter = await prisma.letter.findUnique({
+    where: { id: letterId },
+  })
+
+  if (!letter || letter.userId !== user.id || letter.deletedAt) {
+    return null
+  }
+
   const decrypted = await decryptLetter(
     letter.bodyCiphertext,
     letter.bodyNonce,

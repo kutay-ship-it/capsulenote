@@ -9,6 +9,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mockHeadersContext } from '../utils/next-context'
 
 // Mock all dependencies
 vi.mock('@/server/lib/db', () => ({
@@ -95,6 +96,9 @@ describe('Webhook Integration Tests', () => {
     it('should verify signature and queue event to Inngest', async () => {
       const { stripe } = await import('@/server/providers/stripe/client')
       const { triggerInngestEvent } = await import('@/server/lib/trigger-inngest')
+      mockHeadersContext({
+        'stripe-signature': 't=1234567890,v1=signature_hash',
+      })
 
       // Mock successful signature verification
       const mockEvent = {
@@ -127,6 +131,9 @@ describe('Webhook Integration Tests', () => {
 
     it('should reject webhook with invalid signature', async () => {
       const { stripe } = await import('@/server/providers/stripe/client')
+      mockHeadersContext({
+        'stripe-signature': 't=1234567890,v1=invalid_signature',
+      })
 
       // Mock signature verification failure
       vi.mocked(stripe.webhooks.constructEvent).mockImplementationOnce(() => {
@@ -151,6 +158,9 @@ describe('Webhook Integration Tests', () => {
 
     it('should reject events older than 5 minutes', async () => {
       const { stripe } = await import('@/server/providers/stripe/client')
+      mockHeadersContext({
+        'stripe-signature': 't=1234567890,v1=signature_hash',
+      })
 
       // Mock event created 6 minutes ago
       const sixMinutesAgo = Math.floor((Date.now() - 6 * 60 * 1000) / 1000)
@@ -182,6 +192,9 @@ describe('Webhook Integration Tests', () => {
     it('should return 500 when Inngest queueing fails', async () => {
       const { stripe } = await import('@/server/providers/stripe/client')
       const { triggerInngestEvent } = await import('@/server/lib/trigger-inngest')
+      mockHeadersContext({
+        'stripe-signature': 't=1234567890,v1=signature_hash',
+      })
 
       const mockEvent = {
         id: 'evt_test_123',
@@ -208,6 +221,7 @@ describe('Webhook Integration Tests', () => {
     })
 
     it('should reject webhook with missing signature header', async () => {
+      mockHeadersContext({})
       const request = new Request('http://localhost:3000/api/webhooks/stripe', {
         method: 'POST',
         headers: {},
@@ -227,6 +241,11 @@ describe('Webhook Integration Tests', () => {
     it('should create user with profile on user.created event', async () => {
       const { prisma } = await import('@/server/lib/db')
       const { Webhook } = await import('svix')
+      mockHeadersContext({
+        'svix-id': 'msg_123',
+        'svix-timestamp': '1234567890',
+        'svix-signature': 'v1,signature_hash',
+      })
 
       // Mock Svix verification
       const mockWebhook = new Webhook('test_secret')
@@ -287,6 +306,11 @@ describe('Webhook Integration Tests', () => {
       const { prisma } = await import('@/server/lib/db')
       const { Webhook } = await import('svix')
       const { linkPendingSubscription } = await import('@/app/subscribe/actions')
+      mockHeadersContext({
+        'svix-id': 'msg_123',
+        'svix-timestamp': '1234567890',
+        'svix-signature': 'v1,signature_hash',
+      })
 
       const mockWebhook = new Webhook('test_secret')
       vi.mocked(mockWebhook.verify).mockReturnValueOnce({
@@ -345,6 +369,11 @@ describe('Webhook Integration Tests', () => {
     it('should handle race condition on user.created with retry logic', async () => {
       const { prisma } = await import('@/server/lib/db')
       const { Webhook } = await import('svix')
+      mockHeadersContext({
+        'svix-id': 'msg_123',
+        'svix-timestamp': '1234567890',
+        'svix-signature': 'v1,signature_hash',
+      })
 
       const mockWebhook = new Webhook('test_secret')
       vi.mocked(mockWebhook.verify).mockReturnValueOnce({
@@ -403,6 +432,11 @@ describe('Webhook Integration Tests', () => {
     it('should update user email on user.updated event', async () => {
       const { prisma } = await import('@/server/lib/db')
       const { Webhook } = await import('svix')
+      mockHeadersContext({
+        'svix-id': 'msg_123',
+        'svix-timestamp': '1234567890',
+        'svix-signature': 'v1,signature_hash',
+      })
 
       const mockWebhook = new Webhook('test_secret')
       vi.mocked(mockWebhook.verify).mockReturnValueOnce({
@@ -452,6 +486,11 @@ describe('Webhook Integration Tests', () => {
     it('should soft delete user and cancel deliveries on user.deleted event', async () => {
       const { prisma } = await import('@/server/lib/db')
       const { Webhook } = await import('svix')
+      mockHeadersContext({
+        'svix-id': 'msg_123',
+        'svix-timestamp': '1234567890',
+        'svix-signature': 'v1,signature_hash',
+      })
 
       const mockWebhook = new Webhook('test_secret')
       vi.mocked(mockWebhook.verify).mockReturnValueOnce({
@@ -509,6 +548,11 @@ describe('Webhook Integration Tests', () => {
 
     it('should reject webhook with invalid signature', async () => {
       const { Webhook } = await import('svix')
+      mockHeadersContext({
+        'svix-id': 'msg_123',
+        'svix-timestamp': '1234567890',
+        'svix-signature': 'v1,invalid_signature',
+      })
 
       const mockWebhook = new Webhook('test_secret')
       vi.mocked(mockWebhook.verify).mockImplementationOnce(() => {
@@ -537,6 +581,7 @@ describe('Webhook Integration Tests', () => {
     })
 
     it('should reject webhook with missing svix headers', async () => {
+      mockHeadersContext({})
       const request = new Request('http://localhost:3000/api/webhooks/clerk', {
         method: 'POST',
         headers: {},
@@ -558,6 +603,11 @@ describe('Webhook Integration Tests', () => {
   describe('Resend Webhook Handler', () => {
     it('should mark delivery as failed on email.bounced event', async () => {
       const { prisma } = await import('@/server/lib/db')
+      mockHeadersContext({
+        'svix-id': 'msg_resend_1',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
+        'svix-signature': 'signature_hash',
+      })
 
       vi.mocked(prisma.emailDelivery.findFirst).mockResolvedValueOnce({
         deliveryId: 'delivery_123',
@@ -610,6 +660,11 @@ describe('Webhook Integration Tests', () => {
 
     it('should increment open count on email.opened event', async () => {
       const { prisma } = await import('@/server/lib/db')
+      mockHeadersContext({
+        'svix-id': 'msg_resend_2',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
+        'svix-signature': 'signature_hash',
+      })
 
       vi.mocked(prisma.emailDelivery.findFirst).mockResolvedValueOnce({
         deliveryId: 'delivery_123',
@@ -654,6 +709,11 @@ describe('Webhook Integration Tests', () => {
 
     it('should increment click count on email.clicked event', async () => {
       const { prisma } = await import('@/server/lib/db')
+      mockHeadersContext({
+        'svix-id': 'msg_resend_3',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
+        'svix-signature': 'signature_hash',
+      })
 
       vi.mocked(prisma.emailDelivery.findFirst).mockResolvedValueOnce({
         deliveryId: 'delivery_123',
@@ -697,6 +757,11 @@ describe('Webhook Integration Tests', () => {
 
     it('should handle error gracefully and return 500', async () => {
       const { prisma } = await import('@/server/lib/db')
+      mockHeadersContext({
+        'svix-id': 'msg_resend_4',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
+        'svix-signature': 'signature_hash',
+      })
 
       vi.mocked(prisma.emailDelivery.findFirst).mockRejectedValueOnce(
         new Error('Database connection failed')

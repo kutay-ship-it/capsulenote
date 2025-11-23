@@ -57,6 +57,8 @@ describe('Encryption', () => {
 
     it('should throw error if master key is missing', async () => {
       const originalKey = process.env.CRYPTO_MASTER_KEY
+      const originalRuntimeOnly = process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY
+      process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY = "true"
       delete process.env.CRYPTO_MASTER_KEY
 
       const plaintext = {
@@ -67,6 +69,7 @@ describe('Encryption', () => {
       await expect(encryptLetter(plaintext)).rejects.toThrow()
 
       process.env.CRYPTO_MASTER_KEY = originalKey
+      process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY = originalRuntimeOnly
     })
 
     it('should handle empty content', async () => {

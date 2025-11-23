@@ -15,6 +15,7 @@ export const env = createEnv({
     // Clerk
     CLERK_SECRET_KEY: z.string().min(1),
     CLERK_WEBHOOK_SECRET: z.string().min(1),
+    CLERK_AUTO_PROVISION_ENABLED: z.enum(["true", "false"]).default("true"),
 
     // Stripe
     STRIPE_SECRET_KEY: z.string().min(1),
@@ -96,6 +97,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
+    CLERK_AUTO_PROVISION_ENABLED: process.env.CLERK_AUTO_PROVISION_ENABLED,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_PRICE_DIGITAL_ANNUAL: process.env.STRIPE_PRICE_DIGITAL_ANNUAL,

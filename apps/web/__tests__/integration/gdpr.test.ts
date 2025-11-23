@@ -3,6 +3,9 @@
  *
  * Tests GDPR Article 15 (Right to Access) and Article 17 (Right to Erasure)
  * compliance including data export and deletion workflows.
+ *
+ * Note: Suite retained post paid-only migration; keep expectations aligned with current
+ * architecture rather than disabling. Update fixtures if flows evolve.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -76,9 +79,10 @@ const mockClerk = {
     deleteUser: vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' })),
   },
 }
+const mockClerkFactory = vi.fn(() => Promise.resolve(mockClerk))
 
 vi.mock('@clerk/nextjs/server', () => ({
-  clerkClient: mockClerk,
+  clerkClient: mockClerkFactory,
 }))
 
 vi.mock('../../server/providers/stripe/client', () => ({

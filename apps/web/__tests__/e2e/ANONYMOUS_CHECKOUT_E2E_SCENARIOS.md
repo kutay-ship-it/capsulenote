@@ -14,6 +14,10 @@ npx playwright install
 - Stripe test mode (use test cards)
 - Clerk test instance
 - Test database with seed data
+# Required env for checkout E2E
+export E2E_ENABLE_CHECKOUT_FLOW=true
+export E2E_STRIPE_PAID_SESSION_ID=cs_test_xxx   # from a paid test session
+export PLAYWRIGHT_BASE_URL=http://localhost:3000
 ```
 
 ## Scenario 1: Happy Path - Anonymous Checkout to Signup

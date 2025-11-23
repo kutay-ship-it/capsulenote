@@ -19,7 +19,7 @@ process.env.NODE_ENV = "test"
 process.env.SKIP_ENV_VALIDATION = "true"
 process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000"
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_mock"
-process.env.CRYPTO_MASTER_KEY = "dGVzdF9tYXN0ZXJfa2V5XzMyYnl0ZXNfZXhhY3RseQ==" // Base64 test key (exactly 32 bytes)
+process.env.CRYPTO_MASTER_KEY = "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=" // Base64 test key (exactly 32 bytes)
 process.env.STRIPE_SECRET_KEY = "sk_test_mock"
 process.env.STRIPE_PUBLISHABLE_KEY = "pk_test_mock"
 process.env.CLERK_SECRET_KEY = "sk_test_mock"
@@ -34,6 +34,20 @@ process.env.INNGEST_EVENT_KEY = "test"
 process.env.EMAIL_FROM = "test@dearme.test"
 process.env.UPSTASH_REDIS_REST_URL = "http://localhost:6379"
 process.env.UPSTASH_REDIS_REST_TOKEN = "test_token"
+
+// Validate critical test secrets early to fail fast on invalid fixtures
+function assertValidBase64Key(key: string, expectedBytes: number, label: string) {
+  try {
+    const decoded = Buffer.from(key, "base64")
+    if (decoded.length !== expectedBytes) {
+      throw new Error(`expected ${expectedBytes} bytes, got ${decoded.length}`)
+    }
+  } catch (err) {
+    throw new Error(`[Test Setup] Invalid ${label}: ${err instanceof Error ? err.message : String(err)}`)
+  }
+}
+
+assertValidBase64Key(process.env.CRYPTO_MASTER_KEY!, 32, "CRYPTO_MASTER_KEY")
 
 // ============================================================================
 // Next.js Mocks
@@ -96,7 +110,7 @@ vi.mock("@clerk/nextjs/server", () => ({
       emailAddresses: [{ emailAddress: "test@example.com" }],
       primaryEmailAddressId: "email_123",
     }),
-  clerkClient: () => ({
+  clerkClient: () => Promise.resolve({
     users: {
       getUser: vi.fn(() =>
         Promise.resolve({

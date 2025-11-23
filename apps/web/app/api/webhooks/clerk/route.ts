@@ -4,7 +4,7 @@ import { WebhookEvent } from "@clerk/nextjs/server"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
 import { linkPendingSubscription } from "@/app/subscribe/actions"
-import { clerkClient } from "@clerk/nextjs/server"
+import { getClerkClient } from "@/server/lib/clerk"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET
@@ -76,7 +76,8 @@ export async function POST(req: Request) {
         if (lockedEmail && lockedEmail.toLowerCase() !== email.toLowerCase()) {
           console.error(`[Clerk Webhook] Locked email mismatch. Expected ${lockedEmail}, got ${email}`)
           try {
-            await clerkClient.users.deleteUser(id)
+            const clerk = await getClerkClient()
+            await clerk.users.deleteUser(id)
           } catch (deleteErr) {
             console.error(`[Clerk Webhook] Failed to delete user after mismatch`, deleteErr)
           }

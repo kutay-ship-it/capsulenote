@@ -1,5 +1,8 @@
 import { env } from "@/env.mjs"
 
+const unleashUrl = env.UNLEASH_API_URL || process.env.UNLEASH_API_URL
+const unleashToken = env.UNLEASH_API_TOKEN || process.env.UNLEASH_API_TOKEN
+
 /**
  * Feature flags system
  * Uses Unleash for production, falls back to env vars for development
@@ -38,7 +41,7 @@ export async function getFeatureFlag(
   let value = false
 
   // In production with Unleash configured
-  if (env.UNLEASH_API_URL && env.UNLEASH_API_TOKEN) {
+  if (unleashUrl && unleashToken) {
     try {
       value = await getUnleashFlag(flagName, context)
     } catch (error) {
@@ -66,13 +69,13 @@ async function getUnleashFlag(
   flagName: string,
   context?: { userId?: string; sessionId?: string }
 ): Promise<boolean> {
-  if (!env.UNLEASH_API_URL || !env.UNLEASH_API_TOKEN) {
+  if (!unleashUrl || !unleashToken) {
     return false
   }
 
-  const response = await fetch(`${env.UNLEASH_API_URL}/api/client/features/${flagName}`, {
+  const response = await fetch(`${unleashUrl}/api/client/features/${flagName}`, {
     headers: {
-      "Authorization": env.UNLEASH_API_TOKEN,
+      "Authorization": unleashToken,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({

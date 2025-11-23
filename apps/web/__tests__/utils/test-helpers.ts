@@ -145,7 +145,7 @@ export function mockClerkAuth(user: { userId: string } | null = { userId: 'user_
   vi.mock('@clerk/nextjs/server', () => ({
     auth: () => Promise.resolve(user),
     currentUser: () => Promise.resolve(user ? createMockClerkUser({ id: user.userId }) : null),
-    clerkClient: () => ({
+    clerkClient: () => Promise.resolve({
       users: {
         getUser: vi.fn(() => Promise.resolve(createMockClerkUser({ id: user?.userId }))),
         updateUser: vi.fn(() => Promise.resolve(createMockClerkUser({ id: user?.userId }))),

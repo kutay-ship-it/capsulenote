@@ -19,9 +19,9 @@ import { stripe } from "@/server/providers/stripe"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { env } from "@/env.mjs"
-import { clerkClient } from "@clerk/nextjs/server"
 import { invalidateEntitlementsCache, createUsageRecord } from "@/server/lib/stripe-helpers"
 import { isValidPriceId } from "@/server/providers/stripe/client"
+import { getClerkClient } from "@/server/lib/clerk"
 import {
   anonymousCheckoutSchema,
   type AnonymousCheckoutInput,
@@ -221,6 +221,7 @@ export async function linkPendingSubscription(
     })
 
     if (!user) {
+      console.error("[linkPendingSubscription] User not found", { userId })
       return { success: false, error: "User not found" }
     }
 
@@ -234,7 +235,10 @@ export async function linkPendingSubscription(
     })
 
     if (!pending) {
-      // No pending subscription found (not an error, just nothing to link)
+      console.log("[linkPendingSubscription] No pending subscription to link", {
+        userId: user.id,
+        email: user.email,
+      })
       return { success: true }
     }
 
@@ -245,7 +249,7 @@ export async function linkPendingSubscription(
     })
 
     // 3. Verify email is verified in Clerk
-    const clerk = clerkClient
+    const clerk = await getClerkClient()
     const clerkUser = await clerk.users.getUser(user.clerkUserId)
 
     const primaryEmail = clerkUser.emailAddresses.find(
@@ -410,6 +414,12 @@ export async function linkPendingSubscription(
       success: true,
       subscriptionId: subscription.id,
     }
+  } catch (error) {
+    console.error("[linkPendingSubscription] Unexpected error", {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    })
+    return { success: false, error: "link_failed" }
   } finally {
     // Always release lock, even if error occurred
     try {

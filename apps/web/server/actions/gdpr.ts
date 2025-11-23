@@ -47,8 +47,8 @@ import { createAuditEvent, AuditEventType } from "@/server/lib/audit"
 import { decryptLetter } from "@/server/lib/encryption"
 import type { ActionResult } from "@dearme/types"
 import { ErrorCodes } from "@dearme/types"
-import { clerkClient } from "@clerk/nextjs/server"
 import { stripe } from "@/server/providers/stripe/client"
+import { getClerkClient } from "@/server/lib/clerk"
 
 /**
  * Export all user data (GDPR Article 15 - Right to Access)
@@ -451,7 +451,7 @@ export async function deleteUserData(): Promise<ActionResult<void>> {
 
     // 4. Delete Clerk user (signs out and invalidates all sessions)
     try {
-      const clerk = clerkClient
+      const clerk = await getClerkClient()
       await clerk.users.deleteUser(user.clerkUserId)
       console.log(`[GDPR Delete] Deleted Clerk user: ${user.clerkUserId}`)
     } catch (error) {

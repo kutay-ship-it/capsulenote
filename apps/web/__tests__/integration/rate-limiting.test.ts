@@ -19,19 +19,23 @@ vi.mock('@upstash/redis', () => ({
   })),
 }))
 
-vi.mock('@upstash/ratelimit', () => ({
-  Ratelimit: vi.fn().mockImplementation((config) => {
+vi.mock('@upstash/ratelimit', () => {
+  const Ratelimit = vi.fn().mockImplementation((config) => {
     return {
       limit: mockLimit,
       config,
     }
-  }),
-  slidingWindow: vi.fn((maxRequests: number, window: string) => ({
+  })
+
+  // Attach static helper
+  Ratelimit.slidingWindow = vi.fn((maxRequests: number, window: string) => ({
     type: 'slidingWindow',
     maxRequests,
     window,
-  })),
-}))
+  }))
+
+  return { Ratelimit }
+})
 
 vi.mock('@/env.mjs', () => ({
   env: {

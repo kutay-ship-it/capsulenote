@@ -1,12 +1,39 @@
 export function calculatePresetDate(preset: '6m' | '1y' | '3y' | '5y'): Date {
   const now = new Date()
-  const multipliers = { '6m': 0.5, '1y': 1, '3y': 3, '5y': 5 }
-  const years = multipliers[preset]
+  // Use UTC components to avoid timezone/DST drift while preserving wall-clock time
+  const year = now.getUTCFullYear()
+  const month = now.getUTCMonth()
+  const day = now.getUTCDate()
+  const hours = now.getUTCHours()
+  const minutes = now.getUTCMinutes()
+  const seconds = now.getUTCSeconds()
+  const ms = now.getUTCMilliseconds()
 
-  const futureDate = new Date(now)
-  futureDate.setFullYear(futureDate.getFullYear() + years)
+  let targetYear = year
+  let targetMonth = month
 
-  return futureDate
+  switch (preset) {
+    case '6m':
+      targetMonth += 6
+      break
+    case '1y':
+      targetYear += 1
+      break
+    case '3y':
+      targetYear += 3
+      break
+    case '5y':
+      targetYear += 5
+      break
+  }
+
+  // Handle month overflow
+  while (targetMonth > 11) {
+    targetMonth -= 12
+    targetYear += 1
+  }
+
+  return new Date(Date.UTC(targetYear, targetMonth, day, hours, minutes, seconds, ms))
 }
 
 export function formatDate(date: Date | null): string {
@@ -16,5 +43,6 @@ export function formatDate(date: Date | null): string {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    timeZone: 'UTC', // keep consistent regardless of local TZ
   }).format(date)
 }

@@ -3,6 +3,8 @@
  *
  * Tests audit event creation and sensitive data redaction.
  * Critical for compliance (GDPR, SOC 2) and security monitoring.
+ *
+ * Note: Keep active for compliance; update fixtures if audit schema changes instead of skipping.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'

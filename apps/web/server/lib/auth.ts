@@ -1,6 +1,8 @@
-import { auth as clerkAuth, clerkClient } from "@clerk/nextjs/server"
+import { auth as clerkAuth } from "@clerk/nextjs/server"
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { prisma } from "./db"
+import { getClerkClient } from "./clerk"
+import { env } from "@/env.mjs"
 
 /**
  * Get current user with auto-sync fallback
@@ -15,9 +17,18 @@ import { prisma } from "./db"
  * - Users created before webhook setup
  */
 export async function getCurrentUser() {
-  const { userId: clerkUserId } = await clerkAuth()
+  let clerkUserId: string | null = null
+
+  try {
+    const authResult = await clerkAuth()
+    clerkUserId = authResult.userId
+  } catch (error) {
+    console.error("[Auth] Failed to read Clerk auth state", error)
+    return null
+  }
 
   if (!clerkUserId) {
+    console.debug("[Auth] No active Clerk session found")
     return null
   }
 
@@ -29,12 +40,20 @@ export async function getCurrentUser() {
   })
 
   // Self-healing: If user doesn't exist in DB, create them
+  const autoProvisionEnabled = env.CLERK_AUTO_PROVISION_ENABLED !== "false"
+
   if (!user) {
+    if (!autoProvisionEnabled) {
+      console.warn(`[Auth] Auto-provision disabled; user ${clerkUserId} missing locally`)
+      return null
+    }
+
     console.log(`[Auth] User ${clerkUserId} not found in DB, auto-syncing...`)
 
     try {
       // Fetch user details from Clerk
-      const clerkUser = await clerkClient.users.getUser(clerkUserId)
+      const clerk = await getClerkClient()
+      const clerkUser = await clerk.users.getUser(clerkUserId)
 
       const email = clerkUser.emailAddresses.find(
         e => e.id === clerkUser.primaryEmailAddressId

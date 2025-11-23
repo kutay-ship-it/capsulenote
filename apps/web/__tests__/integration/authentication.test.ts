@@ -161,6 +161,32 @@ describe('Authentication Integration Tests', () => {
       })
     })
 
+    it('should skip auto-sync when CLERK_AUTO_PROVISION_ENABLED is false', async () => {
+      const originalFlag = process.env.CLERK_AUTO_PROVISION_ENABLED
+      process.env.CLERK_AUTO_PROVISION_ENABLED = "false"
+      vi.resetModules()
+
+      const { prisma } = await import('@/server/lib/db')
+      const { getCurrentUser } = await import('@/server/lib/auth')
+
+      // Mock authenticated user with no local record
+      mockClerkAuth.mockResolvedValueOnce({ userId: 'clerk_user_disabled' })
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce(null)
+
+      const user = await getCurrentUser()
+
+      expect(user).toBeNull()
+      expect(mockGetUser).not.toHaveBeenCalled()
+      expect(prisma.user.create).not.toHaveBeenCalled()
+
+      if (originalFlag === undefined) {
+        delete process.env.CLERK_AUTO_PROVISION_ENABLED
+      } else {
+        process.env.CLERK_AUTO_PROVISION_ENABLED = originalFlag
+      }
+      vi.resetModules()
+    })
+
     it('should handle race condition when auto-syncing user', async () => {
       const { prisma } = await import('@/server/lib/db')
 

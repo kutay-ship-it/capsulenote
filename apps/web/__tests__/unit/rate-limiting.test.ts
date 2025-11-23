@@ -47,7 +47,7 @@ class RateLimiter {
     return {
       success,
       limit: this.config.maxRequests,
-      remaining: Math.max(0, this.config.maxRequests - validRequests.length - (success ? 1 : 0)),
+      remaining: Math.max(0, this.config.maxRequests - validRequests.length),
       reset: Math.ceil((windowStart + this.config.windowMs) / 1000),
     }
   }

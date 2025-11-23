@@ -37,6 +37,7 @@ export function SuccessSignupForm({ email }: SuccessSignupFormProps) {
             identityPreviewEditButton: "text-charcoal hover:text-gray-800",
           },
         }}
+        routing="hash"
         initialValues={{
           emailAddress: email,
         }}
