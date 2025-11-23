@@ -94,9 +94,12 @@ vi.mock('@/server/providers/stripe/client', () => ({
   },
 }))
 
+// Shared mock verify function for all Webhook instances
+const mockVerify = vi.fn()
+
 vi.mock('svix', () => ({
   Webhook: vi.fn().mockImplementation(() => ({
-    verify: vi.fn(),
+    verify: mockVerify,
   })),
 }))
 
@@ -262,16 +265,14 @@ describe('Webhook Integration Tests', () => {
   describe('Clerk Webhook Handler', () => {
     it('should create user with profile on user.created event', async () => {
       const { prisma } = await import('@/server/lib/db')
-      const { Webhook } = await import('svix')
       mockHeadersContext({
         'svix-id': 'msg_123',
-        'svix-timestamp': '1234567890',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
         'svix-signature': 'v1,signature_hash',
       })
 
       // Mock Svix verification
-      const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce(buildClerkEvent() as any)
+      mockVerify.mockReturnValueOnce(buildClerkEvent())
 
       vi.mocked(prisma.user.create).mockResolvedValueOnce({
         id: 'user_123',
@@ -320,16 +321,14 @@ describe('Webhook Integration Tests', () => {
 
     it('should auto-link pending subscription on user.created', async () => {
       const { prisma } = await import('@/server/lib/db')
-      const { Webhook } = await import('svix')
       const { linkPendingSubscription } = await import('@/app/subscribe/actions')
       mockHeadersContext({
         'svix-id': 'msg_123',
-        'svix-timestamp': '1234567890',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
         'svix-signature': 'v1,signature_hash',
       })
 
-      const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce(buildClerkEvent() as any)
+      mockVerify.mockReturnValueOnce(buildClerkEvent())
 
       vi.mocked(prisma.user.create).mockResolvedValueOnce({
         id: 'user_123',
@@ -378,15 +377,13 @@ describe('Webhook Integration Tests', () => {
 
     it('should handle race condition on user.created with retry logic', async () => {
       const { prisma } = await import('@/server/lib/db')
-      const { Webhook } = await import('svix')
       mockHeadersContext({
         'svix-id': 'msg_123',
-        'svix-timestamp': '1234567890',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
         'svix-signature': 'v1,signature_hash',
       })
 
-      const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce(buildClerkEvent() as any)
+      mockVerify.mockReturnValueOnce(buildClerkEvent())
 
       // First attempt: race condition (P2002 = unique constraint violation)
       vi.mocked(prisma.user.create).mockRejectedValueOnce({
@@ -435,22 +432,20 @@ describe('Webhook Integration Tests', () => {
 
     it('should update user email on user.updated event', async () => {
       const { prisma } = await import('@/server/lib/db')
-      const { Webhook } = await import('svix')
       mockHeadersContext({
         'svix-id': 'msg_123',
-        'svix-timestamp': '1234567890',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
         'svix-signature': 'v1,signature_hash',
       })
 
-      const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce(
+      mockVerify.mockReturnValueOnce(
         buildClerkEvent({
           type: 'user.updated',
           data: {
             id: 'clerk_user_123',
             email_addresses: [{ email_address: 'newemail@example.com' }],
           },
-        }) as any
+        })
       )
 
       vi.mocked(prisma.user.update).mockResolvedValueOnce({
@@ -491,20 +486,20 @@ describe('Webhook Integration Tests', () => {
 
     it('should soft delete user and cancel deliveries on user.deleted event', async () => {
       const { prisma } = await import('@/server/lib/db')
-      const { Webhook } = await import('svix')
       mockHeadersContext({
         'svix-id': 'msg_123',
-        'svix-timestamp': '1234567890',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
         'svix-signature': 'v1,signature_hash',
       })
 
-      const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockReturnValueOnce({
-        type: 'user.deleted',
-        data: {
-          id: 'clerk_user_123',
-        },
-      } as any)
+      mockVerify.mockReturnValueOnce(
+        buildClerkEvent({
+          type: 'user.deleted',
+          data: {
+            id: 'clerk_user_123',
+          },
+        })
+      )
 
       // Mock transaction callback
       vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback: any) => {
@@ -553,15 +548,13 @@ describe('Webhook Integration Tests', () => {
     })
 
     it('should reject webhook with invalid signature', async () => {
-      const { Webhook } = await import('svix')
       mockHeadersContext({
         'svix-id': 'msg_123',
-        'svix-timestamp': '1234567890',
+        'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,
         'svix-signature': 'v1,invalid_signature',
       })
 
-      const mockWebhook = new Webhook('test_secret')
-      vi.mocked(mockWebhook.verify).mockImplementationOnce(() => {
+      mockVerify.mockImplementationOnce(() => {
         throw new Error('Invalid signature')
       })
 
