@@ -29,10 +29,11 @@ pnpm dev                    # Start all apps (Next.js on :3000, Inngest on :8288
 pnpm dev --filter web       # Run only web app
 pnpm dev --filter inngest   # Run only workers
 
-# Database
+# Database (all commands automatically load .env.local via dotenv-cli)
 pnpm db:generate            # Generate Prisma client after schema changes
-pnpm db:migrate             # Run migrations (development)
-pnpm db:push                # Push schema changes (development only)
+pnpm db:migrate             # Run migrations (requires interactive mode)
+pnpm db:push                # Push schema changes (non-interactive, recommended for dev)
+pnpm db:seed                # Seed database with pricing plans (requires Stripe price IDs in .env.local)
 pnpm db:studio              # Open Prisma Studio
 
 # Quality
@@ -227,8 +228,7 @@ export async function getCurrentUser() {
 
   // Self-healing: Auto-create missing users
   if (!user) {
-    const clerk = await clerkClient()
-    const clerkUser = await clerk.users.getUser(clerkUserId)
+    const clerkUser = await clerkClient.users.getUser(clerkUserId)
 
     user = await prisma.user.create({
       data: {
@@ -520,7 +520,10 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 # Set up database
 pnpm db:generate
-pnpm db:migrate
+pnpm db:push  # or pnpm db:migrate for interactive mode
+
+# Seed database with pricing plans (optional)
+pnpm db:seed
 
 # Set up local webhooks (Stripe + Resend)
 ./scripts/setup-local-webhooks.sh
@@ -687,6 +690,8 @@ pnpm test:watch        # Watch mode
 6. **Environment validation**: Build will fail if required env vars missing. Use `SKIP_ENV_VALIDATION=true` only in CI.
 
 7. **Encryption key rotation**: When rotating keys, increment `keyVersion` but keep old keys accessible for decryption.
+
+8. **Database seeding**: All database scripts (`db:generate`, `db:push`, `db:migrate`, `db:seed`, `db:studio`) automatically load environment variables from `apps/web/.env.local` using `dotenv-cli`. The seed script requires `STRIPE_PRICE_DIGITAL_ANNUAL` and `STRIPE_PRICE_PAPER_ANNUAL` to be set in `.env.local` to seed pricing plans.
 
 ## File Naming Conventions
 

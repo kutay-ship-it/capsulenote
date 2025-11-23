@@ -25,13 +25,13 @@ export function NewLetterForm() {
 
     if (result.success) {
       const letterId = result.data.letterId
-      const timezone = getUserTimezone()
+      const timezone = data.timezone || getUserTimezone()
       const deliverAt = zonedTimeToUtc(`${data.deliveryDate}T09:00`, timezone)
 
       try {
         await scheduleDelivery({
           letterId,
-          channel: "email",
+          channel: data.deliveryType === "physical" ? "mail" : "email",
           deliverAt,
           timezone,
           toEmail: data.recipientEmail,
@@ -71,6 +71,9 @@ export function NewLetterForm() {
         body: "",
         recipientEmail: "",
         deliveryDate: "",
+        deliveryType: "email",
+        recipientType: "self",
+        timezone: getUserTimezone(),
       }}
     />
   )

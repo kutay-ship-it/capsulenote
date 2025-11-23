@@ -95,6 +95,15 @@ async function markDeliveryFailed(
         attemptCount: { increment: 1 },
       },
     }),
+    prisma.deliveryAttempt.create({
+      data: {
+        letterId,
+        channel: "email",
+        status: "failed",
+        errorCode: error.code,
+        errorMessage: error.message,
+      },
+    }),
     prisma.auditEvent.create({
       data: {
         userId,
@@ -509,6 +518,15 @@ export const deliverEmail = inngest.createFunction(
             where: { deliveryId },
             data: {
               resendMessageId: sendResult.id,
+            },
+          }),
+          prisma.deliveryAttempt.create({
+            data: {
+              letterId: delivery.letterId,
+              channel: "email",
+              status: "sent",
+              errorCode: null,
+              errorMessage: null,
             },
           }),
           prisma.auditEvent.create({

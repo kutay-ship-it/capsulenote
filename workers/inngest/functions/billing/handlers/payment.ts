@@ -11,7 +11,7 @@
 
 import Stripe from "stripe"
 import { prisma } from "@dearme/prisma"
-import { recordBillingAudit } from "../../../../../apps/web/server/lib/stripe-helpers"
+import { recordBillingAudit, invalidateEntitlementsCache } from "../../../../../apps/web/server/lib/stripe-helpers"
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
 
 /**
@@ -52,6 +52,31 @@ export async function handlePaymentIntentSucceeded(
       metadata: paymentIntent.metadata,
     },
   })
+
+  // Apply add-on credits if applicable
+  const addonType = paymentIntent.metadata.addon_type as "email" | "physical" | undefined
+  const quantity = Number(paymentIntent.metadata.quantity || "1")
+  if (addonType) {
+    const increment = isNaN(quantity) ? 1 : quantity
+    if (addonType === "email") {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { emailCredits: { increment } },
+      })
+    } else if (addonType === "physical") {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { physicalCredits: { increment } },
+      })
+    }
+
+    await invalidateEntitlementsCache(userId)
+    await recordBillingAudit(userId, AuditEventType.ENTITLEMENTS_UPDATED, {
+      addonType,
+      quantity: increment,
+      paymentIntentId: paymentIntent.id,
+    })
+  }
 
   // Record audit event
   await recordBillingAudit(userId, AuditEventType.PAYMENT_SUCCEEDED, {

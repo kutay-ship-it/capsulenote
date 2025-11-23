@@ -41,6 +41,10 @@ export interface LetterFormData {
   body: string
   recipientEmail: string
   deliveryDate: string
+  deliveryType: "email" | "physical"
+  recipientType: "self" | "other"
+  recipientName?: string
+  timezone?: string
 }
 
 export function LetterEditorForm({
@@ -58,6 +62,14 @@ export function LetterEditorForm({
   const [deliveryDate, setDeliveryDate] = React.useState<Date | undefined>(
     initialData?.deliveryDate ? new Date(initialData.deliveryDate) : undefined
   )
+  const [deliveryType, setDeliveryType] = React.useState<"email" | "physical">(
+    initialData?.deliveryType || "email"
+  )
+  const [recipientType, setRecipientType] = React.useState<"self" | "other">(
+    initialData?.recipientType || "self"
+  )
+  const [recipientName, setRecipientName] = React.useState(initialData?.recipientName || "")
+  const [timezone] = React.useState(initialData?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone)
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
   const [showCustomDate, setShowCustomDate] = React.useState(false)
   const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
@@ -80,8 +92,19 @@ export function LetterEditorForm({
       setBody(initialData.body ?? "")
       setRecipientEmail(initialData.recipientEmail ?? "")
       setDeliveryDate(initialData.deliveryDate ? new Date(initialData.deliveryDate) : undefined)
+      setDeliveryType(initialData.deliveryType ?? "email")
+      setRecipientType(initialData.recipientType ?? "self")
+      setRecipientName(initialData.recipientName ?? "")
     }
-  }, [initialData?.title, initialData?.body, initialData?.recipientEmail, initialData?.deliveryDate])
+  }, [
+    initialData?.title,
+    initialData?.body,
+    initialData?.recipientEmail,
+    initialData?.deliveryDate,
+    initialData?.deliveryType,
+    initialData?.recipientType,
+    initialData?.recipientName,
+  ])
 
   const handlePresetDate = (months: number, label: string) => {
     const today = new Date()
@@ -146,6 +169,10 @@ export function LetterEditorForm({
       newErrors.recipientEmail = "Invalid email address"
     }
 
+    if (recipientType === "other" && !recipientName?.trim()) {
+      newErrors.recipientName = "Recipient name is required"
+    }
+
     if (!deliveryDate) {
       newErrors.deliveryDate = "Delivery date is required"
     } else {
@@ -170,6 +197,10 @@ export function LetterEditorForm({
         body,
         recipientEmail,
         deliveryDate: deliveryDate.toISOString().split("T")[0],
+        deliveryType,
+        recipientType,
+        recipientName,
+        timezone,
       })
     }
   }
@@ -201,6 +232,48 @@ export function LetterEditorForm({
         </div>
 
         <FieldGroup>
+          {/* Recipient */}
+          <FieldSet>
+            <FieldLegend variant="label">Recipient</FieldLegend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant={recipientType === "self" ? "default" : "outline"}
+                onClick={() => setRecipientType("self")}
+                className="border-2 border-charcoal font-mono"
+                style={{ borderRadius: "2px" }}
+              >
+                To myself
+              </Button>
+              <Button
+                type="button"
+                variant={recipientType === "other" ? "default" : "outline"}
+                onClick={() => setRecipientType("other")}
+                className="border-2 border-charcoal font-mono"
+                style={{ borderRadius: "2px" }}
+              >
+                To someone else
+              </Button>
+            </div>
+
+            {recipientType === "other" && (
+              <Field data-invalid={!!errors.recipientName}>
+                <FieldLabel htmlFor="recipient-name">Recipient name</FieldLabel>
+                <Input
+                  id="recipient-name"
+                  value={recipientName}
+                  onChange={(e) => {
+                    setRecipientName(e.target.value)
+                    if (errors.recipientName) setErrors({ ...errors, recipientName: undefined })
+                  }}
+                  placeholder="Their name"
+                  aria-invalid={!!errors.recipientName}
+                />
+                {errors.recipientName && <FieldError>{errors.recipientName}</FieldError>}
+              </Field>
+            )}
+          </FieldSet>
+
           {/* Letter Title */}
           <Field data-invalid={!!errors.title}>
             <FieldLabel htmlFor="letter-title">Letter Title</FieldLabel>
@@ -251,6 +324,31 @@ export function LetterEditorForm({
           <FieldSet>
             <FieldLegend variant="label">Delivery Settings</FieldLegend>
             <FieldGroup>
+              {/* Delivery Type */}
+              <Field>
+                <FieldLabel>Delivery Type</FieldLabel>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant={deliveryType === "email" ? "default" : "outline"}
+                    onClick={() => setDeliveryType("email")}
+                    className="border-2 border-charcoal font-mono"
+                    style={{ borderRadius: "2px" }}
+                  >
+                    Email
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={deliveryType === "physical" ? "default" : "outline"}
+                    disabled
+                    className="border-2 border-charcoal font-mono opacity-60"
+                    style={{ borderRadius: "2px" }}
+                  >
+                    Physical (soon)
+                  </Button>
+                </div>
+              </Field>
+
               {/* Recipient Email */}
               <Field data-invalid={!!errors.recipientEmail}>
                 <FieldLabel htmlFor="recipient-email">Your Email Address</FieldLabel>
@@ -350,6 +448,8 @@ export function LetterEditorForm({
                         month: "long",
                         day: "numeric",
                       })}
+                      {" · "}
+                      {timezone}
                     </p>
                   </div>
                 )}

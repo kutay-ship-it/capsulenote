@@ -8,6 +8,7 @@ import { TimezoneTooltip } from "@/components/timezone-tooltip"
 import { DownloadCalendarButton } from "@/components/download-calendar-button"
 import { DeliveryErrorCard } from "@/components/delivery-error-card"
 import { Mail, Calendar, ArrowLeft } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 // Force dynamic rendering - letter detail must always show fresh data
 export const revalidate = 0
@@ -46,6 +47,9 @@ export default async function LetterDetailPage({ params }: PageProps) {
               <CardDescription>Created {formatDateTime(letter.createdAt)}</CardDescription>
             </div>
             <div className="flex gap-2">
+              <Badge variant="outline" className="font-mono text-xs uppercase">
+                {letter.status}
+              </Badge>
               <Link href={`/letters/${id}/schedule`}>
                 <Button>
                   <Calendar className="mr-2 h-4 w-4" />
@@ -81,9 +85,17 @@ export default async function LetterDetailPage({ params }: PageProps) {
                               </p>
                               <TimezoneTooltip deliveryDate={delivery.deliverAt} variant="clock" />
                             </div>
+                            {letter.lockedAt && (
+                              <p className="text-xs text-gray-secondary">
+                                Locked {formatDateTime(letter.lockedAt)}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="font-mono text-xs uppercase">
+                            {delivery.status}
+                          </Badge>
                           <DownloadCalendarButton
                             letterTitle={letter.title}
                             deliveryDate={new Date(delivery.deliverAt)}
@@ -119,6 +131,28 @@ export default async function LetterDetailPage({ params }: PageProps) {
                   </div>
                 ))}
               </div>
+
+              {letter.deliveryAttempts.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="mb-2 text-sm font-semibold">Delivery Attempts</h4>
+                  <div className="space-y-2">
+                    {letter.deliveryAttempts.map((attempt) => (
+                      <div
+                        key={attempt.id}
+                        className="rounded-sm border border-charcoal/20 bg-bg-blue-light p-3 font-mono text-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{attempt.channel.toUpperCase()} · {attempt.status}</span>
+                          <span>{new Date(attempt.createdAt).toLocaleString()}</span>
+                        </div>
+                        {attempt.errorMessage && (
+                          <p className="mt-1 text-coral">{attempt.errorMessage}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>

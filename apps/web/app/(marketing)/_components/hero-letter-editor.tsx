@@ -15,6 +15,9 @@ export function HeroLetterEditor() {
     body: "",
     recipientEmail: "",
     deliveryDate: "",
+    deliveryType: "email",
+    recipientType: "self",
+    timezone: getUserTimezone(),
   })
 
   useEffect(() => {
@@ -25,6 +28,10 @@ export function HeroLetterEditor() {
         body: draft.body || "",
         recipientEmail: draft.recipientEmail || "",
         deliveryDate: draft.deliveryDate || "",
+        deliveryType: draft.deliveryType || "email",
+        recipientType: draft.recipientType || "self",
+        recipientName: draft.recipientName || "",
+        timezone: draft.timezone || getUserTimezone(),
       })
     }
   }, [])
@@ -36,8 +43,8 @@ export function HeroLetterEditor() {
       return
     }
 
-    const timezone = getUserTimezone()
-    const deliveryType = "email"
+    const timezone = data.timezone || getUserTimezone()
+    const deliveryType = data.deliveryType
 
     // Anonymous user flow: Persist draft + email locally for resume/checkout
     saveAnonymousDraft(
@@ -46,7 +53,9 @@ export function HeroLetterEditor() {
       data.recipientEmail,
       data.deliveryDate,
       deliveryType,
-      timezone
+      timezone,
+      data.recipientType,
+      data.recipientName
     )
 
     // Send to paywall with locked email and delivery metadata
@@ -55,6 +64,8 @@ export function HeroLetterEditor() {
     if (data.deliveryDate) params.set("deliveryDate", data.deliveryDate)
     params.set("deliveryType", deliveryType)
     params.set("timezone", timezone)
+    if (data.recipientName) params.set("recipientName", data.recipientName)
+    params.set("recipientType", data.recipientType)
     router.push(`/subscribe?${params.toString()}`)
   }
 

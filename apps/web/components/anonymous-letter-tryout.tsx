@@ -56,7 +56,7 @@ export function AnonymousLetterTryout() {
   // Auto-save function with debounce
   const performAutoSave = useCallback(() => {
     if (body.trim().length > 0) {
-      saveAnonymousDraft(title, body, email)
+      saveAnonymousDraft(title, body, email, undefined, "email", getUserTimezone(), "self", "")
       setLastSaved(new Date().toISOString())
       setShowSaveIndicator(true)
 
@@ -114,7 +114,7 @@ export function AnonymousLetterTryout() {
       return
     }
     const timezone = getUserTimezone()
-    saveAnonymousDraft(title, body, trimmedEmail, undefined, "email", timezone)
+    saveAnonymousDraft(title, body, trimmedEmail, undefined, "email", timezone, "self", "")
     const params = new URLSearchParams()
     params.set("email", trimmedEmail)
     params.set("deliveryType", "email")

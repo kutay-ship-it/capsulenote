@@ -13,10 +13,11 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "typecheck": "turbo run typecheck",
-    "db:generate": "cd packages/prisma && prisma generate",
-    "db:push": "cd packages/prisma && prisma db push",
-    "db:migrate": "cd packages/prisma && prisma migrate dev",
-    "db:studio": "cd packages/prisma && prisma studio",
+    "db:generate": "dotenv -e apps/web/.env.local -- sh -c 'cd packages/prisma && npx prisma generate'",
+    "db:push": "dotenv -e apps/web/.env.local -- sh -c 'cd packages/prisma && npx prisma db push'",
+    "db:migrate": "dotenv -e apps/web/.env.local -- sh -c 'cd packages/prisma && npx prisma migrate dev'",
+    "db:studio": "dotenv -e apps/web/.env.local -- sh -c 'cd packages/prisma && npx prisma studio'",
+    "db:seed": "dotenv -e apps/web/.env.local -- pnpm --filter prisma db:seed",
     "test": "turbo run test"
   },
   "devDependencies": {

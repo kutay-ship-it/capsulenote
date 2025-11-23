@@ -29,6 +29,9 @@ export function DashboardLetterEditor() {
     body: "",
     recipientEmail: "",
     deliveryDate: "",
+    deliveryType: "email",
+    recipientType: "self",
+    timezone: getUserTimezone(),
   }))
 
   const defaultInitialData = useMemo(
@@ -37,6 +40,9 @@ export function DashboardLetterEditor() {
       body: "",
       recipientEmail: "",
       deliveryDate: "",
+      deliveryType: "email" as const,
+      recipientType: "self" as const,
+      timezone: getUserTimezone(),
     }),
     []
   )
@@ -49,6 +55,10 @@ export function DashboardLetterEditor() {
         body: draft.body || "",
         recipientEmail: draft.recipientEmail || "",
         deliveryDate: draft.deliveryDate || "",
+        deliveryType: draft.deliveryType || "email",
+        recipientType: draft.recipientType || "self",
+        recipientName: draft.recipientName || "",
+        timezone: draft.timezone || getUserTimezone(),
       })
       setShowResumePrompt(true)
     }
@@ -93,13 +103,13 @@ export function DashboardLetterEditor() {
 
       if (result.success) {
         const letterId = result.data.letterId
-        const timezone = getUserTimezone()
+        const timezone = data.timezone || getUserTimezone()
         const deliverAt = fromZonedTime(`${data.deliveryDate}T09:00`, timezone)
 
         try {
           await scheduleDelivery({
             letterId,
-            channel: 'email',
+            channel: data.deliveryType === "physical" ? "mail" : "email",
             deliverAt,
             timezone,
             toEmail: data.recipientEmail,

@@ -16,8 +16,7 @@ async function syncClerkUsers() {
   try {
     console.log("🔄 Fetching Clerk users...")
 
-    const clerk = await clerkClient()
-    const users = await clerk.users.getUserList()
+    const users = await clerkClient.users.getUserList()
 
     console.log(`📋 Found ${users.data.length} Clerk users`)
 

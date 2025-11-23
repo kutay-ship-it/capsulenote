@@ -114,7 +114,7 @@ export function LetterDraftForm({
         .map(p => `<p>${escapeHtml(p)}</p>`)
         .join('')
 
-      saveAnonymousDraft(title, body)
+      saveAnonymousDraft(title, body, undefined, undefined, "email", Intl.DateTimeFormat().resolvedOptions().timeZone, "self", "")
 
       // Call createLetter action
       const result = await createLetter({

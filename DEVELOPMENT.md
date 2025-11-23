@@ -53,6 +53,14 @@ pnpm db:push
 pnpm db:migrate
 ```
 
+### Seeding Capsule Note plans
+
+Prereqs: set `STRIPE_PRICE_DIGITAL_ANNUAL` and `STRIPE_PRICE_PAPER_ANNUAL` (and optional add-on price IDs) in `apps/web/.env.local`.
+
+```bash
+pnpm --filter prisma db:seed
+```
+
 ### Run Development Server
 
 ```bash

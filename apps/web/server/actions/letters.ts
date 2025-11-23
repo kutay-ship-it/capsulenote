@@ -469,6 +469,7 @@ export async function getLetter(letterId: string) {
           deliverAt: "asc",
         },
       },
+      deliveryAttempts: true,
     },
   })
 

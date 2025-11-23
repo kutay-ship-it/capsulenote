@@ -71,12 +71,14 @@ vi.mock('../../server/lib/audit', () => ({
   },
 }))
 
+const mockClerk = {
+  users: {
+    deleteUser: vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' })),
+  },
+}
+
 vi.mock('@clerk/nextjs/server', () => ({
-  clerkClient: () => ({
-    users: {
-      deleteUser: vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' })),
-    },
-  }),
+  clerkClient: mockClerk,
 }))
 
 vi.mock('../../server/providers/stripe/client', () => ({
@@ -379,8 +381,7 @@ describe('GDPR Integration Tests', () => {
 
       await deleteUserAccount()
 
-      const clerk = await clerkClient()
-      expect(clerk.users.deleteUser).toHaveBeenCalledWith('clerk_test_123')
+      expect(clerkClient.users.deleteUser).toHaveBeenCalledWith('clerk_test_123')
     })
 
     it('should preserve audit logs (immutable for compliance)', async () => {

@@ -40,6 +40,9 @@ pnpm db:generate
 # Push database schema
 pnpm db:push
 
+# Seed the database (optional)
+pnpm db:seed
+
 # Run development server
 pnpm dev
 ```

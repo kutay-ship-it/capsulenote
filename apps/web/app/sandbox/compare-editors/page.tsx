@@ -827,6 +827,9 @@ export default function CompareEditorsPage() {
                     body: "",
                     recipientEmail: "",
                     deliveryDate: "",
+                    deliveryType: "email",
+                    recipientType: "self",
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                   }}
                 />
               </CardContent>

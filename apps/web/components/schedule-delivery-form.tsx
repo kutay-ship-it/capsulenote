@@ -38,6 +38,7 @@ export function ScheduleDeliveryForm({
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [deliverTime, setDeliverTime] = useState("09:00")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   // Date presets
   const datePresets = [
@@ -110,6 +111,28 @@ export function ScheduleDeliveryForm({
       })
       return
     }
+
+    // Client-side window validation (5 minutes to 100 years)
+    const now = new Date()
+    const minDate = new Date(now.getTime() + 5 * 60 * 1000)
+    const maxDate = new Date()
+    maxDate.setUTCFullYear(maxDate.getUTCFullYear() + 100)
+    const proposed = zonedTimeToUtc(
+      `${deliveryDate.toISOString().split("T")[0]}T${deliverTime}`,
+      getUserTimezone()
+    )
+
+    if (proposed < minDate) {
+      setValidationError("Delivery must be at least 5 minutes from now.")
+      return
+    }
+
+    if (proposed > maxDate) {
+      setValidationError("Delivery cannot be more than 100 years in the future.")
+      return
+    }
+
+    setValidationError(null)
 
     setIsSubmitting(true)
 
@@ -361,6 +384,11 @@ export function ScheduleDeliveryForm({
       </Card>
 
       {/* Action Buttons */}
+      {validationError && (
+        <div className="rounded-sm border-2 border-coral bg-bg-pink-light p-3 font-mono text-xs text-coral">
+          {validationError}
+        </div>
+      )}
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
         <Button
           type="button"

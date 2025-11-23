@@ -9,6 +9,7 @@ import { SubscriptionStatus } from "./_components/subscription-status"
 import { UsageIndicator } from "./_components/usage-indicator"
 import { ManageSubscriptionButton } from "./_components/manage-subscription-button"
 import { InvoiceHistory } from "./_components/invoice-history"
+import { AddOnPurchase } from "./_components/addon-purchase"
 
 // Force dynamic rendering - billing must always show fresh subscription data
 export const revalidate = 0
@@ -63,6 +64,12 @@ export default async function BillingSettingsPage() {
           <div className="flex justify-end">
             <ManageSubscriptionButton hasSubscription={!!subscription} />
           </div>
+
+          {subscription && (
+            <p className="mt-4 font-mono text-xs text-gray-secondary">
+              Renewal date: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+            </p>
+          )}
         </CardContent>
       </Card>
 
@@ -109,6 +116,14 @@ export default async function BillingSettingsPage() {
             <p className="font-mono text-xs text-gray-secondary pt-2">
               All payment processing is handled securely by Stripe. We never store your payment details.
             </p>
+          </div>
+
+          <div className="mt-6 space-y-3">
+            <h4 className="font-mono text-sm uppercase tracking-wide text-charcoal">Purchase add-ons</h4>
+            <div className="flex flex-wrap gap-3">
+              <AddOnPurchase type="email" label="+5 Email Credits ($4)" />
+              <AddOnPurchase type="physical" label="+1 Physical Letter ($5)" />
+            </div>
           </div>
         </CardContent>
       </Card>

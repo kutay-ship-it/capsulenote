@@ -13,13 +13,21 @@ import { describe, it, expect, beforeEach, vi, afterEach } from "vitest"
 import { createAnonymousCheckout, linkPendingSubscription } from "@/app/subscribe/actions"
 import { prisma } from "@/server/lib/db"
 import { stripe } from "@/server/providers/stripe"
-import { clerkClient } from "@clerk/nextjs/server"
 import { isValidPriceId } from "@/server/providers/stripe/client"
 
 // Mock external dependencies
 vi.mock("@/server/lib/db")
 vi.mock("@/server/providers/stripe")
-vi.mock("@clerk/nextjs/server")
+const mockClerk = {
+  users: {
+    getUser: vi.fn(),
+    deleteUser: vi.fn(),
+  },
+}
+
+vi.mock("@clerk/nextjs/server", () => ({
+  clerkClient: mockClerk,
+}))
 vi.mock("@/server/lib/audit")
 vi.mock("@/server/lib/stripe-helpers")
 vi.mock("@/server/providers/stripe/client", () => ({
@@ -338,13 +346,8 @@ describe("linkPendingSubscription", () => {
       // @ts-ignore
       stripe.subscriptions.retrieve.mockResolvedValue(mockStripeSubscription)
 
-      const mockClerk = {
-        users: {
-          getUser: vi.fn().mockResolvedValue(mockClerkUser),
-        },
-      }
       // @ts-ignore
-      clerkClient.mockResolvedValue(mockClerk)
+      mockClerk.users.getUser.mockResolvedValue(mockClerkUser)
 
       // Act
       const result = await linkPendingSubscription(userId)
@@ -449,13 +452,8 @@ describe("linkPendingSubscription", () => {
       // @ts-ignore
       prisma.pendingSubscription.findFirst.mockResolvedValue(mockPending)
 
-      const mockClerk = {
-        users: {
-          getUser: vi.fn().mockResolvedValue(mockClerkUser),
-        },
-      }
       // @ts-ignore
-      clerkClient.mockResolvedValue(mockClerk)
+      mockClerk.users.getUser.mockResolvedValue(mockClerkUser)
 
       // Act
       const result = await linkPendingSubscription(userId)

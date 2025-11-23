@@ -14,6 +14,8 @@ export interface AnonymousDraft {
   deliveryDate?: string
   deliveryType?: "email" | "physical"
   timezone?: string
+  recipientType?: "self" | "other"
+  recipientName?: string
   wordCount: number
   lastSaved: string // ISO 8601 timestamp
   createdAt: string // ISO 8601 timestamp
@@ -31,7 +33,9 @@ export function saveAnonymousDraft(
   recipientEmail?: string,
   deliveryDate?: string,
   deliveryType?: "email" | "physical",
-  timezone?: string
+  timezone?: string,
+  recipientType?: "self" | "other",
+  recipientName?: string
 ): void {
   try {
     const wordCount = countWords(body)
@@ -45,6 +49,8 @@ export function saveAnonymousDraft(
       deliveryDate,
       deliveryType,
       timezone,
+      recipientType,
+      recipientName,
       wordCount,
       lastSaved: now,
       createdAt: existing?.createdAt || now,
