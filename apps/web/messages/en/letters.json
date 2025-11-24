@@ -2,6 +2,7 @@
   "heading": "My Letters",
   "subtitle": "All your letters to your future self",
   "new": "Write New Letter",
+  "delete": "Delete letter",
   "filters": {
     "all": "All Letters",
     "drafts": "Drafts",
@@ -76,6 +77,14 @@
     "description": "Choose when your letter should arrive in your inbox"
   },
   "toasts": {
+    "deleted": {
+      "title": "Letter Deleted",
+      "description": "Your letter has been deleted."
+    },
+    "deleteError": {
+      "title": "Delete Failed",
+      "description": "Failed to delete the letter. Please try again."
+    },
     "draftSaved": {
       "title": "Draft Saved",
       "description": "Your letter has been saved as a draft."

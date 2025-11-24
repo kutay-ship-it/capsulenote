@@ -2,6 +2,7 @@
   "heading": "Mektuplarım",
   "subtitle": "Gelecekteki kendine yazdığın tüm mektuplar",
   "new": "Yeni Mektup Yaz",
+  "delete": "Mektubu sil",
   "filters": {
     "all": "Tüm Mektuplar",
     "drafts": "Taslaklar",
@@ -76,6 +77,14 @@
     "description": "Mektubunun gelen kutuna ne zaman ulaşacağını seç"
   },
   "toasts": {
+    "deleted": {
+      "title": "Mektup silindi",
+      "description": "Mektubun silindi."
+    },
+    "deleteError": {
+      "title": "Silme basarisiz",
+      "description": "Mektup silinemedi. Lutfen tekrar deneyin."
+    },
     "draftSaved": {
       "title": "Taslak kaydedildi",
       "description": "Mektubun taslak olarak kaydedildi."

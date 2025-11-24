@@ -4,6 +4,8 @@
   "subtitle": "Manage your subscription, usage, and payment methods",
   "subscription": {
     "plan": {
+      "DIGITAL_CAPSULE": "Digital Capsule",
+      "PAPER_PIXELS": "Paper & Pixels",
       "pro": "Pro",
       "enterprise": "Enterprise",
       "none": "Free"

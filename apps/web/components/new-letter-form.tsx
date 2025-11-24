@@ -1,5 +1,6 @@
 "use client"
 
+import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { zonedTimeToUtc } from "date-fns-tz"
@@ -14,8 +15,10 @@ export function NewLetterForm() {
   const router = useRouter()
   const { toast } = useToast()
   const t = useTranslations("letters.toasts")
+  const [isPending, startTransition] = useTransition()
 
-  const handleSubmit = async (data: LetterFormData) => {
+  const handleSubmit = (data: LetterFormData) => {
+    startTransition(async () => {
     // For now, we'll store the plain text body as both bodyRich and bodyHtml
     // In a future update, this can be enhanced to support rich text
     const result = await createLetter({
@@ -66,12 +69,14 @@ export function NewLetterForm() {
         description: t("createError.description", { message: result.error.message }),
       })
     }
+    })
   }
 
   return (
     <LetterEditorForm
       accentColor="blue"
       onSubmit={handleSubmit}
+      isSubmitting={isPending}
       initialData={{
         title: "",
         body: "",

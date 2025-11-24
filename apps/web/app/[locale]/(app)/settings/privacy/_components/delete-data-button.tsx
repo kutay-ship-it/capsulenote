@@ -14,7 +14,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "@/i18n/routing"
 import { deleteUserAccount } from "@/server/actions/gdpr"
 import { Button } from "@/components/ui/button"
@@ -37,51 +37,49 @@ import { useTranslations } from "next-intl"
 export function DeleteDataButton() {
   const [isOpen, setIsOpen] = useState(false)
   const [confirmText, setConfirmText] = useState("")
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
   const router = useRouter()
   const t = useTranslations("privacy.delete")
 
   const isConfirmed = confirmText === "DELETE"
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!isConfirmed) return
 
-    try {
-      setIsDeleting(true)
+    startTransition(async () => {
+      try {
+        const result = await deleteUserAccount()
 
-      const result = await deleteUserAccount()
+        if (!result.success) {
+          toast({
+            variant: "destructive",
+            title: t("toast.error.title"),
+            description: result.error.message,
+          })
+          return
+        }
 
-      if (!result.success) {
+        // Success - user will be signed out by Clerk
+        toast({
+          title: t("toast.success.title"),
+          description: t("toast.success.description"),
+        })
+
+        // Redirect to homepage after a brief delay
+        setTimeout(() => {
+          router.push("/")
+          router.refresh()
+        }, 2000)
+      } catch (error) {
+        console.error("[Delete Data] Unexpected error:", error)
         toast({
           variant: "destructive",
           title: t("toast.error.title"),
-          description: result.error.message,
+          description: t("toast.error.description"),
         })
-        setIsDeleting(false)
-        return
       }
-
-      // Success - user will be signed out by Clerk
-      toast({
-        title: t("toast.success.title"),
-        description: t("toast.success.description"),
-      })
-
-      // Redirect to homepage after a brief delay
-      setTimeout(() => {
-        router.push("/")
-        router.refresh()
-      }, 2000)
-    } catch (error) {
-      console.error("[Delete Data] Unexpected error:", error)
-      toast({
-        variant: "destructive",
-        title: t("toast.error.title"),
-        description: t("toast.error.description"),
-      })
-      setIsDeleting(false)
-    }
+    })
   }
 
   return (
@@ -145,7 +143,7 @@ export function DeleteDataButton() {
                 placeholder={t("dialog.confirmPlaceholder")}
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
-                disabled={isDeleting}
+                disabled={isPending}
                 className="font-mono"
                 autoComplete="off"
               />
@@ -154,15 +152,15 @@ export function DeleteDataButton() {
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>
+          <AlertDialogCancel disabled={isPending}>
             {t("cancel")}
           </AlertDialogCancel>
           <Button
             variant="destructive"
             onClick={handleDelete}
-            disabled={!isConfirmed || isDeleting}
+            disabled={!isConfirmed || isPending}
           >
-            {isDeleting ? (
+            {isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {t("loading")}

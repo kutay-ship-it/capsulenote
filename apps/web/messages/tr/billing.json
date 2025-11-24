@@ -4,6 +4,8 @@
   "subtitle": "Aboneligini, kullanimini ve odeme yontemlerini yonet",
   "subscription": {
     "plan": {
+      "DIGITAL_CAPSULE": "Dijital Kapsul",
+      "PAPER_PIXELS": "Kagit ve Pikseller",
       "pro": "Pro",
       "enterprise": "Kurumsal",
       "none": "Ucretsiz"

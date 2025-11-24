@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
@@ -23,7 +23,7 @@ export function DashboardLetterEditor() {
   const router = useRouter()
   const { toast } = useToast()
   const t = useTranslations("forms.dashboardEditor")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [draftData, setDraftData] = useState<LetterFormData | null>(null)
   const [showResumePrompt, setShowResumePrompt] = useState(false)
   const [activeInitialData, setActiveInitialData] = useState<LetterFormData>(() => ({
@@ -66,116 +66,114 @@ export function DashboardLetterEditor() {
     }
   }, [])
 
-  const handleLetterSubmit = async (data: LetterFormData) => {
+  const handleLetterSubmit = (data: LetterFormData) => {
     // Prevent double submission
-    if (isSubmitting) return
+    if (isPending) return
 
-    setIsSubmitting(true)
+    startTransition(async () => {
+      try {
+        // Convert plain text body to TipTap JSON and HTML
+        // TipTap expects a document structure with paragraphs
+        const paragraphs = data.body.split('\n').filter(p => p.trim()).map(p => ({
+          type: 'paragraph',
+          content: [{ type: 'text', text: p }]
+        }))
 
-    try {
-      // Convert plain text body to TipTap JSON and HTML
-      // TipTap expects a document structure with paragraphs
-      const paragraphs = data.body.split('\n').filter(p => p.trim()).map(p => ({
-        type: 'paragraph',
-        content: [{ type: 'text', text: p }]
-      }))
-
-      const bodyRich = {
-        type: 'doc',
-        content: paragraphs.length > 0 ? paragraphs : [
-          { type: 'paragraph', content: [{ type: 'text', text: data.body }] }
-        ]
-      }
-
-      // Convert to HTML (simple implementation)
-      const bodyHtml = data.body
-        .split('\n')
-        .filter(p => p.trim())
-        .map(p => `<p>${escapeHtml(p)}</p>`)
-        .join('')
-
-      // Call server action to create letter
-      const result = await createLetter({
-        title: data.title,
-        bodyRich,
-        bodyHtml,
-        tags: [],
-        visibility: 'private' as const,
-      })
-
-      if (result.success) {
-        const letterId = result.data.letterId
-        const timezone = data.timezone || getUserTimezone()
-        const deliverAt = fromZonedTime(`${data.deliveryDate}T09:00`, timezone)
-
-        try {
-          await scheduleDelivery({
-            letterId,
-            channel: data.deliveryType === "physical" ? "mail" : "email",
-            deliverAt,
-            timezone,
-            toEmail: data.recipientEmail,
-          })
-        } catch (scheduleError) {
-          toast({
-            variant: "destructive",
-            title: t("toasts.deliveryNotScheduled.title"),
-            description: scheduleError instanceof Error
-              ? scheduleError.message
-              : t("toasts.deliveryNotScheduled.description"),
-          })
+        const bodyRich = {
+          type: 'doc',
+          content: paragraphs.length > 0 ? paragraphs : [
+            { type: 'paragraph', content: [{ type: 'text', text: data.body }] }
+          ]
         }
 
-        clearAnonymousDraft()
+        // Convert to HTML (simple implementation)
+        const bodyHtml = data.body
+          .split('\n')
+          .filter(p => p.trim())
+          .map(p => `<p>${escapeHtml(p)}</p>`)
+          .join('')
 
-        // Show success toast
-        toast({
-          title: t("toasts.letterCreated.title"),
-          description: t("toasts.letterCreated.description", {
-            title: data.title,
-            scheduled: data.deliveryDate ? t("toasts.letterCreated.scheduled") : "",
-          }),
+        // Call server action to create letter
+        const result = await createLetter({
+          title: data.title,
+          bodyRich,
+          bodyHtml,
+          tags: [],
+          visibility: 'private' as const,
         })
 
-        // Redirect to letter detail page
-        router.push(`/letters/${letterId}`)
-      } else {
-        // Handle error cases
-        if (result.error.code === 'QUOTA_EXCEEDED') {
+        if (result.success) {
+          const letterId = result.data.letterId
+          const timezone = data.timezone || getUserTimezone()
+          const deliverAt = fromZonedTime(`${data.deliveryDate}T09:00`, timezone)
+
+          try {
+            await scheduleDelivery({
+              letterId,
+              channel: data.deliveryType === "physical" ? "mail" : "email",
+              deliverAt,
+              timezone,
+              toEmail: data.recipientEmail,
+            })
+          } catch (scheduleError) {
+            toast({
+              variant: "destructive",
+              title: t("toasts.deliveryNotScheduled.title"),
+              description: scheduleError instanceof Error
+                ? scheduleError.message
+                : t("toasts.deliveryNotScheduled.description"),
+            })
+          }
+
+          clearAnonymousDraft()
+
+          // Show success toast
           toast({
-            title: t("toasts.quotaExceeded.title"),
-            description: result.error.message,
-            variant: "destructive",
-            action: {
-              label: t("toasts.upgrade"),
-              onClick: () => router.push('/pricing'),
-            },
+            title: t("toasts.letterCreated.title"),
+            description: t("toasts.letterCreated.description", {
+              title: data.title,
+              scheduled: data.deliveryDate ? t("toasts.letterCreated.scheduled") : "",
+            }),
           })
-        } else if (result.error.code === 'VALIDATION_FAILED') {
-          toast({
-            title: t("toasts.validationError.title"),
-            description: result.error.message,
-            variant: "destructive",
-          })
+
+          // Redirect to letter detail page
+          router.push(`/letters/${letterId}`)
         } else {
-          toast({
-            title: t("toasts.error.title"),
-            description: result.error.message || t("toasts.error.description"),
-            variant: "destructive",
-          })
+          // Handle error cases
+          if (result.error.code === 'QUOTA_EXCEEDED') {
+            toast({
+              title: t("toasts.quotaExceeded.title"),
+              description: result.error.message,
+              variant: "destructive",
+              action: {
+                label: t("toasts.upgrade"),
+                onClick: () => router.push('/pricing'),
+              },
+            })
+          } else if (result.error.code === 'VALIDATION_FAILED') {
+            toast({
+              title: t("toasts.validationError.title"),
+              description: result.error.message,
+              variant: "destructive",
+            })
+          } else {
+            toast({
+              title: t("toasts.error.title"),
+              description: result.error.message || t("toasts.error.description"),
+              variant: "destructive",
+            })
+          }
         }
+      } catch (error) {
+        // Handle unexpected errors
+        console.error('Letter creation error:', error)
+        toast({
+          title: t("toasts.unexpectedError.title"),
+          description: t("toasts.unexpectedError.description"),
+          variant: "destructive",
+        })
       }
-    } catch (error) {
-      // Handle unexpected errors
-      console.error('Letter creation error:', error)
-      toast({
-        title: t("toasts.unexpectedError.title"),
-        description: t("toasts.unexpectedError.description"),
-        variant: "destructive",
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -219,7 +217,7 @@ export function DashboardLetterEditor() {
           return handleLetterSubmit(data)
         }}
         initialData={activeInitialData}
-        isSubmitting={isSubmitting}
+        isSubmitting={isPending}
       />
     </div>
   )

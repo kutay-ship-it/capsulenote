@@ -7,7 +7,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useTransition } from "react"
 import { exportUserData } from "@/server/actions/gdpr"
 import { Button } from "@/components/ui/button"
 import { Download, Loader2 } from "lucide-react"
@@ -15,57 +15,55 @@ import { useToast } from "@/hooks/use-toast"
 import { useTranslations } from "next-intl"
 
 export function ExportDataButton() {
-  const [isExporting, setIsExporting] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
   const t = useTranslations("privacy.export")
 
-  const handleExport = async () => {
-    try {
-      setIsExporting(true)
+  const handleExport = () => {
+    startTransition(async () => {
+      try {
+        const result = await exportUserData()
 
-      const result = await exportUserData()
+        if (!result.success) {
+          toast({
+            variant: "destructive",
+            title: t("toast.error.title"),
+            description: result.error.message,
+          })
+          return
+        }
 
-      if (!result.success) {
+        // Trigger download
+        const link = document.createElement("a")
+        link.href = result.data.downloadUrl
+        link.download = result.data.filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
+        toast({
+          title: t("toast.success.title"),
+          description: t("toast.success.description", { filename: result.data.filename }),
+        })
+      } catch (error) {
+        console.error("[Export Data] Unexpected error:", error)
         toast({
           variant: "destructive",
           title: t("toast.error.title"),
-          description: result.error.message,
+          description: t("toast.error.description"),
         })
-        return
       }
-
-      // Trigger download
-      const link = document.createElement("a")
-      link.href = result.data.downloadUrl
-      link.download = result.data.filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      toast({
-        title: t("toast.success.title"),
-        description: t("toast.success.description", { filename: result.data.filename }),
-      })
-    } catch (error) {
-      console.error("[Export Data] Unexpected error:", error)
-      toast({
-        variant: "destructive",
-        title: t("toast.error.title"),
-        description: t("toast.error.description"),
-      })
-    } finally {
-      setIsExporting(false)
-    }
+    })
   }
 
   return (
     <Button
       onClick={handleExport}
-      disabled={isExporting}
+      disabled={isPending}
       size="lg"
       className="w-full sm:w-auto"
     >
-      {isExporting ? (
+      {isPending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           {t("loading")}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Calendar, Mail as MailIcon } from "lucide-react"
 import { fromZonedTime } from "date-fns-tz"
@@ -41,7 +41,7 @@ export function ScheduleDeliveryForm({
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
   const [showCustomDate, setShowCustomDate] = useState(false)
   const [deliverTime, setDeliverTime] = useState("09:00")
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [validationError, setValidationError] = useState<string | null>(null)
 
   // Date presets
@@ -142,55 +142,53 @@ export function ScheduleDeliveryForm({
 
     setValidationError(null)
 
-    setIsSubmitting(true)
+    startTransition(async () => {
+      try {
+        const { dateTimeStr, timezone } = buildDeliverAtParams({
+          date: deliveryDate,
+          time: deliverTime,
+        })
+        const deliverAt = fromZonedTime(dateTimeStr, timezone)
 
-    try {
-      const { dateTimeStr, timezone } = buildDeliverAtParams({
-        date: deliveryDate,
-        time: deliverTime,
-      })
-      const deliverAt = fromZonedTime(dateTimeStr, timezone)
+        const result = await scheduleDelivery({
+          letterId,
+          channel,
+          deliverAt,
+          timezone,
+          toEmail: recipientEmail,
+        })
 
-      const result = await scheduleDelivery({
-        letterId,
-        channel,
-        deliverAt,
-        timezone,
-        toEmail: recipientEmail,
-      })
+        if (!result.success) {
+          const reason = (result.error as any)?.details?.reason
+          const message =
+            (result.error?.code === "SUBSCRIPTION_REQUIRED" &&
+              (reason === "pending_subscription"
+                ? t("subscriptionPending")
+                : t("subscriptionRequired"))) ||
+            result.error?.message ||
+            t("failed")
+          toast({
+            variant: "destructive",
+            title: t("errorTitle"),
+            description: message,
+          })
+          return
+        }
 
-      if (!result.success) {
-        const reason = (result.error as any)?.details?.reason
-        const message =
-          (result.error?.code === "SUBSCRIPTION_REQUIRED" &&
-            (reason === "pending_subscription"
-              ? t("subscriptionPending")
-              : t("subscriptionRequired"))) ||
-          result.error?.message ||
-          t("failed")
+        toast({
+          title: t("scheduledTitle"),
+          description: t("scheduledDescription", { date: formatDeliveryTime() || "" }),
+        })
+
+        router.push(`/letters/${letterId}`)
+      } catch (error) {
         toast({
           variant: "destructive",
           title: t("errorTitle"),
-          description: message,
+          description: error instanceof Error ? error.message : t("unexpected"),
         })
-        return
       }
-
-      toast({
-        title: t("scheduledTitle"),
-        description: t("scheduledDescription", { date: formatDeliveryTime() || "" }),
-      })
-
-      router.push(`/letters/${letterId}`)
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: t("errorTitle"),
-        description: error instanceof Error ? error.message : t("unexpected"),
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
+    })
   }
 
   return (
@@ -411,7 +409,7 @@ export function ScheduleDeliveryForm({
           type="button"
           variant="outline"
           onClick={() => router.push(`/letters/${letterId}`)}
-          disabled={isSubmitting}
+          disabled={isPending}
           className="border-2 border-charcoal font-mono"
           style={{ borderRadius: "2px" }}
         >
@@ -420,11 +418,11 @@ export function ScheduleDeliveryForm({
         </Button>
         <Button
           type="submit"
-          disabled={isSubmitting || !deliveryDate}
+          disabled={isPending || !deliveryDate}
           className="border-2 border-charcoal bg-charcoal font-mono text-cream hover:bg-gray-800"
           style={{ borderRadius: "2px" }}
         >
-          {isSubmitting ? tf("actions.scheduling") : tf("actions.schedule")}
+          {isPending ? tf("actions.scheduling") : tf("actions.schedule")}
           <MailIcon className="ml-2 h-4 w-4" />
         </Button>
       </div>

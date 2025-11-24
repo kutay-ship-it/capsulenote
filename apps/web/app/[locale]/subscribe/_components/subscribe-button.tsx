@@ -11,7 +11,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useTransition } from "react"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { createAnonymousCheckout } from "../actions"
@@ -46,65 +46,64 @@ export function SubscribeButton({
   size = "lg",
   className,
 }: SubscribeButtonProps) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
-  async function handleClick() {
-    setIsLoading(true)
+  function handleClick() {
+    startTransition(async () => {
+      try {
+        // Call anonymous checkout server action
+        const result = await createAnonymousCheckout({
+          email,
+          priceId,
+          letterId,
+          metadata: {
+            source: "subscribe_page",
+            plan: planName,
+            ...metadata,
+          },
+        })
 
-    try {
-      // Call anonymous checkout server action
-      const result = await createAnonymousCheckout({
-        email,
-        priceId,
-        letterId,
-        metadata: {
-          source: "subscribe_page",
-          plan: planName,
-          ...metadata,
-        },
-      })
+        // Redirect to Stripe Checkout
+        window.location.href = result.sessionUrl
+      } catch (error) {
+        console.error("[SubscribeButton] Checkout error:", error)
 
-      // Redirect to Stripe Checkout
-      window.location.href = result.sessionUrl
-    } catch (error) {
-      console.error("[SubscribeButton] Checkout error:", error)
+        // Handle specific error messages
+        const errorMessage = error instanceof Error ? error.message : String(error)
 
-      // Handle specific error messages
-      const errorMessage = error instanceof Error ? error.message : String(error)
+        switch (errorMessage) {
+          case "ALREADY_PAID":
+            toast({
+              variant: "destructive",
+              title: "Payment already completed",
+              description: "Please sign up to activate your subscription",
+            })
+            // Redirect to signup with email
+            setTimeout(() => {
+              window.location.href = `/sign-up?email=${encodeURIComponent(email)}`
+            }, 2000)
+            break
 
-      switch (errorMessage) {
-        case "ALREADY_PAID":
-          toast({
-            variant: "destructive",
-            title: "Payment already completed",
-            description: "Please sign up to activate your subscription",
-          })
-          // Redirect to signup with email
-          setTimeout(() => {
-            window.location.href = `/sign-up?email=${encodeURIComponent(email)}`
-          }, 2000)
-          break
-
-        default:
-          toast({
-            variant: "destructive",
-            title: "Failed to start checkout",
-            description: errorMessage || "An unexpected error occurred. Please try again.",
-          })
-          setIsLoading(false)
+          default:
+            toast({
+              variant: "destructive",
+              title: "Failed to start checkout",
+              description: errorMessage || "An unexpected error occurred. Please try again.",
+            })
+        }
       }
-    }
+    })
   }
 
   return (
     <Button
       onClick={handleClick}
-      disabled={isLoading}
+      disabled={isPending}
       variant={variant}
       size={size}
       className={className}
     >
-      {isLoading ? (
+      {isPending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           Loading...
