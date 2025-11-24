@@ -175,8 +175,8 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
     const deliveryUrl = `${baseUrl}/deliveries?utm_source=email&utm_medium=notification&utm_campaign=delivery_scheduled`
     const dashboardUrl = `${baseUrl}/dashboard?utm_source=email&utm_medium=notification&utm_campaign=delivery_scheduled`
 
-    // Format delivery date
-    const deliveryDate = formatDeliveryDate(delivery.deliverAt)
+    // Format delivery date (convert to Date object for serialization safety)
+    const deliveryDate = formatDeliveryDate(new Date(delivery.deliverAt))
 
     // Generate email HTML and text
     const emailHtml = generateDeliveryScheduledEmail({

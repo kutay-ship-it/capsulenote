@@ -12,7 +12,7 @@
 
 import Stripe from "stripe"
 import { prisma } from "@dearme/prisma"
-import type { PlanType } from "@prisma/client"
+import type { PlanType, SubscriptionStatus } from "@prisma/client"
 import {
   getUserByStripeCustomer,
   invalidateEntitlementsCache,
@@ -27,6 +27,28 @@ import {
   toDateOrNow,
   ensureValidDate,
 } from "../../../../../apps/web/server/lib/billing-constants"
+
+/**
+ * Map Stripe subscription statuses to our Prisma enum.
+ * Unknown statuses are coerced to past_due to avoid granting benefits.
+ */
+const mapStripeStatus = (status: Stripe.Subscription.Status): SubscriptionStatus => {
+  switch (status) {
+    case "trialing":
+    case "active":
+    case "past_due":
+    case "canceled":
+    case "unpaid":
+    case "paused":
+      return status
+    case "incomplete":
+    case "incomplete_expired":
+      return "past_due"
+    default:
+      console.warn("[Subscription Handler] Unknown Stripe status, coercing to past_due", { status })
+      return "past_due"
+  }
+}
 
 
 
@@ -109,6 +131,7 @@ export async function handleSubscriptionCreatedOrUpdated(
   const periodStart = toDateOrNow(subscription.current_period_start as any, "current_period_start")
   const safePeriodEnd = ensureValidDate(periodEnd, "current_period_end")
   const safePeriodStart = ensureValidDate(periodStart, "current_period_start")
+  const normalizedStatus = mapStripeStatus(subscription.status)
 
   // Upsert subscription
   await prisma.subscription.upsert({
@@ -116,13 +139,13 @@ export async function handleSubscriptionCreatedOrUpdated(
     create: {
       userId: user.id,
       stripeSubscriptionId: subscription.id,
-      status: subscription.status as any,
+      status: normalizedStatus,
       plan,
       currentPeriodEnd: safePeriodEnd,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
     update: {
-      status: subscription.status as any,
+      status: normalizedStatus,
       plan,
       currentPeriodEnd: safePeriodEnd,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
