@@ -156,7 +156,7 @@ Need to make changes? Visit your dashboard to manage all your letters and delive
 ${dashboardUrl}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Sent with ❤️ by DearMe
+Sent with ❤️ by Capsule Note
 Letters to your future self
   `.trim()
 }

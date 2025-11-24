@@ -187,7 +187,7 @@ export function generateLetterCreatedEmail({
                 <a href="${dashboardUrl}/settings/notifications" style="color: #1a1a1a; text-decoration: underline;">Manage email preferences</a>
               </div>
               <div style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 16px;">
-                © 2025 DearMe. All rights reserved.
+                © 2025 Calsule Note. All rights reserved.
               </div>
             </td>
           </tr>
@@ -237,6 +237,6 @@ Go to Dashboard: ${dashboardUrl}
 You're receiving this email because you created a letter on DearMe.
 Manage email preferences: ${dashboardUrl}/settings/notifications
 
-© 2025 DearMe. All rights reserved.
+© 2025 Capsule Note. All rights reserved.
 `.trim()
 }

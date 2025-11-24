@@ -133,6 +133,12 @@ export async function handleSubscriptionCreatedOrUpdated(
   const safePeriodStart = ensureValidDate(periodStart, "current_period_start")
   const normalizedStatus = mapStripeStatus(subscription.status)
 
+  console.log("[Subscription Handler] Normalized status", {
+    subscriptionId: subscription.id,
+    stripeStatus: subscription.status,
+    normalizedStatus,
+  })
+
   // Upsert subscription
   await prisma.subscription.upsert({
     where: { stripeSubscriptionId: subscription.id },
@@ -339,7 +345,7 @@ export async function handleSubscriptionResumed(subscription: Stripe.Subscriptio
   // Update subscription status
   await prisma.subscription.update({
     where: { stripeSubscriptionId: subscription.id },
-    data: { status: subscription.status as any },
+    data: { status: mapStripeStatus(subscription.status) },
   })
 
   // Get user for cache invalidation

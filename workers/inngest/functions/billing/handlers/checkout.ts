@@ -7,7 +7,7 @@
  */
 
 import Stripe from "stripe"
-import type { PlanType } from "@prisma/client"
+import type { PlanType, SubscriptionStatus } from "@prisma/client"
 import {
   createUsageRecord,
   getUserByStripeCustomer,
@@ -26,6 +26,28 @@ import {
   toDateOrNow,
   ensureValidDate,
 } from "../../../../../apps/web/server/lib/billing-constants"
+
+/**
+ * Map Stripe subscription statuses to our Prisma enum.
+ * Unknown statuses are coerced to past_due to avoid granting benefits.
+ */
+const mapStripeStatus = (status: Stripe.Subscription.Status): SubscriptionStatus => {
+  switch (status) {
+    case "trialing":
+    case "active":
+    case "past_due":
+    case "canceled":
+    case "unpaid":
+    case "paused":
+      return status
+    case "incomplete":
+    case "incomplete_expired":
+      return "past_due"
+    default:
+      console.warn("[Checkout Handler] Unknown Stripe status, coercing to past_due", { status })
+      return "past_due"
+  }
+}
 
 function resolvePlanFromSubscription(
   subscription: Stripe.Subscription,
@@ -69,13 +91,13 @@ async function upsertSubscriptionForUser({
       create: {
         userId,
         stripeSubscriptionId: stripeSubscription.id,
-        status: stripeSubscription.status as any,
+        status: mapStripeStatus(stripeSubscription.status),
         plan,
         currentPeriodEnd: periodEnd,
         cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
       },
       update: {
-        status: stripeSubscription.status as any,
+        status: mapStripeStatus(stripeSubscription.status),
         plan,
         currentPeriodEnd: periodEnd,
         cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
