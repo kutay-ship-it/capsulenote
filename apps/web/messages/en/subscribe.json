@@ -1,0 +1,11 @@
+{
+  "emailForm": {
+    "label": "Email Address",
+    "placeholder": "you@example.com",
+    "submit": "Continue",
+    "helper": "Your email will be used for payment and account creation only. Email cannot be changed after payment (locked for security).",
+    "error": {
+      "invalid": "Please enter a valid email address"
+    }
+  }
+}

@@ -16,6 +16,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@clerk/localizations": "^3.28.3",
     "@clerk/nextjs": "^6.35.0",
     "@dearme/inngest": "workspace:*",
     "@dearme/prisma": "workspace:*",
@@ -59,6 +60,7 @@
     "lob": "^6.6.3",
     "lucide-react": "^0.307.0",
     "next": "15.5.6",
+    "next-intl": "^4.5.5",
     "next-themes": "^0.2.1",
     "react": "^19.2.0",
     "react-day-picker": "^9.11.1",
@@ -84,8 +86,8 @@
     "@types/react-dom": "^18.2.18",
     "@types/three": "^0.181.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/ui": "^1.1.0",
     "@vitest/coverage-v8": "^1.5.0",
+    "@vitest/ui": "^1.1.0",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.56.0",
     "eslint-config-next": "15.5.6",

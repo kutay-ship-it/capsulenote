@@ -1,0 +1,145 @@
+{
+  "hero": {
+    "badge": "Ruh için zaman kapsülü",
+    "titleLine1": "Kendine yaz",
+    "titleLine2": "gelecekte",
+    "description": "Mektuplar tam olması gereken anda teslim edilir. Kontrol etmen gereken uygulama yok. Kapatılacak hatırlatmalar yok. Sadece bekleyen sözlerin.",
+    "primaryCta": "Yazmaya başla",
+    "secondaryCta": "Nasıl çalıştığını gör"
+  },
+  "stats": [
+    {
+      "value": "27k+",
+      "label": "Planlanan mektuplar",
+      "description": "74 ülkeden yazıldı ve büyüyor."
+    },
+    {
+      "value": "99.97%",
+      "label": "Zamanında teslimatlar",
+      "description": "Otomatik kontroller her vaadi rayında tutar."
+    },
+    {
+      "value": "2 format",
+      "label": "E-posta + premium posta",
+      "description": "İster anında gelen kutusu, ister mühürlü zarf seç."
+    }
+  ],
+  "howItWorksSection": {
+    "badge": "İzle",
+    "title": "Nasıl çalışıyor"
+  },
+  "heroEditorSection": {
+    "badge": "Hemen dene",
+    "title": "İlk mektubunu yaz",
+    "description": "Gelecekteki kendine yazmanın sakin ritmini hisset. Brutalist editörümüzü keşfetmek için hesap gerekmiyor."
+  },
+  "featuresIntro": {
+    "title": "Gelecek anlara verdiğin sözleri sakin, modern araçlarla tut.",
+    "description": "Capsule Note düşünceli yazımı, güvenli saklamayı ve güvenilir teslimatı brutalist bir deneyimde birleştirir."
+  },
+  "features": [
+    {
+      "title": "Yönlendirmeli yazım ritüelleri",
+      "description": "Yumuşak yönlendirmeler, şablonlar ve ton önerileri seni ilhamlı ve dürüst tutar."
+    },
+    {
+      "title": "Zamanı bilen teslimat",
+      "description": "Dakikasına planla; otomatik saat dilimi algılama ve hatırlatmalar devrede."
+    },
+    {
+      "title": "Varsayılan gizlilik",
+      "description": "Mektuplar beklerken şifreli kalır; kimse içerisine bakamaz."
+    },
+    {
+      "title": "Posta odası desteği",
+      "description": "Somut bir şey istediğinde biz basar, zarf yapar ve göndeririz."
+    },
+    {
+      "title": "Önemli anlar",
+      "description": "Yıldönümleri, mezuniyetler veya yıllık öz değerlendirmeler için tekrar eden planlar."
+    },
+    {
+      "title": "Teslimat görünürlüğü",
+      "description": "Yola çıkmadan önce durumunu izle, düzenle veya duraklat."
+    }
+  ],
+  "cta": {
+    "title": "Mektubunu planlamaya hazır mısın?",
+    "signedOutDescription": "Mektuplarını şifreli kasamızda güvenle saklamak ve gelecekteki sana teslimat planlamak için ücretsiz hesap oluştur.",
+    "signedInDescription": "Taslaklara devam etmek veya yeni teslimatlar planlamak için panoya dön.",
+    "createAccount": "Ücretsiz hesap oluştur",
+    "goToDashboard": "Panoya git"
+  },
+  "testimonial": {
+    "title": "Sözlerin burada iyi yaşlanır",
+    "quote": "\"Kız kardeşim tıp fakültesine gitmeden önce ona bir mektup planladım. İlk gece vardiyasında ulaştı ve beni ağlayarak aradı. Capsule Note o anın kaçmasını engelledi.\"",
+    "attribution": "— Margo L., 2021'den beri Capsule Note yazarı"
+  },
+  "ctaBottom": {
+    "title": "Gelecekteki gelen kutunda bir mektup aç",
+    "description": "Ücretsiz başla, istediğin kadar mektup yaz, teslimat planlayınca ödeme yap.",
+    "primary": "İlk mektubunu oluştur",
+    "secondary": "Zaten hesabım var"
+  },
+  "miniDemo": {
+    "subtitle": "Akışı izle",
+    "title": "Geleceğe giden dört adım",
+    "steps": ["Mektubunu yaz", "Teslim zamanını seç", "Biz güvenle saklarız", "Tam vaktinde ulaşır"],
+    "details": [
+      "Dikkat dağıtmayan editörümüzde düşüncelerini yakala",
+      "Saat dilimi hassasiyetiyle bir gelecekteki kilometre taşı seç",
+      "AES-256 şifreleme teslimata kadar gizli tutar",
+      "Inngest ile %99,97 zamanında teslimat"
+    ]
+  },
+  "howItWorks": {
+    "badge": "Nasıl çalışıyor",
+    "title": "Üç vuruşluk sakin ritüel",
+    "description": "Her Capsule Note mektubu aynı güvenilir akışı takip eder; böylece lojistik değil mesaj odakta kalır.",
+    "journey": {
+      "setMoment": {
+        "title": "Anı ayarla",
+        "description": "Bir dönüm noktası seç veya kendi ritüelini oluştur.",
+        "detail": "Saat dilimi farkındalığı küresel teslimatları zahmetsiz kılar."
+      },
+      "write": {
+        "title": "İçini dök",
+        "description": "Sakin, dikkat dağıtmayan editörde tek seferde yaz.",
+        "detail": "Yönlendirmeler ilham verir; sesin hep sana ait kalır."
+      },
+      "deliver": {
+        "title": "Teslimatı bize bırak",
+        "description": "E-posta, premium posta veya ikisi birden.",
+        "detail": "Gönderildiğinde ve açıldığında seni haberdar ederiz."
+      }
+    },
+    "scenarios": {
+      "title": "Yazarlarımızın planladığı anlar",
+      "description": "Capsule Note mektupları duyguların en yüksek, dikkatin en düşük olduğu anda gelir.",
+      "personal": {
+        "title": "Kişisel ritüeller",
+        "points": [
+          "Sözlerini görünür kılan gelecekteki ben kontrol noktaları.",
+          "Çocuklar, partnerler veya arkadaşlar için doğum günü kapsülleri.",
+          "Kariyer veya sağlık hedeflerini sabitleyen dönüm noktası yansımaları."
+        ]
+      },
+      "team": {
+        "title": "Ekip anları",
+        "points": [
+          "Yeni ekip arkadaşının ilk gününe planlanan karşılama mektupları.",
+          "Lansmanlar veya zamlar sırasında açılan liderlik notları.",
+          "Kamp, offsite veya değerlendirmeler sonrası kültür dokunuşları."
+        ]
+      },
+      "legacy": {
+        "title": "Miras paylaşımı",
+        "points": [
+          "Büyük yaşam olaylarından sonra sevdiklerinle hikayeler paylaş.",
+          "İlerlemeni kutlamak için gelecekteki sana hatırlatmalar gönder.",
+          "Şükran mektuplarını an geçtikten sonra bile ulaştır."
+        ]
+      }
+    }
+  }
+}

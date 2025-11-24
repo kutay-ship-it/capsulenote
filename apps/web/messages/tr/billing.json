@@ -1,0 +1,88 @@
+{
+  "back": "Ayarlar'a dön",
+  "heading": "Faturalandırma ve abonelik",
+  "subtitle": "Aboneliğini, kullanımını ve ödeme yöntemlerini yönet",
+  "subscription": {
+    "plan": {
+      "pro": "Pro",
+      "enterprise": "Kurumsal",
+      "none": "Ücretsiz"
+    },
+    "status": {
+      "active": "Aktif",
+      "trialing": "Deneme",
+      "canceled": "İptal edildi",
+      "past_due": "Vadesi geçmiş",
+      "incomplete": "Eksik",
+      "incomplete_expired": "Eksik",
+      "unpaid": "Ödenmemiş",
+      "none": "Ücretsiz"
+    },
+    "freeTitle": "Ücretsiz plan",
+    "freeDescription": "Aktif abonelik yok",
+    "freeCta": "Sınırsız mektup, planlı teslimatlar ve fiziksel posta için Pro'ya yükselt.",
+    "trialEnds": "Deneme bitişi {date}",
+    "trialHint": "Aboneliğe devam etmek için deneme bitmeden ödeme yöntemi ekle.",
+    "cancelTitle": "Abonelik {date} tarihinde sona erecek",
+    "cancelHint": "Bu tarihe kadar Pro erişimin devam eder. Öncesinde yeniden etkinleştirebilirsin.",
+    "paymentFailedTitle": "Ödeme başarısız",
+    "paymentFailedHint": "Hizmet kesintisi yaşamamak için ödeme yöntemini güncelle.",
+    "nextBilling": "Sonraki fatura tarihi",
+    "renewalDate": "Yenilenme tarihi: {date}"
+  },
+  "manageButton": {
+    "manage": "Aboneliği yönet",
+    "upgrade": "Pro'ya yükselt",
+    "loading": "Yükleniyor..."
+  },
+  "usage": {
+    "heading": "Bu ayki kullanım",
+    "range": "{start} - {end}",
+    "lettersTitle": "Oluşturulan mektuplar",
+    "lettersBadge": "Bu ay toplam {count}",
+    "lettersHint": "Taslak oluşturmak serbest; planlama kredi tüketir.",
+    "emailsTitle": "E-posta teslimatları",
+    "emailsRemaining": "{count} kaldı",
+    "emailsHint": "Bu plan yılı için kalan e-posta kredileri.",
+    "mailTitle": "Fiziksel posta kredileri",
+    "mailRemaining": "{remaining} / {total}",
+    "mailExhausted": "Kredi kalmadı. Ek satın al veya yenilemeyi bekle.",
+    "freeMessage": "Teslimat planlamak ve kredileri açmak için bir plan ekle."
+  },
+  "invoices": {
+    "heading": "Ödeme geçmişi",
+    "subtitle": "Son faturalar ve ödemeler",
+    "empty": "Henüz ödeme geçmişi yok",
+    "count": "Son {count} ödeme",
+    "paymentId": "Ödeme ID: {id}",
+    "invoice": "Fatura",
+    "footer": "Tüm faturaları Stripe Müşteri Portalı'nda gör"
+  },
+  "portal": {
+    "title": "Stripe Müşteri Portalı",
+    "description": "\"Aboneliği yönet\" butonu Stripe'ın güvenli portalını açar, burada şunları yapabilirsin:",
+    "items": [
+      "Ödeme yöntemini güncelle",
+      "Tüm faturaları görüntüle ve indir",
+      "Fatura bilgilerini güncelle",
+      "Aboneliğini iptal et (dönem sonuna kadar erişim devam eder)",
+      "İptal edilen aboneliği yeniden etkinleştir"
+    ],
+    "note": "Tüm ödemeler Stripe tarafından güvenli şekilde işlenir. Ödeme bilgilerini biz saklamıyoruz."
+  },
+  "addons": {
+    "title": "Ek kredi satın al",
+    "email": "+5 E-posta kredisi ($4)",
+    "physical": "+1 Fiziksel mektup ($5)",
+    "toast": {
+      "failedTitle": "Ek satın alma başarısız",
+      "failedDescription": "Lütfen tekrar dene.",
+      "redirect": "Yönlendiriliyor..."
+    }
+  },
+  "toasts": {
+    "errorTitle": "Hata",
+    "portalFailed": "Faturalandırma portalı açılamadı",
+    "portalUnexpected": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
+  }
+}

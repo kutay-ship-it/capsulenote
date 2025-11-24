@@ -1,0 +1,88 @@
+{
+  "back": "Back to Settings",
+  "heading": "Billing & Subscription",
+  "subtitle": "Manage your subscription, usage, and payment methods",
+  "subscription": {
+    "plan": {
+      "pro": "Pro",
+      "enterprise": "Enterprise",
+      "none": "Free"
+    },
+    "status": {
+      "active": "Active",
+      "trialing": "Trial",
+      "canceled": "Canceled",
+      "past_due": "Past Due",
+      "incomplete": "Incomplete",
+      "incomplete_expired": "Incomplete",
+      "unpaid": "Unpaid",
+      "none": "Free"
+    },
+    "freeTitle": "Free Plan",
+    "freeDescription": "No active subscription",
+    "freeCta": "Upgrade to Pro for unlimited letters, scheduled deliveries, and physical mail.",
+    "trialEnds": "Trial ends {date}",
+    "trialHint": "Add a payment method before your trial ends to continue your subscription.",
+    "cancelTitle": "Subscription will cancel on {date}",
+    "cancelHint": "You'll retain Pro access until this date. Reactivate anytime before then.",
+    "paymentFailedTitle": "Payment failed",
+    "paymentFailedHint": "Please update your payment method to avoid service interruption.",
+    "nextBilling": "Next billing date",
+    "renewalDate": "Renewal date: {date}"
+  },
+  "manageButton": {
+    "manage": "Manage Subscription",
+    "upgrade": "Upgrade to Pro",
+    "loading": "Loading..."
+  },
+  "usage": {
+    "heading": "Usage This Month",
+    "range": "{start} - {end}",
+    "lettersTitle": "Letters Created",
+    "lettersBadge": "{count} total this month",
+    "lettersHint": "Draft freely; scheduling consumes credits.",
+    "emailsTitle": "Email Deliveries",
+    "emailsRemaining": "{count} remaining",
+    "emailsHint": "Remaining email credits for this plan year.",
+    "mailTitle": "Physical Mail Credits",
+    "mailRemaining": "{remaining} / {total}",
+    "mailExhausted": "No credits remaining. Purchase add-ons or wait for renewal.",
+    "freeMessage": "Add a plan to schedule deliveries and unlock credits."
+  },
+  "invoices": {
+    "heading": "Payment History",
+    "subtitle": "Recent invoices and payments",
+    "empty": "No payment history yet",
+    "count": "Last {count} payment{count, plural, one {} other {s}}",
+    "paymentId": "Payment ID: {id}",
+    "invoice": "Invoice",
+    "footer": "View all invoices in the Stripe Customer Portal"
+  },
+  "portal": {
+    "title": "Stripe Customer Portal",
+    "description": "The \"Manage Subscription\" button opens Stripe's secure customer portal where you can:",
+    "items": [
+      "Update your payment method",
+      "View and download all invoices",
+      "Update billing information",
+      "Cancel your subscription (keeps access until period end)",
+      "Reactivate a canceled subscription"
+    ],
+    "note": "All payment processing is handled securely by Stripe. We never store your payment details."
+  },
+  "addons": {
+    "title": "Purchase add-ons",
+    "email": "+5 Email Credits ($4)",
+    "physical": "+1 Physical Letter ($5)",
+    "toast": {
+      "failedTitle": "Add-on purchase failed",
+      "failedDescription": "Please try again.",
+      "redirect": "Redirecting..."
+    }
+  },
+  "toasts": {
+    "errorTitle": "Error",
+    "portalFailed": "Failed to open billing portal",
+    "portalUnexpected": "An unexpected error occurred. Please try again."
+  }
+}

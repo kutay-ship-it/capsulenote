@@ -1,16 +1,19 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { zonedTimeToUtc } from "date-fns-tz"
+
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
-import { createLetter } from "@/server/actions/letters"
 import { scheduleDelivery } from "@/server/actions/deliveries"
 import { useToast } from "@/hooks/use-toast"
-import { zonedTimeToUtc } from "date-fns-tz"
 import { getUserTimezone } from "@/lib/utils"
+import { createLetter } from "@/server/actions/letters"
 
 export function NewLetterForm() {
   const router = useRouter()
   const { toast } = useToast()
+  const t = useTranslations("letters.toasts")
 
   const handleSubmit = async (data: LetterFormData) => {
     // For now, we'll store the plain text body as both bodyRich and bodyHtml
@@ -38,17 +41,20 @@ export function NewLetterForm() {
         })
 
         toast({
-          title: "Letter Scheduled",
-          description: `Your letter "${data.title}" is set for ${deliverAt.toLocaleString()}.`,
+          title: t("letterScheduled.title"),
+          description: t("letterScheduled.description", {
+            title: data.title || "",
+            date: new Intl.DateTimeFormat(undefined, { dateStyle: "long", timeStyle: "short" }).format(deliverAt),
+          }),
         })
       } catch (scheduleError) {
         toast({
           variant: "destructive",
-          title: "Delivery Not Scheduled",
+          title: t("scheduleFailed.title"),
           description:
             scheduleError instanceof Error
               ? scheduleError.message
-              : "We saved your letter, but scheduling failed. Please try again from the letter page.",
+              : t("scheduleFailed.description"),
         })
       }
 
@@ -56,8 +62,8 @@ export function NewLetterForm() {
     } else {
       toast({
         variant: "destructive",
-        title: "Error Creating Letter",
-        description: result.error.message,
+        title: t("createError.title"),
+        description: t("createError.description", { message: result.error.message }),
       })
     }
   }

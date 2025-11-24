@@ -1,0 +1,23 @@
+{
+  "heading": "Panel",
+  "welcome": "Tekrar hoş geldin! İşte mektuplarının özeti.",
+  "stats": {
+    "total": { "title": "Toplam Mektup", "description": "Yazdığın tüm mektuplar" },
+    "drafts": { "title": "Taslaklar", "description": "Planlanmamış mektuplar" },
+    "scheduled": { "title": "Planlandı", "description": "Teslim edilmeyi bekliyor" },
+    "delivered": { "title": "Teslim edildi", "description": "Başarıyla gönderildi" }
+  },
+  "quick": {
+    "badge": "Hızlı yaz",
+    "title": "Yeni mektup yaz",
+    "description": "Panondan gelecekteki kendine mektup yaz ve planla."
+  },
+  "recent": {
+    "title": "Son mektuplar",
+    "description": "En son oluşturduğun mektuplar",
+    "empty": "Henüz mektubun yok. İlk mektubunu yazmak için yukarıdaki editörü kullan!",
+    "viewAll": "Tüm {count} mektubu gör →",
+    "deliveryCount": "{count, plural, one {# teslimat} other {# teslimat}}",
+    "createdOn": "Oluşturuldu {date}"
+  }
+}

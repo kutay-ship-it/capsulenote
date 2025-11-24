@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { ArrowRight, Save, Lightbulb } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -37,6 +38,7 @@ export function LetterDraftForm({
 }: LetterDraftFormProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const t = useTranslations("letters")
 
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [body, setBody] = React.useState(initialData?.body || "")
@@ -163,7 +165,7 @@ export function LetterDraftForm({
     const newErrors: { title?: string; body?: string } = {}
 
     if (!body.trim()) {
-      newErrors.body = "Please write something in your letter"
+      newErrors.body = t("toasts.draftValidation")
     }
 
     setErrors(newErrors)
@@ -179,8 +181,8 @@ export function LetterDraftForm({
     await autoSave()
 
     toast({
-      title: "Draft Saved",
-      description: "Your letter has been saved as a draft.",
+      title: t("toasts.draftSaved.title"),
+      description: t("toasts.draftSaved.description"),
     })
   }
 
@@ -237,8 +239,10 @@ export function LetterDraftForm({
 
         if (!result.success) {
           toast({
-            title: "Error",
-            description: result.error.message || "Failed to save letter.",
+            title: t("toasts.createError.title"),
+            description: t("toasts.createError.description", {
+              message: result.error.message || t("toasts.scheduleForm.failed"),
+            }),
             variant: "destructive",
           })
           return
@@ -255,8 +259,8 @@ export function LetterDraftForm({
     } catch (error) {
       console.error('Error saving letter:', error)
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: t("toasts.scheduleForm.errorTitle"),
+        description: t("toasts.scheduleForm.unexpected"),
         variant: "destructive",
       })
     } finally {

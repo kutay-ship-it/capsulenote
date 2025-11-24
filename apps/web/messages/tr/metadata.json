@@ -1,0 +1,17 @@
+{
+  "title": {
+    "default": "Capsule Note — Gelecekteki Kendine Mektuplar",
+    "template": "%s | Capsule Note"
+  },
+  "description": "Gelecekteki kendine içten mektuplar yaz ve bunları e-posta ya da fiziksel posta ile planla.",
+  "openGraph": {
+    "title": "Capsule Note — Gelecekteki Kendine Mektuplar",
+    "description": "Gelecekteki kendine içten mektuplar yaz ve bunları e-posta ya da fiziksel posta ile planla.",
+    "siteName": "Capsule Note"
+  },
+  "twitter": {
+    "title": "Capsule Note — Gelecekteki Kendine Mektuplar",
+    "description": "Gelecekteki kendine içten mektuplar yaz ve bunları e-posta ya da fiziksel posta ile planla."
+  },
+  "keywords": ["gelecekteki ben", "zaman kapsülü", "mektuplar", "günlük", "öz değerlendirme"]
+}

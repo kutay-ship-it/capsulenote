@@ -1,0 +1,23 @@
+{
+  "heading": "Deliveries",
+  "subtitle": "All your scheduled and past deliveries",
+  "empty": {
+    "title": "No Deliveries Scheduled",
+    "description": "When you schedule letters, they'll appear here with their delivery status."
+  },
+  "status": {
+    "scheduled": "Scheduled",
+    "processing": "Processing",
+    "sent": "Sent",
+    "failed": "Failed",
+    "canceled": "Canceled"
+  },
+  "channel": {
+    "email": "Email",
+    "mail": "Physical Mail"
+  },
+  "labels": {
+    "deliveryAt": "Delivery time",
+    "timezone": "Timezone"
+  }
+}

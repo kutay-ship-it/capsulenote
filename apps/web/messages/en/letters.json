@@ -1,0 +1,111 @@
+{
+  "heading": "My Letters",
+  "subtitle": "All your letters to your future self",
+  "new": "Write New Letter",
+  "filters": {
+    "all": "All Letters",
+    "drafts": "Drafts",
+    "scheduled": "Scheduled",
+    "delivered": "Delivered"
+  },
+  "drafts": {
+    "heading": "Draft Letters",
+    "subtitle": "Unscheduled letters • Auto-deleted after 30 days",
+    "all": "All Letters",
+    "writeNew": "Write New",
+    "empty": {
+      "title": "No Drafts",
+      "description": "All your letters have been scheduled! Create a new letter or view all letters.",
+      "cta": "Write New Letter"
+    },
+    "warningTitle": "Drafts Expiring Soon",
+    "expiredMessage": "{count, plural, one {# draft has} other {# drafts have}} expired and will be deleted soon.",
+    "expiringMessage": "{count, plural, one {# draft expires} other {# drafts expire}} within 7 days. Schedule {count, plural, one {it} other {them}} to prevent deletion.",
+    "sections": {
+      "expired": "Expired ({count})",
+      "expiring": "Expiring Soon ({count})",
+      "active": "Active Drafts ({count})"
+    },
+    "badges": {
+      "willDelete": "Will be deleted",
+      "expiringDays": "{count}d left",
+      "continue": "Continue Writing →",
+      "tagOverflow": "+{count}"
+    },
+    "created": "Created {date}",
+    "age": "{count, plural, one {# day old} other {# days old}}",
+    "expiredBadge": "EXPIRED"
+  },
+  "empty": {
+    "title": "No Letters Yet",
+    "description": "Start your journey by writing your first letter to your future self.",
+    "cta": "Create Your First Letter"
+  },
+  "status": {
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "delivered": "Delivered"
+  },
+  "detail": {
+    "back": "Back to Letters",
+    "created": "Created {date}",
+    "scheduleCta": "Schedule Delivery",
+    "scheduledHeading": "Scheduled Deliveries",
+    "deliveryStatus": {
+      "scheduled": "Scheduled",
+      "processing": "Processing",
+      "sent": "Sent",
+      "failed": "Failed",
+      "canceled": "Canceled"
+    },
+    "channel": {
+      "email": "Email",
+      "mail": "Physical Mail"
+    },
+    "locked": "Locked {date}",
+    "attemptsHeading": "Delivery Attempts"
+  },
+  "schedule": {
+    "badge": "Step 2: Schedule",
+    "title": "Schedule Your Letter",
+    "description": "Choose when your letter should arrive in your inbox"
+  },
+  "toasts": {
+    "draftSaved": {
+      "title": "Draft Saved",
+      "description": "Your letter has been saved as a draft."
+    },
+    "letterScheduled": {
+      "title": "Letter Scheduled",
+      "description": "Your letter \"{title}\" is set for {date}."
+    },
+    "scheduleFailed": {
+      "title": "Delivery Not Scheduled",
+      "description": "We saved your letter, but scheduling failed. Please try again from the letter page."
+    },
+    "createError": {
+      "title": "Error Creating Letter",
+      "description": "{message}"
+    },
+    "scheduleForm": {
+      "errorTitle": "Error",
+      "missingDate": "Please select a delivery date",
+      "missingEmail": "Please enter a recipient email",
+      "tooSoon": "Delivery must be at least 5 minutes from now.",
+      "tooFar": "Delivery cannot be more than 100 years in the future.",
+      "subscriptionPending": "Payment received. Verify your email to activate your subscription.",
+      "subscriptionRequired": "Scheduling requires an active subscription.",
+      "failed": "Failed to schedule delivery.",
+      "scheduledTitle": "✓ Delivery Scheduled",
+      "scheduledDescription": "Your letter will arrive on {date}",
+      "unexpected": "Failed to schedule delivery"
+    },
+    "draftValidation": "Please write something in your letter"
+  },
+  "counts": {
+    "deliveries": "{count, plural, one {# delivery} other {# deliveries}}",
+    "tagOverflow": "+{count}"
+  },
+  "createdOn": "Created {date}",
+  "viewAll": "View all"
+}

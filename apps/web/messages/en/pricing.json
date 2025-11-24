@@ -1,0 +1,163 @@
+{
+  "metadata": {
+    "title": "Pricing - Capsule Note",
+    "description": "Choose the perfect plan for your letter writing journey. Start free, upgrade when ready."
+  },
+  "upgrade": {
+    "loading": "Loading...",
+    "errors": {
+      "alreadySubscribed": {
+        "title": "You already have an active subscription",
+        "description": "Manage your subscription in billing settings"
+      },
+      "invalidPlan": {
+        "title": "Invalid plan selected",
+        "description": "Please refresh the page and try again"
+      },
+      "unauthorized": {
+        "title": "Please sign in to continue",
+        "description": "You need an account to subscribe"
+      },
+      "payment": {
+        "title": "Payment system error",
+        "description": "Please try again in a moment"
+      },
+      "generic": {
+        "title": "Something went wrong",
+        "description": "Please try again"
+      },
+      "checkoutFailed": {
+        "title": "Failed to start checkout",
+        "description": "An unexpected error occurred. Please try again."
+      }
+    }
+  },
+  "hero": {
+    "badge": "Transparent Pricing",
+    "title": "Choose Your Plan",
+    "subtitle": "Start writing to your future self today. All plans include encrypted storage and reliable delivery. No credit card required to start.",
+    "socialProof": "Join 1,000+ letter writers"
+  },
+  "tiers": [
+    {
+      "name": "Digital Capsule",
+      "price": 9,
+      "interval": "year",
+      "intervalLabel": "year",
+      "description": "For personal letters to yourself—purely digital delivery.",
+      "features": ["6 email deliveries / year", "Schedule up to 100 years out", "Timezone-aware reminders", "Encrypted storage"],
+      "cta": "Choose Digital",
+      "priceKey": "STRIPE_PRICE_DIGITAL_ANNUAL"
+    },
+    {
+      "name": "Paper & Pixels",
+      "price": 29,
+      "interval": "year",
+      "intervalLabel": "year",
+      "description": "For gifting and tangible keepsakes—email plus premium mail.",
+      "features": ["24 email deliveries / year", "3 physical letters / year", "Address confirmation reminders", "Priority delivery routing"],
+      "cta": "Choose Paper & Pixels",
+      "priceKey": "STRIPE_PRICE_PAPER_ANNUAL",
+      "highlighted": true,
+      "popular": true
+    }
+  ],
+  "trust": [
+    { "title": "Yearly Credits", "description": "Use within your plan year" },
+    { "title": "Bank-Level Security", "description": "AES-256 encryption" },
+    { "title": "Secure Payments", "description": "Powered by Stripe" },
+    { "title": "Cancel Anytime", "description": "No long-term contracts" }
+  ],
+  "matrixTitle": "Compare Plans",
+  "matrixSubtitle": "See exactly what's included in each plan",
+  "matrix": {
+    "headers": { "feature": "Features", "free": "Free", "pro": "Pro", "enterprise": "Enterprise" },
+    "categories": [
+      {
+        "name": "Core Features",
+        "features": [
+          { "name": "Letters per month", "free": "3", "pro": "Unlimited", "enterprise": "Unlimited" },
+          { "name": "Email delivery", "free": true, "pro": true, "enterprise": true },
+          { "name": "Physical mail delivery", "free": false, "pro": true, "enterprise": true },
+          { "name": "Free physical mails/month", "free": "0", "pro": "2", "enterprise": "Custom" },
+          { "name": "Encrypted storage", "free": true, "pro": true, "enterprise": true },
+          { "name": "Letter templates", "free": "Basic", "pro": "Premium", "enterprise": "Custom" }
+        ]
+      },
+      {
+        "name": "Advanced Features",
+        "features": [
+          { "name": "Advanced scheduling", "free": false, "pro": true, "enterprise": true },
+          { "name": "Arrive-by mode", "free": false, "pro": true, "enterprise": true },
+          { "name": "Recurring letters", "free": false, "pro": true, "enterprise": true },
+          { "name": "Custom branding", "free": false, "pro": false, "enterprise": true },
+          { "name": "API access", "free": false, "pro": false, "enterprise": true },
+          { "name": "Webhooks", "free": false, "pro": false, "enterprise": true }
+        ]
+      },
+      {
+        "name": "Support & Analytics",
+        "features": [
+          { "name": "Support", "free": "Community", "pro": "Priority", "enterprise": "Dedicated" },
+          { "name": "Analytics", "free": "Basic", "pro": "Advanced", "enterprise": "Custom" },
+          { "name": "SLA", "free": false, "pro": false, "enterprise": true },
+          { "name": "Dedicated manager", "free": false, "pro": false, "enterprise": true }
+        ]
+      }
+    ],
+    "mobileNote": "Scroll horizontally to see all features"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about pricing and billing",
+    "contact": { "text": "Still have questions?", "link": "Contact our support team" },
+    "items": [
+      {
+        "question": "What happens after the free trial?",
+        "answer": "Your 14-day free trial gives you full access to Pro features. After the trial, you'll be charged the monthly or annual rate you selected. You can cancel anytime before the trial ends with no charge."
+      },
+      {
+        "question": "Can I cancel anytime?",
+        "answer": "Yes! You can cancel your subscription at any time from your billing settings. You'll continue to have access until the end of your billing period, and no further charges will be made."
+      },
+      {
+        "question": "How do physical mail credits work?",
+        "answer": "Pro members get 2 free physical mail deliveries per month. Additional physical mails cost $3.50 each (US) or $5.50 (international). Credits don't roll over, but you can purchase extras anytime."
+      },
+      {
+        "question": "What payment methods do you accept?",
+        "answer": "We accept all major credit cards (Visa, Mastercard, American Express, Discover) processed securely through Stripe. We don't store your payment information on our servers."
+      },
+      {
+        "question": "Is there a discount for annual plans?",
+        "answer": "Yes! Annual plans save you 17% compared to paying monthly. You'll pay $189/year instead of $228/year, saving $39."
+      },
+      {
+        "question": "What happens to my letters if I cancel?",
+        "answer": "Your letters remain in your account even after canceling. You can still view and export them. However, you won't be able to schedule new deliveries until you resubscribe."
+      },
+      {
+        "question": "Do you offer refunds?",
+        "answer": "We offer a 30-day money-back guarantee. If you're not satisfied within the first 30 days, contact support for a full refund. No questions asked."
+      },
+      {
+        "question": "Can I upgrade or downgrade my plan?",
+        "answer": "Yes! You can change your plan anytime. Upgrades take effect immediately with prorated billing. Downgrades take effect at the end of your current billing period."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Start Your Free Trial Today",
+    "description": "Join thousands of people writing meaningful letters to their future selves. Start with 14 days free, cancel anytime.",
+    "badges": [
+      "No credit card required",
+      "14-day free trial",
+      "Cancel anytime",
+      "30-day money-back guarantee"
+    ],
+    "primary": "Start Free Trial",
+    "secondary": "Start Free Forever",
+    "questions": "Questions?",
+    "contact": "Contact our support team"
+  }
+}

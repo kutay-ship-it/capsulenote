@@ -1,0 +1,111 @@
+{
+  "heading": "Mektuplarım",
+  "subtitle": "Gelecekteki kendine yazdığın tüm mektuplar",
+  "new": "Yeni Mektup Yaz",
+  "filters": {
+    "all": "Tüm Mektuplar",
+    "drafts": "Taslaklar",
+    "scheduled": "Planlandı",
+    "delivered": "Teslim edildi"
+  },
+  "drafts": {
+    "heading": "Taslak mektuplar",
+    "subtitle": "Planlanmamış mektuplar • 30 gün sonra otomatik silinir",
+    "all": "Tüm mektuplar",
+    "writeNew": "Yeni yaz",
+    "empty": {
+      "title": "Taslak yok",
+      "description": "Tüm mektupların planlandı! Yeni bir mektup oluştur veya tüm mektupları gör.",
+      "cta": "Yeni mektup yaz"
+    },
+    "warningTitle": "Yakında silinecek taslaklar",
+    "expiredMessage": "{count, plural, one {# taslak} other {# taslak}} süreyi geçti ve yakında silinecek.",
+    "expiringMessage": "{count, plural, one {# taslak 7 gün içinde} other {# taslak 7 gün içinde}} silinecek. Silinmemesi için {count, plural, one {planla} other {planla}}.",
+    "sections": {
+      "expired": "Süresi dolan ({count})",
+      "expiring": "Yakında silinecek ({count})",
+      "active": "Aktif taslaklar ({count})"
+    },
+    "badges": {
+      "willDelete": "Silinecek",
+      "expiringDays": "{count}g kaldı",
+      "continue": "Yazmaya devam et →",
+      "tagOverflow": "+{count}"
+    },
+    "created": "Oluşturuldu {date}",
+    "age": "{count, plural, one {# gün önce} other {# gün önce}}",
+    "expiredBadge": "SÜRESİ DOLDU"
+  },
+  "empty": {
+    "title": "Henüz mektup yok",
+    "description": "Gelecekteki kendine ilk mektubunu yazarak başla.",
+    "cta": "İlk mektubunu oluştur"
+  },
+  "status": {
+    "draft": "Taslak",
+    "scheduled": "Planlandı",
+    "delivered": "Teslim edildi"
+  },
+  "detail": {
+    "back": "Mektuplara dön",
+    "created": "Oluşturuldu {date}",
+    "scheduleCta": "Teslimatı planla",
+    "scheduledHeading": "Planlanan teslimatlar",
+    "deliveryStatus": {
+      "scheduled": "Planlandı",
+      "processing": "İşleniyor",
+      "sent": "Gönderildi",
+      "failed": "Başarısız",
+      "canceled": "İptal edildi"
+    },
+    "channel": {
+      "email": "E-posta",
+      "mail": "Fiziksel posta"
+    },
+    "locked": "Kilitlendi {date}",
+    "attemptsHeading": "Teslimat denemeleri"
+  },
+  "schedule": {
+    "badge": "Adım 2: Planla",
+    "title": "Mektubunu planla",
+    "description": "Mektubunun gelen kutuna ne zaman ulaşacağını seç"
+  },
+  "toasts": {
+    "draftSaved": {
+      "title": "Taslak kaydedildi",
+      "description": "Mektubun taslak olarak kaydedildi."
+    },
+    "letterScheduled": {
+      "title": "Mektup planlandı",
+      "description": "\"{title}\" mektubun {date} için ayarlandı."
+    },
+    "scheduleFailed": {
+      "title": "Teslimat planlanamadı",
+      "description": "Mektubu kaydettik ama planlama başarısız oldu. Lütfen mektup sayfasından tekrar dene."
+    },
+    "createError": {
+      "title": "Mektup oluşturulamadı",
+      "description": "{message}"
+    },
+    "scheduleForm": {
+      "errorTitle": "Hata",
+      "missingDate": "Lütfen bir teslimat tarihi seç",
+      "missingEmail": "Lütfen alıcı e-postasını gir",
+      "tooSoon": "Teslimat şimdiye göre en az 5 dakika sonrasında olmalı.",
+      "tooFar": "Teslimat 100 yıldan fazla ileri olamaz.",
+      "subscriptionPending": "Ödeme alındı. Aboneliğini etkinleştirmek için e-postanı doğrula.",
+      "subscriptionRequired": "Planlama için aktif abonelik gerekiyor.",
+      "failed": "Teslimat planlanamadı.",
+      "scheduledTitle": "✓ Teslimat planlandı",
+      "scheduledDescription": "Mektubun {date} tarihinde ulaşacak",
+      "unexpected": "Teslimat planlanamadı"
+    },
+    "draftValidation": "Lütfen mektubuna bir şeyler yaz"
+  },
+  "counts": {
+    "deliveries": "{count, plural, one {# teslimat} other {# teslimat}}",
+    "tagOverflow": "+{count}"
+  },
+  "createdOn": "Oluşturuldu {date}",
+  "viewAll": "Tümünü gör"
+}

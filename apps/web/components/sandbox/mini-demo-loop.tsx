@@ -1,19 +1,23 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { Card, CardContent } from "@/components/ui/card"
-import { PenLine, Mail, Clock, CheckCircle2 } from "lucide-react"
+import { CheckCircle2, Clock, Mail, PenLine } from "lucide-react"
 
 const demoSteps = [
-  { icon: PenLine, label: "Write your letter", color: "bg-bg-yellow-pale" },
-  { icon: Clock, label: "Choose delivery time", color: "bg-bg-blue-light" },
-  { icon: Mail, label: "We hold it securely", color: "bg-bg-purple-light" },
-  { icon: CheckCircle2, label: "Arrives exactly on time", color: "bg-duck-green/20" },
+  { icon: PenLine, color: "bg-bg-yellow-pale" },
+  { icon: Clock, color: "bg-bg-blue-light" },
+  { icon: Mail, color: "bg-bg-purple-light" },
+  { icon: CheckCircle2, color: "bg-duck-green/20" },
 ]
 
 export function MiniDemoLoop() {
   const [currentStep, setCurrentStep] = useState(0)
+  const t = useTranslations("marketing.miniDemo")
+  const stepLabels = (t.raw("steps") as string[]) || []
+  const detailLabels = (t.raw("details") as string[]) || []
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -27,10 +31,8 @@ export function MiniDemoLoop() {
       <CardContent className="p-8">
         <div className="space-y-6">
           <div className="text-center">
-            <p className="font-mono text-xs uppercase text-gray-secondary">Watch the flow</p>
-            <h3 className="mt-1 font-mono text-lg uppercase tracking-wide text-charcoal">
-              Four steps to future delivery
-            </h3>
+            <p className="font-mono text-xs uppercase text-gray-secondary">{t("subtitle")}</p>
+            <h3 className="mt-1 font-mono text-lg uppercase tracking-wide text-charcoal">{t("title")}</h3>
           </div>
 
           <div className="relative flex items-center justify-between">
@@ -38,9 +40,10 @@ export function MiniDemoLoop() {
               const Icon = step.icon
               const isActive = index === currentStep
               const isPast = index < currentStep
+              const label = stepLabels[index] ?? ""
 
               return (
-                <div key={index} className="relative flex flex-1 flex-col items-center">
+                <div key={label || index} className="relative flex flex-1 flex-col items-center">
                   <motion.div
                     animate={{
                       scale: isActive ? 1.2 : 1,
@@ -64,11 +67,8 @@ export function MiniDemoLoop() {
                     />
                   )}
 
-                  <motion.p
-                    animate={{ opacity: isActive ? 1 : 0.6 }}
-                    className="mt-3 text-center font-mono text-xs uppercase text-charcoal"
-                  >
-                    {step.label}
+                  <motion.p animate={{ opacity: isActive ? 1 : 0.6 }} className="mt-3 text-center font-mono text-xs uppercase text-charcoal">
+                    {label}
                   </motion.p>
                 </div>
               )
@@ -82,10 +82,7 @@ export function MiniDemoLoop() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center font-mono text-xs text-gray-secondary"
             >
-              {currentStep === 0 && "Capture thoughts in our distraction-free editor"}
-              {currentStep === 1 && "Pick a future milestone with timezone precision"}
-              {currentStep === 2 && "AES-256 encryption keeps it private until delivery"}
-              {currentStep === 3 && "Inngest ensures 99.97% on-time arrival"}
+              {detailLabels[currentStep] || ""}
             </motion.p>
           </div>
         </div>

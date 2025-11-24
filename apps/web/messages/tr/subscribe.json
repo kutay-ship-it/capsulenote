@@ -1,0 +1,11 @@
+{
+  "emailForm": {
+    "label": "E-posta adresi",
+    "placeholder": "sen@example.com",
+    "submit": "Devam et",
+    "helper": "E-postan sadece ödeme ve hesap oluşturma için kullanılır. Güvenlik nedeniyle ödeme sonrası e-posta değiştirilemez.",
+    "error": {
+      "invalid": "Lütfen geçerli bir e-posta adresi girin"
+    }
+  }
+}

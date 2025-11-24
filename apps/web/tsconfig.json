@@ -18,6 +18,12 @@
       "@/styles/*": [
         "./styles/*"
       ],
+      "@/i18n/*": [
+        "./i18n/*"
+      ],
+      "@/messages/*": [
+        "./messages/*"
+      ],
       "@/hooks/*": [
         "./hooks/*"
       ]

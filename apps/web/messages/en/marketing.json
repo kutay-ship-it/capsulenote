@@ -1,0 +1,145 @@
+{
+  "hero": {
+    "badge": "Time Capsule for the Soul",
+    "titleLine1": "Write to your",
+    "titleLine2": "future self",
+    "description": "Letters delivered exactly when they should arrive. No apps to check. No reminders to dismiss. Just your words, waiting.",
+    "primaryCta": "Start writing",
+    "secondaryCta": "See how it works"
+  },
+  "stats": [
+    {
+      "value": "27k+",
+      "label": "Letters scheduled",
+      "description": "Written from 74 countries and counting."
+    },
+    {
+      "value": "99.97%",
+      "label": "On-time deliveries",
+      "description": "Automated checks keep every promise on track."
+    },
+    {
+      "value": "2 formats",
+      "label": "Email + premium mail",
+      "description": "Choose an instant inbox drop or a sealed envelope."
+    }
+  ],
+  "howItWorksSection": {
+    "badge": "See it in action",
+    "title": "How it works"
+  },
+  "heroEditorSection": {
+    "badge": "Try it now",
+    "title": "Write Your First Letter",
+    "description": "Experience the calm ritual of writing to your future self. No account needed to explore our brutalist letter editor."
+  },
+  "featuresIntro": {
+    "title": "Keep promises to future moments with calm, modern tools.",
+    "description": "Capsule Note wraps thoughtful writing, secure storage, and dependable delivery into one experience grounded in brutalist design."
+  },
+  "features": [
+    {
+      "title": "Guided writing rituals",
+      "description": "Gentle prompts, templates, and tone suggestions keep you inspired and honest."
+    },
+    {
+      "title": "Time-aware delivery",
+      "description": "Schedule down to the minute with automatic timezone detection and reminders."
+    },
+    {
+      "title": "Private by default",
+      "description": "Letters stay encrypted at rest with zero employees able to peek inside."
+    },
+    {
+      "title": "Mailroom concierge",
+      "description": "We print, stamp, and ship on your behalf when you crave something tangible."
+    },
+    {
+      "title": "Moments that matter",
+      "description": "Recurring schedules for anniversaries, graduations, or annual self check-ins."
+    },
+    {
+      "title": "Delivery visibility",
+      "description": "Track status, edit, or pause anything before it leaves the vault."
+    }
+  ],
+  "cta": {
+    "title": "Ready to schedule your letter?",
+    "signedOutDescription": "Create a free account to securely store your letters in our encrypted vault and schedule deliveries to your future self.",
+    "signedInDescription": "Jump back into your dashboard to keep drafting or scheduling future deliveries.",
+    "createAccount": "Create Free Account",
+    "goToDashboard": "Go to Dashboard"
+  },
+  "testimonial": {
+    "title": "Your words age well here",
+    "quote": "\"I scheduled a letter for my sister before she left for med school. It landed on her first overnight shift and she called me in tears. Capsule Note kept that moment from slipping through the cracks.\"",
+    "attribution": "— Margo L., Capsule Note writer since 2021"
+  },
+  "ctaBottom": {
+    "title": "Open a letter in your future inbox",
+    "description": "Start for free, draft as many letters as you like, and only pay when something gets scheduled for delivery.",
+    "primary": "Create your first letter",
+    "secondary": "I already have an account"
+  },
+  "miniDemo": {
+    "subtitle": "Watch the flow",
+    "title": "Four steps to future delivery",
+    "steps": ["Write your letter", "Choose delivery time", "We hold it securely", "Arrives exactly on time"],
+    "details": [
+      "Capture thoughts in our distraction-free editor",
+      "Pick a future milestone with timezone precision",
+      "AES-256 encryption keeps it private until delivery",
+      "Inngest ensures 99.97% on-time arrival"
+    ]
+  },
+  "howItWorks": {
+    "badge": "How it works",
+    "title": "A calm ritual in three beats",
+    "description": "Every Capsule Note letter follows the same dependable cadence so you can focus on the message, not the logistics.",
+    "journey": {
+      "setMoment": {
+        "title": "Set the moment",
+        "description": "Pick a milestone or create your own ritual.",
+        "detail": "Timezone awareness makes global deliveries effortless."
+      },
+      "write": {
+        "title": "Pour your heart out",
+        "description": "Write once inside a calm, distraction-free editor.",
+        "detail": "Prompts nudge you past writer's block without stealing your voice."
+      },
+      "deliver": {
+        "title": "Let us deliver",
+        "description": "Email, premium paper mail, or both.",
+        "detail": "We notify you when it's sent and when it's opened."
+      }
+    },
+    "scenarios": {
+      "title": "Moments our writers plan ahead",
+      "description": "Capsule Note letters show up exactly when emotions are highest and attention is lowest.",
+      "personal": {
+        "title": "Personal rituals",
+        "points": [
+          "Future-self check-ins to keep promises visible.",
+          "Birthday time capsules for kids, partners, or friends.",
+          "Milestone reflections to anchor career or health goals."
+        ]
+      },
+      "team": {
+        "title": "Team moments",
+        "points": [
+          "Welcome letters scheduled for a new teammate's Day 1.",
+          "Leadership notes that unlock during launches or raises.",
+          "Culture touchpoints after retreats, offsites, or reviews."
+        ]
+      },
+      "legacy": {
+        "title": "Legacy drops",
+        "points": [
+          "Share stories with loved ones after big life events.",
+          "Send reminders to your future self to celebrate progress.",
+          "Deliver gratitude letters long after the moment passes."
+        ]
+      }
+    }
+  }
+}

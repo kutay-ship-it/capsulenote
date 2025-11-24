@@ -1,0 +1,65 @@
+{
+  "heading": "Ayarlar",
+  "subtitle": "Hesabını ve tercihlerini yönet",
+  "account": {
+    "title": "Hesap bilgileri",
+    "description": "Temel hesap detayların",
+    "email": "E-posta",
+    "displayName": "Görünen ad",
+    "timezone": "Saat dilimi",
+    "status": "Hesap durumu",
+    "plan": "Hesap planı",
+    "notSet": "Belirtilmedi",
+    "statusLabel": {
+      "active": "Aktif",
+      "trialing": "Deneme",
+      "past_due": "Vadesi geçmiş",
+      "canceled": "İptal edildi",
+      "unpaid": "Ödenmemiş",
+      "incomplete": "Eksik",
+      "incomplete_expired": "Eksik (süresi doldu)",
+      "paused": "Durduruldu",
+      "none": "Abonelik yok"
+    },
+    "planLabel": {
+      "DIGITAL_CAPSULE": "Dijital Kapsül",
+      "PAPER_PIXELS": "Kağıt & Pikseller",
+      "none": "Ücretsiz seviye"
+    },
+    "badges": {
+      "premium": "Premium",
+      "trial": "Deneme",
+      "editProfile": "Profil düzenleme yakında"
+    }
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "description": "Güncellemeleri nasıl alacağını kontrol et",
+    "body": "Teslimat onayları, hatırlatmalar ve güncellemeler için e-posta bildirimleri.",
+    "badge": "Bildirim ayarları yakında"
+  },
+  "timezone": {
+    "title": "Saat dilimi ve yerelleştirme",
+    "description": "Teslimat zamanlama tercihleri",
+    "body": "Tüm teslimatlar yerel saat dilimine göre planlanır. Yaz saati farkındalığı doğru zamanı sağlar.",
+    "badge": "Saat dilimi seçimi yakında"
+  },
+  "billing": {
+    "title": "Faturalandırma ve abonelik",
+    "description": "Abonelik, kullanım ve ödemelerini yönet",
+    "body": "Abonelik durumunu gör, kullanımı takip et, ödeme yöntemlerini yönet ve faturalarına eriş.",
+    "badge": "Faturalandırma ayarlarını gör →"
+  },
+  "privacy": {
+    "title": "Gizlilik ve veriler",
+    "description": "Veri ve gizlilik ayarlarını kontrol et",
+    "body": "Tüm mektuplar beklerken şifrelenir (AES-256-GCM). Verini dışa aktarabilir veya hesabını istediğin zaman silebilirsin.",
+    "badge": "Gizlilik kontrolleri yakında"
+  },
+  "danger": {
+    "title": "Tehlike bölgesi",
+    "description": "Geri alınamaz işlemler",
+    "body": "Hesabını ve tüm verilerini kalıcı olarak sil. Bu işlem geri alınamaz.",
+    "badge": "Hesap silme yakında"
+  }
+}

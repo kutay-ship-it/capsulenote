@@ -4,16 +4,18 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Calendar, Mail as MailIcon } from "lucide-react"
 import { fromZonedTime } from "date-fns-tz"
+import { useTranslations } from "next-intl"
+
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { scheduleDelivery } from "@/server/actions/deliveries"
 import { useToast } from "@/hooks/use-toast"
 import { TimezoneTooltip, DSTTooltip } from "@/components/timezone-tooltip"
-import { formatDateTimeWithTimezone, getUserTimezone, isDST, buildDeliverAtParams } from "@/lib/utils"
+import { buildDeliverAtParams, formatDateTimeWithTimezone, getUserTimezone, isDST } from "@/lib/utils"
 import { cn } from "@/lib/utils"
+import { scheduleDelivery } from "@/server/actions/deliveries"
 
 interface ScheduleDeliveryFormProps {
   letterId: string
@@ -30,6 +32,7 @@ export function ScheduleDeliveryForm({
 }: ScheduleDeliveryFormProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const t = useTranslations("letters.toasts.scheduleForm")
 
   const [channel, setChannel] = useState<"email" | "mail">("email")
   const [recipientEmail, setRecipientEmail] = useState(userEmail)
@@ -99,8 +102,8 @@ export function ScheduleDeliveryForm({
     if (!deliveryDate) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please select a delivery date",
+        title: t("errorTitle"),
+        description: t("missingDate"),
       })
       return
     }
@@ -108,8 +111,8 @@ export function ScheduleDeliveryForm({
     if (!recipientEmail) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Please enter a recipient email",
+        title: t("errorTitle"),
+        description: t("missingEmail"),
       })
       return
     }
@@ -127,12 +130,12 @@ export function ScheduleDeliveryForm({
     const proposed = fromZonedTime(dateTimeStr, timezone)
 
     if (proposed < minDate) {
-      setValidationError("Delivery must be at least 5 minutes from now.")
+      setValidationError(t("tooSoon"))
       return
     }
 
     if (proposed > maxDate) {
-      setValidationError("Delivery cannot be more than 100 years in the future.")
+      setValidationError(t("tooFar"))
       return
     }
 
@@ -160,29 +163,29 @@ export function ScheduleDeliveryForm({
         const message =
           (result.error?.code === "SUBSCRIPTION_REQUIRED" &&
             (reason === "pending_subscription"
-              ? "Payment received. Verify your email to activate your subscription."
-              : "Scheduling requires an active subscription.")) ||
+              ? t("subscriptionPending")
+              : t("subscriptionRequired"))) ||
           result.error?.message ||
-          "Failed to schedule delivery."
+          t("failed")
         toast({
           variant: "destructive",
-          title: "Error",
+          title: t("errorTitle"),
           description: message,
         })
         return
       }
 
       toast({
-        title: "✓ Delivery Scheduled",
-        description: `Your letter will arrive on ${formatDeliveryTime()}`,
+        title: t("scheduledTitle"),
+        description: t("scheduledDescription", { date: formatDeliveryTime() || "" }),
       })
 
       router.push(`/letters/${letterId}`)
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to schedule delivery",
+        title: t("errorTitle"),
+        description: error instanceof Error ? error.message : t("unexpected"),
       })
     } finally {
       setIsSubmitting(false)

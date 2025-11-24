@@ -1,0 +1,23 @@
+{
+  "heading": "Teslimatlar",
+  "subtitle": "Planladığın ve geçmiş tüm teslimatlar",
+  "empty": {
+    "title": "Planlanmış teslimat yok",
+    "description": "Mektupları planladığında, teslimat durumlarıyla birlikte burada görünecek."
+  },
+  "status": {
+    "scheduled": "Planlandı",
+    "processing": "İşleniyor",
+    "sent": "Gönderildi",
+    "failed": "Başarısız",
+    "canceled": "İptal edildi"
+  },
+  "channel": {
+    "email": "E-posta",
+    "mail": "Fiziksel posta"
+  },
+  "labels": {
+    "deliveryAt": "Teslim zamanı",
+    "timezone": "Saat dilimi"
+  }
+}

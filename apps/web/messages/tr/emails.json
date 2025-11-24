@@ -1,0 +1,31 @@
+{
+  "paymentConfirmation": {
+    "subject": "Ödeme onaylandı - Capsule Note {plan} planına hoş geldin!",
+    "headline": "Ödeme onaylandı! 🎉",
+    "thankYou": "Capsule Note {plan} planına abone olduğun için teşekkürler.",
+    "paymentDetails": "Ödeme detayları",
+    "fields": {
+      "plan": "Plan:",
+      "amount": "Tutar:",
+      "email": "E-posta:"
+    },
+    "nextStepsTitle": "Sıradaki adımlar",
+    "steps": [
+      "Hesabını oluştur: Aboneliğini etkinleştirmek için giriş yap.",
+      "Yazmaya başla: Giriş yaptıktan hemen sonra gelecekteki kendine mektuplar yazabilirsin.",
+      "Teslimat planla: Mektuplarını ne zaman almak istediğini seç."
+    ],
+    "expiryNotice": "⏰ Önemli: Hesap oluşturmazsan aboneliğin 30 gün içinde sona erer. Aktif tutmak için yakında kaydol!",
+    "support": "Yardıma mı ihtiyacın var? {email} adresinden bize ulaş.",
+    "automated": "Bu Capsule Note tarafından gönderilen otomatik bir mesajdır. Lütfen yanıt vermeyin.",
+    "text": {
+      "thankYou": "Capsule Note {plan} planına abone olduğun için teşekkürler.",
+      "nextSteps": [
+        "Hesabını oluştur: {url}",
+        "Gelecekteki kendine mektuplar yaz.",
+        "Teslimatları istediğin zamana planla."
+      ],
+      "expiryNotice": "Hesap oluşturmazsan aboneliğin 30 gün içinde sona erer."
+    }
+  }
+}

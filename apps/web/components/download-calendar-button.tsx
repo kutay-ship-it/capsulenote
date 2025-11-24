@@ -1,6 +1,8 @@
 "use client"
 
 import { Download, Calendar } from "lucide-react"
+import { useTranslations } from "next-intl"
+
 import { Button } from "@/components/ui/button"
 import { generateDeliveryCalendarEvent, createICSBlob } from "@/lib/calendar"
 import { useToast } from "@/hooks/use-toast"
@@ -31,6 +33,7 @@ export function DownloadCalendarButton({
   size = "sm",
 }: DownloadCalendarButtonProps) {
   const { toast } = useToast()
+  const t = useTranslations("common")
 
   const handleDownload = (e: React.MouseEvent) => {
     // Prevent event propagation to parent Link
@@ -65,16 +68,16 @@ export function DownloadCalendarButton({
       URL.revokeObjectURL(url)
 
       toast({
-        title: "✓ Calendar Event Downloaded",
-        description: "Add this to your calendar to remember when your letter arrives!",
+        title: t("toasts.calendarDownloaded.title"),
+        description: t("toasts.calendarDownloaded.description"),
       })
     } catch (error) {
       console.error("Failed to download calendar file:", error)
 
       toast({
         variant: "destructive",
-        title: "Download Failed",
-        description: "Failed to create calendar file. Please try again.",
+        title: t("toasts.calendarFailed.title"),
+        description: t("toasts.calendarFailed.description"),
       })
     }
   }
@@ -88,7 +91,7 @@ export function DownloadCalendarButton({
       className={className}
     >
       <Calendar className="mr-2 h-4 w-4" strokeWidth={2} />
-      Add to Calendar
+      {t("actions.addToCalendar")}
       <Download className="ml-1 h-3 w-3" strokeWidth={2} />
     </Button>
   )

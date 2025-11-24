@@ -1,0 +1,31 @@
+{
+  "paymentConfirmation": {
+    "subject": "Payment Confirmed - Welcome to Capsule Note {plan}!",
+    "headline": "Payment Confirmed! 🎉",
+    "thankYou": "Thank you for subscribing to the Capsule Note {plan} plan.",
+    "paymentDetails": "Payment Details",
+    "fields": {
+      "plan": "Plan:",
+      "amount": "Amount:",
+      "email": "Email:"
+    },
+    "nextStepsTitle": "Next Steps",
+    "steps": [
+      "Create your account: Sign up to activate your subscription.",
+      "Start writing: Once signed up, you can immediately start writing letters to your future self.",
+      "Schedule deliveries: Choose when you want to receive your letters."
+    ],
+    "expiryNotice": "⏰ Important: Your subscription will expire in 30 days if you don't create an account. Sign up soon to keep your subscription active!",
+    "support": "Need help? Contact us at {email}",
+    "automated": "This is an automated message from Capsule Note. Please do not reply to this email.",
+    "text": {
+      "thankYou": "Thank you for subscribing to the Capsule Note {plan} plan.",
+      "nextSteps": [
+        "Create your account: {url}",
+        "Start writing letters to your future self.",
+        "Schedule deliveries for when you want to receive them."
+      ],
+      "expiryNotice": "Your subscription will expire in 30 days if you don't create an account."
+    }
+  }
+}

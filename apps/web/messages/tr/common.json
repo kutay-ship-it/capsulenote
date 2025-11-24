@@ -1,0 +1,36 @@
+{
+  "brand": "Capsule Note",
+  "language": {
+    "label": "Dil",
+    "english": "English",
+    "turkish": "Türkçe"
+  },
+  "actions": {
+    "dashboard": "Panel",
+    "signIn": "Giriş Yap",
+    "signUp": "Hemen Başla",
+    "getStarted": "Hemen Başla",
+    "viewAll": "Tümünü Gör",
+    "tryEditor": "Editörü Dene",
+    "howItWorks": "Nasıl Çalışır",
+    "switchTo": "{language} diline geç",
+    "createAccount": "Hesap Oluştur",
+    "goToDashboard": "Panoya Git",
+    "addToCalendar": "Takvime ekle"
+  },
+  "footer": {
+    "privacy": "Gizlilik",
+    "terms": "Şartlar",
+    "copyright": "© {year} Capsule Note™ Zaman Kapsülü Mektupları. Özen ve gizlilikle inşa edildi."
+  },
+  "toasts": {
+    "calendarDownloaded": {
+      "title": "✓ Takvim etkinliği indirildi",
+      "description": "Mektubunun geleceği tarihi hatırlamak için takvimine ekle!"
+    },
+    "calendarFailed": {
+      "title": "İndirme başarısız",
+      "description": "Takvim dosyası oluşturulamadı. Lütfen tekrar dene."
+    }
+  }
+}

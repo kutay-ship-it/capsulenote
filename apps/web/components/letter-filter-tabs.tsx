@@ -1,8 +1,10 @@
-"use client"
+'use client'
 
-import { useRouter, useSearchParams } from "next/navigation"
+import { useTranslations } from "next-intl"
+import { useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { usePathname, useRouter } from "@/i18n/routing"
 
 export type LetterFilter = "all" | "drafts" | "scheduled" | "delivered"
 
@@ -16,16 +18,11 @@ interface LetterFilterTabsProps {
   currentFilter: LetterFilter
 }
 
-const FILTER_LABELS: Record<LetterFilter, string> = {
-  all: "All Letters",
-  drafts: "Drafts",
-  scheduled: "Scheduled",
-  delivered: "Delivered",
-}
-
 export function LetterFilterTabs({ counts, currentFilter }: LetterFilterTabsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const t = useTranslations("letters.filters")
 
   const handleFilterChange = (filter: LetterFilter) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -34,7 +31,8 @@ export function LetterFilterTabs({ counts, currentFilter }: LetterFilterTabsProp
     } else {
       params.set("filter", filter)
     }
-    router.push(`/letters?${params.toString()}`)
+    const query = params.toString()
+    router.push(query ? `${pathname}?${query}` : pathname)
   }
 
   const filters: LetterFilter[] = ["all", "drafts", "scheduled", "delivered"]
@@ -58,7 +56,7 @@ export function LetterFilterTabs({ counts, currentFilter }: LetterFilterTabsProp
             )}
             style={{ borderRadius: "2px" }}
           >
-            <span>{FILTER_LABELS[filter]}</span>
+            <span>{t(filter)}</span>
             <Badge
               variant="secondary"
               className={cn(

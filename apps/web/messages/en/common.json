@@ -1,0 +1,36 @@
+{
+  "brand": "Capsule Note",
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "turkish": "Türkçe"
+  },
+  "actions": {
+    "dashboard": "Dashboard",
+    "signIn": "Sign In",
+    "signUp": "Get Started",
+    "getStarted": "Get Started",
+    "viewAll": "View all",
+    "tryEditor": "Try Editor",
+    "howItWorks": "How It Works",
+    "switchTo": "Switch to {language}",
+    "createAccount": "Create Account",
+    "goToDashboard": "Go to Dashboard",
+    "addToCalendar": "Add to Calendar"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "copyright": "© {year} Capsule Note™ Time-Capsule Letters. Built with intention and privacy in mind."
+  },
+  "toasts": {
+    "calendarDownloaded": {
+      "title": "✓ Calendar Event Downloaded",
+      "description": "Add this to your calendar to remember when your letter arrives!"
+    },
+    "calendarFailed": {
+      "title": "Download Failed",
+      "description": "Failed to create calendar file. Please try again."
+    }
+  }
+}

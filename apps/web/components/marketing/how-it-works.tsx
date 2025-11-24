@@ -1,70 +1,60 @@
 import { CalendarDays, PenSquare, Send, HeartHandshake } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
-const journey = [
-  {
-    title: "Set the moment",
-    description: "Pick a milestone or create your own ritual.",
-    detail: "Timezone awareness makes global deliveries effortless.",
-    icon: CalendarDays,
-  },
-  {
-    title: "Pour your heart out",
-    description: "Write once inside a calm, distraction-free editor.",
-    detail: "Prompts nudge you past writer's block without stealing your voice.",
-    icon: PenSquare,
-  },
-  {
-    title: "Let us deliver",
-    description: "Email, premium paper mail, or both.",
-    detail: "We notify you when it's sent and when it's opened.",
-    icon: Send,
-  },
-]
+export async function HowItWorks() {
+  const t = await getTranslations("marketing.howItWorks")
 
-const scenarios = [
-  {
-    title: "Personal rituals",
-    points: [
-      "Future-self check-ins to keep promises visible.",
-      "Birthday time capsules for kids, partners, or friends.",
-      "Milestone reflections to anchor career or health goals.",
-    ],
-  },
-  {
-    title: "Team moments",
-    points: [
-      "Welcome letters scheduled for a new teammate's Day 1.",
-      "Leadership notes that unlock during launches or raises.",
-      "Culture touchpoints after retreats, offsites, or reviews.",
-    ],
-  },
-  {
-    title: "Legacy drops",
-    points: [
-      "Share stories with loved ones after big life events.",
-      "Send reminders to your future self to celebrate progress.",
-      "Deliver gratitude letters long after the moment passes.",
-    ],
-  },
-]
+  const journey = [
+    {
+      title: t("journey.setMoment.title"),
+      description: t("journey.setMoment.description"),
+      detail: t("journey.setMoment.detail"),
+      icon: CalendarDays,
+    },
+    {
+      title: t("journey.write.title"),
+      description: t("journey.write.description"),
+      detail: t("journey.write.detail"),
+      icon: PenSquare,
+    },
+    {
+      title: t("journey.deliver.title"),
+      description: t("journey.deliver.description"),
+      detail: t("journey.deliver.detail"),
+      icon: Send,
+    },
+  ]
 
-export function HowItWorks() {
+  const scenarios = [
+    {
+      title: t("scenarios.personal.title"),
+      points: t.raw("scenarios.personal.points") as string[],
+    },
+    {
+      title: t("scenarios.team.title"),
+      points: t.raw("scenarios.team.points") as string[],
+    },
+    {
+      title: t("scenarios.legacy.title"),
+      points: t.raw("scenarios.legacy.points") as string[],
+    },
+  ]
+
   return (
     <section id="how-it-works" className="container px-4 py-12 sm:px-6 sm:py-16 md:py-20">
       <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
         <Card className="h-full border-2 border-charcoal bg-duck-blue shadow-lg" style={{ borderRadius: "2px" }}>
           <CardHeader className="p-5 sm:p-6">
             <Badge variant="secondary" className="w-fit uppercase tracking-wide text-xs">
-              How it works
+              {t("badge")}
             </Badge>
             <CardTitle className="font-mono text-2xl font-normal uppercase tracking-wide sm:text-3xl md:text-4xl">
-              A calm ritual in three beats
+              {t("title")}
             </CardTitle>
             <CardDescription className="font-mono text-sm leading-relaxed text-charcoal sm:text-base">
-              Every Capsule Note letter follows the same dependable cadence so you can focus on the
-              message, not the logistics.
+              {t("description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 p-5 sm:space-y-6 sm:p-6">
@@ -94,10 +84,10 @@ export function HowItWorks() {
         <Card className="h-full border-2 border-charcoal shadow-md" style={{ borderRadius: "2px" }}>
           <CardHeader className="p-5 sm:p-6">
             <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl md:text-3xl">
-              Moments our writers plan ahead
+              {t("scenarios.title")}
             </CardTitle>
             <CardDescription className="font-mono text-xs leading-relaxed text-gray-secondary sm:text-sm">
-              Capsule Note letters show up exactly when emotions are highest and attention is lowest.
+              {t("scenarios.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 p-5 sm:space-y-6 sm:p-6">

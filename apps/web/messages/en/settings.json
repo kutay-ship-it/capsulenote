@@ -1,0 +1,65 @@
+{
+  "heading": "Settings",
+  "subtitle": "Manage your account and preferences",
+  "account": {
+    "title": "Account Information",
+    "description": "Your basic account details",
+    "email": "Email",
+    "displayName": "Display Name",
+    "timezone": "Timezone",
+    "status": "Account Status",
+    "plan": "Account Tier",
+    "notSet": "Not set",
+    "statusLabel": {
+      "active": "Active",
+      "trialing": "Trial",
+      "past_due": "Past Due",
+      "canceled": "Canceled",
+      "unpaid": "Unpaid",
+      "incomplete": "Incomplete",
+      "incomplete_expired": "Incomplete Expired",
+      "paused": "Paused",
+      "none": "No Subscription"
+    },
+    "planLabel": {
+      "DIGITAL_CAPSULE": "Digital Capsule",
+      "PAPER_PIXELS": "Paper & Pixels",
+      "none": "Free Tier"
+    },
+    "badges": {
+      "premium": "Premium",
+      "trial": "Trial",
+      "editProfile": "Edit profile coming soon"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Control how you receive updates",
+    "body": "Email notifications for delivery confirmations, reminders, and updates.",
+    "badge": "Notification settings coming soon"
+  },
+  "timezone": {
+    "title": "Timezone & Localization",
+    "description": "Delivery timing preferences",
+    "body": "All deliveries are scheduled in your local timezone. DST awareness ensures accurate delivery times.",
+    "badge": "Timezone selector coming soon"
+  },
+  "billing": {
+    "title": "Billing & Subscription",
+    "description": "Manage your subscription, usage, and payments",
+    "body": "View your subscription status, track usage, manage payment methods, and access invoices.",
+    "badge": "View Billing Settings →"
+  },
+  "privacy": {
+    "title": "Privacy & Data",
+    "description": "Control your data and privacy settings",
+    "body": "All letters are encrypted at rest (AES-256-GCM). Export your data or delete your account at any time.",
+    "badge": "Privacy controls coming soon"
+  },
+  "danger": {
+    "title": "Danger Zone",
+    "description": "Irreversible actions",
+    "body": "Permanently delete your account and all associated data. This action cannot be undone.",
+    "badge": "Account deletion coming soon"
+  }
+}
