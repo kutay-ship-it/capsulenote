@@ -40,15 +40,21 @@ vi.mock("../../server/lib/entitlements", () => ({
   trackLetterCreation: vi.fn(() => Promise.resolve()),
 }))
 
-vi.mock("../../server/lib/db", () => ({
-  prisma: {
-    letter: {
-      create: vi.fn(),
-      findFirst: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
+const { mockPrisma } = vi.hoisted(() => {
+  return {
+    mockPrisma: {
+      letter: {
+        create: vi.fn(),
+        findFirst: vi.fn(),
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
     },
-  },
+  }
+})
+
+vi.mock("../../server/lib/db", () => ({
+  prisma: mockPrisma,
 }))
 
 vi.mock("../../server/lib/audit", () => ({
@@ -124,7 +130,7 @@ describe("Letters CRUD", () => {
   it("returns not found on update when letter missing", async () => {
     mockPrisma.letter.findFirst.mockResolvedValueOnce(null)
     const result = await updateLetter({
-      id: "missing",
+      id: "550e8400-e29b-41d4-a716-446655440000",
       title: "Updated",
     })
     expect(result.success).toBe(false)
@@ -135,7 +141,7 @@ describe("Letters CRUD", () => {
 
   it("updates letter title", async () => {
     mockPrisma.letter.findFirst.mockResolvedValueOnce({
-      id: "letter_123",
+      id: "44444444-4444-4444-8444-444444444444",
       userId: mockUser.id,
       title: "Old",
       bodyCiphertext: Buffer.from("encrypted"),
@@ -148,24 +154,64 @@ describe("Letters CRUD", () => {
       updatedAt: new Date(),
       deletedAt: null,
     })
-    mockPrisma.letter.update.mockResolvedValueOnce({})
+    mockPrisma.letter.update.mockResolvedValueOnce({
+      id: "44444444-4444-4444-8444-444444444444",
+      userId: mockUser.id,
+      title: "New Title",
+      bodyCiphertext: Buffer.from("encrypted"),
+      bodyNonce: Buffer.from("nonce"),
+      bodyFormat: "rich",
+      keyVersion: 1,
+      visibility: "private",
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: null,
+    })
 
     const result = await updateLetter({
-      id: "letter_123",
+      id: "44444444-4444-4444-8444-444444444444",
       title: "New Title",
     })
     expect(result.success).toBe(true)
   })
 
   it("soft deletes letter", async () => {
+    const letterId = "55555555-5555-4555-8555-555555555555"
     mockPrisma.letter.findFirst.mockResolvedValueOnce({
-      id: "letter_123",
+      id: letterId,
       userId: mockUser.id,
+      title: "Test",
+      bodyCiphertext: Buffer.from("encrypted"),
+      bodyNonce: Buffer.from("nonce"),
+      bodyFormat: "rich",
+      keyVersion: 1,
+      visibility: "private",
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
       deletedAt: null,
     })
-    mockPrisma.letter.update.mockResolvedValueOnce({})
 
-    const result = await deleteLetter({ id: "letter_123" })
+    // Mock $transaction callback
+    mockPrisma.$transaction = vi.fn(async (callback: any) => {
+      const txMock = {
+        letter: {
+          update: vi.fn().mockResolvedValue({
+            id: letterId,
+            userId: mockUser.id,
+            title: "Test",
+            deletedAt: new Date(),
+          })
+        },
+        delivery: {
+          updateMany: vi.fn().mockResolvedValue({ count: 0 })
+        }
+      }
+      return await callback(txMock)
+    })
+
+    const result = await deleteLetter(letterId)
     expect(result.success).toBe(true)
   })
 

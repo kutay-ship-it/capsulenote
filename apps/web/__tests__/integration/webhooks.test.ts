@@ -123,6 +123,8 @@ vi.mock('@/app/subscribe/actions', () => ({
 describe('Webhook Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Reset module cache to prevent test pollution
+    vi.resetModules()
   })
 
   describe('Stripe Webhook Handler', () => {
@@ -250,6 +252,7 @@ describe('Webhook Integration Tests', () => {
 
     it('should reject webhook with missing signature header', async () => {
       mockHeadersContext({})
+      // Don't mock constructEvent - route returns early before calling it
       const request = new Request('http://localhost:3000/api/webhooks/stripe', {
         method: 'POST',
         headers: {},

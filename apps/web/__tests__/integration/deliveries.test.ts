@@ -12,52 +12,54 @@ import { describe, it, expect, beforeEach, vi } from "vitest"
 import { scheduleDelivery, updateDelivery, cancelDelivery } from "../../server/actions/deliveries"
 import { ErrorCodes } from "@dearme/types"
 
-const mockUser = {
-  id: "user_test_123",
-  email: "test@example.com",
-  clerkUserId: "clerk_test_123",
-}
+const { mockUser } = vi.hoisted(() => ({
+  mockUser: {
+    id: "user_test_123",
+    email: "test@example.com",
+    clerkUserId: "clerk_test_123",
+  }
+}))
 
 vi.mock("../../server/lib/auth", () => ({
   requireUser: vi.fn(() => Promise.resolve(mockUser)),
 }))
 
-const mockEntitlements = {
-  userId: mockUser.id,
-  plan: "DIGITAL_CAPSULE",
-  status: "active",
-  features: {
-    canScheduleDeliveries: true,
-    canSchedulePhysicalMail: false,
-    emailDeliveriesIncluded: 6,
-    mailCreditsPerMonth: 0,
-  },
-  usage: {
-    emailsThisMonth: 0,
-    mailCreditsRemaining: 0,
-  },
-  limits: {
-    emailsReached: false,
-    mailCreditsExhausted: true,
-  },
-}
+const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() => {
+  const baseEntitlements = {
+    userId: mockUser.id,
+    plan: "DIGITAL_CAPSULE",
+    status: "active",
+    features: {
+      canScheduleDeliveries: true,
+      canSchedulePhysicalMail: false,
+      emailDeliveriesIncluded: 6,
+      mailCreditsPerMonth: 0,
+    },
+    usage: {
+      emailsThisMonth: 0,
+      mailCreditsRemaining: 0,
+    },
+    limits: {
+      emailsReached: false,
+      mailCreditsExhausted: true,
+    },
+  }
 
-const mockEntitlementsModule = {
-  getEntitlements: vi.fn(() => Promise.resolve(mockEntitlements)),
-  trackEmailDelivery: vi.fn(() => Promise.resolve()),
-  deductMailCredit: vi.fn(() => Promise.resolve()),
-}
+  const entitlementsModule = {
+    getEntitlements: vi.fn(() => Promise.resolve(baseEntitlements)),
+    trackEmailDelivery: vi.fn(() => Promise.resolve()),
+    deductMailCredit: vi.fn(() => Promise.resolve()),
+  }
 
-vi.mock("../../server/lib/entitlements", () => mockEntitlementsModule)
-
-vi.mock("../../server/lib/db", () => {
-  const mockPrisma = {
+  const prismaMock: any = {
     letter: {
       findFirst: vi.fn(),
+      update: vi.fn(),
     },
     delivery: {
       create: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       update: vi.fn(),
     },
     emailDelivery: {
@@ -69,16 +71,22 @@ vi.mock("../../server/lib/db", () => {
     user: {
       update: vi.fn(),
     },
-    $transaction: vi.fn(async (cb: any) => {
-      return cb({
-        delivery: mockPrisma.delivery,
-        emailDelivery: mockPrisma.emailDelivery,
-        mailDelivery: mockPrisma.mailDelivery,
-      })
-    }),
   }
-  return { prisma: mockPrisma }
+  prismaMock.$transaction = vi.fn(async (cb: any) =>
+    cb({
+      delivery: prismaMock.delivery,
+      emailDelivery: prismaMock.emailDelivery,
+      mailDelivery: prismaMock.mailDelivery,
+      letter: prismaMock.letter,
+    })
+  )
+
+  return { mockEntitlements: baseEntitlements, mockEntitlementsModule: entitlementsModule, mockPrisma: prismaMock }
 })
+
+vi.mock("../../server/lib/entitlements", () => mockEntitlementsModule)
+
+vi.mock("../../server/lib/db", () => ({ prisma: mockPrisma }))
 
 vi.mock("../../server/lib/audit", () => ({
   createAuditEvent: vi.fn(() => Promise.resolve({ id: "audit_123" })),
@@ -113,7 +121,7 @@ describe("Deliveries", () => {
 
   it("schedules email delivery successfully", async () => {
     mockPrisma.letter.findFirst.mockResolvedValueOnce({
-      id: "letter_123",
+      id: "11111111-1111-4111-8111-111111111111",
       userId: mockUser.id,
       title: "Test",
       deletedAt: null,
@@ -126,7 +134,7 @@ describe("Deliveries", () => {
     mockPrisma.emailDelivery.create.mockResolvedValueOnce({})
 
     const result = await scheduleDelivery({
-      letterId: "letter_123",
+      letterId: "11111111-1111-4111-8111-111111111111",
       channel: "email",
       deliverAt: new Date(Date.now() + 10 * 60 * 1000),
       timezone: "UTC",
@@ -146,7 +154,7 @@ describe("Deliveries", () => {
     })
 
     const result = await scheduleDelivery({
-      letterId: "letter_123",
+      letterId: "11111111-1111-4111-8111-111111111111",
       channel: "email",
       deliverAt: new Date(Date.now() + 10 * 60 * 1000),
       timezone: "UTC",
@@ -173,11 +181,11 @@ describe("Deliveries", () => {
     })
 
     const result = await scheduleDelivery({
-      letterId: "letter_123",
+      letterId: "11111111-1111-4111-8111-111111111111",
       channel: "mail",
       deliverAt: new Date(Date.now() + 10 * 60 * 1000),
       timezone: "UTC",
-      shippingAddressId: "addr_123",
+      shippingAddressId: "22222222-2222-4222-8222-222222222222",
     })
 
     expect(result.success).toBe(false)
@@ -187,36 +195,49 @@ describe("Deliveries", () => {
   })
 
   it("updates delivery status", async () => {
-    mockPrisma.delivery.findUnique.mockResolvedValueOnce({
-      id: "delivery_123",
+    const deliveryId = "33333333-3333-4333-8333-333333333333"
+    mockPrisma.delivery.findFirst.mockResolvedValueOnce({
+      id: deliveryId,
       userId: mockUser.id,
       status: "scheduled",
       channel: "email",
+      deliverAt: new Date(Date.now() + 10 * 60 * 1000),
+      letter: {
+        id: "11111111-1111-4111-8111-111111111111",
+      },
     })
-    mockPrisma.delivery.update.mockResolvedValueOnce({ id: "delivery_123", status: "sent" })
+    mockPrisma.delivery.update.mockResolvedValueOnce({ id: deliveryId, status: "sent" })
 
     const result = await updateDelivery({
-      deliveryId: "delivery_123",
+      deliveryId,
       status: "sent",
     })
 
+    if (!result.success) {
+      console.error("updateDelivery still failing:", JSON.stringify(result.error, null, 2))
+    }
     expect(result.success).toBe(true)
   })
 
   it("cancels delivery", async () => {
-    mockPrisma.delivery.findUnique.mockResolvedValueOnce({
-      id: "delivery_123",
+    const deliveryId = "44444444-4444-4444-8444-444444444444"
+    mockPrisma.delivery.findFirst.mockResolvedValueOnce({
+      id: deliveryId,
       userId: mockUser.id,
       status: "scheduled",
       channel: "email",
+      deliverAt: new Date(Date.now() + 10 * 60 * 1000),
+      letter: {
+        id: "11111111-1111-4111-8111-111111111111",
+      },
     })
     mockPrisma.delivery.update.mockResolvedValueOnce({
-      id: "delivery_123",
+      id: deliveryId,
       status: "canceled",
     })
 
     const result = await cancelDelivery({
-      deliveryId: "delivery_123",
+      deliveryId,
     })
 
     expect(result.success).toBe(true)
