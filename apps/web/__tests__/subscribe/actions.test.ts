@@ -14,7 +14,7 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest"
 import { createAnonymousCheckout, linkPendingSubscription } from "@/app/subscribe/actions"
 import { prisma } from "@/server/lib/db"
-import { stripe } from "@/server/providers/stripe"
+import { stripe } from "@/server/providers/stripe/client"
 import { isValidPriceId } from "@/server/providers/stripe/client"
 
 // Mock external dependencies

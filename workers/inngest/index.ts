@@ -11,3 +11,6 @@ export * from "./functions/lock-letter"
 export * from "./functions/billing/process-stripe-webhook"
 export * from "./functions/billing/send-billing-notification"
 export * from "./functions/billing/handle-dunning"
+
+// User functions
+export * from "./functions/users/cleanup-deleted-user"

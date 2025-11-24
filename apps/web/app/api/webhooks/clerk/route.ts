@@ -5,6 +5,7 @@ import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
 import { linkPendingSubscription } from "@/app/subscribe/actions"
 import { getClerkClient } from "@/server/lib/clerk"
+import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET
@@ -203,49 +204,28 @@ export async function POST(req: Request) {
         // Soft delete user and cascade to related data
         const deletedAt = new Date()
 
+        // 1. Trigger async Stripe cleanup (outside transaction)
+        const userForStripe = await prisma.user.findUnique({
+          where: { clerkUserId: id },
+          include: { profile: true },
+        })
+
+        if (userForStripe?.profile?.stripeCustomerId) {
+          await triggerInngestEvent("user/deleted", {
+            userId: userForStripe.id,
+            stripeCustomerId: userForStripe.profile.stripeCustomerId,
+          })
+        }
+
+        // 2. Perform local DB cleanup
         await prisma.$transaction(async (tx) => {
-          // First, find the user with subscription data
           const user = await tx.user.findUnique({
             where: { clerkUserId: id },
-            include: {
-              profile: true,
-              subscriptions: {
-                where: {
-                  status: { in: ['active', 'trialing', 'past_due'] }
-                }
-              }
-            },
           })
 
           if (!user) {
             console.warn(`User not found for deletion: ${id}`)
             return
-          }
-
-          // Cancel active Stripe subscriptions and delete customer
-          if (user.profile?.stripeCustomerId) {
-            try {
-              const { stripe } = await import("@/server/providers/stripe")
-
-              // Cancel all active subscriptions
-              for (const sub of user.subscriptions) {
-                try {
-                  await stripe.subscriptions.cancel(sub.stripeSubscriptionId, {
-                    prorate: true, // Issue prorated refund
-                  })
-                  console.log(`Canceled subscription: ${sub.stripeSubscriptionId}`)
-                } catch (subError) {
-                  console.error(`Failed to cancel subscription ${sub.stripeSubscriptionId}:`, subError)
-                }
-              }
-
-              // Delete Stripe customer (removes payment methods and PII)
-              await stripe.customers.del(user.profile.stripeCustomerId)
-              console.log(`Deleted Stripe customer: ${user.profile.stripeCustomerId}`)
-            } catch (stripeError) {
-              console.error(`Failed to cleanup Stripe data for user ${id}:`, stripeError)
-              // Continue with local deletion even if Stripe cleanup fails
-            }
           }
 
           // Mark all letters as deleted

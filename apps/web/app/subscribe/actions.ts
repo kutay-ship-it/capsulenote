@@ -15,7 +15,7 @@
  */
 
 import type { PlanType } from "@prisma/client"
-import { stripe } from "@/server/providers/stripe"
+import { stripe } from "@/server/providers/stripe/client"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { env } from "@/env.mjs"
@@ -29,32 +29,13 @@ import {
   type LinkPendingSubscriptionResult,
 } from "@dearme/types"
 
-const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
-  DIGITAL_CAPSULE: { email: 6, physical: 0 },
-  PAPER_PIXELS: { email: 24, physical: 3 },
-}
+import {
+  PLAN_CREDITS,
+  toDateOrNow,
+  ensureValidDate,
+} from "@/server/lib/billing-constants"
 
-function ensureValidDate(date: Date, label: string): Date {
-  if (date instanceof Date && !isNaN(date.getTime())) {
-    return date
-  }
 
-  console.warn("[linkPendingSubscription] Coercing invalid date to now()", { label, value: date })
-  return new Date()
-}
-
-function toDateOrNow(seconds: number | null | undefined, label: string): Date {
-  if (typeof seconds === "number" && Number.isFinite(seconds)) {
-    return new Date(seconds * 1000)
-  }
-
-  console.warn("[linkPendingSubscription] Missing or invalid timestamp, using now()", {
-    label,
-    seconds,
-  })
-
-  return new Date()
-}
 
 /**
  * Create anonymous checkout session
@@ -76,138 +57,138 @@ export async function createAnonymousCheckout(
     // 1. Validate input
     const validated = anonymousCheckoutSchema.parse(input)
 
-  if (!isValidPriceId(validated.priceId)) {
-    throw new Error("Invalid pricing plan selected")
-  }
+    if (!isValidPriceId(validated.priceId)) {
+      throw new Error("Invalid pricing plan selected")
+    }
 
-  // 2. Check for existing PendingSubscription
-  const existing = await prisma.pendingSubscription.findFirst({
-    where: {
-      email: validated.email,
-      status: { in: ["awaiting_payment", "payment_complete"] },
-      expiresAt: { gt: new Date() }, // Not expired
-    },
-  })
+    // 2. Check for existing PendingSubscription
+    const existing = await prisma.pendingSubscription.findFirst({
+      where: {
+        email: validated.email,
+        status: { in: ["awaiting_payment", "payment_complete"] },
+        expiresAt: { gt: new Date() }, // Not expired
+      },
+    })
 
-  // 3. Handle existing pending subscription
-  if (existing) {
-    if (existing.status === "awaiting_payment") {
-      // Resume existing checkout if session still valid
-      try {
-        const session = await stripe.checkout.sessions.retrieve(existing.stripeSessionId)
+    // 3. Handle existing pending subscription
+    if (existing) {
+      if (existing.status === "awaiting_payment") {
+        // Resume existing checkout if session still valid
+        try {
+          const session = await stripe.checkout.sessions.retrieve(existing.stripeSessionId)
 
-        if (session.status === "open" && session.url) {
-          console.log("[createAnonymousCheckout] Resuming existing session", {
-            email: validated.email,
-            sessionId: existing.stripeSessionId,
-          })
+          if (session.status === "open" && session.url) {
+            console.log("[createAnonymousCheckout] Resuming existing session", {
+              email: validated.email,
+              sessionId: existing.stripeSessionId,
+            })
 
-          return {
-            sessionId: session.id,
-            sessionUrl: session.url,
-            customerId: existing.stripeCustomerId,
+            return {
+              sessionId: session.id,
+              sessionUrl: session.url,
+              customerId: existing.stripeCustomerId,
+            }
           }
+        } catch (error) {
+          console.warn("[createAnonymousCheckout] Existing session invalid, creating new one", {
+            email: validated.email,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          // Session expired or invalid, continue to create new one
         }
-      } catch (error) {
-        console.warn("[createAnonymousCheckout] Existing session invalid, creating new one", {
-          email: validated.email,
-          error: error instanceof Error ? error.message : String(error),
-        })
-        // Session expired or invalid, continue to create new one
+      }
+
+      if (existing.status === "payment_complete") {
+        // Already paid, redirect to signup
+        throw new Error("ALREADY_PAID")
       }
     }
 
-    if (existing.status === "payment_complete") {
-      // Already paid, redirect to signup
-      throw new Error("ALREADY_PAID")
-    }
-  }
-
-  // 4. Create Stripe Customer (THIS LOCKS THE EMAIL)
-  const customer = await stripe.customers.create({
-    email: validated.email,
-    metadata: {
-      source: "anonymous_checkout",
-      letterId: validated.letterId || "",
-      ...validated.metadata,
-    },
-  })
-
-  console.log("[createAnonymousCheckout] Stripe customer created", {
-    customerId: customer.id,
-    email: validated.email,
-  })
-
-  // 5. Get pricing info
-  console.log("[createAnonymousCheckout] Retrieving price info", { priceId: validated.priceId })
-  const price = await stripe.prices.retrieve(validated.priceId)
-  console.log("[createAnonymousCheckout] Price retrieved", { priceId: price.id, productId: price.product })
-
-  const product = await stripe.products.retrieve(price.product as string)
-  console.log("[createAnonymousCheckout] Product retrieved", { productId: product.id, productName: product.name })
-
-  // 6. Create Stripe Checkout Session
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
-    customer: customer.id, // Email locked because customer exists
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price: validated.priceId,
-        quantity: 1,
+    // 4. Create Stripe Customer (THIS LOCKS THE EMAIL)
+    const customer = await stripe.customers.create({
+      email: validated.email,
+      metadata: {
+        source: "anonymous_checkout",
+        letterId: validated.letterId || "",
+        ...validated.metadata,
       },
-    ],
-    success_url: `${env.NEXT_PUBLIC_APP_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${env.NEXT_PUBLIC_APP_URL}/subscribe`,
-    metadata: {
+    })
+
+    console.log("[createAnonymousCheckout] Stripe customer created", {
+      customerId: customer.id,
       email: validated.email,
-      letterId: validated.letterId || "",
-      ...validated.metadata,
-    },
-    expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
-  })
+    })
 
-  console.log("[createAnonymousCheckout] Checkout session created", {
-    sessionId: session.id,
-    email: validated.email,
-  })
+    // 5. Get pricing info
+    console.log("[createAnonymousCheckout] Retrieving price info", { priceId: validated.priceId })
+    const price = await stripe.prices.retrieve(validated.priceId)
+    console.log("[createAnonymousCheckout] Price retrieved", { priceId: price.id, productId: price.product })
 
-  // 7. Determine plan from product name
-  const planMap: Record<string, PlanType> = {
-    "digital capsule": "DIGITAL_CAPSULE",
-    "paper & pixels": "PAPER_PIXELS",
-    "paper and pixels": "PAPER_PIXELS",
-  }
-  const plan = planMap[product.name.toLowerCase()] || "DIGITAL_CAPSULE"
+    const product = await stripe.products.retrieve(price.product as string)
+    console.log("[createAnonymousCheckout] Product retrieved", { productId: product.id, productName: product.name })
 
-  // 8. Create PendingSubscription record
-  await prisma.pendingSubscription.create({
-    data: {
-      email: validated.email,
-      stripeCustomerId: customer.id,
-      stripeSessionId: session.id,
-      priceId: validated.priceId,
-      plan,
-      amountCents: price.unit_amount || 0,
-      currency: price.currency,
-      status: "awaiting_payment",
-      metadata: validated.metadata || {},
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-    },
-  })
+    // 6. Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: customer.id, // Email locked because customer exists
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: validated.priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${env.NEXT_PUBLIC_APP_URL}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${env.NEXT_PUBLIC_APP_URL}/subscribe`,
+      metadata: {
+        email: validated.email,
+        letterId: validated.letterId || "",
+        ...validated.metadata,
+      },
+      expires_at: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
+    })
 
-  // 9. Create audit event
-  await createAuditEvent({
-    userId: null, // No user yet
-    type: "subscription.checkout_created",
-    data: {
-      email: validated.email,
+    console.log("[createAnonymousCheckout] Checkout session created", {
       sessionId: session.id,
-      plan: product.name,
-      amount: price.unit_amount,
-      letterId: validated.letterId,
-    },
-  })
+      email: validated.email,
+    })
+
+    // 7. Determine plan from product name
+    const planMap: Record<string, PlanType> = {
+      "digital capsule": "DIGITAL_CAPSULE",
+      "paper & pixels": "PAPER_PIXELS",
+      "paper and pixels": "PAPER_PIXELS",
+    }
+    const plan = planMap[product.name.toLowerCase()] || "DIGITAL_CAPSULE"
+
+    // 8. Create PendingSubscription record
+    await prisma.pendingSubscription.create({
+      data: {
+        email: validated.email,
+        stripeCustomerId: customer.id,
+        stripeSessionId: session.id,
+        priceId: validated.priceId,
+        plan,
+        amountCents: price.unit_amount || 0,
+        currency: price.currency,
+        status: "awaiting_payment",
+        metadata: validated.metadata || {},
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      },
+    })
+
+    // 9. Create audit event
+    await createAuditEvent({
+      userId: null, // No user yet
+      type: "subscription.checkout_created",
+      data: {
+        email: validated.email,
+        sessionId: session.id,
+        plan: product.name,
+        amount: price.unit_amount,
+        letterId: validated.letterId,
+      },
+    })
 
     return {
       sessionId: session.id,

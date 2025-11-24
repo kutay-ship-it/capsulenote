@@ -19,12 +19,13 @@ import { prisma } from "../../../../../apps/web/server/lib/db"
 import { linkPendingSubscription } from "../../../../../apps/web/app/subscribe/actions"
 import { sendPaymentConfirmationEmail } from "../../../../../apps/web/server/lib/emails/payment-confirmation"
 import { env } from "../../../../../apps/web/env.mjs"
-import { stripe } from "../../../../../apps/web/server/providers/stripe"
+import { stripe } from "../../../../../apps/web/server/providers/stripe/client"
 
-const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
-  DIGITAL_CAPSULE: { email: 6, physical: 0 },
-  PAPER_PIXELS: { email: 24, physical: 3 },
-}
+import {
+  PLAN_CREDITS,
+  toDateOrNow,
+  ensureValidDate,
+} from "../../../../../apps/web/server/lib/billing-constants"
 
 function resolvePlanFromSubscription(
   subscription: Stripe.Subscription,
@@ -38,27 +39,7 @@ function resolvePlanFromSubscription(
   )
 }
 
-function toDateOrNow(seconds: number | null | undefined, label: string): Date {
-  if (typeof seconds === "number" && Number.isFinite(seconds)) {
-    return new Date(seconds * 1000)
-  }
 
-  console.warn("[Checkout Handler] Missing or invalid timestamp, using now()", {
-    label,
-    seconds,
-  })
-
-  return new Date()
-}
-
-function ensureValidDate(date: Date, label: string): Date {
-  if (date instanceof Date && !isNaN(date.getTime())) {
-    return date
-  }
-
-  console.warn("[Checkout Handler] Coercing invalid date to now()", { label, value: date })
-  return new Date()
-}
 
 async function upsertSubscriptionForUser({
   userId,

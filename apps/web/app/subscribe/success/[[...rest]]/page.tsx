@@ -14,7 +14,7 @@ import * as React from "react"
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
-import { stripe } from "@/server/providers/stripe"
+import { stripe } from "@/server/providers/stripe/client"
 import { getCurrentUser } from "@/server/lib/auth"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"

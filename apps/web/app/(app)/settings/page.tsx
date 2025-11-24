@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { User, Bell, Globe, Lock, CreditCard, AlertTriangle } from "lucide-react"
 import Link from "next/link"
+import { getEntitlements } from "@/server/lib/entitlements"
 
 // Force dynamic rendering - settings must always show fresh user data
 export const revalidate = 0
@@ -15,6 +16,8 @@ export default async function SettingsPage() {
   if (!user) {
     redirect("/sign-in")
   }
+
+  const entitlements = await getEntitlements(user.id)
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 sm:space-y-10">
@@ -73,6 +76,68 @@ export default async function SettingsPage() {
             <p className="font-mono text-sm text-gray-secondary sm:text-base">
               {user.profile?.timezone || "Not set"}
             </p>
+          </div>
+          <div className="space-y-2">
+            <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+              Account Status
+            </Label>
+            <div className="flex items-center gap-2">
+              <p className="font-mono text-sm text-gray-secondary sm:text-base">
+                {entitlements.status === "active" && "Active"}
+                {entitlements.status === "trialing" && "Trial"}
+                {entitlements.status === "past_due" && "Past Due"}
+                {entitlements.status === "canceled" && "Canceled"}
+                {entitlements.status === "unpaid" && "Unpaid"}
+                {entitlements.status === "incomplete" && "Incomplete"}
+                {entitlements.status === "incomplete_expired" && "Incomplete Expired"}
+                {entitlements.status === "paused" && "Paused"}
+                {entitlements.status === "none" && "No Subscription"}
+              </p>
+              {entitlements.status === "active" && (
+                <Badge
+                  className="border-2 border-charcoal bg-lime font-mono text-xs uppercase"
+                  style={{ borderRadius: "2px" }}
+                >
+                  ✓
+                </Badge>
+              )}
+              {entitlements.status === "trialing" && (
+                <Badge
+                  className="border-2 border-charcoal bg-duck-yellow font-mono text-xs uppercase"
+                  style={{ borderRadius: "2px" }}
+                >
+                  Trial
+                </Badge>
+              )}
+              {(entitlements.status === "past_due" || entitlements.status === "unpaid") && (
+                <Badge
+                  className="border-2 border-charcoal bg-coral font-mono text-xs uppercase text-white"
+                  style={{ borderRadius: "2px" }}
+                >
+                  !
+                </Badge>
+              )}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+              Account Tier
+            </Label>
+            <div className="flex items-center gap-2">
+              <p className="font-mono text-sm text-gray-secondary sm:text-base">
+                {entitlements.plan === "DIGITAL_CAPSULE" && "Digital Capsule"}
+                {entitlements.plan === "PAPER_PIXELS" && "Paper & Pixels"}
+                {entitlements.plan === "none" && "Free Tier"}
+              </p>
+              {entitlements.plan === "PAPER_PIXELS" && (
+                <Badge
+                  className="border-2 border-charcoal bg-lavender font-mono text-xs uppercase"
+                  style={{ borderRadius: "2px" }}
+                >
+                  Premium
+                </Badge>
+              )}
+            </div>
           </div>
           <div className="pt-2">
             <Badge

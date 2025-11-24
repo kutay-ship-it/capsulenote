@@ -7,6 +7,7 @@ import {
   processStripeWebhook,
   sendBillingNotification,
   handleDunning,
+  cleanupDeletedUser,
 } from "@dearme/inngest"
 
 export const { GET, POST, PUT } = serve({

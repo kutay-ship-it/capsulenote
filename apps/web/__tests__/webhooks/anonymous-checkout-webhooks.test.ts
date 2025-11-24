@@ -11,7 +11,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { stripe } from "@/server/providers/stripe"
+import { stripe } from "@/server/providers/stripe/client"
 
 // Mock dependencies
 const mockPrisma = {

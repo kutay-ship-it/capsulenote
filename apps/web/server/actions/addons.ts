@@ -1,7 +1,7 @@
 "use server"
 
 import { requireUser } from "@/server/lib/auth"
-import { stripe } from "@/server/providers/stripe"
+import { stripe } from "@/server/providers/stripe/client"
 import { env } from "@/env.mjs"
 import type { ActionResult } from "@dearme/types"
 import { ErrorCodes } from "@dearme/types"

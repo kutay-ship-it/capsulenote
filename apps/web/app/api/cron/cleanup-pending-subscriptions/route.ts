@@ -14,7 +14,7 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/lib/db"
-import { stripe } from "@/server/providers/stripe"
+import { stripe } from "@/server/providers/stripe/client"
 import { createAuditEvent } from "@/server/lib/audit"
 import { env } from "@/env.mjs"
 

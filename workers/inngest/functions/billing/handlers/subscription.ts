@@ -22,32 +22,13 @@ import {
 } from "../../../../../apps/web/server/lib/stripe-helpers"
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
 
-const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
-  DIGITAL_CAPSULE: { email: 6, physical: 0 },
-  PAPER_PIXELS: { email: 24, physical: 3 },
-}
+import {
+  PLAN_CREDITS,
+  toDateOrNow,
+  ensureValidDate,
+} from "../../../../../apps/web/server/lib/billing-constants"
 
-function toDateOrNow(seconds: number | null | undefined, label: string): Date {
-  if (typeof seconds === "number" && Number.isFinite(seconds)) {
-    return new Date(seconds * 1000)
-  }
 
-  console.warn("[Subscription Handler] Missing or invalid timestamp, using now()", {
-    label,
-    seconds,
-  })
-
-  return new Date()
-}
-
-function ensureValidDate(date: Date, label: string): Date {
-  if (date instanceof Date && !isNaN(date.getTime())) {
-    return date
-  }
-
-  console.warn("[Subscription Handler] Coercing invalid date to now()", { label, value: date })
-  return new Date()
-}
 
 /**
  * Handle subscription.created or subscription.updated event
