@@ -18,6 +18,9 @@ export const metadata = {
   description: "Manage your data privacy and GDPR rights",
 }
 
+// Force dynamic rendering - page requires auth
+export const dynamic = 'force-dynamic'
+
 export default async function PrivacySettingsPage() {
   const user = await requireUser()
 

@@ -128,14 +128,12 @@ export default async function DeliveriesPage() {
 
                       {/* Right Side - Status Badge and Actions */}
                       <div className="flex items-center gap-3">
-                        <div onClick={(e) => e.preventDefault()}>
-                          <DownloadCalendarButton
-                            letterTitle={delivery.letter.title}
-                            deliveryDate={new Date(delivery.deliverAt)}
-                            deliveryMethod={delivery.channel}
-                            recipientEmail={delivery.channel === "email" ? (delivery.emailDelivery?.toEmail ?? "") : ""}
-                          />
-                        </div>
+                        <DownloadCalendarButton
+                          letterTitle={delivery.letter.title}
+                          deliveryDate={new Date(delivery.deliverAt)}
+                          deliveryMethod={delivery.channel}
+                          recipientEmail={delivery.channel === "email" ? (delivery.emailDelivery?.toEmail ?? "") : ""}
+                        />
                         <Badge
                           className={`border-2 border-charcoal font-mono text-xs uppercase ${getStatusColor(delivery.status)}`}
                           style={{ borderRadius: "2px" }}

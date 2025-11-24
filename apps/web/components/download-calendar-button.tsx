@@ -32,7 +32,11 @@ export function DownloadCalendarButton({
 }: DownloadCalendarButtonProps) {
   const { toast } = useToast()
 
-  const handleDownload = () => {
+  const handleDownload = (e: React.MouseEvent) => {
+    // Prevent event propagation to parent Link
+    e.preventDefault()
+    e.stopPropagation()
+
     try {
       // Convert string to Date if needed
       const date = typeof deliveryDate === "string" ? new Date(deliveryDate) : deliveryDate

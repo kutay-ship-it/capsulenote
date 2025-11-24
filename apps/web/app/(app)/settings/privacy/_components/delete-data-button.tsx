@@ -16,7 +16,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { deleteUserData } from "@/server/actions/gdpr"
+import { deleteUserAccount } from "@/server/actions/gdpr"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -48,7 +48,7 @@ export function DeleteDataButton() {
     try {
       setIsDeleting(true)
 
-      const result = await deleteUserData()
+      const result = await deleteUserAccount()
 
       if (!result.success) {
         toast({

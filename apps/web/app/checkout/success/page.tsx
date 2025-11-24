@@ -26,6 +26,9 @@ function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+// Force dynamic rendering - page requires auth and searchParams
+export const dynamic = 'force-dynamic'
+
 export default async function CheckoutSuccessPage({
   searchParams,
 }: CheckoutSuccessPageProps) {

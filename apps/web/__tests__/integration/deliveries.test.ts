@@ -182,16 +182,39 @@ describe("Deliveries", () => {
   })
 
   it("surfaces pending subscription reason when payment exists but not linked", async () => {
-    mockEntitlementsModule.getEntitlements.mockResolvedValueOnce({
-      ...mockEntitlements,
-      features: { ...mockEntitlements.features, canScheduleDeliveries: false },
-      plan: "none",
-      status: "none",
-    })
+    // Mock entitlements - inactive before and after auto-link (entitlements didn't refresh)
+    mockEntitlementsModule.getEntitlements
+      .mockResolvedValueOnce({
+        ...mockEntitlements,
+        features: { ...mockEntitlements.features, canScheduleDeliveries: false },
+        plan: "none",
+        status: "none",
+      })
+      .mockResolvedValueOnce({
+        ...mockEntitlements,
+        features: { ...mockEntitlements.features, canScheduleDeliveries: false },
+        plan: "none",
+        status: "none",
+      })
+
     const expiresAt = new Date(Date.now() + 86400000)
     mockPrisma.pendingSubscription.findFirst.mockResolvedValueOnce({
       id: "pending_test",
       expiresAt,
+    })
+
+    // Mock auto-link succeeds but entitlements don't reflect it yet (cache/race)
+    mockLinkPendingSubscription.mockResolvedValueOnce({
+      success: true,
+      subscriptionId: "sub_123",
+    } as any)
+
+    // Mock letter exists so we reach subscription check
+    mockPrisma.letter.findFirst.mockResolvedValueOnce({
+      id: "11111111-1111-4111-8111-111111111111",
+      userId: mockUser.id,
+      title: "Test Letter",
+      deletedAt: null,
     })
 
     const result = await scheduleDelivery({
