@@ -22,7 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, AlertCircle } from "lucide-react"
 
-import { SuccessSignupForm } from "../../_components/success-signup-form"
+import { CustomSignUpForm } from "@/components/auth/custom-sign-up"
 
 export const metadata: Metadata = {
   title: "Payment Successful - Capsule Note",
@@ -177,42 +177,44 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   }
 
   return (
-    <div className="container px-4 py-12 sm:px-6 sm:py-16">
-      <div className="mx-auto max-w-2xl space-y-8">
-        {/* Success Banner */}
-        <Alert className="border-4 border-charcoal bg-duck-blue">
-          <CheckCircle className="h-4 w-4" />
-          <AlertTitle className="font-mono text-lg">Payment Successful!</AlertTitle>
-          <AlertDescription className="font-mono">
-            Your payment for <strong>{planName}</strong> has been processed.
-            <br />
-            Complete your signup below to activate your subscription.
-          </AlertDescription>
-        </Alert>
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background to-muted/20">
+      {/* Success Banner - Fixed at top */}
+      <div className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container px-4 py-4">
+          <Alert className="border-2 border-green-600 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-900">Payment Successful!</AlertTitle>
+            <AlertDescription className="text-green-800">
+              Your payment for <strong>{planName}</strong> has been processed. Complete your signup
+              below to activate your subscription.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
 
-        {/* Signup Card */}
-        <Card className="border-4 border-charcoal shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-center font-mono text-2xl uppercase tracking-wide">
-              Complete Your Signup
-            </CardTitle>
-            <p className="text-center font-mono text-sm text-gray-secondary">
+      {/* Centered Signup Form */}
+      <div className="flex flex-1 items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight">Complete Your Signup</h1>
+            <p className="mt-2 text-muted-foreground">
               Create your account to activate your subscription
             </p>
-          </CardHeader>
-          <CardContent>
-            <SuccessSignupForm email={email} />
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Security Notice */}
-        <div className="rounded-lg border-2 border-charcoal bg-off-white p-4">
-          <p className="font-mono text-sm text-charcoal">
-            <strong>🔒 Security Notice:</strong>
-            <br />
-            You must verify your email address before your subscription is activated. Check your
-            inbox for a verification email from Capsule Note.
-          </p>
+          <Card className="border-2 border-charcoal shadow-lg">
+            <CardContent className="pt-6">
+              <CustomSignUpForm lockedEmail={email} />
+            </CardContent>
+          </Card>
+
+          {/* Security Notice */}
+          <div className="rounded-lg border border-muted bg-muted/50 p-4">
+            <p className="text-sm text-muted-foreground">
+              <strong>🔒 Security:</strong> You must verify your email address before your
+              subscription is activated. Check your inbox for a verification email.
+            </p>
+          </div>
         </div>
       </div>
     </div>
