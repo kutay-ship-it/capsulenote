@@ -46,11 +46,24 @@ stripe login
 
 This opens browser for authentication. Follow the prompts.
 
-### 3. Forward Webhooks to Local Server
+### 3. Start App + Inngest Worker
+
+Use the combined dev script so both Next.js and the Inngest worker run:
+```bash
+pnpm dev:web+worker
+```
+If you prefer separate terminals:
+```bash
+pnpm --filter web dev
+pnpm --filter @dearme/inngest dev
+```
+
+### 4. Forward Webhooks to Local Server
 
 ```bash
 # Start your Next.js app first
-pnpm dev
+# If not already running:
+# pnpm --filter web dev
 
 # In another terminal, forward webhooks
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
@@ -111,6 +124,7 @@ You should see:
 **Check your app logs**:
 ```
 [Webhook Processor] Starting webhook processing
+[Webhook Processor] Worker health OK
 [Webhook Processor] Idempotency claimed
 [Webhook Processor] Event processed successfully
 ```

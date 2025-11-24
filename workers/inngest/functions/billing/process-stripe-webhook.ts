@@ -188,6 +188,16 @@ export const processStripeWebhook = inngest.createFunction(
     console.log("[Webhook Processor] Starting webhook processing", {
       eventId: stripeEvent.id,
       eventType: stripeEvent.type,
+      workerEnv: process.env.NODE_ENV,
+      workerHost: process.env.HOSTNAME,
+    })
+
+    // Lightweight health marker to confirm worker is consuming events (useful in dev/CI)
+    await step.run("worker-health-log", async () => {
+      console.log("[Webhook Processor] Worker health OK", {
+        at: new Date().toISOString(),
+        eventId: stripeEvent.id,
+      })
     })
 
     /**

@@ -145,6 +145,9 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
               />
             </div>
 
+            {/* Clerk Smart CAPTCHA widget placeholder */}
+            <div id="clerk-captcha" data-cl-theme="auto" data-cl-size="flexible" />
+
             <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
               {isSubmitting ? "Creating account..." : "Continue"}
             </Button>
