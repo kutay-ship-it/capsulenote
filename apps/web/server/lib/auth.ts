@@ -149,7 +149,7 @@ export async function getCurrentUser() {
 
       try {
         // Import the linking function dynamically to avoid circular dependencies
-        const { linkPendingSubscription } = await import("../../app/subscribe/actions")
+        const { linkPendingSubscription } = await import("../../app/[locale]/subscribe/actions")
         const result = await linkPendingSubscription(user.id)
 
         if (result.success) {

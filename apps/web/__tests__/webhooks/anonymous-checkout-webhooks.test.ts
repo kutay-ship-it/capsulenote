@@ -44,7 +44,7 @@ vi.mock("@/server/lib/db", () => ({ prisma: mockPrisma }))
 vi.mock("@/server/providers/stripe")
 vi.mock("@/server/lib/audit")
 vi.mock("@/server/lib/stripe-helpers")
-vi.mock("@/app/subscribe/actions")
+vi.mock("@/app/[locale]/subscribe/actions")
 
 const prisma = mockPrisma
 
@@ -126,7 +126,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       prisma.pendingSubscription.findFirst.mockResolvedValue(mockPending)
 
       // Mock linkPendingSubscription
-      const { linkPendingSubscription } = await import("@/app/subscribe/actions")
+      const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
       // @ts-ignore
       linkPendingSubscription.mockResolvedValue({
         success: true,
@@ -171,7 +171,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       // @ts-ignore
       prisma.pendingSubscription.findFirst.mockResolvedValue(null) // No payment_complete subscription found yet
 
-      const { linkPendingSubscription } = await import("@/app/subscribe/actions")
+      const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
       // @ts-ignore
       linkPendingSubscription.mockResolvedValue({ success: true, subscriptionId: "sub_auto" }) // Auto-link may occur
 
@@ -218,7 +218,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       // @ts-ignore
       prisma.user.findFirst.mockResolvedValue(mockUser) // User exists now!
 
-      const { linkPendingSubscription } = await import("@/app/subscribe/actions")
+      const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
       // @ts-ignore
       linkPendingSubscription.mockResolvedValue({
         success: true,
@@ -418,7 +418,7 @@ describe("Webhook Integration: Edge Cases", () => {
     // @ts-ignore
     prisma.pendingSubscription.findFirst.mockResolvedValueOnce(null) // Query with expiry filter returns null
 
-    const { linkPendingSubscription } = await import("@/app/subscribe/actions")
+    const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
     // @ts-ignore
     linkPendingSubscription.mockResolvedValue({ success: true }) // Should skip expired
 
@@ -477,7 +477,7 @@ describe("Webhook Integration: Edge Cases", () => {
     // @ts-ignore
     prisma.pendingSubscription.findFirst.mockResolvedValueOnce(null) // Query for payment_complete doesn't match 'linked' status
 
-    const { linkPendingSubscription } = await import("@/app/subscribe/actions")
+    const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
     // @ts-ignore
     linkPendingSubscription.mockResolvedValue({ success: true })
 

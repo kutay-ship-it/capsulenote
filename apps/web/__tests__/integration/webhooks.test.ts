@@ -113,7 +113,7 @@ vi.mock('svix', () => ({
   })),
 }))
 
-vi.mock('@/app/subscribe/actions', () => ({
+vi.mock('@/app/[locale]/subscribe/actions', () => ({
   linkPendingSubscription: vi.fn(() => Promise.resolve({
     success: true,
     subscriptionId: 'sub_123'
@@ -327,7 +327,7 @@ describe('Webhook Integration Tests', () => {
 
     it('should auto-link pending subscription on user.created', async () => {
       const { prisma } = await import('@/server/lib/db')
-      const { linkPendingSubscription } = await import('@/app/subscribe/actions')
+      const { linkPendingSubscription } = await import('@/app/[locale]/subscribe/actions')
       mockHeadersContext({
         'svix-id': 'msg_123',
         'svix-timestamp': `${Math.floor(Date.now() / 1000)}`,

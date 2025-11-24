@@ -56,7 +56,12 @@
       "processing": "Processing",
       "sent": "Sent",
       "failed": "Failed",
-      "canceled": "Canceled"
+      "canceled": "Canceled",
+      "DRAFT": "Draft",
+      "SCHEDULED": "Scheduled",
+      "LOCKED": "Locked",
+      "SENT": "Sent",
+      "FAILED": "Failed"
     },
     "channel": {
       "email": "Email",

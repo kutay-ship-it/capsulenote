@@ -42,7 +42,7 @@ vi.mock("@clerk/nextjs/server", () => ({
   ),
 }))
 
-vi.mock("@/app/subscribe/actions", () => ({
+vi.mock("@/app/[locale]/subscribe/actions", () => ({
   linkPendingSubscription: vi.fn(() =>
     Promise.resolve({
       success: true,
@@ -149,7 +149,7 @@ describe("Race Condition Handling", () => {
 
   describe("Subscription Linking Race Conditions", () => {
     it("should handle idempotent subscription linking", async () => {
-      const { linkPendingSubscription } = await import("@/app/subscribe/actions")
+      const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
 
       // Execute multiple times - should be idempotent
       const result1 = await linkPendingSubscription("user_123")

@@ -31,12 +31,24 @@ export default async function LetterDetailPage({ params }: PageProps) {
     notFound()
   }
 
-  const formatDate = (date: Date | string, withTime = false, withTz = false) =>
-    new Intl.DateTimeFormat(locale, {
+  const formatDate = (date: Date | string, withTime = false, withTz = false) => {
+    const dateObj = typeof date === "string" ? new Date(date) : date
+    // dateStyle/timeStyle cannot be combined with timeZoneName
+    // Use explicit options when timeZoneName is needed
+    if (withTz) {
+      return new Intl.DateTimeFormat(locale, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        ...(withTime && { hour: "numeric", minute: "numeric" }),
+        timeZoneName: "short",
+      }).format(dateObj)
+    }
+    return new Intl.DateTimeFormat(locale, {
       dateStyle: "long",
       timeStyle: withTime ? "short" : undefined,
-      timeZoneName: withTz ? "short" : undefined,
-    }).format(typeof date === "string" ? new Date(date) : date)
+    }).format(dateObj)
+  }
 
   const statusLabel = (status: string) => t(`detail.deliveryStatus.${status}` as const)
   const channelLabel = (channel: string) => (channel === "email" ? t("detail.channel.email") : t("detail.channel.mail"))

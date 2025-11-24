@@ -56,7 +56,12 @@
       "processing": "İşleniyor",
       "sent": "Gönderildi",
       "failed": "Başarısız",
-      "canceled": "İptal edildi"
+      "canceled": "İptal edildi",
+      "DRAFT": "Taslak",
+      "SCHEDULED": "Planlandı",
+      "LOCKED": "Kilitli",
+      "SENT": "Gönderildi",
+      "FAILED": "Başarısız"
     },
     "channel": {
       "email": "E-posta",

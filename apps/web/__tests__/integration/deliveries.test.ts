@@ -116,7 +116,7 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }))
 
-vi.mock("@/app/subscribe/actions", () => ({
+vi.mock("@/app/[locale]/subscribe/actions", () => ({
   linkPendingSubscription: mockLinkPendingSubscription,
 }))
 

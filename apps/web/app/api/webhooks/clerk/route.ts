@@ -3,7 +3,7 @@ import { headers } from "next/headers"
 import { WebhookEvent } from "@clerk/nextjs/server"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
-import { linkPendingSubscription } from "@/app/subscribe/actions"
+import { linkPendingSubscription } from "@/app/[locale]/subscribe/actions"
 import { getClerkClient } from "@/server/lib/clerk"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 

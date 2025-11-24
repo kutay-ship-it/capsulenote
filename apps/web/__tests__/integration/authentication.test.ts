@@ -36,7 +36,7 @@ vi.mock('@/server/lib/db', () => ({
   },
 }))
 
-vi.mock('@/app/subscribe/actions', () => ({
+vi.mock('@/app/[locale]/subscribe/actions', () => ({
   linkPendingSubscription: vi.fn(() => Promise.resolve({
     success: true,
     subscriptionId: 'sub_123',
@@ -249,7 +249,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should auto-link pending subscription for newly synced user', async () => {
       const { prisma } = await import('@/server/lib/db')
-      const { linkPendingSubscription } = await import('@/app/subscribe/actions')
+      const { linkPendingSubscription } = await import('@/app/[locale]/subscribe/actions')
 
       // Mock authenticated user
       mockClerkAuth.mockResolvedValueOnce({ userId: 'clerk_user_pending' })

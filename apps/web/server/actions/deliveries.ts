@@ -21,7 +21,7 @@ import {
   invalidateEntitlementsCache,
 } from "@/server/lib/entitlements"
 import { env } from "@/env.mjs"
-import { linkPendingSubscription } from "@/app/subscribe/actions"
+import { linkPendingSubscription } from "@/app/[locale]/subscribe/actions"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
 const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
