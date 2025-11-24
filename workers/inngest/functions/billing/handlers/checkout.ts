@@ -23,8 +23,7 @@ import { stripe } from "../../../../../apps/web/server/providers/stripe/client"
 
 import {
   PLAN_CREDITS,
-  toDateOrNow,
-  ensureValidDate,
+  getSubscriptionPeriodDates,
 } from "../../../../../apps/web/server/lib/billing-constants"
 
 /**
@@ -77,14 +76,8 @@ async function upsertSubscriptionForUser({
   try {
     const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId)
     const plan = resolvePlanFromSubscription(stripeSubscription, fallbackPlan)
-    const periodEnd = ensureValidDate(
-      toDateOrNow(stripeSubscription.current_period_end as any, "current_period_end"),
-      "current_period_end"
-    )
-    const periodStart = ensureValidDate(
-      toDateOrNow(stripeSubscription.current_period_start as any, "current_period_start"),
-      "current_period_start"
-    )
+    // Extract period dates from subscription (handles both legacy and new API versions)
+    const { periodStart, periodEnd } = getSubscriptionPeriodDates(stripeSubscription)
 
     await prisma.subscription.upsert({
       where: { stripeSubscriptionId: stripeSubscription.id },

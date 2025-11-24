@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useUser, useClerk } from "@clerk/nextjs"
+import { useTranslations } from "next-intl"
 import { toast } from "@/hooks/use-toast"
 
 /**
@@ -13,6 +14,7 @@ export function EmailLockGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser()
   const { signOut } = useClerk()
   const router = useRouter()
+  const t = useTranslations("auth.emailLockGuard")
 
   useEffect(() => {
     if (!isLoaded || !user) return
@@ -23,13 +25,13 @@ export function EmailLockGuard({ children }: { children: React.ReactNode }) {
       if (primaryEmail && primaryEmail !== lockedEmail.toLowerCase()) {
         toast({
           variant: "destructive",
-          title: "Email mismatch",
-          description: "Please sign in with the email used at checkout.",
+          title: t("title"),
+          description: t("description"),
         })
         signOut().then(() => router.push("/sign-in"))
       }
     }
-  }, [isLoaded, user, signOut, router])
+  }, [isLoaded, user, signOut, router, t])
 
   return <>{children}</>
 }

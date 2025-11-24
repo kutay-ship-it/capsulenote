@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSignIn } from "@clerk/nextjs"
+import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,6 +16,7 @@ interface CustomSignInFormProps {
 export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
   const router = useRouter()
   const { isLoaded, signIn, setActive } = useSignIn()
+  const t = useTranslations("auth.signIn")
 
   const [email, setEmail] = useState(prefillEmail || "")
   const [password, setPassword] = useState("")
@@ -42,10 +44,10 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
         setNeedsSecondFactor(true)
         setError(null)
       } else {
-        setError("Additional verification required. Please complete the next step.")
+        setError(t("errors.additionalVerification"))
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Sign in failed.")
+      setError(err?.errors?.[0]?.message || t("errors.failed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -67,10 +69,10 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
         await setActive({ session: result.createdSessionId })
         router.push("/dashboard")
       } else {
-        setError("Invalid code. Please try again.")
+        setError(t("errors.invalidCode"))
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Second factor failed.")
+      setError(err?.errors?.[0]?.message || t("errors.secondFactorFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -87,7 +89,7 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
         redirectUrlComplete: "/dashboard",
       })
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Google sign in failed.")
+      setError(err?.errors?.[0]?.message || t("errors.googleFailed"))
     }
   }
 
@@ -95,14 +97,14 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
     <div className="space-y-4">
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
       {needsSecondFactor ? (
         <form onSubmit={handleSecondFactor} className="space-y-4">
           <div className="space-y-2">
-            <Label>Two-Factor Code</Label>
+            <Label>{t("twoFactor.label")}</Label>
             <Input
               type="text"
               value={secondFactorCode}
@@ -112,11 +114,11 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
               pattern="[0-9]*"
             />
             <p className="text-xs text-muted-foreground">
-              Enter the code from your authenticator app.
+              {t("twoFactor.helper")}
             </p>
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
-            {isSubmitting ? "Verifying..." : "Verify & Continue"}
+            {isSubmitting ? t("twoFactor.verifying") : t("twoFactor.verify")}
           </Button>
         </form>
       ) : (
@@ -124,7 +126,7 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
           {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{t("email.label")}</Label>
               <Input
                 type="email"
                 value={email}
@@ -135,7 +137,7 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Password</Label>
+              <Label>{t("password.label")}</Label>
               <Input
                 type="password"
                 value={password}
@@ -147,12 +149,12 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <a href="/reset-password" className="underline hover:text-primary">
-                Forgot password?
+                {t("forgotPassword")}
               </a>
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
-              {isSubmitting ? "Signing in..." : "Sign In"}
+              {isSubmitting ? t("submitting") : t("submit")}
             </Button>
           </form>
 
@@ -162,7 +164,7 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or</span>
+              <span className="bg-background px-2 text-muted-foreground">{t("divider")}</span>
             </div>
           </div>
 
@@ -192,7 +194,7 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            Continue with Google
+            {t("google")}
           </Button>
         </>
       )}

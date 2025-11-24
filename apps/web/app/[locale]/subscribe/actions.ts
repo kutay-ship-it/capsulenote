@@ -31,8 +31,7 @@ import {
 
 import {
   PLAN_CREDITS,
-  toDateOrNow,
-  ensureValidDate,
+  getSubscriptionPeriodDates,
 } from "@/server/lib/billing-constants"
 
 
@@ -322,6 +321,8 @@ export async function linkPendingSubscription(
     const stripeSubscription = await stripe.subscriptions.retrieve(
       pending.stripeSubscriptionId!
     )
+    // Extract period dates from subscription (handles both legacy and new API versions)
+    const { periodEnd } = getSubscriptionPeriodDates(stripeSubscription)
 
     // 6. Create Subscription record and update Profile (transaction)
     // Wrap in try-catch to handle race conditions when multiple requests try to link same subscription
@@ -335,10 +336,7 @@ export async function linkPendingSubscription(
             stripeSubscriptionId: pending.stripeSubscriptionId!,
             status: stripeSubscription.status as any, // Will be updated by webhook if different
             plan: pending.plan,
-            currentPeriodEnd: ensureValidDate(
-              toDateOrNow(stripeSubscription.current_period_end as any, "current_period_end"),
-              "current_period_end"
-            ),
+            currentPeriodEnd: periodEnd,
             cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
           },
         })
@@ -351,10 +349,7 @@ export async function linkPendingSubscription(
             planType: pending.plan,
             emailCredits: credits.email,
             physicalCredits: credits.physical,
-            creditExpiresAt: ensureValidDate(
-              toDateOrNow(stripeSubscription.current_period_end as any, "current_period_end"),
-              "current_period_end"
-            ),
+            creditExpiresAt: periodEnd,
           },
         })
 

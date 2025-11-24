@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import { Mail, Calendar, ArrowLeft } from "lucide-react"
 import { getLocale, getTranslations } from "next-intl/server"
@@ -10,6 +11,7 @@ import { TimezoneTooltip } from "@/components/timezone-tooltip"
 import { DownloadCalendarButton } from "@/components/download-calendar-button"
 import { DeliveryErrorCard } from "@/components/delivery-error-card"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/skeletons"
 
 // Force dynamic rendering - letter detail must always show fresh data
 export const revalidate = 0
@@ -20,10 +22,40 @@ interface PageProps {
   }>
 }
 
-export default async function LetterDetailPage({ params }: PageProps) {
-  const { id } = await params
+// Skeleton for letter detail content
+function LetterDetailSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-9 w-64" />
+            <Skeleton className="h-5 w-48" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-2/3" />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Async component for letter content
+async function LetterContent({ id }: { id: string }) {
   const locale = await getLocale()
   const t = await getTranslations("letters")
+
   let letter
   try {
     letter = await getLetter(id)
@@ -33,8 +65,6 @@ export default async function LetterDetailPage({ params }: PageProps) {
 
   const formatDate = (date: Date | string, withTime = false, withTz = false) => {
     const dateObj = typeof date === "string" ? new Date(date) : date
-    // dateStyle/timeStyle cannot be combined with timeZoneName
-    // Use explicit options when timeZoneName is needed
     if (withTz) {
       return new Intl.DateTimeFormat(locale, {
         year: "numeric",
@@ -54,17 +84,7 @@ export default async function LetterDetailPage({ params }: PageProps) {
   const channelLabel = (channel: string) => (channel === "email" ? t("detail.channel.email") : t("detail.channel.mail"))
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/letters">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {t("detail.back")}
-          </Button>
-        </Link>
-      </div>
-
-      <Card>
+    <Card>
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>
@@ -184,6 +204,29 @@ export default async function LetterDetailPage({ params }: PageProps) {
           )}
         </CardContent>
       </Card>
+  )
+}
+
+export default async function LetterDetailPage({ params }: PageProps) {
+  const { id } = await params
+  const t = await getTranslations("letters")
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      {/* Back Link - Instant */}
+      <div className="flex items-center gap-4">
+        <Link href="/letters">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            {t("detail.back")}
+          </Button>
+        </Link>
+      </div>
+
+      {/* Letter Content - Streams independently */}
+      <Suspense fallback={<LetterDetailSkeleton />}>
+        <LetterContent id={id} />
+      </Suspense>
     </div>
   )
 }

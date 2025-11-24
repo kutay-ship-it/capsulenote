@@ -24,8 +24,7 @@ import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
 
 import {
   PLAN_CREDITS,
-  toDateOrNow,
-  ensureValidDate,
+  getSubscriptionPeriodDates,
 } from "../../../../../apps/web/server/lib/billing-constants"
 
 /**
@@ -127,10 +126,8 @@ export async function handleSubscriptionCreatedOrUpdated(
     (subscription.items?.data?.[0]?.price?.metadata?.plan as PlanType | undefined) ||
     "DIGITAL_CAPSULE"
 
-  const periodEnd = toDateOrNow(subscription.current_period_end as any, "current_period_end")
-  const periodStart = toDateOrNow(subscription.current_period_start as any, "current_period_start")
-  const safePeriodEnd = ensureValidDate(periodEnd, "current_period_end")
-  const safePeriodStart = ensureValidDate(periodStart, "current_period_start")
+  // Extract period dates from subscription (handles both legacy and new API versions)
+  const { periodStart: safePeriodStart, periodEnd: safePeriodEnd } = getSubscriptionPeriodDates(subscription)
   const normalizedStatus = mapStripeStatus(subscription.status)
 
   console.log("[Subscription Handler] Normalized status", {

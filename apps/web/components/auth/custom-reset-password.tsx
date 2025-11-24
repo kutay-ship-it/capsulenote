@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSignIn } from "@clerk/nextjs"
+import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,7 @@ type Step = "request" | "reset"
 export function CustomResetPasswordForm() {
   const router = useRouter()
   const { isLoaded, signIn, setActive } = useSignIn()
+  const t = useTranslations("auth.resetPassword")
 
   const [email, setEmail] = useState("")
   const [code, setCode] = useState("")
@@ -36,10 +38,10 @@ export function CustomResetPasswordForm() {
       if (result.status === "needs_first_factor") {
         setStep("reset")
       } else {
-        setError("Unable to start reset. Please try again.")
+        setError(t("errors.unableToStart"))
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Failed to start reset.")
+      setError(err?.errors?.[0]?.message || t("errors.startFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -62,10 +64,10 @@ export function CustomResetPasswordForm() {
         await setActive({ session: result.createdSessionId })
         router.push("/dashboard")
       } else {
-        setError("Invalid code or password. Please try again.")
+        setError(t("errors.invalidCodeOrPassword"))
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Reset failed.")
+      setError(err?.errors?.[0]?.message || t("errors.resetFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -75,7 +77,7 @@ export function CustomResetPasswordForm() {
     <div className="space-y-4">
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -83,7 +85,7 @@ export function CustomResetPasswordForm() {
       {step === "request" ? (
         <form onSubmit={handleRequest} className="space-y-4">
           <div className="space-y-2">
-            <Label>Email</Label>
+            <Label>{t("email.label")}</Label>
             <Input
               type="email"
               value={email}
@@ -93,13 +95,13 @@ export function CustomResetPasswordForm() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
-            {isSubmitting ? "Sending code..." : "Send reset code"}
+            {isSubmitting ? t("sendingCode") : t("sendCode")}
           </Button>
         </form>
       ) : (
         <form onSubmit={handleReset} className="space-y-4">
           <div className="space-y-2">
-            <Label>Verification Code</Label>
+            <Label>{t("verification.label")}</Label>
             <Input
               type="text"
               value={code}
@@ -109,10 +111,10 @@ export function CustomResetPasswordForm() {
               pattern="[0-9]*"
               maxLength={6}
             />
-            <p className="text-xs text-muted-foreground">Enter the 6-digit code sent to {email}.</p>
+            <p className="text-xs text-muted-foreground">{t("verification.helper", { email })}</p>
           </div>
           <div className="space-y-2">
-            <Label>New Password</Label>
+            <Label>{t("newPassword.label")}</Label>
             <Input
               type="password"
               value={password}
@@ -122,7 +124,7 @@ export function CustomResetPasswordForm() {
             />
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
-            {isSubmitting ? "Resetting..." : "Reset password"}
+            {isSubmitting ? t("resetting") : t("reset")}
           </Button>
         </form>
       )}

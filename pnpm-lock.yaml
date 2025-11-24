@@ -189,8 +189,8 @@ importers:
         specifier: ^3.0.0
         version: 3.5.0(react-dom@19.2.0)(react@19.2.0)
       stripe:
-        specifier: ^14.10.0
-        version: 14.25.0
+        specifier: ^20.0.0
+        version: 20.0.0(@types/node@20.19.25)
       svix:
         specifier: ^1.81.0
         version: 1.81.0
@@ -11782,9 +11782,14 @@ packages:
       js-tokens: 9.0.1
     dev: true
 
-  /stripe@14.25.0:
-    resolution: {integrity: sha512-wQS3GNMofCXwH8TSje8E1SE8zr6ODiGtHQgPtO95p9Mb4FhKC9jvXR2NUTpZ9ZINlckJcFidCmaTFV4P6vsb9g==}
-    engines: {node: '>=12.*'}
+  /stripe@20.0.0(@types/node@20.19.25):
+    resolution: {integrity: sha512-EaZeWpbJOCcDytdjKSwdrL5BxzbDGNueiCfHjHXlPdBQvLqoxl6AAivC35SPzTmVXJb5duXQlXFGS45H0+e6Gg==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@types/node': '>=16'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
     dependencies:
       '@types/node': 20.19.25
       qs: 6.14.0

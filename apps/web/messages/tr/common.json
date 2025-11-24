@@ -5,6 +5,9 @@
     "english": "English",
     "turkish": "Türkçe"
   },
+  "accessibility": {
+    "dismissAlert": "Uyariyi kapat"
+  },
   "actions": {
     "dashboard": "Panel",
     "signIn": "Giriş Yap",

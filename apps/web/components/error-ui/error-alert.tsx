@@ -5,7 +5,10 @@
  * Suitable for validation errors, failed operations, and user feedback.
  */
 
+"use client"
+
 import { AlertTriangle, XCircle, Info, CheckCircle, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 
 export interface ErrorAlertProps {
@@ -34,6 +37,7 @@ export function ErrorAlert({
   dismissible = false,
   className = '',
 }: ErrorAlertProps) {
+  const t = useTranslations('common.accessibility')
   const variants = {
     error: {
       bg: 'bg-coral',
@@ -97,7 +101,7 @@ export function ErrorAlert({
             variant="ghost"
             size="icon"
             className={`h-6 w-6 shrink-0 ${config.text} hover:opacity-70`}
-            aria-label="Dismiss alert"
+            aria-label={t('dismissAlert')}
           >
             <X className="h-4 w-4" strokeWidth={2} />
           </Button>

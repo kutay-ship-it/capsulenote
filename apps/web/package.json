@@ -68,7 +68,7 @@
     "react-email": "^2.0.0",
     "react-hook-form": "^7.49.3",
     "resend": "^3.0.0",
-    "stripe": "^14.10.0",
+    "stripe": "^20.0.0",
     "svix": "^1.81.0",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",

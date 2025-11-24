@@ -20,7 +20,7 @@ import { env } from "@/env.mjs"
  * - Request timeout: 60 seconds
  */
 export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-11-17.clover",
   typescript: true,
   maxNetworkRetries: 3,
   timeout: 60000, // 60 seconds

@@ -15,6 +15,7 @@
 
 import { useEffect, useRef } from "react"
 import { useUser } from "@clerk/nextjs"
+import { useTranslations } from "next-intl"
 import { detectBrowserTimezone } from "@/lib/timezone"
 
 /**
@@ -71,6 +72,7 @@ export function TimezoneDetector({
   forceUpdate = false,
 }: TimezoneDetectorProps = {}) {
   const { user, isLoaded } = useUser()
+  const t = useTranslations("auth.timezoneDetector")
   const hasAttempted = useRef(false)
 
   useEffect(() => {
@@ -99,7 +101,7 @@ export function TimezoneDetector({
     const timezone = detectBrowserTimezone()
 
     if (!timezone) {
-      const error = new Error("Could not detect browser timezone")
+      const error = new Error(t("error"))
       console.warn("[TimezoneDetector]", error.message)
       onError?.(error)
       return
@@ -123,7 +125,7 @@ export function TimezoneDetector({
         console.error("[TimezoneDetector] Failed to update metadata:", error)
         onError?.(error instanceof Error ? error : new Error(String(error)))
       })
-  }, [isLoaded, user, forceUpdate, onDetected, onError])
+  }, [isLoaded, user, forceUpdate, onDetected, onError, t])
 
   // Silent component - no UI
   return null

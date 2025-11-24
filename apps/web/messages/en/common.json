@@ -5,6 +5,9 @@
     "english": "English",
     "turkish": "Türkçe"
   },
+  "accessibility": {
+    "dismissAlert": "Dismiss alert"
+  },
   "actions": {
     "dashboard": "Dashboard",
     "signIn": "Sign In",
