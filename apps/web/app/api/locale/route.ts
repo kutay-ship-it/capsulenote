@@ -14,7 +14,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "invalid_locale" }, { status: 400 })
   }
 
-  await clerkClient.users.updateUserMetadata(userId, {
+  // Clerk v6: clerkClient() is async
+  const client = await clerkClient()
+  await client.users.updateUserMetadata(userId, {
     publicMetadata: { preferredLocale: locale },
   })
 
