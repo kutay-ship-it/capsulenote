@@ -444,9 +444,33 @@ export const deliverEmail = inngest.createFunction(
         const { ResendEmailProvider } = await import("../../../apps/web/server/providers/email/resend-provider")
         const { PostmarkEmailProvider } = await import("../../../apps/web/server/providers/email/postmark-provider")
 
-        const fallbackProvider = primaryName === 'Resend'
-          ? new PostmarkEmailProvider()
-          : new ResendEmailProvider()
+        // Check if fallback provider is configured before attempting to use it
+        let fallbackProvider
+        try {
+          fallbackProvider = primaryName === 'Resend'
+            ? new PostmarkEmailProvider()
+            : new ResendEmailProvider()
+        } catch (configError) {
+          // Fallback provider not configured, throw original primary error
+          logger.error('Fallback provider not configured', {
+            deliveryId,
+            primaryProvider: primaryName,
+            fallbackProvider: primaryName === 'Resend' ? 'Postmark' : 'Resend',
+            configError: configError instanceof Error ? configError.message : String(configError),
+          })
+
+          // Classify and throw the original primary error since fallback isn't available
+          if (primaryError instanceof WorkerError) {
+            throw primaryError
+          }
+
+          const classified = classifyProviderError(primaryError)
+          if (!classified.retryable) {
+            throw new NonRetriableError(classified.message)
+          }
+
+          throw classified
+        }
 
         try {
           logger.info("Sending email with fallback provider", {
