@@ -27,6 +27,28 @@ const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
   PAPER_PIXELS: { email: 24, physical: 3 },
 }
 
+function toDateOrNow(seconds: number | null | undefined, label: string): Date {
+  if (typeof seconds === "number" && Number.isFinite(seconds)) {
+    return new Date(seconds * 1000)
+  }
+
+  console.warn("[Subscription Handler] Missing or invalid timestamp, using now()", {
+    label,
+    seconds,
+  })
+
+  return new Date()
+}
+
+function ensureValidDate(date: Date, label: string): Date {
+  if (date instanceof Date && !isNaN(date.getTime())) {
+    return date
+  }
+
+  console.warn("[Subscription Handler] Coercing invalid date to now()", { label, value: date })
+  return new Date()
+}
+
 /**
  * Handle subscription.created or subscription.updated event
  *
@@ -102,6 +124,11 @@ export async function handleSubscriptionCreatedOrUpdated(
     (subscription.items?.data?.[0]?.price?.metadata?.plan as PlanType | undefined) ||
     "DIGITAL_CAPSULE"
 
+  const periodEnd = toDateOrNow(subscription.current_period_end as any, "current_period_end")
+  const periodStart = toDateOrNow(subscription.current_period_start as any, "current_period_start")
+  const safePeriodEnd = ensureValidDate(periodEnd, "current_period_end")
+  const safePeriodStart = ensureValidDate(periodStart, "current_period_start")
+
   // Upsert subscription
   await prisma.subscription.upsert({
     where: { stripeSubscriptionId: subscription.id },
@@ -110,13 +137,13 @@ export async function handleSubscriptionCreatedOrUpdated(
       stripeSubscriptionId: subscription.id,
       status: subscription.status as any,
       plan,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodEnd: safePeriodEnd,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
     update: {
       status: subscription.status as any,
       plan,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodEnd: safePeriodEnd,
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
   })
@@ -126,18 +153,14 @@ export async function handleSubscriptionCreatedOrUpdated(
 
   // Create usage record for new active subscription
   if (subscription.status === "active" || subscription.status === "trialing") {
-    await createUsageRecord(
-      user.id,
-      new Date(subscription.current_period_start * 1000),
-      PLAN_CREDITS[plan]?.physical ?? 0
-    )
+    await createUsageRecord(user.id, safePeriodStart, PLAN_CREDITS[plan]?.physical ?? 0)
     await prisma.user.update({
       where: { id: user.id },
       data: {
         planType: plan,
         emailCredits: PLAN_CREDITS[plan]?.email ?? 0,
         physicalCredits: PLAN_CREDITS[plan]?.physical ?? 0,
-        creditExpiresAt: new Date(subscription.current_period_end * 1000),
+        creditExpiresAt: safePeriodEnd,
       },
     })
   }
@@ -147,7 +170,7 @@ export async function handleSubscriptionCreatedOrUpdated(
     subscriptionId: subscription.id,
     status: subscription.status,
     plan,
-    currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+    currentPeriodEnd: safePeriodEnd.toISOString(),
   })
 
   console.log("[Subscription Handler] Subscription updated successfully", {

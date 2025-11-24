@@ -1,13 +1,22 @@
-import { clerkClient as clerkClientFactory } from "@clerk/nextjs/server"
+import { createClerkClient } from "@clerk/nextjs/server"
 import type { ClerkClient } from "@clerk/backend"
 
 /**
- * Wrapper to obtain a fully constructed Clerk client.
+ * Pre-initialized Clerk client for backend operations.
  *
- * In Clerk v6 the exported `clerkClient` is an async factory, not the client
- * instance. Awaiting here centralizes the pattern and prevents runtime
- * undefined errors when accessing `.users`, `.sessions`, etc.
+ * In Clerk v6, we use createClerkClient() with explicit secretKey configuration
+ * to create a persistent client instance. This is the correct pattern for
+ * server-side API operations like users.getUser(), avoiding the undefined
+ * errors that occur with the deprecated factory pattern.
  */
-export async function getClerkClient(): Promise<ClerkClient> {
-  return clerkClientFactory()
+const clerkClientInstance: ClerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+})
+
+/**
+ * Returns the configured Clerk client instance for backend operations.
+ * This client is used for manual database operations like getUser, etc.
+ */
+export function getClerkClient(): ClerkClient {
+  return clerkClientInstance
 }

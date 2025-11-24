@@ -49,6 +49,7 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
     getEntitlements: vi.fn(() => Promise.resolve(baseEntitlements)),
     trackEmailDelivery: vi.fn(() => Promise.resolve()),
     deductMailCredit: vi.fn(() => Promise.resolve()),
+    invalidateEntitlementsCache: vi.fn(() => Promise.resolve()),
   }
 
   const prismaMock: any = {
@@ -87,6 +88,10 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
   return { mockEntitlements: baseEntitlements, mockEntitlementsModule: entitlementsModule, mockPrisma: prismaMock }
 })
 
+const { mockLinkPendingSubscription } = vi.hoisted(() => ({
+  mockLinkPendingSubscription: vi.fn(() => Promise.resolve({ success: true })),
+}))
+
 vi.mock("../../server/lib/entitlements", () => mockEntitlementsModule)
 
 vi.mock("../../server/lib/db", () => ({ prisma: mockPrisma }))
@@ -111,6 +116,10 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }))
 
+vi.mock("@/app/subscribe/actions", () => ({
+  linkPendingSubscription: mockLinkPendingSubscription,
+}))
+
 describe("Deliveries", () => {
   it("smoke: delivery actions available", () => {
     expect(scheduleDelivery).toBeDefined()
@@ -121,6 +130,7 @@ describe("Deliveries", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockPrisma.pendingSubscription.findFirst.mockResolvedValue(null)
+    mockLinkPendingSubscription.mockResolvedValue({ success: true, subscriptionId: "sub_123" } as any)
   })
 
   it("schedules email delivery successfully", async () => {
@@ -198,6 +208,82 @@ describe("Deliveries", () => {
       expect((result.error as any).details?.reason).toBe("pending_subscription")
       expect((result.error as any).details?.pendingSubscriptionId).toBe("pending_test")
       expect((result.error as any).details?.pendingExpiresAt).toBe(expiresAt.toISOString())
+    }
+  })
+
+  it("auto-links pending subscription and proceeds when entitlements refresh", async () => {
+    const inactiveEntitlements = {
+      ...mockEntitlements,
+      plan: "none",
+      status: "none",
+      features: { ...mockEntitlements.features, canScheduleDeliveries: false },
+    }
+
+    mockEntitlementsModule.getEntitlements
+      .mockResolvedValueOnce(inactiveEntitlements as any)
+      .mockResolvedValueOnce(mockEntitlements as any)
+
+    const expiresAt = new Date(Date.now() + 86400000)
+    mockPrisma.pendingSubscription.findFirst.mockResolvedValueOnce({
+      id: "pending_auto",
+      expiresAt,
+    })
+
+    mockPrisma.letter.findFirst.mockResolvedValueOnce({
+      id: "11111111-1111-4111-8111-111111111111",
+      userId: mockUser.id,
+      title: "Test",
+      deletedAt: null,
+    })
+    mockPrisma.delivery.create.mockResolvedValueOnce({
+      id: "delivery_auto",
+      channel: "email",
+    })
+    mockPrisma.emailDelivery.create.mockResolvedValueOnce({})
+
+    const result = await scheduleDelivery({
+      letterId: "11111111-1111-4111-8111-111111111111",
+      channel: "email",
+      deliverAt: new Date(Date.now() + 10 * 60 * 1000),
+      timezone: "UTC",
+      toEmail: mockUser.email,
+    })
+
+    expect(result.success).toBe(true)
+    expect(mockLinkPendingSubscription).toHaveBeenCalledWith(mockUser.id)
+    expect(mockEntitlementsModule.invalidateEntitlementsCache).toHaveBeenCalledWith(mockUser.id)
+  })
+
+  it("returns subscription required with link failure details when auto-link fails", async () => {
+    mockEntitlementsModule.getEntitlements.mockResolvedValueOnce({
+      ...mockEntitlements,
+      features: { ...mockEntitlements.features, canScheduleDeliveries: false },
+      plan: "none",
+      status: "none",
+    })
+    const expiresAt = new Date(Date.now() + 86400000)
+    mockPrisma.pendingSubscription.findFirst.mockResolvedValueOnce({
+      id: "pending_fail",
+      expiresAt,
+    })
+    mockLinkPendingSubscription.mockResolvedValueOnce({
+      success: false,
+      error: "Email not verified",
+    })
+
+    const result = await scheduleDelivery({
+      letterId: "11111111-1111-4111-8111-111111111111",
+      channel: "email",
+      deliverAt: new Date(Date.now() + 10 * 60 * 1000),
+      timezone: "UTC",
+      toEmail: mockUser.email,
+    })
+
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.code).toBe(ErrorCodes.SUBSCRIPTION_REQUIRED)
+      expect((result.error as any).details?.reason).toBe("link_failed")
+      expect((result.error as any).details?.linkError).toBe("Email not verified")
     }
   })
 

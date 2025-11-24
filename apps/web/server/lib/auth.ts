@@ -52,7 +52,7 @@ export async function getCurrentUser() {
 
     try {
       // Fetch user details from Clerk
-      const clerk = await getClerkClient()
+      const clerk = getClerkClient()
       const clerkUser = await clerk.users.getUser(clerkUserId)
 
       const email = clerkUser.emailAddresses.find(

@@ -451,7 +451,7 @@ export async function deleteUserAccount(): Promise<ActionResult<void>> {
 
     // 4. Delete Clerk user (signs out and invalidates all sessions)
     try {
-      const clerk = await getClerkClient()
+      const clerk = getClerkClient()
       await clerk.users.deleteUser(user.clerkUserId)
       console.log(`[GDPR Delete] Deleted Clerk user: ${user.clerkUserId}`)
     } catch (error) {

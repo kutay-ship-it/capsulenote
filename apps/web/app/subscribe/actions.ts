@@ -34,6 +34,28 @@ const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
   PAPER_PIXELS: { email: 24, physical: 3 },
 }
 
+function ensureValidDate(date: Date, label: string): Date {
+  if (date instanceof Date && !isNaN(date.getTime())) {
+    return date
+  }
+
+  console.warn("[linkPendingSubscription] Coercing invalid date to now()", { label, value: date })
+  return new Date()
+}
+
+function toDateOrNow(seconds: number | null | undefined, label: string): Date {
+  if (typeof seconds === "number" && Number.isFinite(seconds)) {
+    return new Date(seconds * 1000)
+  }
+
+  console.warn("[linkPendingSubscription] Missing or invalid timestamp, using now()", {
+    label,
+    seconds,
+  })
+
+  return new Date()
+}
+
 /**
  * Create anonymous checkout session
  *
@@ -50,8 +72,9 @@ const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
 export async function createAnonymousCheckout(
   input: AnonymousCheckoutInput
 ): Promise<AnonymousCheckoutResponse> {
-  // 1. Validate input
-  const validated = anonymousCheckoutSchema.parse(input)
+  try {
+    // 1. Validate input
+    const validated = anonymousCheckoutSchema.parse(input)
 
   if (!isValidPriceId(validated.priceId)) {
     throw new Error("Invalid pricing plan selected")
@@ -116,8 +139,12 @@ export async function createAnonymousCheckout(
   })
 
   // 5. Get pricing info
+  console.log("[createAnonymousCheckout] Retrieving price info", { priceId: validated.priceId })
   const price = await stripe.prices.retrieve(validated.priceId)
+  console.log("[createAnonymousCheckout] Price retrieved", { priceId: price.id, productId: price.product })
+
   const product = await stripe.products.retrieve(price.product as string)
+  console.log("[createAnonymousCheckout] Product retrieved", { productId: product.id, productName: product.name })
 
   // 6. Create Stripe Checkout Session
   const session = await stripe.checkout.sessions.create({
@@ -182,10 +209,19 @@ export async function createAnonymousCheckout(
     },
   })
 
-  return {
-    sessionId: session.id,
-    sessionUrl: session.url!,
-    customerId: customer.id,
+    return {
+      sessionId: session.id,
+      sessionUrl: session.url!,
+      customerId: customer.id,
+    }
+  } catch (error) {
+    console.error("[createAnonymousCheckout] ERROR:", error)
+    console.error("[createAnonymousCheckout] Error type:", error instanceof Error ? error.constructor.name : typeof error)
+    console.error("[createAnonymousCheckout] Error message:", error instanceof Error ? error.message : String(error))
+    if (error instanceof Error && error.stack) {
+      console.error("[createAnonymousCheckout] Stack trace:", error.stack)
+    }
+    throw error
   }
 }
 
@@ -257,7 +293,7 @@ export async function linkPendingSubscription(
     })
 
     // 3. Verify email is verified in Clerk
-    const clerk = await getClerkClient()
+    const clerk = getClerkClient()
     const clerkUser = await clerk.users.getUser(user.clerkUserId)
 
     const primaryEmail = clerkUser.emailAddresses.find(
@@ -318,7 +354,10 @@ export async function linkPendingSubscription(
             stripeSubscriptionId: pending.stripeSubscriptionId!,
             status: stripeSubscription.status as any, // Will be updated by webhook if different
             plan: pending.plan,
-            currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+            currentPeriodEnd: ensureValidDate(
+              toDateOrNow(stripeSubscription.current_period_end as any, "current_period_end"),
+              "current_period_end"
+            ),
             cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
           },
         })
@@ -331,7 +370,10 @@ export async function linkPendingSubscription(
             planType: pending.plan,
             emailCredits: credits.email,
             physicalCredits: credits.physical,
-            creditExpiresAt: new Date(stripeSubscription.current_period_end * 1000),
+            creditExpiresAt: ensureValidDate(
+              toDateOrNow(stripeSubscription.current_period_end as any, "current_period_end"),
+              "current_period_end"
+            ),
           },
         })
 

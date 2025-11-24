@@ -92,6 +92,83 @@ While the codebase is high-quality, the following areas could be reviewed for co
 3.  **Error Handling**: Verify that the `FailedWebhook` pattern is effectively monitored and alerted on.
 4.  **Performance**: With 3D elements (`three.js`), ensure lazy loading and performance optimization to avoid impacting Core Web Vitals on lower-end devices.
 
-## 8. Conclusion
+---
 
-CapsuleNote is a professionally architected application. It successfully balances modern features with strict security and reliability requirements. The use of a monorepo and strict typing provides a solid foundation for future growth and team collaboration.
+# Deep Dive Audit: Payments, Registration & Workers
+**Date:** November 24, 2025
+**Scope:** Stripe, Clerk, Inngest, User Registration Flow, Paywall Logic.
+
+## 1. Critical Findings (Immediate Action Required)
+
+### 1.1 Transaction Safety Violation in Clerk Webhook
+**Location:** `apps/web/app/api/webhooks/clerk/route.ts` (Lines 206-273)
+**Issue:** The `user.deleted` handler executes external API calls (Stripe cancellation and customer deletion) *inside* a Prisma database transaction.
+**Risk:** External API calls are unpredictable. If Stripe is slow or times out, the database transaction remains open, holding locks on the `User` table and potentially exhausting the database connection pool. This can bring down the entire application during high load or network issues.
+**Recommendation:** Move Stripe API calls *outside* the transaction.
+- **Option A:** Perform Stripe cleanup first. If it fails, log it but proceed with local deletion (or vice-versa).
+- **Option B (Best):** Queue a "cleanup user data" job to Inngest upon receiving the webhook. Let the worker handle Stripe deletion and then local DB deletion.
+
+### 1.2 Inngest Idempotency Logic Bug
+**Location:** `workers/inngest/functions/billing/process-stripe-webhook.ts` (Lines 218-247)
+**Issue:** The `claim-idempotency` step attempts to create a `WebhookEvent` record. If it fails with `P2002` (unique constraint), it throws `NonRetriableError`.
+**Scenario:**
+1. Inngest runs `claim-idempotency`. The DB record is created.
+2. The Inngest step completes, but the worker crashes or network fails *before* Inngest records the step completion.
+3. Inngest retries the function.
+4. It runs `claim-idempotency` again.
+5. The DB insert fails because the record already exists (`P2002`).
+6. The code throws `NonRetriableError`, permanently failing the job.
+**Result:** The event is never processed, even though it was valid.
+**Recommendation:** Use `upsert` or check for existence. If the record exists, check if it was processed. Ideally, rely on Inngest's built-in deduplication (using `id` in `inngest.createFunction` options) or modify the logic to treat `P2002` as "success, proceed" if the processing hasn't happened yet.
+
+## 2. High Severity Findings
+
+### 2.1 Silent Failure in Subscription Linking
+**Location:** `apps/web/app/api/webhooks/clerk/route.ts` (Lines 160-173)
+**Issue:** When a new user is created, the code attempts to link a pending subscription (`linkPendingSubscription`). If this fails (returns `{ success: false }`), the error is logged, but the webhook returns 200 OK.
+**Risk:** The user account is created, but their paid subscription is not attached. The user will be confused and likely contact support.
+**Recommendation:**
+- Throw an error if linking fails to trigger a webhook retry (if the error is transient).
+- Or better, queue a dedicated `billing.link-subscription` job to Inngest that can retry independently of the user creation flow.
+
+### 2.2 Hardcoded Plan Credits & Logic Duplication
+**Location:** `handlers/checkout.ts`, `handlers/subscription.ts`, `actions.ts`
+**Issue:** The `PLAN_CREDITS` object (defining how many credits each plan gets) is hardcoded in three separate files.
+**Risk:** If the business logic changes (e.g., "Paper & Pixels" gets 30 emails instead of 24), a developer might update it in one place and miss the others, leading to inconsistent data.
+**Recommendation:** Move `PLAN_CREDITS` and helper functions like `toDateOrNow` to a shared library file (e.g., `apps/web/server/lib/billing-constants.ts`).
+
+## 3. Medium Severity Findings
+
+### 3.1 Advisory Lock Collision Risk
+**Location:** `apps/web/app/subscribe/actions.ts` (Line 251)
+**Issue:** Uses `pg_advisory_lock(hashtext(${userId}))`. `hashtext` returns a 32-bit integer.
+**Risk:** While unlikely for UUIDs, hash collisions are possible. If User A and User B hash to the same integer, User A's action could block User B's action unnecessarily.
+**Recommendation:** Use a namespaced lock key (e.g., `hashtext('link_sub:' + userId)`) to reduce collision probability with other parts of the app, or use `pg_advisory_xact_lock` (transaction level) if appropriate.
+
+### 3.2 Missing DLQ Alerting
+**Location:** `workers/inngest/functions/billing/process-stripe-webhook.ts` (Line 166)
+**Issue:** The code has a `TODO` for alerting when a webhook moves to the Dead Letter Queue.
+**Risk:** If webhooks fail repeatedly, they will silently pile up in the `FailedWebhook` table without the team knowing.
+**Recommendation:** Implement the `sendSlackAlert` or email notification immediately.
+
+## 4. Low Severity Findings
+
+### 4.1 Stripe Metadata Limits
+**Location:** `apps/web/app/subscribe/actions.ts` (Line 165)
+**Issue:** Passes `...validated.metadata` directly to Stripe.
+**Risk:** Stripe limits metadata to 50 keys and 500 characters per value. Unsanitized input could cause the API call to fail.
+**Recommendation:** Sanitize and limit metadata before sending to Stripe.
+
+### 4.2 Race Condition in Checkout Handler
+**Location:** `workers/inngest/functions/billing/handlers/checkout.ts`
+**Issue:** The handler updates `PendingSubscription` status to `payment_complete` *before* checking if the user exists.
+**Risk:** Minor race condition where `linkPendingSubscription` (called by Clerk webhook) might run *before* the status update and fail to find the subscription.
+**Mitigation:** The current flow eventually resolves itself because `handleCheckoutCompleted` also attempts to link the subscription. No immediate action needed, but worth noting.
+
+## 5. Summary of Recommendations
+
+1.  **Refactor Clerk Webhook:** Remove Stripe API calls from the Prisma transaction.
+2.  **Fix Idempotency:** Update `process-stripe-webhook.ts` to handle `P2002` gracefully without permanently failing valid retries.
+3.  **Centralize Constants:** Create a `billing-constants.ts` file for `PLAN_CREDITS` and date helpers.
+4.  **Robust Linking:** Ensure `linkPendingSubscription` failures are retried or alerted.
+5.  **Implement Alerts:** Add Slack/Email alerts for the Dead Letter Queue.

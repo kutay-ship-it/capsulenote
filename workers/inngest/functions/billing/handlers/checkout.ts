@@ -7,8 +7,11 @@
  */
 
 import Stripe from "stripe"
+import type { PlanType } from "@prisma/client"
 import {
+  createUsageRecord,
   getUserByStripeCustomer,
+  invalidateEntitlementsCache,
   recordBillingAudit,
 } from "../../../../../apps/web/server/lib/stripe-helpers"
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
@@ -16,6 +19,122 @@ import { prisma } from "../../../../../apps/web/server/lib/db"
 import { linkPendingSubscription } from "../../../../../apps/web/app/subscribe/actions"
 import { sendPaymentConfirmationEmail } from "../../../../../apps/web/server/lib/emails/payment-confirmation"
 import { env } from "../../../../../apps/web/env.mjs"
+import { stripe } from "../../../../../apps/web/server/providers/stripe"
+
+const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
+  DIGITAL_CAPSULE: { email: 6, physical: 0 },
+  PAPER_PIXELS: { email: 24, physical: 3 },
+}
+
+function resolvePlanFromSubscription(
+  subscription: Stripe.Subscription,
+  fallbackPlan?: PlanType
+): PlanType {
+  return (
+    (subscription.metadata?.plan as PlanType | undefined) ||
+    (subscription.items?.data?.[0]?.price?.metadata?.plan as PlanType | undefined) ||
+    fallbackPlan ||
+    "DIGITAL_CAPSULE"
+  )
+}
+
+function toDateOrNow(seconds: number | null | undefined, label: string): Date {
+  if (typeof seconds === "number" && Number.isFinite(seconds)) {
+    return new Date(seconds * 1000)
+  }
+
+  console.warn("[Checkout Handler] Missing or invalid timestamp, using now()", {
+    label,
+    seconds,
+  })
+
+  return new Date()
+}
+
+function ensureValidDate(date: Date, label: string): Date {
+  if (date instanceof Date && !isNaN(date.getTime())) {
+    return date
+  }
+
+  console.warn("[Checkout Handler] Coercing invalid date to now()", { label, value: date })
+  return new Date()
+}
+
+async function upsertSubscriptionForUser({
+  userId,
+  subscriptionId,
+  fallbackPlan,
+}: {
+  userId: string
+  subscriptionId?: string | null
+  fallbackPlan?: PlanType
+}) {
+  if (!subscriptionId || typeof subscriptionId !== "string") return
+
+  try {
+    const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId)
+    const plan = resolvePlanFromSubscription(stripeSubscription, fallbackPlan)
+    const periodEnd = ensureValidDate(
+      toDateOrNow(stripeSubscription.current_period_end as any, "current_period_end"),
+      "current_period_end"
+    )
+    const periodStart = ensureValidDate(
+      toDateOrNow(stripeSubscription.current_period_start as any, "current_period_start"),
+      "current_period_start"
+    )
+
+    await prisma.subscription.upsert({
+      where: { stripeSubscriptionId: stripeSubscription.id },
+      create: {
+        userId,
+        stripeSubscriptionId: stripeSubscription.id,
+        status: stripeSubscription.status as any,
+        plan,
+        currentPeriodEnd: periodEnd,
+        cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+      },
+      update: {
+        status: stripeSubscription.status as any,
+        plan,
+        currentPeriodEnd: periodEnd,
+        cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+      },
+    })
+
+    const credits = PLAN_CREDITS[plan] || { email: 0, physical: 0 }
+    const isActiveOrTrial = stripeSubscription.status === "active" || stripeSubscription.status === "trialing"
+
+    if (isActiveOrTrial) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          planType: plan,
+          emailCredits: credits.email,
+          physicalCredits: credits.physical,
+          creditExpiresAt: periodEnd,
+        },
+      })
+    }
+
+    await invalidateEntitlementsCache(userId)
+    if (isActiveOrTrial) {
+      await createUsageRecord(userId, periodStart, credits.physical)
+    }
+
+    console.log("[Checkout Handler] Subscription synced on checkout completion", {
+      userId,
+      subscriptionId: stripeSubscription.id,
+      plan,
+      status: stripeSubscription.status,
+    })
+  } catch (error) {
+    console.error("[Checkout Handler] Failed to sync subscription on checkout completion", {
+      userId,
+      subscriptionId,
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+}
 
 /**
  * Handle checkout.session.completed event
@@ -55,6 +174,11 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
       subscriptionId: session.subscription,
       amountTotal: session.amount_total,
       currency: session.currency,
+    })
+
+    await upsertSubscriptionForUser({
+      userId: user.id,
+      subscriptionId: session.subscription as string,
     })
 
     console.log("[Checkout Handler] Checkout completion logged for existing user", {
@@ -183,6 +307,12 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
       console.log("[Checkout Handler] Successfully auto-linked subscription", {
         userId: existingUser.id,
         subscriptionId: result.subscriptionId,
+      })
+
+      await upsertSubscriptionForUser({
+        userId: existingUser.id,
+        subscriptionId: session.subscription as string,
+        fallbackPlan: updatedPendingRecord.plan,
       })
     } else {
       console.error("[Checkout Handler] Failed to auto-link subscription", {

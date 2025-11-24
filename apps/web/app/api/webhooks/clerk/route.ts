@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         if (lockedEmail && lockedEmail.toLowerCase() !== email.toLowerCase()) {
           console.error(`[Clerk Webhook] Locked email mismatch. Expected ${lockedEmail}, got ${email}`)
           try {
-            const clerk = await getClerkClient()
+            const clerk = getClerkClient()
             await clerk.users.deleteUser(id)
           } catch (deleteErr) {
             console.error(`[Clerk Webhook] Failed to delete user after mismatch`, deleteErr)

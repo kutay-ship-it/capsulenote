@@ -13,8 +13,15 @@ import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
-import { getEntitlements, trackEmailDelivery, deductMailCredit, QuotaExceededError } from "@/server/lib/entitlements"
+import {
+  getEntitlements,
+  trackEmailDelivery,
+  deductMailCredit,
+  QuotaExceededError,
+  invalidateEntitlementsCache,
+} from "@/server/lib/entitlements"
 import { env } from "@/env.mjs"
+import { linkPendingSubscription } from "@/app/subscribe/actions"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
 const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
@@ -75,13 +82,16 @@ export async function scheduleDelivery(
     }
 
     // Check subscription entitlements
-    const entitlements = await getEntitlements(user.id)
+    let entitlements = await getEntitlements(user.id)
     const devBypass =
       env.NODE_ENV !== "production" && env.DEV_BYPASS_SUBSCRIPTION === "true"
+    let pendingSubscription: { id: string; expiresAt: Date } | null = null
+    let pendingLinkError: string | null = null
+    let attemptedAutoLink = false
 
     // Check if user can schedule deliveries
     if (!entitlements.features.canScheduleDeliveries) {
-      const pendingSubscription = await prisma.pendingSubscription.findFirst({
+      pendingSubscription = await prisma.pendingSubscription.findFirst({
         where: {
           email: user.email,
           status: "payment_complete",
@@ -91,7 +101,40 @@ export async function scheduleDelivery(
         select: { id: true, expiresAt: true },
       })
 
-      const gatingReason = pendingSubscription
+      // Auto-link pending subscription if it exists (anonymous checkout safety net)
+      if (pendingSubscription) {
+        attemptedAutoLink = true
+        try {
+          const linkResult = await linkPendingSubscription(user.id)
+
+          if (!linkResult.success) {
+            pendingLinkError = linkResult.error ?? "link_failed"
+            await logger.warn('Auto-link pending subscription failed during scheduling', {
+              userId: user.id,
+              pendingSubscriptionId: pendingSubscription.id,
+              error: pendingLinkError,
+            })
+          } else {
+            await invalidateEntitlementsCache(user.id)
+            entitlements = await getEntitlements(user.id)
+            await logger.info('Auto-linked pending subscription during scheduling attempt', {
+              userId: user.id,
+              pendingSubscriptionId: pendingSubscription.id,
+              subscriptionId: linkResult.subscriptionId,
+            })
+          }
+        } catch (linkError) {
+          pendingLinkError = "link_failed"
+          await logger.error('Auto-link pending subscription threw during scheduling', linkError, {
+            userId: user.id,
+            pendingSubscriptionId: pendingSubscription.id,
+          })
+        }
+      }
+
+      const gatingReason = pendingLinkError
+        ? "link_failed"
+        : pendingSubscription
         ? "pending_subscription"
         : entitlements.plan === "none"
         ? "no_subscription"
@@ -101,22 +144,32 @@ export async function scheduleDelivery(
         await logger.warn('Bypassing subscription requirement for scheduling (dev mode)', {
           userId: user.id,
           entitlements,
+          pendingSubscriptionId: pendingSubscription?.id,
+          attemptedAutoLink,
+          linkError: pendingLinkError,
         })
-      } else {
+      } else if (!entitlements.features.canScheduleDeliveries) {
         await logger.warn('User attempted to schedule delivery without active subscription', {
           userId: user.id,
           plan: entitlements.plan,
           gatingReason,
           pendingSubscriptionId: pendingSubscription?.id,
+          attemptedAutoLink,
+          linkError: pendingLinkError,
         })
+
+        const gatingMessage =
+          pendingLinkError === "Email not verified"
+            ? "Please verify your email to activate your subscription."
+            : pendingSubscription
+            ? "We received your payment. Please verify your email to activate your subscription."
+            : "Scheduling deliveries requires an active subscription"
 
         return {
           success: false,
           error: {
             code: ErrorCodes.SUBSCRIPTION_REQUIRED,
-            message: pendingSubscription
-              ? "We received your payment. Please verify your email to activate your subscription."
-              : "Scheduling deliveries requires an active subscription",
+            message: gatingMessage,
             details: {
               requiredPlan: 'DIGITAL_CAPSULE or PAPER_PIXELS',
               currentPlan: entitlements.plan,
@@ -124,6 +177,7 @@ export async function scheduleDelivery(
               reason: gatingReason,
               pendingSubscriptionId: pendingSubscription?.id,
               pendingExpiresAt: pendingSubscription?.expiresAt.toISOString(),
+              linkError: pendingLinkError ?? undefined,
             }
           }
         }
