@@ -254,7 +254,7 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
     currency: updatedPendingRecord.currency,
     nextSteps: {
       signUpUrl: `${env.NEXT_PUBLIC_APP_URL}/sign-up?email=${encodeURIComponent(updatedPendingRecord.email)}`,
-      supportEmail: "support@dearme.app",
+      supportEmail: "support@capsulenote.com",
     },
   })
     .then((result) => {
