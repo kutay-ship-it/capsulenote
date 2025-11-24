@@ -57,7 +57,7 @@ describe('Date Utilities', () => {
       // Feb 29, 2024 + 1 year = Feb 28, 2025 (not a leap year)
       // Note: JavaScript Date handles this automatically
       expect(result.getFullYear()).toBe(2025)
-      expect(result.getMonth()).toBe(1) // February (0-indexed)
+      expect(result.getUTCMonth()).toBe(1) // February (0-indexed)
     })
 
     it('should return future dates only', () => {
@@ -78,10 +78,10 @@ describe('Date Utilities', () => {
 
       const result = calculatePresetDate('1y')
 
-      expect(result.getHours()).toBe(15)
-      expect(result.getMinutes()).toBe(30)
-      expect(result.getSeconds()).toBe(45)
-      expect(result.getMilliseconds()).toBe(123)
+      expect(result.getUTCHours()).toBe(15)
+      expect(result.getUTCMinutes()).toBe(30)
+      expect(result.getUTCSeconds()).toBe(45)
+      expect(result.getUTCMilliseconds()).toBe(123)
     })
   })
 

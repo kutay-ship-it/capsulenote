@@ -57,9 +57,20 @@ describe('Encryption', () => {
 
     it('should throw error if master key is missing', async () => {
       const originalKey = process.env.CRYPTO_MASTER_KEY
+      const originalKeyV1 = process.env.CRYPTO_MASTER_KEY_V1
+      const originalKeyV2 = process.env.CRYPTO_MASTER_KEY_V2
+      const originalKeyV3 = process.env.CRYPTO_MASTER_KEY_V3
+      const originalKeyV4 = process.env.CRYPTO_MASTER_KEY_V4
+      const originalKeyV5 = process.env.CRYPTO_MASTER_KEY_V5
       const originalRuntimeOnly = process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY
+
       process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY = "true"
       delete process.env.CRYPTO_MASTER_KEY
+      delete process.env.CRYPTO_MASTER_KEY_V1
+      delete process.env.CRYPTO_MASTER_KEY_V2
+      delete process.env.CRYPTO_MASTER_KEY_V3
+      delete process.env.CRYPTO_MASTER_KEY_V4
+      delete process.env.CRYPTO_MASTER_KEY_V5
 
       const plaintext = {
         bodyRich: { type: 'doc', content: [] },
@@ -69,6 +80,11 @@ describe('Encryption', () => {
       await expect(encryptLetter(plaintext)).rejects.toThrow()
 
       process.env.CRYPTO_MASTER_KEY = originalKey
+      if (originalKeyV1) process.env.CRYPTO_MASTER_KEY_V1 = originalKeyV1
+      if (originalKeyV2) process.env.CRYPTO_MASTER_KEY_V2 = originalKeyV2
+      if (originalKeyV3) process.env.CRYPTO_MASTER_KEY_V3 = originalKeyV3
+      if (originalKeyV4) process.env.CRYPTO_MASTER_KEY_V4 = originalKeyV4
+      if (originalKeyV5) process.env.CRYPTO_MASTER_KEY_V5 = originalKeyV5
       process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY = originalRuntimeOnly
     })
 

@@ -28,8 +28,8 @@ vi.mock('../../server/lib/encryption', () => ({
   })),
 }))
 
-vi.mock('../../server/lib/db', () => ({
-  prisma: {
+vi.mock('../../server/lib/db', () => {
+  const transactionClient = {
     profile: {
       findUnique: vi.fn(),
       delete: vi.fn(),
@@ -44,6 +44,7 @@ vi.mock('../../server/lib/db', () => ({
     },
     subscription: {
       findMany: vi.fn(),
+      findFirst: vi.fn(),
       updateMany: vi.fn(),
     },
     subscriptionUsage: {
@@ -57,13 +58,24 @@ vi.mock('../../server/lib/db', () => ({
     auditEvent: {
       findMany: vi.fn(),
     },
+    payment: {
+      findMany: vi.fn(),
+      updateMany: vi.fn(),
+    },
     user: {
       update: vi.fn(),
       delete: vi.fn(),
+      upsert: vi.fn(),
     },
-  },
-}))
+  }
 
+  return {
+    prisma: {
+      ...transactionClient,
+      $transaction: vi.fn((callback) => callback(transactionClient)),
+    },
+  }
+})
 vi.mock('../../server/lib/audit', () => ({
   createAuditEvent: vi.fn(() => Promise.resolve({ id: 'audit_123' })),
   AuditEventType: {
@@ -74,10 +86,13 @@ vi.mock('../../server/lib/audit', () => ({
   },
 }))
 
-vi.mock('@clerk/nextjs/server', () => ({
-  clerkClient: vi.fn(() => Promise.resolve({
+// Shared mock for Clerk deleteUser
+const mockDeleteUser = vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' }))
+
+vi.mock('../../server/lib/clerk', () => ({
+  getClerkClient: vi.fn(() => Promise.resolve({
     users: {
-      deleteUser: vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' })),
+      deleteUser: mockDeleteUser,
     },
   })),
 }))
@@ -133,6 +148,7 @@ describe('GDPR Integration Tests', () => {
 
       vi.mocked(prisma.delivery.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([])
+      vi.mocked(prisma.payment.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscriptionUsage.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.shippingAddress.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.auditEvent.findMany).mockResolvedValueOnce([])
@@ -201,6 +217,7 @@ describe('GDPR Integration Tests', () => {
 
       vi.mocked(prisma.delivery.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([])
+      vi.mocked(prisma.payment.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscriptionUsage.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.shippingAddress.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.auditEvent.findMany).mockResolvedValueOnce([])
@@ -228,6 +245,7 @@ describe('GDPR Integration Tests', () => {
       vi.mocked(prisma.letter.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.delivery.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([])
+      vi.mocked(prisma.payment.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscriptionUsage.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.shippingAddress.findMany).mockResolvedValueOnce([])
 
@@ -271,6 +289,7 @@ describe('GDPR Integration Tests', () => {
       vi.mocked(prisma.letter.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.delivery.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([])
+      vi.mocked(prisma.payment.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.subscriptionUsage.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.shippingAddress.findMany).mockResolvedValueOnce([])
       vi.mocked(prisma.auditEvent.findMany).mockResolvedValueOnce([])
@@ -289,26 +308,26 @@ describe('GDPR Integration Tests', () => {
     it('should delete user account and all data successfully', async () => {
       const { prisma } = await import('../../server/lib/db')
       const { createAuditEvent } = await import('../../server/lib/audit')
-      const { clerkClient } = await import('@clerk/nextjs/server')
+      const { getClerkClient } = await import('../../server/lib/clerk')
 
       // Mock finding active subscriptions
-      vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([])
+      vi.mocked(prisma.subscription.findFirst).mockResolvedValueOnce(null)
 
-      // Mock deletion operations
-      vi.mocked(prisma.delivery.deleteMany).mockResolvedValueOnce({ count: 5 })
-      vi.mocked(prisma.letter.deleteMany).mockResolvedValueOnce({ count: 10 })
-      vi.mocked(prisma.subscriptionUsage.deleteMany).mockResolvedValueOnce({ count: 3 })
-      vi.mocked(prisma.shippingAddress.deleteMany).mockResolvedValueOnce({ count: 2 })
-      vi.mocked(prisma.profile.delete).mockResolvedValueOnce({
-        userId: 'user_test_123',
-        displayName: 'Test User',
-        timezone: 'UTC',
-        marketingOptIn: false,
-        onboardingCompleted: true,
+      // Mock sentinel user creation
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({
+        id: '00000000-0000-0000-0000-000000000000',
+        email: 'deleted-user@system.internal',
+        clerkUserId: 'system_deleted_user',
         stripeCustomerId: null,
+        deletedAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
+
+      // Mock payment anonymization
+      vi.mocked(prisma.payment.updateMany).mockResolvedValueOnce({ count: 0 })
+
+      // Mock deletion operations
       vi.mocked(prisma.user.delete).mockResolvedValueOnce({
         id: 'user_test_123',
         email: 'test@example.com',
@@ -322,8 +341,6 @@ describe('GDPR Integration Tests', () => {
       const result = await deleteUserAccount()
 
       expect(result.success).toBe(true)
-      expect(prisma.delivery.deleteMany).toHaveBeenCalled()
-      expect(prisma.letter.deleteMany).toHaveBeenCalled()
       expect(prisma.user.delete).toHaveBeenCalled()
       expect(createAuditEvent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -336,29 +353,29 @@ describe('GDPR Integration Tests', () => {
       const { prisma } = await import('../../server/lib/db')
       const { stripe } = await import('../../server/providers/stripe/client')
 
-      vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([
-        {
-          id: 'sub_db_123',
-          userId: 'user_test_123',
-          plan: 'pro',
-          status: 'active',
-          stripeCustomerId: 'cus_123',
-          stripeSubscriptionId: 'sub_stripe_123',
-          stripePriceId: 'price_123',
-          currentPeriodStart: new Date(),
-          currentPeriodEnd: new Date(),
-          cancelAtPeriodEnd: false,
-          canceledAt: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ])
+      vi.mocked(prisma.subscription.findFirst).mockResolvedValueOnce({
+        id: 'sub_db_123',
+        userId: 'user_test_123',
+        plan: 'pro',
+        status: 'active',
+        stripeCustomerId: 'cus_123',
+        stripeSubscriptionId: 'sub_stripe_123',
+        stripePriceId: 'price_123',
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: new Date(),
+        cancelAtPeriodEnd: false,
+        canceledAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
 
-      vi.mocked(prisma.delivery.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.letter.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.subscriptionUsage.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.shippingAddress.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.profile.delete).mockResolvedValueOnce({} as any)
+      // Mock sentinel user creation
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({} as any)
+
+      // Mock payment anonymization
+      vi.mocked(prisma.payment.updateMany).mockResolvedValueOnce({ count: 0 })
+
+      // Mock deletion
       vi.mocked(prisma.user.delete).mockResolvedValueOnce({} as any)
 
       await deleteUserAccount()
@@ -370,30 +387,35 @@ describe('GDPR Integration Tests', () => {
 
     it('should delete user from Clerk authentication', async () => {
       const { prisma } = await import('../../server/lib/db')
-      const { clerkClient } = await import('@clerk/nextjs/server')
 
-      vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([])
-      vi.mocked(prisma.delivery.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.letter.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.subscriptionUsage.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.shippingAddress.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.profile.delete).mockResolvedValueOnce({} as any)
+      vi.mocked(prisma.subscription.findFirst).mockResolvedValueOnce(null)
+
+      // Mock sentinel user creation
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({} as any)
+
+      // Mock payment anonymization
+      vi.mocked(prisma.payment.updateMany).mockResolvedValueOnce({ count: 0 })
+
+      // Mock deletion
       vi.mocked(prisma.user.delete).mockResolvedValueOnce({} as any)
 
       await deleteUserAccount()
 
-      expect(clerkClient.users.deleteUser).toHaveBeenCalledWith('clerk_test_123')
+      expect(mockDeleteUser).toHaveBeenCalledWith('clerk_test_123')
     })
 
     it('should preserve audit logs (immutable for compliance)', async () => {
       const { prisma } = await import('../../server/lib/db')
 
-      vi.mocked(prisma.subscription.findMany).mockResolvedValueOnce([])
-      vi.mocked(prisma.delivery.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.letter.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.subscriptionUsage.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.shippingAddress.deleteMany).mockResolvedValueOnce({ count: 0 })
-      vi.mocked(prisma.profile.delete).mockResolvedValueOnce({} as any)
+      vi.mocked(prisma.subscription.findFirst).mockResolvedValueOnce(null)
+
+      // Mock sentinel user creation
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({} as any)
+
+      // Mock payment anonymization
+      vi.mocked(prisma.payment.updateMany).mockResolvedValueOnce({ count: 0 })
+
+      // Mock deletion
       vi.mocked(prisma.user.delete).mockResolvedValueOnce({} as any)
 
       await deleteUserAccount()

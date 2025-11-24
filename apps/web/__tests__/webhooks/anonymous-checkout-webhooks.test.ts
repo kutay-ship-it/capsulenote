@@ -23,6 +23,7 @@ const mockPrisma = {
   },
   user: {
     findFirst: vi.fn(),
+    findUnique: vi.fn(),
     create: vi.fn(),
   },
   webhookEvent: {
@@ -168,7 +169,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       // @ts-ignore
       prisma.user.create.mockResolvedValue(mockUser)
       // @ts-ignore
-      prisma.pendingSubscription.findFirst.mockResolvedValue(mockPending)
+      prisma.pendingSubscription.findFirst.mockResolvedValue(null) // No payment_complete subscription found yet
 
       const { linkPendingSubscription } = await import("@/app/subscribe/actions")
       // @ts-ignore
@@ -415,9 +416,7 @@ describe("Webhook Integration: Edge Cases", () => {
     }
 
     // @ts-ignore
-    prisma.pendingSubscription.findFirst
-      .mockResolvedValueOnce(expiredPending) // initial lookup could see expired
-      .mockResolvedValueOnce(null) // filtered lookup should skip expired
+    prisma.pendingSubscription.findFirst.mockResolvedValueOnce(null) // Query with expiry filter returns null
 
     const { linkPendingSubscription } = await import("@/app/subscribe/actions")
     // @ts-ignore
@@ -476,9 +475,7 @@ describe("Webhook Integration: Edge Cases", () => {
     }
 
     // @ts-ignore
-    prisma.pendingSubscription.findFirst
-      .mockResolvedValueOnce(linkedPending)
-      .mockResolvedValueOnce(null) // when filtering for payment_complete
+    prisma.pendingSubscription.findFirst.mockResolvedValueOnce(null) // Query for payment_complete doesn't match 'linked' status
 
     const { linkPendingSubscription } = await import("@/app/subscribe/actions")
     // @ts-ignore

@@ -310,7 +310,7 @@ export async function exportUserData(): Promise<
 }
 
 /**
- * Delete all user data (GDPR Article 17 - Right to Erasure)
+ * Delete user account (GDPR Article 17 - Right to Erasure)
  *
  * Implements "Right to be Forgotten" with legal compliance:
  *
@@ -336,13 +336,13 @@ export async function exportUserData(): Promise<
  * @returns Success confirmation
  *
  * @example
- * const result = await deleteUserData()
+ * const result = await deleteUserAccount()
  * if (result.success) {
  *   // User will be signed out automatically
  *   router.push('/')
  * }
  */
-export async function deleteUserData(): Promise<ActionResult<void>> {
+export async function deleteUserAccount(): Promise<ActionResult<void>> {
   try {
     const user = await requireUser()
 
