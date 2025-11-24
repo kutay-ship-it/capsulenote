@@ -105,6 +105,7 @@
   "letterDraft": {
     "title": "Mektubunu Yaz",
     "description": "Dusuncelerine odaklan. Sonraki adimda teslimati planlayacaksin.",
+    "untitledLetter": "Başlıksız Mektup",
     "titleField": {
       "label": "Baslik",
       "optional": "(Istege bagli)",

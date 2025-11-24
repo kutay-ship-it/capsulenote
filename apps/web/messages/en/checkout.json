@@ -1,4 +1,15 @@
 {
+  "processing": {
+    "title": "Processing Your Subscription",
+    "waiting": "Please wait while we activate your account...",
+    "takingLonger": "Taking longer than expected. Your subscription will be ready shortly.",
+    "usuallyQuick": "This usually takes just a few seconds.",
+    "stillProcessing": "Still processing?",
+    "safeToNavigate": "You can safely navigate away - we'll send you an email confirmation once your subscription is active.",
+    "checkStatus": "You can check your subscription status in settings",
+    "goToDashboard": "Go to Dashboard",
+    "viewBilling": "View Billing Settings"
+  },
   "success": {
     "title": "Welcome to Capsule Note Pro!",
     "subtitle": "Your subscription has been successfully activated",

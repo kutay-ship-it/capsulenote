@@ -1,4 +1,55 @@
 {
+  "page": {
+    "title": "Privacy Settings",
+    "description": "Manage your data privacy and exercise your GDPR rights",
+    "metadata": {
+      "title": "Privacy Settings | Capsule Note",
+      "description": "Manage your data privacy and GDPR rights"
+    },
+    "exportSection": {
+      "title": "Export Your Data",
+      "description": "Download a complete copy of all your data stored in Capsule Note. This includes your letters, deliveries, subscription history, and payment records.",
+      "includesTitle": "Your export will include:",
+      "includes": {
+        "profile": "Profile information and settings",
+        "letters": "All letters (decrypted content)",
+        "deliveries": "Delivery history and schedules",
+        "subscription": "Subscription and payment records",
+        "usage": "Usage statistics",
+        "audit": "Audit log (security events)"
+      },
+      "footer": "The export is provided in JSON format and will download immediately. This data is intended for your personal records and complies with GDPR Article 15 (Right to Access)."
+    },
+    "deleteSection": {
+      "title": "Delete Your Data",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "willDeleteTitle": "What will be deleted:",
+      "willDelete": {
+        "profile": "Your profile and account settings",
+        "letters": "All letters and scheduled deliveries",
+        "subscription": "Subscription records",
+        "usage": "Usage statistics and shipping addresses",
+        "auth": "Your authentication account"
+      },
+      "willRetainTitle": "What will be retained:",
+      "willRetain": {
+        "payments": "Payment records (anonymized, required by tax law for 7 years)",
+        "audit": "Audit logs (immutable, required for compliance)"
+      },
+      "beforeTitle": "Before you proceed:",
+      "before": {
+        "export": "Consider exporting your data first if you want to keep a copy",
+        "subscription": "Active subscriptions will be canceled immediately",
+        "signOut": "You will be signed out and cannot undo this action"
+      },
+      "footer": "This implements GDPR Article 17 (Right to Erasure). Payment records are retained in anonymized form to comply with tax regulations."
+    },
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "gdpr": "GDPR Information"
+    }
+  },
   "export": {
     "button": "Download My Data",
     "loading": "Exporting...",

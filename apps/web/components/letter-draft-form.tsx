@@ -121,7 +121,7 @@ export function LetterDraftForm({
 
       // Call createLetter action
       const result = await createLetter({
-        title: title || "Untitled Letter",
+        title: title || tf("untitledLetter"),
         bodyRich,
         bodyHtml,
         tags: [],
@@ -231,7 +231,7 @@ export function LetterDraftForm({
           .join('')
 
         const result = await createLetter({
-          title: title || "Untitled Letter",
+          title: title || tf("untitledLetter"),
           bodyRich,
           bodyHtml,
           tags: [],

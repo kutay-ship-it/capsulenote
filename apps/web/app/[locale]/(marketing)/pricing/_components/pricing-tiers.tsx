@@ -17,7 +17,13 @@ interface Tier {
   badge?: string
 }
 
-export function PricingTiers({ tiers, currencySymbol = "$" }: { tiers: Tier[]; currencySymbol?: string }) {
+interface PricingTiersProps {
+  tiers: Tier[]
+  currencySymbol?: string
+  popularBadgeText?: string
+}
+
+export function PricingTiers({ tiers, currencySymbol = "$", popularBadgeText }: PricingTiersProps) {
   return (
     <div className="grid gap-8 lg:grid-cols-2 lg:gap-6">
       {tiers.map((tier) => (
@@ -34,6 +40,7 @@ export function PricingTiers({ tiers, currencySymbol = "$" }: { tiers: Tier[]; c
           ctaHref={tier.ctaHref}
           highlighted={tier.highlighted}
           popular={tier.popular}
+          popularBadgeText={popularBadgeText}
           badge={tier.badge}
           currencySymbol={currencySymbol}
         />

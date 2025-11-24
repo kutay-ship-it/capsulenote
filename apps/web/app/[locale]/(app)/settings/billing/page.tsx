@@ -219,7 +219,7 @@ export default async function BillingSettingsPage() {
           </div>
 
           <div className="mt-6 space-y-3">
-            <h4 className="font-mono text-sm uppercase tracking-wide text-charcoal">Purchase add-ons</h4>
+            <h4 className="font-mono text-sm uppercase tracking-wide text-charcoal">{t("addons.title")}</h4>
             <div className="flex flex-wrap gap-3">
               <AddOnPurchase type="email" label={t("addons.email")} />
               <AddOnPurchase type="physical" label={t("addons.physical")} />

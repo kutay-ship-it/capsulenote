@@ -24,11 +24,13 @@ import {
 import { Download, Trash2, Shield, AlertTriangle } from "lucide-react"
 import { exportUserData, deleteUserData } from "@/server/actions/gdpr"
 import { useRouter } from "@/i18n/routing"
+import { useTranslations } from "next-intl"
 
 export function DataPrivacySection() {
   const [isExporting, setIsExporting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const router = useRouter()
+  const t = useTranslations("settings.dataPrivacy")
 
   const handleExportData = async () => {
     try {
@@ -45,12 +47,12 @@ export function DataPrivacySection() {
         link.click()
         document.body.removeChild(link)
 
-        alert(`Data exported successfully to ${result.data.filename}`)
+        alert(t("exportSuccess", { filename: result.data.filename }))
       } else {
-        alert(`Export failed: ${result.error.message}`)
+        alert(t("exportFailed", { message: result.error.message }))
       }
     } catch (error) {
-      alert("Export failed: An unexpected error occurred. Please try again.")
+      alert(t("exportError"))
     } finally {
       setIsExporting(false)
     }
@@ -63,18 +65,18 @@ export function DataPrivacySection() {
       const result = await deleteUserData()
 
       if (result.success) {
-        alert("Your account and all associated data have been permanently deleted.")
+        alert(t("deleteSuccess"))
 
         // Redirect to homepage after a brief delay
         setTimeout(() => {
           router.push("/")
         }, 2000)
       } else {
-        alert(`Deletion failed: ${result.error.message}`)
+        alert(t("deleteFailed", { message: result.error.message }))
         setIsDeleting(false)
       }
     } catch (error) {
-      alert("Deletion failed: An unexpected error occurred. Please contact support.")
+      alert(t("deleteError"))
       setIsDeleting(false)
     }
   }
@@ -84,19 +86,18 @@ export function DataPrivacySection() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5" />
-          <CardTitle>Data & Privacy</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </div>
         <CardDescription>
-          Manage your personal data and privacy preferences in compliance with GDPR
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-3">
           <div>
-            <h3 className="font-medium">Export Your Data</h3>
+            <h3 className="font-medium">{t("exportTitle")}</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Download a complete copy of your personal data, including all letters,
-              deliveries, and account information in JSON format.
+              {t("exportDescription")}
             </p>
             <Button
               onClick={handleExportData}
@@ -105,30 +106,29 @@ export function DataPrivacySection() {
               className="mt-3"
             >
               <Download className="mr-2 h-4 w-4" />
-              {isExporting ? "Exporting..." : "Export Data"}
+              {isExporting ? t("exporting") : t("exportButton")}
             </Button>
           </div>
 
           <div className="border-t pt-4">
-            <h3 className="font-medium text-destructive">Delete Your Account</h3>
+            <h3 className="font-medium text-destructive">{t("deleteTitle")}</h3>
             <div className="mt-2 rounded-lg bg-destructive/10 p-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
                 <div className="space-y-2 text-sm">
-                  <p className="font-medium">This action cannot be undone.</p>
+                  <p className="font-medium">{t("deleteWarning")}</p>
                   <p className="text-muted-foreground">
-                    Deleting your account will:
+                    {t("deleteIntro")}
                   </p>
                   <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
-                    <li>Permanently delete all your letters and content</li>
-                    <li>Cancel any active subscriptions</li>
-                    <li>Remove all scheduled deliveries</li>
-                    <li>Delete your profile and preferences</li>
-                    <li>Sign you out of all devices</li>
+                    <li>{t("deleteList.letters")}</li>
+                    <li>{t("deleteList.subscriptions")}</li>
+                    <li>{t("deleteList.deliveries")}</li>
+                    <li>{t("deleteList.profile")}</li>
+                    <li>{t("deleteList.signOut")}</li>
                   </ul>
                   <p className="text-muted-foreground mt-3">
-                    Payment records will be anonymized and retained for 7 years for tax
-                    compliance as required by law.
+                    {t("deleteRetention")}
                   </p>
                 </div>
               </div>
@@ -142,30 +142,28 @@ export function DataPrivacySection() {
                   disabled={isDeleting}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  {isDeleting ? "Deleting..." : "Delete Account"}
+                  {isDeleting ? t("deleting") : t("deleteButton")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("confirmTitle")}</AlertDialogTitle>
                   <AlertDialogDescription className="space-y-3">
                     <p>
-                      This will permanently delete your account and remove all your data
-                      from our servers. This action cannot be undone.
+                      {t("confirmDescription")}
                     </p>
                     <p className="font-medium text-foreground">
-                      All your letters, scheduled deliveries, and account settings will
-                      be permanently lost.
+                      {t("confirmWarning")}
                     </p>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("confirmCancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteData}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Yes, delete my account
+                    {t("confirmDelete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -175,13 +173,13 @@ export function DataPrivacySection() {
       </CardContent>
       <CardFooter className="flex-col items-start border-t pt-6">
         <p className="text-sm text-muted-foreground">
-          Your privacy is important to us. For more information, see our{" "}
+          {t("privacyFooter")}{" "}
           <a href="/privacy" className="underline hover:text-foreground">
-            Privacy Policy
+            {t("privacyPolicy")}
           </a>{" "}
-          and{" "}
+          {t("and")}{" "}
           <a href="/terms" className="underline hover:text-foreground">
-            Terms of Service
+            {t("termsOfService")}
           </a>
           .
         </p>

@@ -14,6 +14,7 @@ import { useRouter } from "@/i18n/routing"
 import { Loader2 } from "lucide-react"
 import { checkSubscriptionStatus } from "@/server/actions/billing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
 interface CheckoutProcessingProps {
   sessionId: string
@@ -21,6 +22,7 @@ interface CheckoutProcessingProps {
 
 export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
   const router = useRouter()
+  const t = useTranslations("checkout.processing")
   const [pollCount, setPollCount] = useState(0)
   const maxPolls = 15 // Poll for up to 30 seconds (15 polls × 2s interval)
 
@@ -60,23 +62,20 @@ export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
           <div className="flex justify-center mb-4">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
           </div>
-          <CardTitle className="text-2xl">Processing Your Subscription</CardTitle>
+          <CardTitle className="text-2xl">{t("title")}</CardTitle>
           <CardDescription className="text-base">
             {pollCount < maxPolls
-              ? "Please wait while we activate your account..."
-              : "Taking longer than expected. Your subscription will be ready shortly."}
+              ? t("waiting")
+              : t("takingLonger")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4 text-center text-sm text-muted-foreground">
-            <p>This usually takes just a few seconds.</p>
+            <p>{t("usuallyQuick")}</p>
             {pollCount >= 10 && (
               <div className="space-y-2">
-                <p className="font-medium">Still processing?</p>
-                <p>
-                  You can safely navigate away - we'll send you an email confirmation once your
-                  subscription is active.
-                </p>
+                <p className="font-medium">{t("stillProcessing")}</p>
+                <p>{t("safeToNavigate")}</p>
               </div>
             )}
           </div>
@@ -86,20 +85,20 @@ export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
       {pollCount >= 10 && (
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            You can check your subscription status in settings
+            {t("checkStatus")}
           </p>
           <div className="flex gap-4 justify-center">
             <a
               href="/dashboard"
               className="text-sm text-primary hover:underline"
             >
-              Go to Dashboard
+              {t("goToDashboard")}
             </a>
             <a
               href="/settings/billing"
               className="text-sm text-primary hover:underline"
             >
-              View Billing Settings
+              {t("viewBilling")}
             </a>
           </div>
         </div>

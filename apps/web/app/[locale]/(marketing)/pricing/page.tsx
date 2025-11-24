@@ -115,7 +115,7 @@ export default async function PricingPage({ params }: { params: Promise<{ locale
 
         {/* Pricing Tiers */}
         <section className="container px-4 pb-16 sm:px-6 sm:pb-20 md:pb-24">
-          <PricingTiers tiers={tiers} />
+          <PricingTiers tiers={tiers} popularBadgeText={t("popularBadge")} />
         </section>
 
         {/* Trust Signals Bar */}

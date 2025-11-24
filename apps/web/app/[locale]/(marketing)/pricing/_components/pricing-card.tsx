@@ -22,6 +22,8 @@ interface PricingCardProps {
   highlighted?: boolean
   badge?: string
   popular?: boolean
+  /** Text to display in the popular badge */
+  popularBadgeText?: string
   className?: string
   currencySymbol?: string
 }
@@ -38,6 +40,7 @@ export function PricingCard({
   highlighted = false,
   badge,
   popular = false,
+  popularBadgeText = "Most Popular",
   className,
   currencySymbol = "$",
 }: PricingCardProps) {
@@ -53,7 +56,7 @@ export function PricingCard({
       {popular && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
           <Badge variant="default" className="px-4 py-1.5 text-sm">
-            Most Popular
+            {popularBadgeText}
           </Badge>
         </div>
       )}

@@ -1,6 +1,13 @@
 {
   "heading": "Ayarlar",
   "subtitle": "Hesabını ve tercihlerini yönet",
+  "profile": {
+    "title": "Profil",
+    "description": "Hesap bilgilerin",
+    "email": "E-posta",
+    "accountId": "Hesap ID",
+    "memberSince": "Üyelik tarihi"
+  },
   "account": {
     "title": "Hesap bilgileri",
     "description": "Temel hesap detayların",
@@ -31,6 +38,42 @@
       "trial": "Deneme",
       "editProfile": "Profil düzenleme yakında"
     }
+  },
+  "dataPrivacy": {
+    "title": "Veri ve Gizlilik",
+    "description": "GDPR uyumlu kişisel veri ve gizlilik tercihlerini yönet",
+    "exportTitle": "Verilerini Dışa Aktar",
+    "exportDescription": "Tüm mektupların, teslimatların ve hesap bilgilerinin dahil olduğu kişisel verilerinin tam bir kopyasını JSON formatında indir.",
+    "exportButton": "Verileri Dışa Aktar",
+    "exporting": "Dışa aktarılıyor...",
+    "exportSuccess": "{filename} dosyasına başarıyla aktarıldı",
+    "exportFailed": "Dışa aktarma başarısız: {message}",
+    "exportError": "Dışa aktarma başarısız: Beklenmeyen bir hata oluştu. Lütfen tekrar dene.",
+    "deleteTitle": "Hesabını Sil",
+    "deleteWarning": "Bu işlem geri alınamaz.",
+    "deleteIntro": "Hesabını silmek şunları yapacak:",
+    "deleteList": {
+      "letters": "Tüm mektuplarını ve içeriklerini kalıcı olarak sil",
+      "subscriptions": "Aktif abonelikleri iptal et",
+      "deliveries": "Planlanmış tüm teslimatları kaldır",
+      "profile": "Profilini ve tercihlerini sil",
+      "signOut": "Tüm cihazlardan çıkış yap"
+    },
+    "deleteRetention": "Ödeme kayıtları yasaların gerektirdiği şekilde vergi uyumluluğu için 7 yıl boyunca anonimleştirilmiş olarak saklanacaktır.",
+    "deleteButton": "Hesabı Sil",
+    "deleting": "Siliniyor...",
+    "deleteSuccess": "Hesabın ve tüm ilişkili veriler kalıcı olarak silindi.",
+    "deleteFailed": "Silme başarısız: {message}",
+    "deleteError": "Silme başarısız: Beklenmeyen bir hata oluştu. Lütfen destek ile iletişime geç.",
+    "confirmTitle": "Kesinlikle emin misin?",
+    "confirmDescription": "Bu işlem hesabını kalıcı olarak silecek ve tüm verilerini sunucularımızdan kaldıracaktır. Bu işlem geri alınamaz.",
+    "confirmWarning": "Tüm mektupların, planlanmış teslimatların ve hesap ayarların kalıcı olarak kaybolacak.",
+    "confirmCancel": "İptal",
+    "confirmDelete": "Evet, hesabımı sil",
+    "privacyFooter": "Gizliliğin bizim için önemli. Daha fazla bilgi için",
+    "privacyPolicy": "Gizlilik Politikası",
+    "and": "ve",
+    "termsOfService": "Hizmet Şartları"
   },
   "notifications": {
     "title": "Bildirimler",

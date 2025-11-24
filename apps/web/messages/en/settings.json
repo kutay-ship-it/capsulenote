@@ -1,6 +1,13 @@
 {
   "heading": "Settings",
   "subtitle": "Manage your account and preferences",
+  "profile": {
+    "title": "Profile",
+    "description": "Your account information",
+    "email": "Email",
+    "accountId": "Account ID",
+    "memberSince": "Member Since"
+  },
   "account": {
     "title": "Account Information",
     "description": "Your basic account details",
@@ -31,6 +38,42 @@
       "trial": "Trial",
       "editProfile": "Edit profile coming soon"
     }
+  },
+  "dataPrivacy": {
+    "title": "Data & Privacy",
+    "description": "Manage your personal data and privacy preferences in compliance with GDPR",
+    "exportTitle": "Export Your Data",
+    "exportDescription": "Download a complete copy of your personal data, including all letters, deliveries, and account information in JSON format.",
+    "exportButton": "Export Data",
+    "exporting": "Exporting...",
+    "exportSuccess": "Data exported successfully to {filename}",
+    "exportFailed": "Export failed: {message}",
+    "exportError": "Export failed: An unexpected error occurred. Please try again.",
+    "deleteTitle": "Delete Your Account",
+    "deleteWarning": "This action cannot be undone.",
+    "deleteIntro": "Deleting your account will:",
+    "deleteList": {
+      "letters": "Permanently delete all your letters and content",
+      "subscriptions": "Cancel any active subscriptions",
+      "deliveries": "Remove all scheduled deliveries",
+      "profile": "Delete your profile and preferences",
+      "signOut": "Sign you out of all devices"
+    },
+    "deleteRetention": "Payment records will be anonymized and retained for 7 years for tax compliance as required by law.",
+    "deleteButton": "Delete Account",
+    "deleting": "Deleting...",
+    "deleteSuccess": "Your account and all associated data have been permanently deleted.",
+    "deleteFailed": "Deletion failed: {message}",
+    "deleteError": "Deletion failed: An unexpected error occurred. Please contact support.",
+    "confirmTitle": "Are you absolutely sure?",
+    "confirmDescription": "This will permanently delete your account and remove all your data from our servers. This action cannot be undone.",
+    "confirmWarning": "All your letters, scheduled deliveries, and account settings will be permanently lost.",
+    "confirmCancel": "Cancel",
+    "confirmDelete": "Yes, delete my account",
+    "privacyFooter": "Your privacy is important to us. For more information, see our",
+    "privacyPolicy": "Privacy Policy",
+    "and": "and",
+    "termsOfService": "Terms of Service"
   },
   "notifications": {
     "title": "Notifications",

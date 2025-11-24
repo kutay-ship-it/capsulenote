@@ -105,6 +105,7 @@
   "letterDraft": {
     "title": "Write Your Letter",
     "description": "Focus on your thoughts. You'll schedule delivery in the next step.",
+    "untitledLetter": "Untitled Letter",
     "titleField": {
       "label": "Title",
       "optional": "(Optional)",

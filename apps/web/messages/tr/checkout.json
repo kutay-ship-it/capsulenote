@@ -1,4 +1,15 @@
 {
+  "processing": {
+    "title": "Aboneliğiniz İşleniyor",
+    "waiting": "Hesabınız aktif edilirken lütfen bekleyin...",
+    "takingLonger": "Beklenenden uzun sürüyor. Aboneliğiniz kısa süre içinde hazır olacak.",
+    "usuallyQuick": "Bu genellikle sadece birkaç saniye sürer.",
+    "stillProcessing": "Hâlâ işleniyor mu?",
+    "safeToNavigate": "Güvenle başka bir sayfaya geçebilirsiniz - aboneliğiniz aktif olduğunda size bir e-posta onayı göndereceğiz.",
+    "checkStatus": "Abonelik durumunuzu ayarlarda kontrol edebilirsiniz",
+    "goToDashboard": "Panele Git",
+    "viewBilling": "Fatura Ayarlarını Gör"
+  },
   "success": {
     "title": "Capsule Note Pro'ya Hosgeldin!",
     "subtitle": "Aboneligin basariyla aktif edildi",

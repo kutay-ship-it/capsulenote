@@ -1,4 +1,55 @@
 {
+  "page": {
+    "title": "Gizlilik Ayarları",
+    "description": "Veri gizliliğinizi yönetin ve GDPR haklarınızı kullanın",
+    "metadata": {
+      "title": "Gizlilik Ayarları | Capsule Note",
+      "description": "Veri gizliliğinizi ve GDPR haklarınızı yönetin"
+    },
+    "exportSection": {
+      "title": "Verilerinizi Dışa Aktarın",
+      "description": "Capsule Note'ta saklanan tüm verilerinizin tam bir kopyasını indirin. Buna mektuplarınız, teslimatlarınız, abonelik geçmişiniz ve ödeme kayıtlarınız dahildir.",
+      "includesTitle": "Dışa aktarımınız şunları içerecek:",
+      "includes": {
+        "profile": "Profil bilgileri ve ayarlar",
+        "letters": "Tüm mektuplar (şifresi çözülmüş içerik)",
+        "deliveries": "Teslimat geçmişi ve programları",
+        "subscription": "Abonelik ve ödeme kayıtları",
+        "usage": "Kullanım istatistikleri",
+        "audit": "Denetim günlüğü (güvenlik olayları)"
+      },
+      "footer": "Dışa aktarım JSON formatında sağlanır ve hemen indirilir. Bu veriler kişisel kayıtlarınız için tasarlanmıştır ve GDPR Madde 15 (Erişim Hakkı) ile uyumludur."
+    },
+    "deleteSection": {
+      "title": "Verilerinizi Silin",
+      "description": "Hesabınızı ve tüm ilişkili verileri kalıcı olarak silin. Bu işlem geri alınamaz.",
+      "willDeleteTitle": "Silinecekler:",
+      "willDelete": {
+        "profile": "Profiliniz ve hesap ayarlarınız",
+        "letters": "Tüm mektuplar ve planlanmış teslimatlar",
+        "subscription": "Abonelik kayıtları",
+        "usage": "Kullanım istatistikleri ve gönderim adresleri",
+        "auth": "Kimlik doğrulama hesabınız"
+      },
+      "willRetainTitle": "Saklanacaklar:",
+      "willRetain": {
+        "payments": "Ödeme kayıtları (anonimleştirilmiş, vergi yasası gereği 7 yıl saklanır)",
+        "audit": "Denetim günlükleri (değiştirilemez, uyumluluk için gerekli)"
+      },
+      "beforeTitle": "Devam etmeden önce:",
+      "before": {
+        "export": "Bir kopya saklamak istiyorsanız önce verilerinizi dışa aktarmayı düşünün",
+        "subscription": "Aktif abonelikler hemen iptal edilecektir",
+        "signOut": "Çıkış yapılacak ve bu işlem geri alınamaz"
+      },
+      "footer": "Bu, GDPR Madde 17'yi (Silinme Hakkı) uygular. Ödeme kayıtları vergi düzenlemelerine uygunluk için anonimleştirilmiş biçimde saklanır."
+    },
+    "links": {
+      "privacy": "Gizlilik Politikası",
+      "terms": "Hizmet Şartları",
+      "gdpr": "GDPR Bilgileri"
+    }
+  },
   "export": {
     "button": "Verilerimi Indir",
     "loading": "Disari aktariliyor...",
