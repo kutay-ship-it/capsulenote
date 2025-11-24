@@ -1,7 +1,7 @@
 # Next.js 15 & React 19 Compliance Report
 
 **Date**: 2025-11-10
-**Project**: DearMe (Capsule Note)
+**Project**: Capsule Note
 **Next.js Version**: 15.5.6
 **React Version**: 19.2.0 (stable)
 
@@ -316,7 +316,7 @@ pnpm build
 
 ## Conclusion
 
-The DearMe codebase demonstrates **best-in-class** implementation of Next.js 15 and React 19 Server/Client Component patterns.
+The Capsule Note codebase demonstrates **best-in-class** implementation of Next.js 15 and React 19 Server/Client Component patterns.
 
 ### Key Achievements
 

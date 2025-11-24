@@ -31,7 +31,7 @@ export function generateLetterCreatedEmail({
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="x-apple-disable-message-reformatting">
-  <title>Letter Created - DearMe</title>
+  <title>Letter Created - Capsule Note</title>
   <!--[if mso]>
   <style type="text/css">
     body, table, td { font-family: Arial, Helvetica, sans-serif !important; }
@@ -51,7 +51,7 @@ export function generateLetterCreatedEmail({
           <tr>
             <td style="padding: 32px 40px 24px; text-align: center; border-bottom: 1px solid #e5e7eb;">
               <div style="font-size: 28px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.5px;">
-                DearMe
+                Capsule Note
               </div>
               <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
                 Letters to Your Future Self
@@ -183,11 +183,11 @@ export function generateLetterCreatedEmail({
           <tr>
             <td style="padding: 24px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
               <div style="font-size: 13px; color: #6b7280; text-align: center; line-height: 1.6;">
-                You're receiving this email because you created a letter on DearMe.<br>
+                You're receiving this email because you created a letter on Capsule Note.<br>
                 <a href="${dashboardUrl}/settings/notifications" style="color: #1a1a1a; text-decoration: underline;">Manage email preferences</a>
               </div>
               <div style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 16px;">
-                © 2025 Calsule Note. All rights reserved.
+                © 2025 Capsule Note. All rights reserved.
               </div>
             </td>
           </tr>
@@ -234,7 +234,7 @@ What's Next?
 Go to Dashboard: ${dashboardUrl}
 
 ---
-You're receiving this email because you created a letter on DearMe.
+You're receiving this email because you created a letter on Capsule Note.
 Manage email preferences: ${dashboardUrl}/settings/notifications
 
 © 2025 Capsule Note. All rights reserved.

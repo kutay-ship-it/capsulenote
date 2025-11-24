@@ -1,4 +1,4 @@
-# DearMe - Claude Code Repository Guide
+# Capsule Note - Claude Code Repository Guide
 
 > Privacy-first platform for writing letters to your future self via email or physical mail.
 
@@ -460,7 +460,7 @@ CLERK_WEBHOOK_SECRET=whsec_xxx
 
 # Email
 RESEND_API_KEY=re_xxx
-EMAIL_FROM=no-reply@mail.dearme.app
+EMAIL_FROM=no-reply@mail.capsulenote.com
 
 # Jobs
 INNGEST_SIGNING_KEY=signkey-prod-xxx
@@ -508,7 +508,7 @@ SENTRY_DSN=https://xxx@sentry.io/xxx
 ### First-Time Setup
 ```bash
 git clone <repo>
-cd Dearme
+cd capsulenote
 pnpm install
 
 # Set up environment

@@ -46,7 +46,7 @@ export function CheckoutSuccess({ subscription }: CheckoutSuccessProps) {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/20 mb-4">
           <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
         </div>
-        <h1 className="text-3xl font-bold mb-2">Welcome to DearMe Pro!</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome to Capsule Note Pro!</h1>
         <p className="text-lg text-muted-foreground">
           Your subscription has been successfully activated
         </p>
@@ -67,7 +67,7 @@ export function CheckoutSuccess({ subscription }: CheckoutSuccessProps) {
           <div className="flex items-start gap-3">
             <Sparkles className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <h3 className="font-semibold mb-1">DearMe Pro</h3>
+              <h3 className="font-semibold mb-1">Capsule Note Pro</h3>
               <p className="text-sm text-muted-foreground">
                 Unlimited letters, email deliveries, and physical mail credits
               </p>

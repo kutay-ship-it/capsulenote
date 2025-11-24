@@ -19,8 +19,9 @@ import { AuditLogFilters } from "./_components/audit-log-filters"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const metadata = {
-  title: "Audit Log | Admin | DearMe",
+  title: "Audit Log | Admin | Capsule Note",
   description: "View system audit logs for compliance and monitoring",
+  robots: { index: false, follow: false },
 }
 
 interface PageProps {

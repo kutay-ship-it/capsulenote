@@ -100,7 +100,7 @@ export function generateDeliveryScheduledEmail(data: DeliveryScheduledEmailData)
 
   <div style="text-align: center; padding: 20px; font-size: 12px; color: #999;">
     <p style="margin: 0 0 5px 0;">
-      Sent with ❤️ by <strong>DearMe</strong>
+      Sent with ❤️ by <strong>Capsule Note</strong>
     </p>
     <p style="margin: 0;">
       Letters to your future self

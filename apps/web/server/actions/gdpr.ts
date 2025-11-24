@@ -171,7 +171,7 @@ export async function exportUserData(): Promise<
         userId: user.id,
         email: user.email,
         dataProtectionNotice:
-          "This export contains all personal data stored by DearMe in accordance with GDPR Article 15.",
+          "This export contains all personal data stored by Capsule Note in accordance with GDPR Article 15.",
       },
       user: {
         id: user.id,
@@ -258,7 +258,7 @@ export async function exportUserData(): Promise<
     // 4. Convert to JSON and create download
     const json = JSON.stringify(exportData, null, 2)
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
-    const filename = `dearme-data-export-${timestamp}.json`
+    const filename = `capsulenote-data-export-${timestamp}.json`
 
     // Create data URL for download
     const downloadUrl = `data:application/json;charset=utf-8,${encodeURIComponent(json)}`

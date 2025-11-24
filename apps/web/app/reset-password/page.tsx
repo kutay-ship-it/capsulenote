@@ -1,4 +1,13 @@
+import type { Metadata } from "next"
 import { CustomResetPasswordForm } from "@/components/auth/custom-reset-password"
+
+export const metadata: Metadata = {
+  title: "Reset Password | Capsule Note",
+  robots: { index: false, follow: false },
+  alternates: {
+    canonical: "/reset-password",
+  },
+}
 
 export default function ResetPasswordPage() {
   return (
@@ -15,4 +24,3 @@ export default function ResetPasswordPage() {
     </div>
   )
 }
-

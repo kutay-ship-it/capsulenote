@@ -104,7 +104,7 @@ export default function WelcomePage() {
               </div>
               <div className="space-y-2">
                 <h2 className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
-                  Welcome to DearMe! 🎉
+                  Welcome to Capsule Note! 🎉
                 </h2>
                 <p className="font-mono text-sm text-gray-secondary">
                   Your letter has been saved successfully. Redirecting...
@@ -133,7 +133,7 @@ export default function WelcomePage() {
               </div>
               <div className="space-y-2">
                 <h2 className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
-                  Welcome to DearMe!
+                  Welcome to Capsule Note!
                 </h2>
                 <p className="font-mono text-sm text-gray-secondary">
                   Let's get started with your first letter.

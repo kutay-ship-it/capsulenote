@@ -1,5 +1,5 @@
 /**
- * Structured logging utility for DearMe application.
+ * Structured logging utility for Capsule Note application.
  *
  * Provides consistent logging across Server Components, Server Actions, and API routes.
  * Uses console in development and structured JSON in production for easy parsing.

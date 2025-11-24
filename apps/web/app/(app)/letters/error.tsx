@@ -146,9 +146,9 @@ export default function LettersError({
 
         {/* Help Text */}
         <p className="mt-6 text-center font-mono text-xs text-gray-secondary">
-          Need help recovering your work?{' '}
+          Need help recovering your work?{" "}
           <a
-            href="mailto:support@dearme.app"
+            href="mailto:support@capsulenote.com"
             className="underline hover:opacity-70"
           >
             Contact support

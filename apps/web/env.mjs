@@ -31,7 +31,7 @@ export const env = createEnv({
     EMAIL_FROM_NOTIFICATION: z.string().min(1).optional(),
     EMAIL_FROM_DELIVERY: z.string().min(1).optional(),
     // Legacy email sender (backward compatibility)
-    EMAIL_FROM: z.string().min(1).optional().default("no-reply@mail.dearme.app"),
+    EMAIL_FROM: z.string().min(1).optional().default("no-reply@letter.capsulenote.com"),
 
     // Inngest
     INNGEST_SIGNING_KEY: z.string().min(1),
@@ -60,7 +60,7 @@ export const env = createEnv({
     // Feature Flags (Unleash)
     UNLEASH_API_URL: z.string().url().optional(),
     UNLEASH_API_TOKEN: z.string().optional(),
-    UNLEASH_APP_NAME: z.string().default("dearme"),
+    UNLEASH_APP_NAME: z.string().default("capsulenote"),
 
     // Analytics & Observability
     POSTHOG_API_KEY: z.string().optional(),

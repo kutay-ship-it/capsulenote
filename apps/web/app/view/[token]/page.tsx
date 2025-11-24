@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { prisma } from "@/server/lib/db"
@@ -6,6 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
+
+export const metadata: Metadata = {
+  title: "View Letter | Capsule Note",
+  robots: { index: false, follow: false },
+  alternates: {
+    canonical: "/view",
+  },
+}
 
 interface ViewLetterPageProps {
   params: Promise<{

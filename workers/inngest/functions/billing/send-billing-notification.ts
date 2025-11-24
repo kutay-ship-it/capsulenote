@@ -63,7 +63,7 @@ export const sendBillingNotification = inngest.createFunction(
               <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #1a1a1a;">Your Trial is Ending Soon</h1>
                 <p style="color: #666; font-size: 16px;">
-                  Your 14-day free trial of DearMe Pro will end in ${data.daysRemaining} days.
+                  Your 14-day free trial of Capsule Note Pro will end in ${data.daysRemaining} days.
                 </p>
                 <p style="color: #666; font-size: 16px;">
                   After your trial ends on ${trialEndsDate}, 
@@ -86,7 +86,7 @@ export const sendBillingNotification = inngest.createFunction(
         case "payment-failed": {
           const amount = formatAmount(data.amountDue as number, data.currency as string)
           return {
-            subject: "Payment failed for your DearMe subscription",
+            subject: "Payment failed for your Capsule Note subscription",
             html: `
               <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #dc2626;">Payment Failed</h1>
@@ -112,12 +112,12 @@ export const sendBillingNotification = inngest.createFunction(
 
         case "subscription-canceled":
           return {
-            subject: "Your DearMe subscription has been canceled",
+            subject: "Your Capsule Note subscription has been canceled",
             html: `
               <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #1a1a1a;">Subscription Canceled</h1>
                 <p style="color: #666; font-size: 16px;">
-                  Your DearMe Pro subscription has been canceled.
+                  Your Capsule Note Pro subscription has been canceled.
                 </p>
                 <p style="color: #666; font-size: 16px;">
                   You will continue to have access to Pro features until the end of your billing period.
@@ -138,7 +138,7 @@ export const sendBillingNotification = inngest.createFunction(
         case "payment-receipt": {
           const amount = formatAmount(data.amountPaid as number, data.currency as string)
           return {
-            subject: "Receipt for your DearMe payment",
+            subject: "Receipt for your Capsule Note payment",
             html: `
               <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #1a1a1a;">Payment Receipt</h1>

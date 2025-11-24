@@ -36,7 +36,7 @@ export default function WriteLetterPage() {
             style={{ borderRadius: "2px" }}
           >
             <h3 className="font-mono text-2xl text-charcoal uppercase mb-6">
-              Why DearMe?
+              Why Capsule Note?
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>

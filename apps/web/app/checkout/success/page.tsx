@@ -78,8 +78,11 @@ export default async function CheckoutSuccessPage({
  * Metadata for SEO and social sharing
  */
 export const metadata = {
-  title: "Checkout Success | DearMe",
+  title: "Checkout Success | Capsule Note",
   description: "Your subscription is being activated",
+  alternates: {
+    canonical: "/checkout/success",
+  },
   robots: {
     index: false,
     follow: false,

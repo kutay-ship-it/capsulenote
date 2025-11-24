@@ -66,8 +66,11 @@ export default function CheckoutCancelPage() {
  * Metadata for SEO
  */
 export const metadata = {
-  title: "Checkout Canceled | DearMe",
+  title: "Checkout Canceled | Capsule Note",
   description: "Checkout was canceled",
+  alternates: {
+    canonical: "/checkout/cancel",
+  },
   robots: {
     index: false,
     follow: false,

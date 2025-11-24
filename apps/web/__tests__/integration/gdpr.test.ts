@@ -157,7 +157,7 @@ describe('GDPR Integration Tests', () => {
 
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data.filename).toContain('dearme-data-export')
+        expect(result.data.filename).toContain('capsulenote-data-export')
         expect(result.data.downloadUrl).toBeTruthy()
       }
       expect(createAuditEvent).toHaveBeenCalledWith(

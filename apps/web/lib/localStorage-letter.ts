@@ -21,7 +21,8 @@ export interface AnonymousDraft {
   createdAt: string // ISO 8601 timestamp
 }
 
-const STORAGE_KEY = 'dearme_anonymous_draft'
+const STORAGE_KEY = "capsulenote_anonymous_draft"
+const LEGACY_STORAGE_KEY = "dearme_anonymous_draft"
 const DRAFT_EXPIRY_DAYS = 7 // Auto-delete after 7 days
 
 /**
@@ -73,7 +74,8 @@ export function getAnonymousDraft(): AnonymousDraft | null {
   try {
     if (typeof window === 'undefined') return null
 
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored =
+      localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY)
     if (!stored) return null
 
     const draft = JSON.parse(stored) as AnonymousDraft
@@ -86,6 +88,12 @@ export function getAnonymousDraft(): AnonymousDraft | null {
       // Draft expired, remove it
       clearAnonymousDraft()
       return null
+    }
+
+    // Migrate legacy key to the new brand key
+    if (!localStorage.getItem(STORAGE_KEY)) {
+      localStorage.setItem(STORAGE_KEY, stored)
+      localStorage.removeItem(LEGACY_STORAGE_KEY)
     }
 
     return draft
@@ -102,6 +110,7 @@ export function clearAnonymousDraft(): void {
   try {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(LEGACY_STORAGE_KEY)
     }
   } catch (error) {
     console.warn('Failed to clear anonymous draft:', error)

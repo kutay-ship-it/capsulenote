@@ -47,7 +47,7 @@ export async function sendPaymentConfirmationEmail(
           <div style="background-color: #f8f9fa; border: 2px solid #000; padding: 30px; margin-bottom: 20px;">
             <h1 style="color: #000; margin: 0 0 20px 0; font-size: 28px;">Payment Confirmed! 🎉</h1>
             <p style="font-size: 16px; margin-bottom: 15px;">
-              Thank you for subscribing to DearMe ${planName} plan.
+              Thank you for subscribing to the Capsule Note ${planName} plan.
             </p>
             <div style="background-color: #fff; border: 2px solid #000; padding: 20px; margin: 20px 0;">
               <h2 style="margin-top: 0; font-size: 20px;">Payment Details</h2>
@@ -97,7 +97,7 @@ export async function sendPaymentConfirmationEmail(
                 Need help? Contact us at <a href="mailto:${options.nextSteps.supportEmail}" style="color: #0066cc;">${options.nextSteps.supportEmail}</a>
               </p>
               <p style="font-size: 12px; color: #999; margin: 0;">
-                This is an automated message from DearMe. Please do not reply to this email.
+                This is an automated message from Capsule Note. Please do not reply to this email.
               </p>
             </div>
           </div>
@@ -108,7 +108,7 @@ export async function sendPaymentConfirmationEmail(
     const text = `
 Payment Confirmed!
 
-Thank you for subscribing to DearMe ${planName} plan.
+Thank you for subscribing to the Capsule Note ${planName} plan.
 
 Payment Details:
 - Plan: ${planName}
@@ -126,9 +126,9 @@ Need help? Contact us at ${options.nextSteps.supportEmail}
     `.trim()
 
     const result = await provider.send({
-      from: "DearMe <no-reply@dearme.app>",
+      from: "Capsule Note <no-reply@letter.capsulenote.com>",
       to: options.email,
-      subject: `Payment Confirmed - Welcome to DearMe ${planName}!`,
+      subject: `Payment Confirmed - Welcome to Capsule Note ${planName}!`,
       html,
       text,
     })

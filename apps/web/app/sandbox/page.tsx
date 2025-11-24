@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
 export const metadata = {
-  title: "DearMe · Write to your future self",
+  title: "Capsule Note · Write to your future self",
   description: "Letters delivered exactly when they should arrive. Time capsule for the soul.",
 }
 

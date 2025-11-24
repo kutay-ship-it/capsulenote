@@ -209,7 +209,7 @@ export function parseDeliveryError(lastError: string | null): {
  * Support contact information
  */
 export const SUPPORT_INFO = {
-  email: "support@dearme.app",
+  email: "support@capsulenote.com",
   subject: "Delivery Failure Support",
   helpUrl: "/help/delivery-failures",
 } as const

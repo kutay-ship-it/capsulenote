@@ -32,7 +32,7 @@ export function generateICSFile(options: CalendarEventOptions): string {
     startTime,
     endTime,
     url = "",
-    organizerEmail = "no-reply@dearme.app",
+    organizerEmail = "no-reply@letter.capsulenote.com",
     attendeeEmail,
   } = options
 
@@ -53,13 +53,13 @@ export function generateICSFile(options: CalendarEventOptions): string {
   const timestamp = formatDate(now)
 
   // Unique ID for the event (using timestamp + random)
-  const uid = `${timestamp}-${Math.random().toString(36).substring(7)}@dearme.app`
+  const uid = `${timestamp}-${Math.random().toString(36).substring(7)}@capsulenote.com`
 
   // Build iCalendar content (RFC 5545)
   const lines: string[] = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//DearMe//Letter Delivery Reminder//EN",
+    "PRODID:-//Capsule Note//Letter Delivery Reminder//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
@@ -156,7 +156,7 @@ export function generateDeliveryCalendarEvent(
     "",
     "This is a reminder to check your inbox (or mailbox) for your letter to your future self.",
     "",
-    "Sent with love by DearMe - https://dearme.app",
+    "Sent with love by Capsule Note - https://capsulenote.com",
   ].join("\n")
 
   // Event duration: 30 minutes (just for calendar display)
@@ -168,6 +168,6 @@ export function generateDeliveryCalendarEvent(
     startTime: deliveryDate,
     endTime,
     attendeeEmail: recipientEmail,
-    url: "https://dearme.app/deliveries",
+    url: "https://capsulenote.com/deliveries",
   })
 }

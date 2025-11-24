@@ -56,7 +56,7 @@ export function DownloadCalendarButton({
       // Create temporary link and trigger download
       const link = document.createElement("a")
       link.href = url
-      link.download = `dearme-delivery-${letterTitle.toLowerCase().replace(/\s+/g, "-")}.ics`
+      link.download = `capsulenote-delivery-${letterTitle.toLowerCase().replace(/\s+/g, "-")}.ics`
       document.body.appendChild(link)
       link.click()
 

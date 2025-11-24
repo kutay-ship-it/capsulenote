@@ -98,9 +98,9 @@ export default function DashboardError({
 
         {/* Help Text */}
         <p className="mt-6 text-center font-mono text-xs text-gray-secondary">
-          If this problem persists, please{' '}
+          If this problem persists, please{" "}
           <a
-            href="mailto:support@dearme.app"
+            href="mailto:support@capsulenote.com"
             className="underline hover:opacity-70"
           >
             contact support

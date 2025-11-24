@@ -14,7 +14,7 @@ import { DeleteDataButton } from "./_components/delete-data-button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const metadata = {
-  title: "Privacy Settings | DearMe",
+  title: "Privacy Settings | Capsule Note",
   description: "Manage your data privacy and GDPR rights",
 }
 
@@ -39,7 +39,7 @@ export default async function PrivacySettingsPage() {
         <CardHeader>
           <CardTitle>Export Your Data</CardTitle>
           <CardDescription>
-            Download a complete copy of all your data stored in DearMe. This includes your letters,
+            Download a complete copy of all your data stored in Capsule Note. This includes your letters,
             deliveries, subscription history, and payment records.
           </CardDescription>
         </CardHeader>

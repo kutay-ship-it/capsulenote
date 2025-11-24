@@ -40,7 +40,7 @@ export async function sendLetter(options: MailOptions) {
         address_country: options.to.country,
       },
       from: {
-        name: "DearMe",
+        name: "Capsule Note",
         address_line1: "123 Main St", // TODO: Configure sender address
         address_city: "San Francisco",
         address_state: "CA",

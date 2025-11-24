@@ -27,6 +27,9 @@ import { SubscribePricingCard } from "./_components/subscribe-pricing-card"
 export const metadata: Metadata = {
   title: "Subscribe - Capsule Note",
   description: "Choose your plan and start writing letters to your future self",
+  alternates: {
+    canonical: "/subscribe",
+  },
 }
 
 interface SubscribePageProps {

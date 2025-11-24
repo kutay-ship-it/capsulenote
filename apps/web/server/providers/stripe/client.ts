@@ -25,7 +25,7 @@ export const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
   maxNetworkRetries: 3,
   timeout: 60000, // 60 seconds
   appInfo: {
-    name: "DearMe",
+    name: "Capsule Note",
     version: "1.0.0",
   },
 })

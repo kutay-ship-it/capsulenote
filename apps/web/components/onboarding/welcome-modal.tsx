@@ -94,7 +94,7 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
 
               <DialogHeader className="space-y-3">
                 <DialogTitle className="font-mono text-3xl font-bold uppercase tracking-wide text-charcoal">
-                  Welcome to DearMe! 👋
+                  Welcome to Capsule Note! 👋
                 </DialogTitle>
                 <DialogDescription className="font-mono text-base text-gray-700 leading-relaxed max-w-lg mx-auto">
                   Write letters to your future self and receive them at the perfect moment.

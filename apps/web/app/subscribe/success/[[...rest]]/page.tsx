@@ -27,6 +27,13 @@ import { CustomSignUpForm } from "@/components/auth/custom-sign-up"
 export const metadata: Metadata = {
   title: "Payment Successful - Capsule Note",
   description: "Your payment was successful. Complete your signup to activate your subscription.",
+  alternates: {
+    canonical: "/subscribe/success",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 interface SuccessPageProps {

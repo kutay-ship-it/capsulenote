@@ -22,6 +22,13 @@ import { AlertCircle, XCircle, Clock, Mail, HelpCircle } from "lucide-react"
 export const metadata: Metadata = {
   title: "Payment Error - Capsule Note",
   description: "There was an issue with your payment. Please try again or contact support.",
+  alternates: {
+    canonical: "/subscribe/error",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 interface ErrorPageProps {
