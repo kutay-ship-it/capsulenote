@@ -71,6 +71,9 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
     user: {
       update: vi.fn(),
     },
+    pendingSubscription: {
+      findFirst: vi.fn(),
+    },
   }
   prismaMock.$transaction = vi.fn(async (cb: any) =>
     cb({
@@ -117,6 +120,7 @@ describe("Deliveries", () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    mockPrisma.pendingSubscription.findFirst.mockResolvedValue(null)
   })
 
   it("schedules email delivery successfully", async () => {
@@ -164,6 +168,36 @@ describe("Deliveries", () => {
     expect(result.success).toBe(false)
     if (!result.success) {
       expect(result.error.code).toBe(ErrorCodes.SUBSCRIPTION_REQUIRED)
+    }
+  })
+
+  it("surfaces pending subscription reason when payment exists but not linked", async () => {
+    mockEntitlementsModule.getEntitlements.mockResolvedValueOnce({
+      ...mockEntitlements,
+      features: { ...mockEntitlements.features, canScheduleDeliveries: false },
+      plan: "none",
+      status: "none",
+    })
+    const expiresAt = new Date(Date.now() + 86400000)
+    mockPrisma.pendingSubscription.findFirst.mockResolvedValueOnce({
+      id: "pending_test",
+      expiresAt,
+    })
+
+    const result = await scheduleDelivery({
+      letterId: "11111111-1111-4111-8111-111111111111",
+      channel: "email",
+      deliverAt: new Date(Date.now() + 10 * 60 * 1000),
+      timezone: "UTC",
+      toEmail: mockUser.email,
+    })
+
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.code).toBe(ErrorCodes.SUBSCRIPTION_REQUIRED)
+      expect((result.error as any).details?.reason).toBe("pending_subscription")
+      expect((result.error as any).details?.pendingSubscriptionId).toBe("pending_test")
+      expect((result.error as any).details?.pendingExpiresAt).toBe(expiresAt.toISOString())
     }
   })
 

@@ -14,6 +14,7 @@ import { createAuditEvent } from "@/server/lib/audit"
 import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 import { getEntitlements, trackEmailDelivery, deductMailCredit, QuotaExceededError } from "@/server/lib/entitlements"
+import { env } from "@/env.mjs"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
 const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
@@ -75,23 +76,55 @@ export async function scheduleDelivery(
 
     // Check subscription entitlements
     const entitlements = await getEntitlements(user.id)
+    const devBypass =
+      env.NODE_ENV !== "production" && env.DEV_BYPASS_SUBSCRIPTION === "true"
 
     // Check if user can schedule deliveries
     if (!entitlements.features.canScheduleDeliveries) {
-      await logger.warn('User attempted to schedule delivery without active subscription', {
-        userId: user.id,
-        plan: entitlements.plan,
+      const pendingSubscription = await prisma.pendingSubscription.findFirst({
+        where: {
+          email: user.email,
+          status: "payment_complete",
+          expiresAt: { gt: new Date() },
+        },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, expiresAt: true },
       })
 
-      return {
-        success: false,
-        error: {
-          code: ErrorCodes.SUBSCRIPTION_REQUIRED,
-          message: 'Scheduling deliveries requires an active subscription',
-          details: {
-            requiredPlan: 'DIGITAL_CAPSULE or PAPER_PIXELS',
-            currentPlan: entitlements.plan,
-            upgradeUrl: '/pricing'
+      const gatingReason = pendingSubscription
+        ? "pending_subscription"
+        : entitlements.plan === "none"
+        ? "no_subscription"
+        : "inactive_status"
+
+      if (devBypass) {
+        await logger.warn('Bypassing subscription requirement for scheduling (dev mode)', {
+          userId: user.id,
+          entitlements,
+        })
+      } else {
+        await logger.warn('User attempted to schedule delivery without active subscription', {
+          userId: user.id,
+          plan: entitlements.plan,
+          gatingReason,
+          pendingSubscriptionId: pendingSubscription?.id,
+        })
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.SUBSCRIPTION_REQUIRED,
+            message: pendingSubscription
+              ? "We received your payment. Please verify your email to activate your subscription."
+              : "Scheduling deliveries requires an active subscription",
+            details: {
+              requiredPlan: 'DIGITAL_CAPSULE or PAPER_PIXELS',
+              currentPlan: entitlements.plan,
+              upgradeUrl: '/pricing',
+              reason: gatingReason,
+              pendingSubscriptionId: pendingSubscription?.id,
+              pendingExpiresAt: pendingSubscription?.expiresAt.toISOString(),
+            }
           }
         }
       }

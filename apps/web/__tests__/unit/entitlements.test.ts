@@ -27,6 +27,9 @@ const { mockPrisma, mockRedis } = vi.hoisted(() => {
     letter: {
       count: vi.fn(),
     },
+    subscription: {
+      findFirst: vi.fn(),
+    },
   }
 
   const redisMock = {
@@ -63,6 +66,7 @@ describe("Entitlements (paid-only)", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockRedis.get.mockResolvedValue(null)
+    mockPrisma.subscription.findFirst.mockResolvedValue(null)
   })
 
   it("returns plan none when user has no active subscription", async () => {
@@ -179,6 +183,13 @@ describe("Entitlements (paid-only)", () => {
   })
 
   it("reads from cache when present", async () => {
+    // Mock subscription.findFirst to return matching subscription
+    mockPrisma.subscription.findFirst.mockResolvedValue({
+      status: "active",
+      plan: "DIGITAL_CAPSULE",
+      updatedAt: new Date(),
+    })
+
     mockRedis.get.mockResolvedValue(
       JSON.stringify({
         ...baseUser,
@@ -193,5 +204,40 @@ describe("Entitlements (paid-only)", () => {
     const entitlements = await getEntitlements(baseUser.id)
     expect(entitlements.plan).toBe("DIGITAL_CAPSULE")
     expect(mockPrisma.user.findUnique).not.toHaveBeenCalled()
+  })
+
+  it("refreshes cache when subscription state changes", async () => {
+    mockRedis.get.mockResolvedValue(
+      JSON.stringify({
+        ...baseUser,
+        plan: "none",
+        status: "none",
+        features: { canCreateLetters: true, canScheduleDeliveries: false, canSchedulePhysicalMail: false, maxLettersPerMonth: "unlimited", emailDeliveriesIncluded: 0, mailCreditsPerMonth: 0 },
+        usage: { lettersThisMonth: 0, emailsThisMonth: 0, mailCreditsRemaining: 0 },
+        limits: { lettersReached: false, emailsReached: true, mailCreditsExhausted: true },
+      })
+    )
+    mockPrisma.subscription.findFirst.mockResolvedValue({
+      status: "active",
+      plan: "DIGITAL_CAPSULE",
+      updatedAt: new Date(),
+    })
+    mockPrisma.user.findUnique.mockResolvedValue({
+      ...baseUser,
+      emailCredits: 6,
+      physicalCredits: 0,
+      subscriptions: [
+        {
+          plan: "DIGITAL_CAPSULE",
+          status: "active",
+          currentPeriodEnd: new Date(Date.now() + 86400000),
+        },
+      ],
+    })
+    mockPrisma.letter.count.mockResolvedValue(0)
+
+    const entitlements = await getEntitlements(baseUser.id)
+    expect(entitlements.plan).toBe("DIGITAL_CAPSULE")
+    expect(mockPrisma.user.findUnique).toHaveBeenCalled()
   })
 })

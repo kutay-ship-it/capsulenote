@@ -242,6 +242,14 @@ export async function linkPendingSubscription(
       return { success: true }
     }
 
+    if (!pending.stripeSubscriptionId) {
+      console.error("[linkPendingSubscription] Pending subscription missing Stripe subscription id", {
+        pendingId: pending.id,
+        email: pending.email,
+      })
+      return { success: false, error: "Subscription reference missing" }
+    }
+
     console.log("[linkPendingSubscription] Found pending subscription", {
       userId: user.id,
       email: user.email,

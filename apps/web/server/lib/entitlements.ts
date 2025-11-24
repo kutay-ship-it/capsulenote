@@ -90,7 +90,13 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
       if (parsed.trialInfo?.trialEndsAt) {
         parsed.trialInfo.trialEndsAt = new Date(parsed.trialInfo.trialEndsAt)
       }
-      return parsed
+      const refreshNeeded = await shouldRefreshEntitlements(userId, parsed)
+      if (!refreshNeeded) {
+        return parsed
+      }
+      console.log("[Entitlements] Cache refresh triggered due to newer subscription state", {
+        userId,
+      })
     }
   } catch (error) {
     console.error("Redis cache read failed:", error)
@@ -287,4 +293,36 @@ async function buildEntitlements(userId: string): Promise<Entitlements> {
 
 function getStartOfMonth(date: Date): Date {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1, 0, 0, 0, 0))
+}
+
+async function shouldRefreshEntitlements(
+  userId: string,
+  cached: Entitlements
+): Promise<boolean> {
+  // If cache shows active/trial and DB has no subscription, refresh
+  const latest = await prisma.subscription.findFirst({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    select: { status: true, plan: true, updatedAt: true },
+  })
+
+  if (!latest) {
+    return cached.plan !== "none" || cached.status !== "none"
+  }
+
+  const latestStatus = latest.status
+  const latestPlan = latest.plan
+
+  if (cached.plan !== latestPlan) return true
+  if (cached.status !== latestStatus) return true
+
+  // If cache says no subscription but DB has active/trialing, refresh
+  if (
+    cached.plan === "none" &&
+    (latestStatus === "active" || latestStatus === "trialing")
+  ) {
+    return true
+  }
+
+  return false
 }

@@ -18,61 +18,7 @@ import { stripe } from "@/server/providers/stripe"
 import { isValidPriceId } from "@/server/providers/stripe/client"
 
 // Mock external dependencies
-const { mockPrisma } = vi.hoisted(() => {
-  return {
-    mockPrisma: {
-      pendingSubscription: {
-        findFirst: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn(),
-      },
-      user: {
-        findUnique: vi.fn(),
-        update: vi.fn(),
-      },
-      subscription: {
-        create: vi.fn(),
-        findUnique: vi.fn(),
-      },
-      profile: {
-        update: vi.fn(),
-      },
-      $transaction: vi.fn(async (callback: any) => await callback({
-        subscription: { create: vi.fn(), findUnique: vi.fn() },
-        user: { update: vi.fn() },
-        profile: { update: vi.fn() },
-        pendingSubscription: { update: vi.fn() },
-      })),
-      $executeRaw: vi.fn().mockResolvedValue(undefined),
-    },
-  }
-})
-
-vi.mock("@/server/lib/db", () => ({ prisma: mockPrisma }))
-vi.mock("@/server/providers/stripe")
-const { mockClerk, mockClerkFactory } = vi.hoisted(() => {
-  const clerk = {
-    users: {
-      getUser: vi.fn(),
-      deleteUser: vi.fn(),
-    },
-  }
-  return {
-    mockClerk: clerk,
-    mockClerkFactory: vi.fn(() => Promise.resolve(clerk)),
-  }
-})
-
-vi.mock("@clerk/nextjs/server", () => ({
-  clerkClient: mockClerkFactory,
-}))
-vi.mock("@/server/lib/audit")
-vi.mock("@/server/lib/stripe-helpers")
-vi.mock("@/server/providers/stripe/client", () => ({
-  isValidPriceId: vi.fn(() => true),
-}))
-
-const { mockPrisma } = vi.hoisted(() => {
+const { mockPrisma, mockClerk, mockClerkFactory } = vi.hoisted(() => {
   const prismaMock: any = {
     pendingSubscription: {
       findFirst: vi.fn(),
@@ -95,10 +41,30 @@ const { mockPrisma } = vi.hoisted(() => {
   prismaMock.$transaction = vi.fn(async (cb: any) => cb(prismaMock))
   prismaMock.$executeRaw = vi.fn(async () => undefined)
 
-  return { mockPrisma: prismaMock }
+  const clerk = {
+    users: {
+      getUser: vi.fn(),
+      deleteUser: vi.fn(),
+    },
+  }
+
+  return {
+    mockPrisma: prismaMock,
+    mockClerk: clerk,
+    mockClerkFactory: vi.fn(() => Promise.resolve(clerk)),
+  }
 })
 
 vi.mock("@/server/lib/db", () => ({ prisma: mockPrisma }))
+vi.mock("@/server/providers/stripe")
+vi.mock("@clerk/nextjs/server", () => ({
+  clerkClient: mockClerkFactory,
+}))
+vi.mock("@/server/lib/audit")
+vi.mock("@/server/lib/stripe-helpers")
+vi.mock("@/server/providers/stripe/client", () => ({
+  isValidPriceId: vi.fn(() => true),
+}))
 
 describe("createAnonymousCheckout", () => {
   it("smoke: module imports", () => {
@@ -503,6 +469,7 @@ describe("linkPendingSubscription", () => {
         id: "pending_123",
         email: mockUser.email,
         status: "payment_complete",
+        stripeSubscriptionId: "sub_123", // Required for email verification check
         expiresAt: new Date(Date.now() + 86400000),
       }
 
@@ -545,29 +512,61 @@ describe("linkPendingSubscription", () => {
       const mockUser = {
         id: userId,
         email: "test@example.com",
+        clerkUserId: "clerk_123",
         profile: {},
       }
 
       const mockPending = {
         id: "pending_123",
         email: mockUser.email,
-        status: "linked", // Already linked
+        status: "payment_complete", // Must be payment_complete to be found
+        stripeSubscriptionId: "sub_123",
         expiresAt: new Date(Date.now() + 86400000),
+      }
+
+      const mockExistingSubscription = {
+        id: "subscription_existing",
+        stripeSubscriptionId: "sub_123",
+        userId: userId,
+      }
+
+      const mockClerkUser = {
+        id: "clerk_123",
+        primaryEmailAddressId: "email_123",
+        emailAddresses: [
+          {
+            id: "email_123",
+            emailAddress: mockUser.email,
+            verification: { status: "verified" }, // Email verified
+          },
+        ],
       }
 
       // @ts-ignore
       prisma.user.findUnique.mockResolvedValue(mockUser)
       // @ts-ignore
       prisma.pendingSubscription.findFirst.mockResolvedValue(mockPending)
+      // @ts-ignore
+      prisma.subscription.findUnique.mockResolvedValue(mockExistingSubscription)
+      // @ts-ignore
+      mockClerk.users.getUser.mockResolvedValue(mockClerkUser)
 
       // Act
       const result = await linkPendingSubscription(userId)
 
       // Assert
       expect(result.success).toBe(true)
-      // Should not attempt to link again
+      // Should not attempt to create new subscription
       expect(prisma.subscription.create).not.toHaveBeenCalled()
-      expect(prisma.pendingSubscription.update).not.toHaveBeenCalled()
+      // Should still mark pending as linked (idempotency)
+      expect(prisma.pendingSubscription.update).toHaveBeenCalledWith({
+        where: { id: "pending_123" },
+        data: {
+          status: "linked",
+          linkedAt: expect.any(Date),
+          linkedUserId: userId,
+        },
+      })
     })
 
     it("should return existing subscription without duplicating", async () => {

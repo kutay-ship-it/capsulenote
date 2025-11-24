@@ -68,6 +68,9 @@ export const env = createEnv({
     OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
     OTEL_EXPORTER_OTLP_HEADERS: z.string().optional(),
 
+    // Dev/testing
+    DEV_BYPASS_SUBSCRIPTION: z.enum(["true", "false"]).default("false"),
+
     // Sentry
     SENTRY_DSN: z.string().url().optional(),
     SENTRY_ORG: z.string().optional(),
@@ -129,6 +132,7 @@ export const env = createEnv({
     SENTRY_DSN: process.env.SENTRY_DSN,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+    DEV_BYPASS_SUBSCRIPTION: process.env.DEV_BYPASS_SUBSCRIPTION,
 
     // Client
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

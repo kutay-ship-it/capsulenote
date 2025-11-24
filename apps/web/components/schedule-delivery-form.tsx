@@ -156,11 +156,14 @@ export function ScheduleDeliveryForm({
       })
 
       if (!result.success) {
+        const reason = (result.error as any)?.details?.reason
         const message =
+          (result.error?.code === "SUBSCRIPTION_REQUIRED" &&
+            (reason === "pending_subscription"
+              ? "Payment received. Verify your email to activate your subscription."
+              : "Scheduling requires an active subscription.")) ||
           result.error?.message ||
-          (result.error?.code === "SUBSCRIPTION_REQUIRED"
-            ? "Scheduling requires a subscription."
-            : "Failed to schedule delivery.")
+          "Failed to schedule delivery."
         toast({
           variant: "destructive",
           title: "Error",

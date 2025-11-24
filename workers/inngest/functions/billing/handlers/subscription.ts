@@ -45,8 +45,54 @@ export async function handleSubscriptionCreatedOrUpdated(
     status: subscription.status,
   })
 
-  // Find user
-  const user = await getUserByStripeCustomer(customerId)
+  // Find user; fallback to pending subscription/email mapping if customer lookup fails
+  let user = await getUserByStripeCustomer(customerId)
+  if (!user) {
+    const pending = await prisma.pendingSubscription.findFirst({
+      where: {
+        OR: [
+          { stripeSubscriptionId: subscription.id },
+          { stripeCustomerId: customerId },
+        ],
+        email: { not: null },
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    if (pending?.email) {
+      const fallbackUser = await prisma.user.findUnique({
+        where: { email: pending.email },
+        include: { profile: true },
+      })
+
+      if (fallbackUser) {
+        // Ensure profile is mapped for future webhook lookups
+        if (!fallbackUser.profile?.stripeCustomerId) {
+          await prisma.profile.update({
+            where: { userId: fallbackUser.id },
+            data: { stripeCustomerId: customerId },
+          }).catch((error) => {
+            console.warn("[Subscription Handler] Failed to backfill stripeCustomerId on profile", {
+              userId: fallbackUser.id,
+              error: error instanceof Error ? error.message : String(error),
+            })
+          })
+        }
+
+        user = {
+          id: fallbackUser.id,
+          email: fallbackUser.email,
+          clerkUserId: fallbackUser.clerkUserId,
+        }
+        console.log("[Subscription Handler] Fallback user resolution succeeded", {
+          userId: fallbackUser.id,
+          email: fallbackUser.email,
+          subscriptionId: subscription.id,
+        })
+      }
+    }
+  }
+
   if (!user) {
     throw new Error(`User not found for customer: ${customerId}`)
   }
