@@ -2,6 +2,8 @@ import { inngest } from "../client"
 import { prisma } from "@dearme/prisma"
 import { NonRetriableError } from "inngest"
 import { generateDeliveryScheduledEmail, generateDeliveryScheduledEmailText } from "../templates/delivery-scheduled-email"
+import type { Locale } from "../lib/i18n/load-messages"
+import { loadMessages } from "../lib/i18n/load-messages"
 import { getEmailSender } from "../lib/email-config"
 
 /**
@@ -41,8 +43,8 @@ function validateConfig(): void {
 /**
  * Format delivery date with timezone
  */
-function formatDeliveryDate(date: Date): string {
-  const formatted = new Intl.DateTimeFormat("en-US", {
+function formatDeliveryDate(date: Date, locale: Locale): string {
+  const formatted = new Intl.DateTimeFormat(locale, {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -51,8 +53,7 @@ function formatDeliveryDate(date: Date): string {
     hour12: true,
   }).format(date)
 
-  // Get timezone abbreviation
-  const timezoneParts = new Intl.DateTimeFormat("en-US", {
+  const timezoneParts = new Intl.DateTimeFormat(locale, {
     timeZoneName: "short",
   }).formatToParts(date)
   const timezoneName = timezoneParts.find(part => part.type === "timeZoneName")?.value || ""
@@ -175,11 +176,13 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
     const deliveryUrl = `${baseUrl}/deliveries?utm_source=email&utm_medium=notification&utm_campaign=delivery_scheduled`
     const dashboardUrl = `${baseUrl}/dashboard?utm_source=email&utm_medium=notification&utm_campaign=delivery_scheduled`
 
-    // Format delivery date (convert to Date object for serialization safety)
-    const deliveryDate = formatDeliveryDate(new Date(delivery.deliverAt))
+    const userLocale: Locale =
+      ((delivery.user.profile as any)?.preferredLocale as Locale | undefined) || "en"
+
+    const deliveryDate = formatDeliveryDate(new Date(delivery.deliverAt), userLocale)
 
     // Generate email HTML and text
-    const emailHtml = generateDeliveryScheduledEmail({
+    const emailHtml = await generateDeliveryScheduledEmail({
       letterTitle: delivery.letter.title,
       deliveryId: delivery.id,
       deliveryDate,
@@ -188,9 +191,10 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
       userFirstName: delivery.user.profile?.displayName ?? undefined,
       deliveryUrl,
       dashboardUrl,
+      locale: userLocale,
     })
 
-    const emailText = generateDeliveryScheduledEmailText({
+    const emailText = await generateDeliveryScheduledEmailText({
       letterTitle: delivery.letter.title,
       deliveryId: delivery.id,
       deliveryDate,
@@ -199,12 +203,16 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
       userFirstName: delivery.user.profile?.displayName ?? undefined,
       deliveryUrl,
       dashboardUrl,
+      locale: userLocale,
     })
 
     // Send email with idempotency
     const sendResult = await step.run("send-email", async () => {
       const idempotencyKey = `delivery-scheduled-${deliveryId}`
       const sender = getEmailSender('notification')
+
+      // Load messages for subject line
+      const messages = await loadMessages(userLocale)
 
       logger.info("Sending delivery confirmation email", {
         deliveryId,
@@ -226,7 +234,7 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
         const result = await provider.send({
           from: sender.from,
           to: delivery.user.email!,
-          subject: `✓ Delivery Scheduled: ${delivery.letter.title}`,
+          subject: messages.emails.deliveryScheduled.subject.replace("{title}", delivery.letter.title),
           html: emailHtml,
           text: emailText,
           headers: {

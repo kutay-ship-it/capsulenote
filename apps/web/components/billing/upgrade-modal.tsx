@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Check, Zap } from "lucide-react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import type { ErrorCodes } from "@dearme/types"
 
 interface UpgradeModalProps {
@@ -31,11 +32,20 @@ interface UpgradeModalProps {
 }
 
 export function UpgradeModal({ open, onClose, error }: UpgradeModalProps) {
+  const t = useTranslations("billing.upgradeModal")
+
   const isQuotaError = error?.code === 'QUOTA_EXCEEDED'
   const isSubscriptionError = error?.code === 'SUBSCRIPTION_REQUIRED'
   const isCreditsError = error?.code === 'INSUFFICIENT_CREDITS'
 
   const upgradeUrl = error?.details?.upgradeUrl || '/pricing'
+
+  const getTitle = () => {
+    if (isQuotaError) return t("quotaTitle")
+    if (isSubscriptionError) return t("subscriptionTitle")
+    if (isCreditsError) return t("creditsTitle")
+    return t("defaultTitle")
+  }
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -49,14 +59,11 @@ export function UpgradeModal({ open, onClose, error }: UpgradeModalProps) {
               <Zap className="h-6 w-6 text-charcoal" strokeWidth={2} />
             </div>
             <DialogTitle className="font-mono text-xl font-normal uppercase tracking-wide">
-              {isQuotaError && "Free Plan Limit Reached"}
-              {isSubscriptionError && "Pro Subscription Required"}
-              {isCreditsError && "No Mail Credits"}
-              {!isQuotaError && !isSubscriptionError && !isCreditsError && "Upgrade to Continue"}
+              {getTitle()}
             </DialogTitle>
           </div>
           <DialogDescription className="font-mono text-sm text-gray-secondary">
-            {error?.message || "Upgrade to Pro to unlock this feature"}
+            {error?.message || t("defaultDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -64,7 +71,7 @@ export function UpgradeModal({ open, onClose, error }: UpgradeModalProps) {
         {isQuotaError && error?.details?.currentUsage !== undefined && error?.details?.limit && (
           <div className="py-4 space-y-2">
             <div className="flex items-center justify-between font-mono text-sm">
-              <span className="text-gray-secondary">Current Usage</span>
+              <span className="text-gray-secondary">{t("currentUsage")}</span>
               <Badge
                 className="border-2 border-charcoal bg-coral font-mono text-xs uppercase text-white"
                 style={{ borderRadius: "2px" }}
@@ -78,28 +85,28 @@ export function UpgradeModal({ open, onClose, error }: UpgradeModalProps) {
         {/* Pro Features */}
         <div className="space-y-3 py-4">
           <p className="font-mono text-sm font-medium uppercase tracking-wide text-charcoal">
-            Pro Plan Includes:
+            {t("proIncludes")}
           </p>
           <div className="space-y-2">
             <div className="flex items-start gap-2">
               <Check className="h-4 w-4 text-lime mt-0.5 flex-shrink-0" strokeWidth={3} />
-              <span className="font-mono text-sm text-gray-secondary">Unlimited letters per month</span>
+              <span className="font-mono text-sm text-gray-secondary">{t("features.unlimited")}</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="h-4 w-4 text-lime mt-0.5 flex-shrink-0" strokeWidth={3} />
-              <span className="font-mono text-sm text-gray-secondary">Schedule email deliveries</span>
+              <span className="font-mono text-sm text-gray-secondary">{t("features.email")}</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="h-4 w-4 text-lime mt-0.5 flex-shrink-0" strokeWidth={3} />
-              <span className="font-mono text-sm text-gray-secondary">Physical mail delivery (2 credits/month)</span>
+              <span className="font-mono text-sm text-gray-secondary">{t("features.mail")}</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="h-4 w-4 text-lime mt-0.5 flex-shrink-0" strokeWidth={3} />
-              <span className="font-mono text-sm text-gray-secondary">Priority support</span>
+              <span className="font-mono text-sm text-gray-secondary">{t("features.support")}</span>
             </div>
             <div className="flex items-start gap-2">
               <Check className="h-4 w-4 text-lime mt-0.5 flex-shrink-0" strokeWidth={3} />
-              <span className="font-mono text-sm text-gray-secondary">14-day free trial</span>
+              <span className="font-mono text-sm text-gray-secondary">{t("features.trial")}</span>
             </div>
           </div>
         </div>
@@ -111,14 +118,14 @@ export function UpgradeModal({ open, onClose, error }: UpgradeModalProps) {
             className="border-2 border-charcoal font-mono text-sm uppercase tracking-wide"
             style={{ borderRadius: "2px" }}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Link href={upgradeUrl}>
             <Button
               className="border-2 border-charcoal bg-lime font-mono text-sm uppercase tracking-wide hover:bg-lime/90"
               style={{ borderRadius: "2px" }}
             >
-              Upgrade to Pro
+              {t("upgrade")}
             </Button>
           </Link>
         </DialogFooter>

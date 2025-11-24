@@ -1,0 +1,63 @@
+{
+  "export": {
+    "button": "Download My Data",
+    "loading": "Exporting...",
+    "toast": {
+      "success": {
+        "title": "Data Export Complete",
+        "description": "Your data has been exported successfully to {filename}"
+      },
+      "error": {
+        "title": "Export Failed",
+        "description": "An unexpected error occurred. Please try again."
+      }
+    }
+  },
+  "delete": {
+    "button": "Delete My Data",
+    "loading": "Deleting...",
+    "confirmButton": "Permanently Delete Everything",
+    "cancel": "Cancel",
+    "dialog": {
+      "title": "Permanently Delete Your Account?",
+      "warning": "This action is permanent and cannot be undone.",
+      "willBeDeleted": {
+        "title": "The following will be deleted:",
+        "items": {
+          "profile": "Your profile and account settings",
+          "letters": "All letters and their scheduled deliveries",
+          "subscription": "Subscription records",
+          "usage": "Usage statistics and shipping addresses",
+          "auth": "Your authentication account"
+        }
+      },
+      "willBeRetained": {
+        "title": "What will be retained:",
+        "items": {
+          "payments": "Payment records (anonymized, required by law for 7 years)",
+          "audit": "Audit logs (required for security and compliance)"
+        }
+      },
+      "beforeProceeding": {
+        "title": "Before proceeding:",
+        "items": {
+          "export": "Export your data first if you want to keep a copy",
+          "subscription": "Active subscriptions will be canceled immediately",
+          "signOut": "You will be signed out automatically"
+        }
+      },
+      "confirmPrompt": "Type {keyword} to confirm:",
+      "confirmPlaceholder": "Type DELETE to confirm"
+    },
+    "toast": {
+      "success": {
+        "title": "Account Deleted",
+        "description": "Your data has been permanently deleted. You will now be signed out."
+      },
+      "error": {
+        "title": "Deletion Failed",
+        "description": "An unexpected error occurred. Please contact support for assistance."
+      }
+    }
+  }
+}

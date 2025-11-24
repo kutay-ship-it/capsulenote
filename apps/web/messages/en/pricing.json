@@ -159,5 +159,11 @@
     "secondary": "Start Free Forever",
     "questions": "Questions?",
     "contact": "Contact our support team"
+  },
+  "footer": {
+    "copyright": "© {year} Capsule Note™ Time-Capsule Letters. Built with intention and privacy in mind.",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "home": "Home"
   }
 }

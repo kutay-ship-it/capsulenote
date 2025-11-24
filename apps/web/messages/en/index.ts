@@ -1,3 +1,4 @@
+import admin from "./admin.json"
 import app from "./app.json"
 import common from "./common.json"
 import marketing from "./marketing.json"
@@ -13,16 +14,26 @@ import deliveries from "./deliveries.json"
 import settings from "./settings.json"
 import billing from "./billing.json"
 import subscribe from "./subscribe.json"
+import checkout from "./checkout.json"
+import welcome from "./welcome.json"
+import onboarding from "./onboarding.json"
+import privacy from "./privacy.json"
+import forms from "./forms.json"
+import components from "./components.json"
 
 const messages = {
+  admin,
   app,
   auth,
   common,
+  checkout,
+  components,
   dashboard,
   deliveries,
   dates,
   emails,
   errors,
+  forms,
   letters,
   marketing,
   metadata,
@@ -30,6 +41,9 @@ const messages = {
   billing,
   subscribe,
   settings,
+  welcome,
+  onboarding,
+  privacy,
 }
 
 export default messages

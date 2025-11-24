@@ -12,6 +12,7 @@ import { usePathname } from "@/i18n/routing"
 import { Link } from "@/i18n/routing"
 import { Button } from '@/components/ui/button'
 import { Home, RefreshCw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function DashboardError({
   error,
@@ -21,6 +22,9 @@ export default function DashboardError({
   reset: () => void
 }) {
   const pathname = usePathname()
+  const t = useTranslations('errors.dashboard')
+  const tCommon = useTranslations('errors.common')
+  const tFallback = useTranslations('errors.fallback')
 
   useEffect(() => {
     // Log error with dashboard context
@@ -55,14 +59,14 @@ export default function DashboardError({
 
         {/* Error Title */}
         <h2 className="mb-4 text-center font-mono text-xl font-bold uppercase tracking-wide text-charcoal md:text-2xl">
-          Dashboard Error
+          {t('title')}
         </h2>
 
         {/* User-Friendly Message */}
         <p className="mb-6 text-center font-mono text-sm text-gray-secondary">
           {process.env.NODE_ENV === 'development'
-            ? `Error: ${error.message}`
-            : 'We encountered an issue loading your dashboard. Your data is safe.'}
+            ? `${tCommon('error')} ${error.message}`
+            : t('message')}
         </p>
 
         {/* Error Digest */}
@@ -72,7 +76,7 @@ export default function DashboardError({
             style={{ borderRadius: '2px' }}
           >
             <p className="font-mono text-xs text-gray-secondary">
-              <span className="font-bold">Error ID:</span> {error.digest}
+              <span className="font-bold">{tFallback('errorIdLabel')}</span> {error.digest}
             </p>
           </div>
         )}
@@ -86,26 +90,28 @@ export default function DashboardError({
             className="w-full"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
-            Reload Dashboard
+            {t('actions.reload')}
           </Button>
           <Link href="/dashboard" className="w-full">
             <Button variant="outline" size="lg" className="w-full">
               <Home className="mr-2 h-4 w-4" />
-              Go to Dashboard Home
+              {t('actions.goHome')}
             </Button>
           </Link>
         </div>
 
         {/* Help Text */}
         <p className="mt-6 text-center font-mono text-xs text-gray-secondary">
-          If this problem persists, please{" "}
-          <a
-            href="mailto:support@capsulenote.com"
-            className="underline hover:opacity-70"
-          >
-            contact support
-          </a>
-          .
+          {t.rich('help', {
+            link: (chunks) => (
+              <a
+                href="mailto:support@capsulenote.com"
+                className="underline hover:opacity-70"
+              >
+                {t('contactSupport')}
+              </a>
+            )
+          })}
         </p>
       </div>
     </div>

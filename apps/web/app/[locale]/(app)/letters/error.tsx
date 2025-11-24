@@ -13,6 +13,7 @@ import { useSearchParams } from 'next/navigation'
 import { Link } from "@/i18n/routing"
 import { Button } from '@/components/ui/button'
 import { FileText, Home, RefreshCw } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export default function LettersError({
   error,
@@ -23,6 +24,9 @@ export default function LettersError({
 }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const t = useTranslations('errors.letters')
+  const tCommon = useTranslations('errors.common')
+  const tFallback = useTranslations('errors.fallback')
 
   useEffect(() => {
     // Log error with letters context
@@ -58,21 +62,21 @@ export default function LettersError({
 
         {/* Error Title */}
         <h2 className="mb-4 text-center font-mono text-xl font-bold uppercase tracking-wide text-charcoal md:text-2xl">
-          Letter Operation Failed
+          {t('title')}
         </h2>
 
         {/* Context-Aware Message */}
         <p className="mb-6 text-center font-mono text-sm text-gray-secondary">
           {process.env.NODE_ENV === 'development' ? (
             <>
-              <span className="font-bold">Error:</span> {error.message}
+              <span className="font-bold">{tCommon('error')}</span> {error.message}
             </>
           ) : pathname.includes('/new') ? (
-            'We encountered an issue creating your letter. Your work may not have been saved.'
+            t('createError')
           ) : pathname.includes('/edit') ? (
-            'We encountered an issue updating your letter. Your changes may not have been saved.'
+            t('editError')
           ) : (
-            'We encountered an issue loading your letters. Your data is safe.'
+            t('loadError')
           )}
         </p>
 
@@ -83,10 +87,10 @@ export default function LettersError({
             style={{ borderRadius: '2px' }}
           >
             <p className="font-mono text-sm font-bold text-charcoal">
-              ⚠ Unsaved Changes
+              {t('unsavedChanges.title')}
             </p>
             <p className="mt-2 font-mono text-xs text-charcoal">
-              If you were editing a letter, please copy your content before refreshing to avoid losing your work.
+              {t('unsavedChanges.message')}
             </p>
           </div>
         )}
@@ -98,7 +102,7 @@ export default function LettersError({
             style={{ borderRadius: '2px' }}
           >
             <p className="font-mono text-xs text-gray-secondary">
-              <span className="font-bold">Error ID:</span> {error.digest}
+              <span className="font-bold">{tFallback('errorIdLabel')}</span> {error.digest}
             </p>
           </div>
         )}
@@ -107,7 +111,7 @@ export default function LettersError({
         {process.env.NODE_ENV === 'development' && error.stack && (
           <details className="mb-6">
             <summary className="cursor-pointer font-mono text-xs font-bold uppercase tracking-wide text-charcoal hover:opacity-70">
-              Technical Details
+              {tFallback('technicalDetails')}
             </summary>
             <pre
               className="mt-3 max-h-40 overflow-auto border-2 border-charcoal bg-off-white p-3 font-mono text-xs"
@@ -127,19 +131,19 @@ export default function LettersError({
             className="w-full"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
-            Try Again
+            {t('actions.tryAgain')}
           </Button>
           <div className="grid grid-cols-2 gap-3">
             <Link href="/letters" className="w-full">
               <Button variant="outline" size="lg" className="w-full">
                 <FileText className="mr-2 h-4 w-4" />
-                My Letters
+                {t('actions.myLetters')}
               </Button>
             </Link>
             <Link href="/dashboard" className="w-full">
               <Button variant="outline" size="lg" className="w-full">
                 <Home className="mr-2 h-4 w-4" />
-                Dashboard
+                {t('actions.dashboard')}
               </Button>
             </Link>
           </div>
@@ -147,14 +151,16 @@ export default function LettersError({
 
         {/* Help Text */}
         <p className="mt-6 text-center font-mono text-xs text-gray-secondary">
-          Need help recovering your work?{" "}
-          <a
-            href="mailto:support@capsulenote.com"
-            className="underline hover:opacity-70"
-          >
-            Contact support
-          </a>
-          .
+          {t.rich('help', {
+            link: (chunks) => (
+              <a
+                href="mailto:support@capsulenote.com"
+                className="underline hover:opacity-70"
+              >
+                {t('contactSupport')}
+              </a>
+            )
+          })}
         </p>
       </div>
     </div>

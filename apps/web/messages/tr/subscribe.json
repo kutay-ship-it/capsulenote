@@ -3,9 +3,56 @@
     "label": "E-posta adresi",
     "placeholder": "sen@example.com",
     "submit": "Devam et",
-    "helper": "E-postan sadece ödeme ve hesap oluşturma için kullanılır. Güvenlik nedeniyle ödeme sonrası e-posta değiştirilemez.",
+    "helper": "E-postan sadece odeme ve hesap olusturma icin kullanilir. Guvenlik nedeniyle odeme sonrasi e-posta degistirilemez.",
     "error": {
-      "invalid": "Lütfen geçerli bir e-posta adresi girin"
+      "invalid": "Lutfen gecerli bir e-posta adresi girin"
+    }
+  },
+  "error": {
+    "metadata": {
+      "title": "Odeme Hatasi - Capsule Note",
+      "description": "Odemenizde bir sorun olustu. Lutfen tekrar deneyin veya destekle iletisime gecin."
+    },
+    "whatToDoNext": "Simdi Ne Yapmaliyim?",
+    "needHelp": "Yardima mi Ihtiyacin Var?",
+    "contactSupport": "Destek ekibimize ulasabilirsin:",
+    "errorCode": "Hata Kodu:",
+    "returnHome": "Ana Sayfaya Don",
+    "types": {
+      "payment_failed": {
+        "title": "Odeme Basarisiz",
+        "description": "Odemen islenemedi. Bu yetersiz bakiye, suresi dolmus kart veya diger odeme sorunlarindan kaynaklanabilir. Lutfen odeme yontemini kontrol edip tekrar dene.",
+        "action": "Tekrar Dene",
+        "secondaryAction": "Destekle Iletisime Gec"
+      },
+      "session_expired": {
+        "title": "Odeme Oturumu Suresi Doldu",
+        "description": "Guvenlik nedeniyle odeme oturumunun suresi doldu. Oturumlar 24 saat gecerlidir. Abone olmak icin yeni bir odeme baslat.",
+        "action": "Yeniden Basla"
+      },
+      "email_mismatch": {
+        "title": "E-posta Uyusmazligi",
+        "description": "Odeme oturumundaki e-posta adresi hesabinla uyusmuyor. Guvenlik icin odeme icin kullanilan e-posta ile giris yapman gerekiyor.",
+        "action": "Giris Yap",
+        "secondaryAction": "Yeni Odeme Baslat"
+      },
+      "email_not_verified": {
+        "title": "E-posta Dogrulanmadi",
+        "description": "Aboneliginin aktif edilmesi icin e-posta adresini dogrulaman gerekiyor. Gelen kutunu Capsule Note'tan gelen dogrulama e-postasi icin kontrol et.",
+        "action": "Dogrulama E-postasini Yeniden Gonder"
+      },
+      "pending_subscription_not_found": {
+        "title": "Abonelik Bulunamadi",
+        "description": "Bekleyen aboneligini bulamadik. Bu, suresinin dolmus olmasi veya zaten aktif edilmis olmasi anlamina gelebilir. Bunun bir hata oldugunu dusunuyorsan lutfen destekle iletisime gec.",
+        "action": "Faturalandirmayi Kontrol Et",
+        "secondaryAction": "Destekle Iletisime Gec"
+      },
+      "unknown": {
+        "title": "Bir Seyler Yanlis Gitti",
+        "description": "Odeme sirasinda beklenmeyen bir hata olustu. Lutfen tekrar dene veya sorun devam ederse destekle iletisime gec.",
+        "action": "Tekrar Dene",
+        "secondaryAction": "Destekle Iletisime Gec"
+      }
     }
   }
 }

@@ -1,0 +1,31 @@
+{
+  "checking": {
+    "title": "Taslak kontrol ediliyor..."
+  },
+  "migrating": {
+    "title": "Mektubun kaydediliyor...",
+    "description": "Taslaginizi hesabiniza guvenli bir sekilde kaydediyoruz."
+  },
+  "success": {
+    "title": "Capsule Note'a Hosgeldin!",
+    "description": "Mektubun basariyla kaydedildi. Yonlendiriliyor...",
+    "nextSteps": "Sonraki adimlar:",
+    "steps": {
+      "review": "Mektubunu gozden gecir ve duzenle",
+      "schedule": "Ne zaman almak istedigini planla",
+      "delivery": "Teslimat yontemini sec (e-posta veya posta)"
+    }
+  },
+  "noDraft": {
+    "title": "Capsule Note'a Hosgeldin!",
+    "description": "Ilk mektubunla baslayalim."
+  },
+  "error": {
+    "title": "Hay aksi! Bir Seyler Yanlis Gitti",
+    "defaultMessage": "Beklenmeyen bir hata olustu. Lutfen tekrar dene.",
+    "buttons": {
+      "newLetter": "Yeni Mektup Baslat",
+      "dashboard": "Panele Git"
+    }
+  }
+}

@@ -59,7 +59,7 @@ Scope: add Turkish (`tr`) alongside English (`en`) using `next-intl` with App Ro
     - Ensure sign-in/up/reset flows at `/tr/...` show Turkish UI; URLs remain locale-prefixed.
     - Acceptance: Clerk widgets display Turkish strings when locale is `tr`.
 
-11) **Emails and background jobs**
+[x] 11) **Emails and background jobs**
     - Load messages via server-safe helper in React Email templates and Inngest workers.
     - Localize subject lines, body copy, and dates/numbers.
     - Acceptance: Sample email renders in Turkish; workers can render localized content without Next runtime dependencies.

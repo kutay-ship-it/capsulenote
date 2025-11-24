@@ -1,1 +1,44 @@
-{}
+{
+  "letters": {
+    "title": "Mektup Islemi Basarisiz",
+    "createError": "Mektubunu olustururken bir sorun yasadik. Calisman kaydedilmemis olabilir.",
+    "editError": "Mektubunu guncellerken bir sorun yasadik. Degisikliklerin kaydedilmemis olabilir.",
+    "loadError": "Mektuplarini yuklerken bir sorun yasadik. Verilerin guvenli.",
+    "unsavedChanges": {
+      "title": "Kaydedilmemis Degisiklikler",
+      "message": "Bir mektup duzenliyorduysan, iscini kaybetmemek icin yenilemeden once icerigini kopyala."
+    },
+    "actions": {
+      "tryAgain": "Tekrar Dene",
+      "myLetters": "Mektuplarım",
+      "dashboard": "Panel"
+    },
+    "help": "Iscini kurtarmak icin yardim mi lazim? {link}.",
+    "contactSupport": "Destek ile iletisime gec"
+  },
+  "dashboard": {
+    "title": "Panel Hatasi",
+    "message": "Panelini yuklerken bir sorun yasadik. Verilerin guvenli.",
+    "actions": {
+      "reload": "Paneli Yenile",
+      "goHome": "Panel Ana Sayfasina Git"
+    },
+    "help": "Bu sorun devam ederse, lutfen {link}.",
+    "contactSupport": "destek ile iletisime gec"
+  },
+  "fallback": {
+    "defaultTitle": "Bir Seyler Ters Gitti",
+    "defaultMessage": "Beklenmeyen bir hata olustu. Lutfen tekrar dene.",
+    "errorIdLabel": "Hata ID:",
+    "errorIdHelp": "Destek ile iletisimde bu ID'yi paylas.",
+    "technicalDetails": "Teknik Detaylar",
+    "retrying": "Deneniyor...",
+    "tryAgain": "Tekrar Dene",
+    "returnHome": "Ana Sayfaya Don",
+    "needHelp": "Yardim mi lazim? {link}",
+    "contactSupport": "Destek ile Iletisime Gec"
+  },
+  "common": {
+    "error": "Hata:"
+  }
+}

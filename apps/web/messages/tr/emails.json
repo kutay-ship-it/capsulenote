@@ -27,5 +27,83 @@
       ],
       "expiryNotice": "Hesap oluşturmazsan aboneliğin 30 gün içinde sona erer."
     }
+  },
+  "letterCreated": {
+    "subject": "\"{title}\" mektubun oluşturuldu ✓",
+    "headline": "Mektubun oluşturuldu",
+    "subhead": "{name}mektubun güvenle kaydedildi ve şifrelendi.",
+    "subheadPrefix": "Merhaba {name}, ",
+    "subheadNoName": "Mektubun güvenle kaydedildi ve şifrelendi.",
+    "letterTitleLabel": "Mektup başlığı",
+    "whatsNext": "Sırada ne var?",
+    "steps": [
+      "📧 Mükemmel zamanda almak için teslimatı planla",
+      "✏️ İlham geldiğinde düzenle veya detay ekle",
+      "➕ Farklı tarihler için yeni mektuplar oluştur"
+    ],
+    "viewLetter": "Mektubunu gör",
+    "dashboard": "Panoya git",
+    "footer": {
+      "reason": "Bu e-postayı Capsule Note'ta bir mektup oluşturduğun için alıyorsun.",
+      "manage": "E-posta tercihlerini yönet",
+      "copyright": "© 2025 Capsule Note. Tüm hakları saklıdır."
+    },
+    "text": {
+      "headline": "Mektubun oluşturuldu",
+      "greeting": "Merhaba {name}",
+      "body": "Harika haber! \"{title}\" adlı mektubun güvenle kaydedildi ve şifrelendi.",
+      "details": [
+        "Mektubu tam istediğin zamanda almak için teslimatı planla",
+        "İlham geldiğinde düzenle veya detay ekle",
+        "Farklı tarihler için yeni mektuplar oluştur"
+      ],
+      "view": "Mektubunu gör",
+      "dashboard": "Panoya git"
+    }
+  },
+  "deliveryScheduled": {
+    "subject": "✓ Teslimat planlandı: \"{title}\"",
+    "headline": "✓ Teslimat planlandı",
+    "subhead": "Gelecekteki kendine mektubun hazır!",
+    "greeting": "Merhaba {name}",
+    "body": "Harika haber! \"{title}\" adlı mektubun teslimat için planlandı.",
+    "detailsLabel": "Teslimat detayları",
+    "fields": {
+      "date": "Teslimat tarihi:",
+      "method": "Teslimat yöntemi:",
+      "recipient": "Alıcı:"
+    },
+    "methods": {
+      "email": "E-posta",
+      "mail": "Fiziksel posta"
+    },
+    "nextTitle": "Sırada ne olacak?",
+    "bullets": [
+      "Mektubun güvenle saklanır ve şifrelenir",
+      "Planlanan tarihte {channel} {recipient} adresine gönderilir",
+      "Gönderildiğinde teslimat onayı alırsın",
+      "Panondan teslimatı istediğin zaman görebilir veya güncelleyebilirsin"
+    ],
+    "cta": "Teslimat detaylarını gör →",
+    "dashboardCta": "panoya",
+    "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için panonu ziyaret et.",
+    "footer": {
+      "sentWith": "Capsule Note sevgisiyle gönderildi",
+      "tagline": "Gelecekteki kendine mektuplar"
+    },
+    "text": {
+      "headline": "✓ TESLİMAT PLANLANDI",
+      "body": "Harika haber! \"{title}\" adlı mektubun teslimat için planlandı.",
+      "details": "TESLİMAT DETAYLARI",
+      "whatNext": "SIRADA NE OLACAK?",
+      "bullets": [
+        "Mektubun güvenle saklanır ve şifrelenir",
+        "Planlanan tarihte {channel} {recipient} adresine gönderilir",
+        "Gönderildiğinde teslimat onayı alırsın",
+        "Panondan teslimatı istediğin zaman görebilir veya güncelleyebilirsin"
+      ],
+      "view": "TESLİMAT DETAYLARINI GÖR",
+      "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için panonu ziyaret et:"
+    }
   }
 }

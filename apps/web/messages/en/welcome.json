@@ -1,0 +1,31 @@
+{
+  "checking": {
+    "title": "Checking for draft..."
+  },
+  "migrating": {
+    "title": "Saving your letter...",
+    "description": "We're securely saving your draft to your account."
+  },
+  "success": {
+    "title": "Welcome to Capsule Note!",
+    "description": "Your letter has been saved successfully. Redirecting...",
+    "nextSteps": "Next steps:",
+    "steps": {
+      "review": "Review and edit your letter",
+      "schedule": "Schedule when to receive it",
+      "delivery": "Choose delivery method (email or mail)"
+    }
+  },
+  "noDraft": {
+    "title": "Welcome to Capsule Note!",
+    "description": "Let's get started with your first letter."
+  },
+  "error": {
+    "title": "Oops! Something Went Wrong",
+    "defaultMessage": "An unexpected error occurred. Please try again.",
+    "buttons": {
+      "newLetter": "Start New Letter",
+      "dashboard": "Go to Dashboard"
+    }
+  }
+}

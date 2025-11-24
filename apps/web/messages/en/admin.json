@@ -1,0 +1,65 @@
+{
+  "audit": {
+    "pageTitle": "Audit Log | Admin | Capsule Note",
+    "pageDescription": "View system audit logs for compliance and monitoring",
+    "heading": "Audit Log",
+    "subtitle": "Monitor system events for compliance and security analysis",
+    "stats": {
+      "title": "Audit Statistics",
+      "description": "Showing {count} of {total} total events",
+      "totalEvents": "Total Events",
+      "currentPage": "Current Page",
+      "filtersActive": "Filters Active",
+      "retentionPeriod": "Retention Period",
+      "years": "{count} years"
+    },
+    "filters": {
+      "title": "Filters",
+      "description": "Filter audit events by type, user, and date range",
+      "clearFilters": "Clear Filters",
+      "eventType": "Event Type",
+      "allTypes": "All types",
+      "userId": "User ID",
+      "userIdPlaceholder": "Filter by user ID",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "applyFilters": "Apply Filters",
+      "categories": {
+        "checkout": "Checkout",
+        "subscription": "Subscription",
+        "payment": "Payment",
+        "gdpr": "GDPR",
+        "security": "Security",
+        "admin": "Admin",
+        "other": "Other"
+      }
+    },
+    "table": {
+      "timestamp": "Timestamp",
+      "eventType": "Event Type",
+      "user": "User",
+      "ipAddress": "IP Address",
+      "actions": "Actions",
+      "noEvents": "No audit events found",
+      "system": "System",
+      "notAvailable": "N/A",
+      "details": "Details",
+      "pagination": {
+        "pageOf": "Page {current} of {total}",
+        "previous": "Previous",
+        "next": "Next"
+      }
+    },
+    "eventDetails": {
+      "title": "Audit Event Details",
+      "description": "Full details for event {id}",
+      "eventId": "Event ID",
+      "eventType": "Event Type",
+      "timestamp": "Timestamp",
+      "user": "User",
+      "ipAddress": "IP Address",
+      "userAgent": "User Agent",
+      "eventData": "Event Data"
+    }
+  }
+}

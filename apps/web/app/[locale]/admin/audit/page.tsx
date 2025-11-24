@@ -17,11 +17,15 @@ import { prisma } from "@/server/lib/db"
 import { AuditLogTable } from "./_components/audit-log-table"
 import { AuditLogFilters } from "./_components/audit-log-filters"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getTranslations } from "next-intl/server"
 
-export const metadata = {
-  title: "Audit Log | Admin | Capsule Note",
-  description: "View system audit logs for compliance and monitoring",
-  robots: { index: false, follow: false },
+export async function generateMetadata() {
+  const t = await getTranslations("admin.audit")
+  return {
+    title: t("pageTitle"),
+    description: t("pageDescription"),
+    robots: { index: false, follow: false },
+  }
 }
 
 interface PageProps {
@@ -54,6 +58,8 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
   if (!hasAdminRole && !isAllowlisted) {
     redirect("/dashboard")
   }
+
+  const t = await getTranslations("admin.audit")
 
   const page = parseInt(searchParams.page || "1", 10)
   const limit = 50
@@ -101,41 +107,41 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
     <div className="container mx-auto max-w-7xl py-8 space-y-8">
       {/* Page Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Audit Log</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("heading")}</h1>
         <p className="text-muted-foreground">
-          Monitor system events for compliance and security analysis
+          {t("subtitle")}
         </p>
       </div>
 
       {/* Stats Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Audit Statistics</CardTitle>
+          <CardTitle>{t("stats.title")}</CardTitle>
           <CardDescription>
-            Showing {events.length} of {totalCount} total events
+            {t("stats.description", { count: events.length, total: totalCount })}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Total Events</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("stats.totalEvents")}</p>
               <p className="text-2xl font-bold">{totalCount.toLocaleString()}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Current Page</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("stats.currentPage")}</p>
               <p className="text-2xl font-bold">
                 {page} / {totalPages}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Filters Active</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("stats.filtersActive")}</p>
               <p className="text-2xl font-bold">
                 {Object.keys(searchParams).filter((k) => k !== "page").length}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">Retention Period</p>
-              <p className="text-2xl font-bold">7 years</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("stats.retentionPeriod")}</p>
+              <p className="text-2xl font-bold">{t("stats.years", { count: 7 })}</p>
             </div>
           </div>
         </CardContent>

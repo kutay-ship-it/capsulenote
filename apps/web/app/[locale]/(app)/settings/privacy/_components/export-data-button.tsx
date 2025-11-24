@@ -12,10 +12,12 @@ import { exportUserData } from "@/server/actions/gdpr"
 import { Button } from "@/components/ui/button"
 import { Download, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useTranslations } from "next-intl"
 
 export function ExportDataButton() {
   const [isExporting, setIsExporting] = useState(false)
   const { toast } = useToast()
+  const t = useTranslations("privacy.export")
 
   const handleExport = async () => {
     try {
@@ -26,7 +28,7 @@ export function ExportDataButton() {
       if (!result.success) {
         toast({
           variant: "destructive",
-          title: "Export Failed",
+          title: t("toast.error.title"),
           description: result.error.message,
         })
         return
@@ -41,15 +43,15 @@ export function ExportDataButton() {
       document.body.removeChild(link)
 
       toast({
-        title: "Data Export Complete",
-        description: `Your data has been exported successfully to ${result.data.filename}`,
+        title: t("toast.success.title"),
+        description: t("toast.success.description", { filename: result.data.filename }),
       })
     } catch (error) {
       console.error("[Export Data] Unexpected error:", error)
       toast({
         variant: "destructive",
-        title: "Export Failed",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("toast.error.title"),
+        description: t("toast.error.description"),
       })
     } finally {
       setIsExporting(false)
@@ -66,12 +68,12 @@ export function ExportDataButton() {
       {isExporting ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Exporting...
+          {t("loading")}
         </>
       ) : (
         <>
           <Download className="mr-2 h-4 w-4" />
-          Download My Data
+          {t("button")}
         </>
       )}
     </Button>

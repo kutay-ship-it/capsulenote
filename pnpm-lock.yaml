@@ -304,6 +304,9 @@ importers:
       '@dearme/prisma':
         specifier: workspace:*
         version: link:../../packages/prisma
+      html-escaper:
+        specifier: ^3.0.3
+        version: 3.0.3
       inngest:
         specifier: ^3.15.11
         version: 3.46.0(@opentelemetry/core@2.2.0)(next@15.5.6)(typescript@5.9.3)(zod@3.25.76)
@@ -317,6 +320,9 @@ importers:
       '@dearme/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@types/html-escaper':
+        specifier: ^3.0.4
+        version: 3.0.4
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -5806,6 +5812,10 @@ packages:
 
   /@types/estree@1.0.8:
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
+
+  /@types/html-escaper@3.0.4:
+    resolution: {integrity: sha512-UKSaMPMXXKnq1jDj74seVikfdq5pWvoXcIgOUbwYzHuAEGiv8/juom1i/MsWBF8boFSI0uHQCSZauzr5OYnnJA==}
+    dev: true
 
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Reusable Error Fallback Component
  *
@@ -8,6 +10,7 @@
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, Home, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export interface ErrorFallbackProps {
   /** Error title */
@@ -35,18 +38,20 @@ export interface ErrorFallbackProps {
 }
 
 export function ErrorFallback({
-  title = 'Something Went Wrong',
-  message = 'An unexpected error occurred. Please try again.',
+  title,
+  message,
   errorId,
   stack,
   onRetry,
   isRetrying = false,
-  retryText = 'Try Again',
+  retryText,
   showHomeLink = true,
   homeUrl = '/',
   className = '',
   iconVariant = 'warning',
 }: ErrorFallbackProps) {
+  const t = useTranslations('errors.fallback')
+
   const iconColors = {
     warning: 'bg-duck-yellow',
     error: 'bg-coral',
@@ -54,6 +59,11 @@ export function ErrorFallback({
   }
 
   const iconBg = iconColors[iconVariant]
+
+  // Use provided values or fall back to translations
+  const displayTitle = title ?? t('defaultTitle')
+  const displayMessage = message ?? t('defaultMessage')
+  const displayRetryText = retryText ?? t('tryAgain')
 
   return (
     <div className={`w-full max-w-2xl ${className}`}>
@@ -74,12 +84,12 @@ export function ErrorFallback({
 
         {/* Error Title */}
         <h2 className="mb-4 text-center font-mono text-xl font-bold uppercase tracking-wide text-charcoal md:text-2xl">
-          {title}
+          {displayTitle}
         </h2>
 
         {/* Error Message */}
         <p className="mb-6 text-center font-mono text-sm text-gray-secondary md:text-base">
-          {message}
+          {displayMessage}
         </p>
 
         {/* Error ID */}
@@ -89,10 +99,10 @@ export function ErrorFallback({
             style={{ borderRadius: '2px' }}
           >
             <p className="font-mono text-xs text-gray-secondary">
-              <span className="font-bold">Error ID:</span> {errorId}
+              <span className="font-bold">{t('errorIdLabel')}</span> {errorId}
             </p>
             <p className="mt-1 font-mono text-xs text-gray-secondary">
-              Please include this ID when contacting support.
+              {t('errorIdHelp')}
             </p>
           </div>
         )}
@@ -101,7 +111,7 @@ export function ErrorFallback({
         {process.env.NODE_ENV === 'development' && stack && (
           <details className="mb-6">
             <summary className="cursor-pointer font-mono text-sm font-bold uppercase tracking-wide text-charcoal hover:opacity-70">
-              Technical Details
+              {t('technicalDetails')}
             </summary>
             <pre
               className="mt-3 max-h-60 overflow-auto border-2 border-charcoal bg-off-white p-4 font-mono text-xs"
@@ -125,7 +135,7 @@ export function ErrorFallback({
               <RefreshCw
                 className={`mr-2 h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`}
               />
-              {isRetrying ? 'Retrying...' : retryText}
+              {isRetrying ? t('retrying') : displayRetryText}
             </Button>
           )}
 
@@ -133,7 +143,7 @@ export function ErrorFallback({
             <Link href={homeUrl} className="w-full">
               <Button variant="outline" size="lg" className="w-full">
                 <Home className="mr-2 h-4 w-4" />
-                Return Home
+                {t('returnHome')}
               </Button>
             </Link>
           )}
@@ -141,13 +151,16 @@ export function ErrorFallback({
 
         {/* Support Link */}
         <p className="mt-6 text-center font-mono text-xs text-gray-secondary">
-          Need help?{" "}
-          <a
-            href="mailto:support@capsulenote.com"
-            className="underline hover:opacity-70"
-          >
-            Contact Support
-          </a>
+          {t.rich('needHelp', {
+            link: (chunks) => (
+              <a
+                href="mailto:support@capsulenote.com"
+                className="underline hover:opacity-70"
+              >
+                {t('contactSupport')}
+              </a>
+            )
+          })}
         </p>
       </div>
     </div>

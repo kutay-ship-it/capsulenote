@@ -1,0 +1,54 @@
+{
+  "timezoneWarning": {
+    "title": "Timezone Changed",
+    "detected": "We've detected your timezone has changed from <strong>{savedTimezone}</strong> to <strong>{currentTimezone}</strong>.",
+    "explanation": "Your scheduled letter deliveries will still arrive at the <strong>same local time</strong> you originally selected, but this will be a different time in your new timezone.",
+    "updateButton": "Update Timezone in Settings",
+    "dismissButton": "Dismiss for Now"
+  },
+  "timezoneTooltip": {
+    "ariaLabel": "Timezone information",
+    "yourTimezone": "Your Timezone:",
+    "currentlyDST": "Currently in Daylight Saving Time"
+  },
+  "dstTooltip": {
+    "ariaLabel": "Daylight Saving Time information",
+    "title": "About Daylight Saving Time",
+    "explanation": "If you schedule a letter during DST (Daylight Saving Time), it will be delivered at the same local time you selected, even if DST has ended.",
+    "example": "Example: A letter scheduled for 9:00 AM PDT will arrive at 9:00 AM PST if DST has ended.",
+    "tip": "Times adjust to your current timezone"
+  },
+  "resumeDraftBanner": {
+    "title": "Continue where you left off?",
+    "description": "We found a saved draft from your last visit.",
+    "resume": "Resume draft",
+    "startFresh": "Start fresh"
+  },
+  "deliveryError": {
+    "title": "Delivery Failed",
+    "categories": {
+      "retryable": "This error is usually temporary",
+      "actionRequired": "Action required",
+      "permanent": "This error cannot be automatically fixed"
+    },
+    "attemptCount": "Failed after {count} attempts",
+    "actions": {
+      "retryDelivery": "Retry Delivery",
+      "retrying": "Retrying...",
+      "contactSupport": "Contact Support"
+    },
+    "toasts": {
+      "retryScheduled": {
+        "title": "Delivery Retry Scheduled",
+        "description": "We'll try sending \"{title}\" again."
+      },
+      "retryFailed": {
+        "title": "Retry Failed"
+      },
+      "error": {
+        "title": "Error",
+        "description": "Failed to retry delivery"
+      }
+    }
+  }
+}

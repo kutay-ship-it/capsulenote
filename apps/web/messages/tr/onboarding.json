@@ -1,0 +1,64 @@
+{
+  "modal": {
+    "close": "Kapat",
+    "stepOf": "Adim {current} / {total}",
+    "navigation": {
+      "next": "Ileri",
+      "previous": "Onceki",
+      "back": "Geri"
+    },
+    "step1": {
+      "title": "Capsule Note'a Hosgeldin!",
+      "description": "Gelecekteki kendine mektuplar yaz ve tam dogru zamanda al. Dusuncelerin sifrelenir ve tam ihtiyacin oldugunda teslim edilir.",
+      "benefits": {
+        "encrypted": {
+          "title": "Sifreli",
+          "description": "AES-256-GCM sifreleme mektuplarini gizli tutar"
+        },
+        "timed": {
+          "title": "Zamanli",
+          "description": "Planladığin zamanda teslim edilir"
+        },
+        "reliable": {
+          "title": "Guvenilir",
+          "description": "%99.95 zamaninda teslimat garantisi"
+        }
+      }
+    },
+    "step2": {
+      "title": "Nasil Calisiyor",
+      "description": "Gelecekteki kendine mektup gondermek icin uc basit adim",
+      "steps": {
+        "write": {
+          "title": "Mektubunu Yaz",
+          "description": "Icini dok. Askeri duzeyde sifreleme ile guvenle saklariz."
+        },
+        "schedule": {
+          "title": "Zamani Sec",
+          "description": "6 ay? 1 yil? 10 yil? Ne zaman almak istedigine sen karar ver."
+        },
+        "deliver": {
+          "title": "Biz Teslim Ederiz",
+          "description": "Tam dogru zamanda gelen kutuna guvenle teslim edilir. Tam ihtiyacin oldugunda."
+        }
+      }
+    },
+    "step3": {
+      "title": "Baslamaya Hazir misin?",
+      "description": "Baslamana yardimci olacak bazi fikirler",
+      "promptsTitle": "Su konularda yazmayi dene:",
+      "prompts": {
+        "grateful": "Bugun icin minnettar oldugun seyler",
+        "goals": "Bu yil basarmak istedigin hedefler",
+        "advice": "Gelecekteki kendine tavsiyeler",
+        "moment": "Sonsuza kadar hatirlamak istedigin bir an",
+        "challenges": "Su anda karsilastigin zorluklar",
+        "future": "Gelecekte hayatinin nasil gorunmesini umdugun"
+      },
+      "buttons": {
+        "explore": "Paneli Kesfet",
+        "start": "Yazmaya Basla"
+      }
+    }
+  }
+}

@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { createLetter } from "@/server/actions/letters"
 import { useToast } from "@/hooks/use-toast"
 import { getAnonymousDraft, saveAnonymousDraft, clearAnonymousDraft } from "@/lib/localStorage-letter"
@@ -23,15 +22,6 @@ interface LetterDraftFormProps {
   accentColor?: "yellow" | "blue" | "teal" | "lavender" | "peach" | "lime"
 }
 
-const writingPrompts = [
-  "What are you grateful for right now?",
-  "What challenges are you currently facing?",
-  "What goals do you hope to achieve?",
-  "What would you tell your future self?",
-  "What makes you proud today?",
-  "What lessons have you learned recently?",
-]
-
 export function LetterDraftForm({
   initialData,
   accentColor = "yellow",
@@ -39,6 +29,7 @@ export function LetterDraftForm({
   const router = useRouter()
   const { toast } = useToast()
   const t = useTranslations("letters")
+  const tf = useTranslations("forms.letterDraft")
 
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [body, setBody] = React.useState(initialData?.body || "")
@@ -64,6 +55,16 @@ export function LetterDraftForm({
     peach: "bg-bg-peach-light border-peach-500",
     lime: "bg-bg-lime-light border-lime-500",
   }
+
+  // Writing prompts
+  const writingPrompts = [
+    tf("prompts.items.grateful"),
+    tf("prompts.items.challenges"),
+    tf("prompts.items.goals"),
+    tf("prompts.items.tellFuture"),
+    tf("prompts.items.proud"),
+    tf("prompts.items.lessons"),
+  ]
 
   // Load saved draft from localStorage (anonymous flow)
   React.useEffect(() => {
@@ -299,39 +300,39 @@ export function LetterDraftForm({
         >
           <CardHeader className="p-5 sm:p-6">
             <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl">
-              Write Your Letter
+              {tf("title")}
             </CardTitle>
             <CardDescription className="font-mono text-xs sm:text-sm">
-              Focus on your thoughts. You'll schedule delivery in the next step.
+              {tf("description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 p-5 sm:p-6">
             {/* Title Field */}
             <Field>
               <FieldLabel className="font-mono text-sm font-normal uppercase tracking-wide">
-                Title <span className="text-gray-secondary">(Optional)</span>
+                {tf("titleField.label")} <span className="text-gray-secondary">{tf("titleField.optional")}</span>
               </FieldLabel>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="A letter to my future self..."
+                placeholder={tf("titleField.placeholder")}
                 className="border-2 border-charcoal font-mono"
                 style={{ borderRadius: "2px" }}
               />
               <FieldDescription className="font-mono text-xs">
-                Give your letter a memorable title
+                {tf("titleField.description")}
               </FieldDescription>
             </Field>
 
             {/* Body Field */}
             <Field>
               <FieldLabel className="font-mono text-sm font-normal uppercase tracking-wide">
-                Your Letter <span className="text-red-500">*</span>
+                {tf("bodyField.label")} <span className="text-red-500">{tf("bodyField.required")}</span>
               </FieldLabel>
               <Textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="Dear Future Me,&#10;&#10;Write your thoughts here..."
+                placeholder={tf("bodyField.placeholder")}
                 rows={16}
                 className="border-2 border-charcoal font-mono resize-none"
                 style={{ borderRadius: "2px" }}
@@ -341,21 +342,21 @@ export function LetterDraftForm({
               )}
             <div className="flex items-center justify-between">
               <FieldDescription className="font-mono text-xs">
-                {characterCount} characters · {wordCount} words
+                {tf("bodyField.stats", { chars: characterCount, words: wordCount })}
               </FieldDescription>
               {restoredDraft && (
                 <FieldDescription className="font-mono text-xs text-green-700">
-                  Draft restored from last visit
+                  {tf("status.draftRestored")}
                 </FieldDescription>
               )}
               {lastSaved && !isSaving && (
                 <FieldDescription className="font-mono text-xs text-green-600">
-                  ✓ Saved {formatLastSaved()}
+                  {tf("status.saved", { time: formatLastSaved() })}
                   </FieldDescription>
                 )}
                 {isSaving && (
                   <FieldDescription className="font-mono text-xs text-gray-secondary">
-                    Saving...
+                    {tf("status.saving")}
                   </FieldDescription>
                 )}
               </div>
@@ -372,7 +373,7 @@ export function LetterDraftForm({
                 style={{ borderRadius: "2px" }}
               >
                 <Save className="mr-2 h-4 w-4" />
-                Save Draft
+                {tf("actions.saveDraft")}
               </Button>
               <Button
                 type="button"
@@ -381,7 +382,7 @@ export function LetterDraftForm({
                 className="border-2 border-charcoal bg-charcoal font-mono text-cream hover:bg-gray-800"
                 style={{ borderRadius: "2px" }}
               >
-                {isSubmitting ? "Saving..." : "Continue to Schedule"}
+                {isSubmitting ? tf("actions.saving") : tf("actions.continue")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -399,11 +400,11 @@ export function LetterDraftForm({
             <div className="flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-charcoal" />
               <CardTitle className="font-mono text-base font-normal uppercase tracking-wide">
-                Writing Prompts
+                {tf("prompts.title")}
               </CardTitle>
             </div>
             <CardDescription className="font-mono text-xs">
-              Stuck? Try one of these
+              {tf("prompts.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 p-4 pt-0">

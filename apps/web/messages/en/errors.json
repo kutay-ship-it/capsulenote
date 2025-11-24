@@ -1,1 +1,44 @@
-{}
+{
+  "letters": {
+    "title": "Letter Operation Failed",
+    "createError": "We encountered an issue creating your letter. Your work may not have been saved.",
+    "editError": "We encountered an issue updating your letter. Your changes may not have been saved.",
+    "loadError": "We encountered an issue loading your letters. Your data is safe.",
+    "unsavedChanges": {
+      "title": "Unsaved Changes",
+      "message": "If you were editing a letter, please copy your content before refreshing to avoid losing your work."
+    },
+    "actions": {
+      "tryAgain": "Try Again",
+      "myLetters": "My Letters",
+      "dashboard": "Dashboard"
+    },
+    "help": "Need help recovering your work? {link}.",
+    "contactSupport": "Contact support"
+  },
+  "dashboard": {
+    "title": "Dashboard Error",
+    "message": "We encountered an issue loading your dashboard. Your data is safe.",
+    "actions": {
+      "reload": "Reload Dashboard",
+      "goHome": "Go to Dashboard Home"
+    },
+    "help": "If this problem persists, please {link}.",
+    "contactSupport": "contact support"
+  },
+  "fallback": {
+    "defaultTitle": "Something Went Wrong",
+    "defaultMessage": "An unexpected error occurred. Please try again.",
+    "errorIdLabel": "Error ID:",
+    "errorIdHelp": "Please include this ID when contacting support.",
+    "technicalDetails": "Technical Details",
+    "retrying": "Retrying...",
+    "tryAgain": "Try Again",
+    "returnHome": "Return Home",
+    "needHelp": "Need help? {link}",
+    "contactSupport": "Contact Support"
+  },
+  "common": {
+    "error": "Error:"
+  }
+}

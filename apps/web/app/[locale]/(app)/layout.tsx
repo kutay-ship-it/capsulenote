@@ -10,11 +10,12 @@ import type { Locale } from "@/i18n/routing"
 
 export default async function AppLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: ReactNode
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: "app" })
 
   return (

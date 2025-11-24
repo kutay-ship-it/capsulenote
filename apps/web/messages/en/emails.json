@@ -28,4 +28,83 @@
       "expiryNotice": "Your subscription will expire in 30 days if you don't create an account."
     }
   }
+  ,
+  "letterCreated": {
+    "subject": "Your letter \"{title}\" has been created ✓",
+    "headline": "Your Letter Has Been Created",
+    "subhead": "{name}your letter has been safely saved and encrypted.",
+    "subheadPrefix": "Hi {name}, ",
+    "subheadNoName": "Your letter has been safely saved and encrypted.",
+    "letterTitleLabel": "Letter Title",
+    "whatsNext": "What's Next?",
+    "steps": [
+      "📧 Schedule delivery to receive your letter at the perfect time",
+      "✏️ Edit or add details whenever inspiration strikes",
+      "➕ Create more letters for different future dates"
+    ],
+    "viewLetter": "View Your Letter",
+    "dashboard": "Go to Dashboard",
+    "footer": {
+      "reason": "You're receiving this email because you created a letter on Capsule Note.",
+      "manage": "Manage email preferences",
+      "copyright": "© 2025 Capsule Note. All rights reserved."
+    },
+    "text": {
+      "headline": "Your Letter Has Been Created",
+      "greeting": "Hi {name}",
+      "body": "Great news! Your letter \"{title}\" has been safely saved and encrypted.",
+      "details": [
+        "Schedule delivery to receive your letter at the perfect time",
+        "Edit or add details whenever inspiration strikes",
+        "Create more letters for different future dates"
+      ],
+      "view": "View Your Letter",
+      "dashboard": "Go to Dashboard"
+    }
+  },
+  "deliveryScheduled": {
+    "subject": "✓ Delivery Scheduled: \"{title}\"",
+    "headline": "✓ Delivery Scheduled",
+    "subhead": "Your letter to your future self is all set!",
+    "greeting": "Hi {name}",
+    "body": "Great news! Your letter \"{title}\" has been scheduled for delivery.",
+    "detailsLabel": "Delivery Details",
+    "fields": {
+      "date": "Delivery Date:",
+      "method": "Delivery Method:",
+      "recipient": "Recipient:"
+    },
+    "methods": {
+      "email": "Email",
+      "mail": "Physical Mail"
+    },
+    "nextTitle": "What happens next?",
+    "bullets": [
+      "Your letter is safely stored and encrypted",
+      "On the scheduled date, it will be {channel} to {recipient}",
+      "You'll receive a delivery confirmation when it's sent",
+      "You can view or update the delivery anytime from your dashboard"
+    ],
+    "cta": "View Delivery Details →",
+    "dashboardCta": "dashboard",
+    "change": "Need to make changes? Visit your dashboard to manage all your letters and deliveries.",
+    "footer": {
+      "sentWith": "Sent with ❤️ by Capsule Note",
+      "tagline": "Letters to your future self"
+    },
+    "text": {
+      "headline": "✓ DELIVERY SCHEDULED",
+      "body": "Great news! Your letter \"{title}\" has been scheduled for delivery.",
+      "details": "DELIVERY DETAILS",
+      "whatNext": "WHAT HAPPENS NEXT?",
+      "bullets": [
+        "Your letter is safely stored and encrypted",
+        "On the scheduled date, it will be {channel} to {recipient}",
+        "You'll receive a delivery confirmation when it's sent",
+        "You can view or update the delivery anytime from your dashboard"
+      ],
+      "view": "VIEW DELIVERY DETAILS",
+      "change": "Need to make changes? Visit your dashboard to manage all your letters and deliveries:"
+    }
+  }
 }

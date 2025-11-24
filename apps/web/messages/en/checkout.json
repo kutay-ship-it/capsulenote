@@ -1,0 +1,53 @@
+{
+  "success": {
+    "title": "Welcome to Capsule Note Pro!",
+    "subtitle": "Your subscription has been successfully activated",
+    "subscriptionDetails": "Subscription Details",
+    "badge": {
+      "trial": "Trial Active",
+      "active": "Active"
+    },
+    "planName": "Capsule Note Pro",
+    "planDescription": "Unlimited letters, email deliveries, and physical mail credits",
+    "trial": {
+      "title": "14-Day Free Trial",
+      "endsOn": "Your trial ends on {date} ({days} days remaining)",
+      "endingSoon": "Your trial is ending soon",
+      "noBilling": "You won't be charged until your trial ends. Cancel anytime before then."
+    },
+    "features": {
+      "title": "What's included:",
+      "unlimited": "Create unlimited letters to your future self",
+      "emailDelivery": "Schedule unlimited email deliveries",
+      "mailCredits": "2 physical mail credits per month",
+      "support": "Priority support"
+    },
+    "buttons": {
+      "dashboard": "Go to Dashboard",
+      "writeLetter": "Write Your First Letter"
+    },
+    "confirmEmail": "A confirmation email has been sent to your inbox.",
+    "manageSubscription": "Manage your subscription anytime in {link}.",
+    "billingSettings": "billing settings"
+  },
+  "cancel": {
+    "title": "Checkout Canceled",
+    "description": "No worries! You can return to pricing and try again whenever you're ready.",
+    "freePlanInfo": "Your account remains on the free plan. You can upgrade at any time to unlock:",
+    "features": {
+      "unlimited": "Unlimited letters and email deliveries",
+      "mail": "Physical mail delivery",
+      "support": "Priority support"
+    },
+    "buttons": {
+      "dashboard": "Return to Dashboard",
+      "pricing": "View Pricing"
+    },
+    "support": "Have questions? {link}",
+    "contactSupport": "Contact support"
+  },
+  "metadata": {
+    "cancelTitle": "Checkout Canceled | Capsule Note",
+    "cancelDescription": "Checkout was canceled"
+  }
+}

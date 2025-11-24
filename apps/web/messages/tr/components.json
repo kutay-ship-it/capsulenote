@@ -1,0 +1,54 @@
+{
+  "timezoneWarning": {
+    "title": "Saat Dilimi Degisti",
+    "detected": "Saat diliminin <strong>{savedTimezone}</strong> yerine <strong>{currentTimezone}</strong> oldugunu tespit ettik.",
+    "explanation": "Planlanan mektup teslimatlar hala orijinal olarak sectigin <strong>yerel saatte</strong> gelecek, ama bu yeni saat diliminde farkli bir saat olacak.",
+    "updateButton": "Ayarlarda Saat Dilimini Guncelle",
+    "dismissButton": "Simdilik Kapat"
+  },
+  "timezoneTooltip": {
+    "ariaLabel": "Saat dilimi bilgisi",
+    "yourTimezone": "Saat Dilimin:",
+    "currentlyDST": "Su anda Yaz Saati Uygulamasinda"
+  },
+  "dstTooltip": {
+    "ariaLabel": "Yaz Saati Uygulamasi bilgisi",
+    "title": "Yaz Saati Uygulamasi Hakkinda",
+    "explanation": "Yaz saati uygulamasi sirasinda bir mektup planlarsan, yaz saati sona ermis olsa bile sectigin yerel saatte teslim edilecek.",
+    "example": "Ornek: 09:00 PDT icin planlanan bir mektup, yaz saati sona ermisse 09:00 PST'de ulasacak.",
+    "tip": "Saatler mevcut saat dilimine gore ayarlanir"
+  },
+  "resumeDraftBanner": {
+    "title": "Kaldigin yerden devam et?",
+    "description": "Son ziyaretinden kayitli bir taslak bulduk.",
+    "resume": "Taslaga devam et",
+    "startFresh": "Sifirdan basla"
+  },
+  "deliveryError": {
+    "title": "Teslimat Basarisiz",
+    "categories": {
+      "retryable": "Bu hata genellikle gecicidir",
+      "actionRequired": "Islem gerekli",
+      "permanent": "Bu hata otomatik olarak duzeltilemez"
+    },
+    "attemptCount": "{count} denemeden sonra basarisiz oldu",
+    "actions": {
+      "retryDelivery": "Teslimati Tekrar Dene",
+      "retrying": "Tekrar deneniyor...",
+      "contactSupport": "Destekle Iletisim"
+    },
+    "toasts": {
+      "retryScheduled": {
+        "title": "Teslimat Yeniden Deneme Planlandi",
+        "description": "\"{title}\" tekrar gondermeyi deneyecegiz."
+      },
+      "retryFailed": {
+        "title": "Yeniden Deneme Basarisiz"
+      },
+      "error": {
+        "title": "Hata",
+        "description": "Teslimat yeniden denenemedi"
+      }
+    }
+  }
+}

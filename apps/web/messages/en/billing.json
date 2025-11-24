@@ -84,5 +84,31 @@
     "errorTitle": "Error",
     "portalFailed": "Failed to open billing portal",
     "portalUnexpected": "An unexpected error occurred. Please try again."
+  },
+  "upgradeModal": {
+    "quotaTitle": "Free Plan Limit Reached",
+    "subscriptionTitle": "Pro Subscription Required",
+    "creditsTitle": "No Mail Credits",
+    "defaultTitle": "Upgrade to Continue",
+    "defaultDescription": "Upgrade to Pro to unlock this feature",
+    "currentUsage": "Current Usage",
+    "proIncludes": "Pro Plan Includes:",
+    "features": {
+      "unlimited": "Unlimited letters per month",
+      "email": "Schedule email deliveries",
+      "mail": "Physical mail delivery (2 credits/month)",
+      "support": "Priority support",
+      "trial": "14-day free trial"
+    },
+    "cancel": "Cancel",
+    "upgrade": "Upgrade to Pro"
+  },
+  "quotaBanner": {
+    "limitReached": "Free Plan Limit Reached",
+    "approaching": "Approaching Plan Limit",
+    "limitReachedDescription": "You've used all {max} letters for this month. Upgrade to Pro for unlimited letters.",
+    "approachingDescription": "You've used {used} of {max} letters this month. Upgrade to Pro for unlimited access.",
+    "lettersUsed": "Letters Used",
+    "upgrade": "Upgrade to Pro"
   }
 }

@@ -1,0 +1,223 @@
+{
+  "letterEditor": {
+    "recipient": {
+      "legend": "Recipient",
+      "toMyself": "To myself",
+      "toSomeone": "To someone else",
+      "namePlaceholder": "Their name",
+      "nameLabel": "Recipient name",
+      "nameRequired": "Recipient name is required"
+    },
+    "title": {
+      "label": "Letter Title",
+      "placeholder": "My Letter to Future Me...",
+      "description": "Give your letter a memorable title (max 100 characters)",
+      "required": "Title is required"
+    },
+    "content": {
+      "label": "Letter Content",
+      "placeholder": "Dear Future Me,\n\nI'm writing this letter to remind you of...",
+      "description": "Write your letter to your future self. Be honest, be kind, be you.",
+      "required": "Letter content is required",
+      "words": "{count} words",
+      "chars": "{count} chars"
+    },
+    "delivery": {
+      "legend": "Delivery Settings",
+      "typeLabel": "Delivery Type",
+      "email": "Email",
+      "physical": "Physical (soon)",
+      "emailLabel": "Your Email Address",
+      "emailPlaceholder": "future-me@example.com",
+      "emailDescription": "Where should we send your letter when it's time?",
+      "emailRequired": "Email address is required",
+      "emailInvalid": "Invalid email address",
+      "dateLabel": "Delivery Date",
+      "dateDescription": "Choose when your future self should receive this letter",
+      "dateRequired": "Delivery date is required",
+      "dateFuture": "Delivery date must be in the future"
+    },
+    "datePresets": {
+      "6months": "6 Months",
+      "1year": "1 Year",
+      "3years": "3 Years",
+      "5years": "5 Years",
+      "10years": "10 Years",
+      "custom": "Custom Date"
+    },
+    "datePicker": {
+      "placeholder": "Choose a custom date",
+      "scheduledFor": "Scheduled for:"
+    },
+    "submit": {
+      "schedule": "Schedule Letter",
+      "creating": "Creating..."
+    },
+    "clear": {
+      "button": "Clear",
+      "title": "Clear Form?",
+      "description": "This will delete all your progress on this letter. This action cannot be undone. Are you sure you want to clear everything?",
+      "cancel": "Cancel",
+      "confirm": "Clear Everything"
+    }
+  },
+  "scheduleDelivery": {
+    "preview": {
+      "title": "Letter Preview"
+    },
+    "options": {
+      "title": "Delivery Options",
+      "description": "Choose when and how to deliver your letter"
+    },
+    "method": {
+      "label": "Delivery Method",
+      "email": "Email",
+      "physicalMail": "Physical Mail",
+      "soon": "Soon"
+    },
+    "sendTo": {
+      "label": "Send To",
+      "placeholder": "you@example.com",
+      "description": "Your future self will receive this email"
+    },
+    "when": {
+      "label": "When to Receive?",
+      "custom": "Custom Date",
+      "date": "Date",
+      "time": "Time",
+      "presets": {
+        "6months": "6 Months",
+        "1year": "1 Year",
+        "3years": "3 Years",
+        "5years": "5 Years",
+        "10years": "10 Years"
+      }
+    },
+    "arrival": {
+      "willArrive": "Will arrive:"
+    },
+    "actions": {
+      "back": "Back to Edit",
+      "schedule": "Schedule Delivery",
+      "scheduling": "Scheduling..."
+    }
+  },
+  "letterDraft": {
+    "title": "Write Your Letter",
+    "description": "Focus on your thoughts. You'll schedule delivery in the next step.",
+    "titleField": {
+      "label": "Title",
+      "optional": "(Optional)",
+      "placeholder": "A letter to my future self...",
+      "description": "Give your letter a memorable title"
+    },
+    "bodyField": {
+      "label": "Your Letter",
+      "required": "*",
+      "placeholder": "Dear Future Me,\n\nWrite your thoughts here...",
+      "stats": "{chars} characters · {words} words"
+    },
+    "status": {
+      "draftRestored": "Draft restored from last visit",
+      "saved": "Saved {time}",
+      "saving": "Saving..."
+    },
+    "actions": {
+      "saveDraft": "Save Draft",
+      "continue": "Continue to Schedule",
+      "saving": "Saving..."
+    },
+    "prompts": {
+      "title": "Writing Prompts",
+      "description": "Stuck? Try one of these",
+      "items": {
+        "grateful": "What are you grateful for right now?",
+        "challenges": "What challenges are you currently facing?",
+        "goals": "What goals do you hope to achieve?",
+        "tellFuture": "What would you tell your future self?",
+        "proud": "What makes you proud today?",
+        "lessons": "What lessons have you learned recently?"
+      }
+    }
+  },
+  "anonymousTryout": {
+    "signUpPrompt": {
+      "title": "Nice writing!",
+      "description": "You've written {wordCount} words. Want to schedule this letter to your future self?",
+      "signUp": "Sign Up to Save",
+      "keepWriting": "Keep Writing",
+      "features": "Free forever • No credit card needed • Draft saved locally"
+    },
+    "editor": {
+      "title": "Start Writing",
+      "subtitle": "No account needed • Saved locally",
+      "saved": "Saved",
+      "savedTime": "Saved {time}"
+    },
+    "fields": {
+      "titleLabel": "Letter Title (optional)",
+      "titlePlaceholder": "Give your letter a title...",
+      "emailLabel": "Your Email (for scheduling)",
+      "emailPlaceholder": "you@example.com",
+      "emailDescription": "We'll lock this email for checkout and sign-up so your delivery is tied to you.",
+      "letterLabel": "Your Letter",
+      "letterPlaceholder": "Dear Future Me,\n\nStart writing here... Your thoughts will be saved automatically every 10 seconds.",
+      "wordCount": "{count} word",
+      "wordCountPlural": "{count} words"
+    },
+    "actions": {
+      "saveNow": "Save Now",
+      "sendSchedule": "Send & Schedule",
+      "signUpFirst": "Sign Up First"
+    },
+    "features": {
+      "autoSave": "Auto-saves every 10 seconds",
+      "draftKept": "Draft kept for 7 days"
+    },
+    "prompts": {
+      "title": "Writing Prompts",
+      "items": {
+        "grateful": "What am I grateful for today?",
+        "challenges": "What challenges am I facing?",
+        "goals": "What are my goals for the future?",
+        "advice": "What advice would I give myself?",
+        "remember": "What do I want to remember?",
+        "grown": "How have I grown recently?"
+      }
+    }
+  },
+  "dashboardEditor": {
+    "resumePrompt": {
+      "title": "Continue where you left off?",
+      "description": "We found a saved draft from your last visit.",
+      "resume": "Resume draft",
+      "startFresh": "Start fresh"
+    },
+    "toasts": {
+      "deliveryNotScheduled": {
+        "title": "Delivery Not Scheduled",
+        "description": "Letter saved, but scheduling failed. Please try again from the letter page."
+      },
+      "letterCreated": {
+        "title": "Letter Created",
+        "description": "\"{title}\" has been saved to your encrypted vault{scheduled}.",
+        "scheduled": " and scheduled"
+      },
+      "quotaExceeded": {
+        "title": "Quota Exceeded"
+      },
+      "validationError": {
+        "title": "Validation Error"
+      },
+      "error": {
+        "title": "Error",
+        "description": "Failed to create letter. Please try again."
+      },
+      "unexpectedError": {
+        "title": "Unexpected Error",
+        "description": "Something went wrong. Please try again."
+      },
+      "upgrade": "Upgrade"
+    }
+  }
+}

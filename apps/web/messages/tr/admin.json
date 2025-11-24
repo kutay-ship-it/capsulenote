@@ -1,0 +1,65 @@
+{
+  "audit": {
+    "pageTitle": "Denetim Gunlugu | Yonetici | Capsule Note",
+    "pageDescription": "Uyumluluk ve izleme icin sistem denetim gunluklerini goruntule",
+    "heading": "Denetim Gunlugu",
+    "subtitle": "Uyumluluk ve guvenlik analizi icin sistem olaylarini izle",
+    "stats": {
+      "title": "Denetim Istatistikleri",
+      "description": "Toplam {total} olaydan {count} tanesi gosteriliyor",
+      "totalEvents": "Toplam Olay",
+      "currentPage": "Mevcut Sayfa",
+      "filtersActive": "Aktif Filtreler",
+      "retentionPeriod": "Saklama Suresi",
+      "years": "{count} yil"
+    },
+    "filters": {
+      "title": "Filtreler",
+      "description": "Denetim olaylarini ture, kullaniciya ve tarih araligina gore filtrele",
+      "clearFilters": "Filtreleri Temizle",
+      "eventType": "Olay Turu",
+      "allTypes": "Tum turler",
+      "userId": "Kullanici ID",
+      "userIdPlaceholder": "Kullanici ID'sine gore filtrele",
+      "startDate": "Baslangic Tarihi",
+      "endDate": "Bitis Tarihi",
+      "applyFilters": "Filtreleri Uygula",
+      "categories": {
+        "checkout": "Odeme",
+        "subscription": "Abonelik",
+        "payment": "Odeme",
+        "gdpr": "GDPR",
+        "security": "Guvenlik",
+        "admin": "Yonetici",
+        "other": "Diger"
+      }
+    },
+    "table": {
+      "timestamp": "Zaman Damgasi",
+      "eventType": "Olay Turu",
+      "user": "Kullanici",
+      "ipAddress": "IP Adresi",
+      "actions": "Islemler",
+      "noEvents": "Denetim olayi bulunamadi",
+      "system": "Sistem",
+      "notAvailable": "Yok",
+      "details": "Detaylar",
+      "pagination": {
+        "pageOf": "Sayfa {current} / {total}",
+        "previous": "Onceki",
+        "next": "Sonraki"
+      }
+    },
+    "eventDetails": {
+      "title": "Denetim Olayi Detaylari",
+      "description": "{id} olayi icin tam detaylar",
+      "eventId": "Olay ID",
+      "eventType": "Olay Turu",
+      "timestamp": "Zaman Damgasi",
+      "user": "Kullanici",
+      "ipAddress": "IP Adresi",
+      "userAgent": "Kullanici Ajani",
+      "eventData": "Olay Verileri"
+    }
+  }
+}

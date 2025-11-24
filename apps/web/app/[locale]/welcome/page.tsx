@@ -14,9 +14,11 @@ import { Button } from "@/components/ui/button"
 import { Loader2, Check, AlertCircle } from "lucide-react"
 import { getAnonymousDraft, clearAnonymousDraft } from "@/lib/localStorage-letter"
 import { migrateAnonymousDraft } from "@/server/actions/migrate-anonymous-draft"
+import { useTranslations } from "next-intl"
 
 export default function WelcomePage() {
   const router = useRouter()
+  const t = useTranslations("welcome")
   const [status, setStatus] = useState<'checking' | 'migrating' | 'success' | 'no-draft' | 'error'>('checking')
   const [letterId, setLetterId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string>('')
@@ -59,12 +61,12 @@ export default function WelcomePage() {
         }
       } catch (error) {
         setStatus('error')
-        setErrorMessage('An unexpected error occurred. Please try again.')
+        setErrorMessage(t("error.defaultMessage"))
       }
     }
 
     checkAndMigrateDraft()
-  }, [router])
+  }, [router, t])
 
   return (
     <div className="min-h-screen bg-cream flex items-center justify-center px-4">
@@ -77,7 +79,7 @@ export default function WelcomePage() {
             <div className="text-center space-y-4">
               <Loader2 className="h-12 w-12 animate-spin text-charcoal mx-auto" />
               <h2 className="font-mono text-xl font-normal uppercase tracking-wide text-charcoal">
-                Checking for draft...
+                {t("checking.title")}
               </h2>
             </div>
           )}
@@ -86,10 +88,10 @@ export default function WelcomePage() {
             <div className="text-center space-y-4">
               <Loader2 className="h-12 w-12 animate-spin text-charcoal mx-auto" />
               <h2 className="font-mono text-xl font-normal uppercase tracking-wide text-charcoal">
-                Saving your letter...
+                {t("migrating.title")}
               </h2>
               <p className="font-mono text-sm text-gray-secondary">
-                We're securely saving your draft to your account.
+                {t("migrating.description")}
               </p>
             </div>
           )}
@@ -104,20 +106,20 @@ export default function WelcomePage() {
               </div>
               <div className="space-y-2">
                 <h2 className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
-                  Welcome to Capsule Note! 🎉
+                  {t("success.title")}
                 </h2>
                 <p className="font-mono text-sm text-gray-secondary">
-                  Your letter has been saved successfully. Redirecting...
+                  {t("success.description")}
                 </p>
               </div>
               <div className="border-t-2 border-charcoal pt-6">
                 <p className="font-mono text-xs text-gray-secondary mb-4">
-                  Next steps:
+                  {t("success.nextSteps")}
                 </p>
                 <ul className="space-y-2 font-mono text-xs text-gray-secondary text-left">
-                  <li>✓ Review and edit your letter</li>
-                  <li>✓ Schedule when to receive it</li>
-                  <li>✓ Choose delivery method (email or mail)</li>
+                  <li>{t("success.steps.review")}</li>
+                  <li>{t("success.steps.schedule")}</li>
+                  <li>{t("success.steps.delivery")}</li>
                 </ul>
               </div>
             </div>
@@ -133,10 +135,10 @@ export default function WelcomePage() {
               </div>
               <div className="space-y-2">
                 <h2 className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
-                  Welcome to Capsule Note!
+                  {t("noDraft.title")}
                 </h2>
                 <p className="font-mono text-sm text-gray-secondary">
-                  Let's get started with your first letter.
+                  {t("noDraft.description")}
                 </p>
               </div>
             </div>
@@ -152,7 +154,7 @@ export default function WelcomePage() {
               </div>
               <div className="space-y-2">
                 <h2 className="font-mono text-xl font-normal uppercase tracking-wide text-charcoal">
-                  Oops! Something Went Wrong
+                  {t("error.title")}
                 </h2>
                 <p className="font-mono text-sm text-gray-secondary">
                   {errorMessage}
@@ -164,7 +166,7 @@ export default function WelcomePage() {
                   className="flex-1 border-2 border-charcoal bg-charcoal font-mono text-sm uppercase hover:bg-gray-800"
                   style={{ borderRadius: "2px" }}
                 >
-                  Start New Letter
+                  {t("error.buttons.newLetter")}
                 </Button>
                 <Button
                   onClick={() => router.push('/dashboard')}
@@ -172,7 +174,7 @@ export default function WelcomePage() {
                   className="flex-1 border-2 border-charcoal font-mono text-sm uppercase"
                   style={{ borderRadius: "2px" }}
                 >
-                  Go to Dashboard
+                  {t("error.buttons.dashboard")}
                 </Button>
               </div>
             </div>

@@ -1,0 +1,64 @@
+{
+  "modal": {
+    "close": "Close",
+    "stepOf": "Step {current} of {total}",
+    "navigation": {
+      "next": "Next",
+      "previous": "Previous",
+      "back": "Back"
+    },
+    "step1": {
+      "title": "Welcome to Capsule Note!",
+      "description": "Write letters to your future self and receive them at the perfect moment. Your thoughts are encrypted and delivered exactly when you need them.",
+      "benefits": {
+        "encrypted": {
+          "title": "Encrypted",
+          "description": "AES-256-GCM encryption keeps your letters private"
+        },
+        "timed": {
+          "title": "Timed",
+          "description": "Delivered exactly when you schedule them"
+        },
+        "reliable": {
+          "title": "Reliable",
+          "description": "99.95% on-time delivery guarantee"
+        }
+      }
+    },
+    "step2": {
+      "title": "How It Works",
+      "description": "Three simple steps to send a letter to your future self",
+      "steps": {
+        "write": {
+          "title": "Write Your Letter",
+          "description": "Pour your heart out. We'll keep it safe with military-grade encryption."
+        },
+        "schedule": {
+          "title": "Choose When",
+          "description": "6 months? 1 year? 10 years? You decide when you want to receive it."
+        },
+        "deliver": {
+          "title": "We Deliver",
+          "description": "Securely delivered to your inbox at the perfect time. Exactly when you need it."
+        }
+      }
+    },
+    "step3": {
+      "title": "Ready to Start?",
+      "description": "Here are some prompts to help you get started",
+      "promptsTitle": "Try writing about:",
+      "prompts": {
+        "grateful": "What you're grateful for today",
+        "goals": "Goals you want to achieve this year",
+        "advice": "Advice for your future self",
+        "moment": "A moment you want to remember forever",
+        "challenges": "Challenges you're facing right now",
+        "future": "What you hope your life looks like in the future"
+      },
+      "buttons": {
+        "explore": "Explore Dashboard",
+        "start": "Start Writing"
+      }
+    }
+  }
+}

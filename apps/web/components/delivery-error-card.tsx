@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { AlertCircle, RefreshCw, Mail } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
@@ -35,6 +36,7 @@ export function DeliveryErrorCard({
   letterTitle,
 }: DeliveryErrorCardProps) {
   const { toast } = useToast()
+  const t = useTranslations("components.deliveryError")
   const [isRetrying, setIsRetrying] = useState(false)
 
   // Parse error
@@ -50,21 +52,21 @@ export function DeliveryErrorCard({
 
       if (result.success) {
         toast({
-          title: "✓ Delivery Retry Scheduled",
-          description: `We'll try sending "${letterTitle}" again.`,
+          title: t("toasts.retryScheduled.title"),
+          description: t("toasts.retryScheduled.description", { title: letterTitle }),
         })
       } else {
         toast({
           variant: "destructive",
-          title: "Retry Failed",
+          title: t("toasts.retryFailed.title"),
           description: result.error.message,
         })
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to retry delivery",
+        title: t("toasts.error.title"),
+        description: error instanceof Error ? error.message : t("toasts.error.description"),
       })
     } finally {
       setIsRetrying(false)
@@ -87,12 +89,12 @@ export function DeliveryErrorCard({
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-              Delivery Failed
+              {t("title")}
             </h4>
             <p className="mt-1 font-mono text-xs text-gray-secondary">
-              {errorInfo.category === "retryable" && "This error is usually temporary"}
-              {errorInfo.category === "user_action_required" && "Action required"}
-              {errorInfo.category === "permanent" && "This error cannot be automatically fixed"}
+              {errorInfo.category === "retryable" && t("categories.retryable")}
+              {errorInfo.category === "user_action_required" && t("categories.actionRequired")}
+              {errorInfo.category === "permanent" && t("categories.permanent")}
             </p>
           </div>
         </div>
@@ -112,7 +114,7 @@ export function DeliveryErrorCard({
         {/* Attempt Count */}
         {attemptCount > 1 && (
           <p className="font-mono text-xs text-gray-secondary">
-            Failed after {attemptCount} attempt{attemptCount > 1 ? "s" : ""}
+            {t("attemptCount", { count: attemptCount })}
           </p>
         )}
 
@@ -130,7 +132,7 @@ export function DeliveryErrorCard({
                 className={`mr-2 h-4 w-4 ${isRetrying ? "animate-spin" : ""}`}
                 strokeWidth={2}
               />
-              {isRetrying ? "Retrying..." : "Retry Delivery"}
+              {isRetrying ? t("actions.retrying") : t("actions.retryDelivery")}
             </Button>
           )}
 
@@ -152,7 +154,7 @@ export function DeliveryErrorCard({
                 rel="noopener noreferrer"
               >
                 <Mail className="mr-2 h-4 w-4" strokeWidth={2} />
-                Contact Support
+                {t("actions.contactSupport")}
               </a>
             </Button>
           )}

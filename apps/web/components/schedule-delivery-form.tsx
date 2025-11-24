@@ -33,6 +33,7 @@ export function ScheduleDeliveryForm({
   const router = useRouter()
   const { toast } = useToast()
   const t = useTranslations("letters.toasts.scheduleForm")
+  const tf = useTranslations("forms.scheduleDelivery")
 
   const [channel, setChannel] = useState<"email" | "mail">("email")
   const [recipientEmail, setRecipientEmail] = useState(userEmail)
@@ -45,20 +46,20 @@ export function ScheduleDeliveryForm({
 
   // Date presets
   const datePresets = [
-    { label: "6 Months", months: 6 },
-    { label: "1 Year", months: 12 },
-    { label: "3 Years", months: 36 },
-    { label: "5 Years", months: 60 },
-    { label: "10 Years", months: 120 },
+    { label: tf("when.presets.6months"), months: 6, key: "6months" },
+    { label: tf("when.presets.1year"), months: 12, key: "1year" },
+    { label: tf("when.presets.3years"), months: 36, key: "3years" },
+    { label: tf("when.presets.5years"), months: 60, key: "5years" },
+    { label: tf("when.presets.10years"), months: 120, key: "10years" },
   ]
 
   // Handle preset date selection
-  const handlePresetDate = (months: number, label: string) => {
+  const handlePresetDate = (months: number, key: string) => {
     const today = new Date()
     const futureDate = new Date(today)
     futureDate.setMonth(futureDate.getMonth() + months)
     setDeliveryDate(futureDate)
-    setSelectedPreset(label)
+    setSelectedPreset(key)
     setShowCustomDate(false)
   }
 
@@ -201,7 +202,7 @@ export function ScheduleDeliveryForm({
       >
         <CardHeader className="p-5 sm:p-6">
           <CardTitle className="font-mono text-lg font-normal uppercase tracking-wide sm:text-xl">
-            Letter Preview
+            {tf("preview.title")}
           </CardTitle>
           <CardDescription className="font-mono text-xs sm:text-sm">
             {letterTitle}
@@ -221,17 +222,17 @@ export function ScheduleDeliveryForm({
       >
         <CardHeader className="p-5 sm:p-6">
           <CardTitle className="font-mono text-lg font-normal uppercase tracking-wide sm:text-xl">
-            Delivery Options
+            {tf("options.title")}
           </CardTitle>
           <CardDescription className="font-mono text-xs sm:text-sm">
-            Choose when and how to deliver your letter
+            {tf("options.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 p-5 sm:p-6 pt-0">
           {/* Delivery Method */}
           <div className="space-y-3">
             <Label className="font-mono text-sm font-normal uppercase tracking-wide">
-              Delivery Method
+              {tf("method.label")}
             </Label>
             <div className="grid grid-cols-2 gap-3">
               <Button
@@ -245,7 +246,7 @@ export function ScheduleDeliveryForm({
                 style={{ borderRadius: "2px" }}
               >
                 <MailIcon className="mr-2 h-4 w-4" />
-                Email
+                {tf("method.email")}
               </Button>
               <Button
                 type="button"
@@ -255,8 +256,8 @@ export function ScheduleDeliveryForm({
                 style={{ borderRadius: "2px" }}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                Physical Mail
-                <Badge variant="outline" className="ml-2 text-xs">Soon</Badge>
+                {tf("method.physicalMail")}
+                <Badge variant="outline" className="ml-2 text-xs">{tf("method.soon")}</Badge>
               </Button>
             </div>
           </div>
@@ -265,20 +266,20 @@ export function ScheduleDeliveryForm({
           {channel === "email" && (
             <div className="space-y-2">
               <Label htmlFor="recipientEmail" className="font-mono text-sm font-normal uppercase tracking-wide">
-                Send To
+                {tf("sendTo.label")}
               </Label>
               <Input
                 id="recipientEmail"
                 type="email"
                 value={recipientEmail}
                 onChange={(e) => setRecipientEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder={tf("sendTo.placeholder")}
                 required
                 className="border-2 border-charcoal font-mono"
                 style={{ borderRadius: "2px" }}
               />
               <p className="font-mono text-xs text-gray-secondary">
-                Your future self will receive this email
+                {tf("sendTo.description")}
               </p>
             </div>
           )}
@@ -286,18 +287,18 @@ export function ScheduleDeliveryForm({
           {/* When to receive - Date Presets */}
           <div className="space-y-3">
             <Label className="font-mono text-sm font-normal uppercase tracking-wide">
-              When to Receive?
+              {tf("when.label")}
             </Label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
               {datePresets.map((preset) => (
                 <Button
-                  key={preset.label}
+                  key={preset.key}
                   type="button"
-                  variant={selectedPreset === preset.label ? "default" : "outline"}
-                  onClick={() => handlePresetDate(preset.months, preset.label)}
+                  variant={selectedPreset === preset.key ? "default" : "outline"}
+                  onClick={() => handlePresetDate(preset.months, preset.key)}
                   className={cn(
                     "border-2 border-charcoal font-mono text-xs sm:text-sm",
-                    selectedPreset === preset.label && "bg-charcoal text-cream hover:bg-gray-800"
+                    selectedPreset === preset.key && "bg-charcoal text-cream hover:bg-gray-800"
                   )}
                   style={{ borderRadius: "2px" }}
                 >
@@ -318,7 +319,7 @@ export function ScheduleDeliveryForm({
               style={{ borderRadius: "2px" }}
             >
               <Calendar className="mr-2 h-4 w-4" />
-              Custom Date
+              {tf("when.custom")}
             </Button>
 
             {/* Custom Date Picker */}
@@ -326,7 +327,7 @@ export function ScheduleDeliveryForm({
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="customDate" className="font-mono text-xs">
-                    Date
+                    {tf("when.date")}
                   </Label>
                   <Input
                     id="customDate"
@@ -346,7 +347,7 @@ export function ScheduleDeliveryForm({
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="customTime" className="font-mono text-xs">
-                      Time
+                      {tf("when.time")}
                     </Label>
                     <TimezoneTooltip variant="clock" />
                   </div>
@@ -369,7 +370,7 @@ export function ScheduleDeliveryForm({
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong className="font-normal">Will arrive:</strong>
+                    <strong className="font-normal">{tf("arrival.willArrive")}</strong>
                     <br />
                     {formatDeliveryTime()}
                   </p>
@@ -415,7 +416,7 @@ export function ScheduleDeliveryForm({
           style={{ borderRadius: "2px" }}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Edit
+          {tf("actions.back")}
         </Button>
         <Button
           type="submit"
@@ -423,7 +424,7 @@ export function ScheduleDeliveryForm({
           className="border-2 border-charcoal bg-charcoal font-mono text-cream hover:bg-gray-800"
           style={{ borderRadius: "2px" }}
         >
-          {isSubmitting ? "Scheduling..." : "Schedule Delivery"}
+          {isSubmitting ? tf("actions.scheduling") : tf("actions.schedule")}
           <MailIcon className="ml-2 h-4 w-4" />
         </Button>
       </div>

@@ -169,5 +169,11 @@
     "secondary": "Sonsuza dek ücretsiz başla",
     "questions": "Soruların mı var?",
     "contact": "Destek ekibimizle iletişime geç"
+  },
+  "footer": {
+    "copyright": "© {year} Capsule Note™ Zaman Kapsülü Mektupları. Özen ve gizlilikle inşa edildi.",
+    "privacy": "Gizlilik",
+    "terms": "Şartlar",
+    "home": "Ana Sayfa"
   }
 }

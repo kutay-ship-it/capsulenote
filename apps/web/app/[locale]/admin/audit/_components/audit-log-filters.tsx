@@ -22,10 +22,12 @@ import {
 } from "@/components/ui/select"
 import { Filter, X } from "lucide-react"
 import { AuditEventType } from "@/server/lib/audit"
+import { useTranslations } from "next-intl"
 
 export function AuditLogFilters() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations("admin.audit.filters")
 
   const [type, setType] = useState(searchParams.get("type") || "")
   const [userId, setUserId] = useState(searchParams.get("userId") || "")
@@ -54,14 +56,14 @@ export function AuditLogFilters() {
 
   // Group event types by category
   const eventTypes = Object.values(AuditEventType)
-  const eventCategories = {
-    Checkout: eventTypes.filter((t) => t.startsWith("checkout")),
-    Subscription: eventTypes.filter((t) => t.startsWith("subscription")),
-    Payment: eventTypes.filter((t) => t.startsWith("payment") || t.startsWith("invoice") || t.startsWith("refund")),
-    GDPR: eventTypes.filter((t) => t.startsWith("gdpr")),
-    Security: eventTypes.filter((t) => t.startsWith("security")),
-    Admin: eventTypes.filter((t) => t.startsWith("admin")),
-    Other: eventTypes.filter((t) => t.startsWith("billing_portal") || t.startsWith("letter") || t.startsWith("delivery")),
+  const eventCategories: Record<string, string[]> = {
+    checkout: eventTypes.filter((et) => et.startsWith("checkout")),
+    subscription: eventTypes.filter((et) => et.startsWith("subscription")),
+    payment: eventTypes.filter((et) => et.startsWith("payment") || et.startsWith("invoice") || et.startsWith("refund")),
+    gdpr: eventTypes.filter((et) => et.startsWith("gdpr")),
+    security: eventTypes.filter((et) => et.startsWith("security")),
+    admin: eventTypes.filter((et) => et.startsWith("admin")),
+    other: eventTypes.filter((et) => et.startsWith("billing_portal") || et.startsWith("letter") || et.startsWith("delivery")),
   }
 
   return (
@@ -69,13 +71,13 @@ export function AuditLogFilters() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Filters</CardTitle>
-            <CardDescription>Filter audit events by type, user, and date range</CardDescription>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </div>
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={handleClearFilters}>
               <X className="h-4 w-4 mr-1" />
-              Clear Filters
+              {t("clearFilters")}
             </Button>
           )}
         </div>
@@ -84,18 +86,18 @@ export function AuditLogFilters() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Event Type Filter */}
           <div className="space-y-2">
-            <Label htmlFor="type">Event Type</Label>
+            <Label htmlFor="type">{t("eventType")}</Label>
             <Select value={type || "all"} onValueChange={(value) => setType(value === "all" ? "" : value)}>
               <SelectTrigger id="type">
-                <SelectValue placeholder="All types" />
+                <SelectValue placeholder={t("allTypes")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
+                <SelectItem value="all">{t("allTypes")}</SelectItem>
                 {Object.entries(eventCategories).map(([category, types]) =>
                   types.length > 0 ? (
                     <div key={category}>
                       <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                        {category}
+                        {t(`categories.${category}`)}
                       </div>
                       {types.map((eventType) => (
                         <SelectItem key={eventType} value={eventType}>
@@ -111,11 +113,11 @@ export function AuditLogFilters() {
 
           {/* User ID Filter */}
           <div className="space-y-2">
-            <Label htmlFor="userId">User ID</Label>
+            <Label htmlFor="userId">{t("userId")}</Label>
             <Input
               id="userId"
               type="text"
-              placeholder="Filter by user ID"
+              placeholder={t("userIdPlaceholder")}
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
             />
@@ -123,7 +125,7 @@ export function AuditLogFilters() {
 
           {/* Start Date Filter */}
           <div className="space-y-2">
-            <Label htmlFor="startDate">Start Date</Label>
+            <Label htmlFor="startDate">{t("startDate")}</Label>
             <Input
               id="startDate"
               type="date"
@@ -134,7 +136,7 @@ export function AuditLogFilters() {
 
           {/* End Date Filter */}
           <div className="space-y-2">
-            <Label htmlFor="endDate">End Date</Label>
+            <Label htmlFor="endDate">{t("endDate")}</Label>
             <Input
               id="endDate"
               type="date"
@@ -148,7 +150,7 @@ export function AuditLogFilters() {
         <div className="flex justify-end mt-4">
           <Button onClick={handleApplyFilters}>
             <Filter className="h-4 w-4 mr-2" />
-            Apply Filters
+            {t("applyFilters")}
           </Button>
         </div>
       </CardContent>

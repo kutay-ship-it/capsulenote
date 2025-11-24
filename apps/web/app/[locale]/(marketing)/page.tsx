@@ -13,7 +13,8 @@ import { MiniDemoLoop } from "@/components/sandbox/mini-demo-loop"
 import { Link } from "@/i18n/routing"
 import { HeroLetterEditor } from "./_components/hero-letter-editor"
 
-export default async function HomePage({ params: { locale } }: { params: { locale: Locale } }) {
+export default async function HomePage({ params }: { params: Promise<{ locale: Locale }> }) {
+  const { locale } = await params
   const { userId } = await auth()
   const isSignedIn = Boolean(userId)
   const t = await getTranslations({ locale, namespace: "marketing" })

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog"
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 
 interface AuditEvent {
   id: string
@@ -47,6 +48,8 @@ interface AuditLogTableProps {
 
 export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTableProps) {
   const [selectedEvent, setSelectedEvent] = useState<AuditEvent | null>(null)
+  const t = useTranslations("admin.audit.table")
+  const tDetails = useTranslations("admin.audit.eventDetails")
 
   const getEventTypeColor = (type: string) => {
     if (type.startsWith("gdpr")) return "destructive"
@@ -67,18 +70,18 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Timestamp</TableHead>
-              <TableHead>Event Type</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>IP Address</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("timestamp")}</TableHead>
+              <TableHead>{t("eventType")}</TableHead>
+              <TableHead>{t("user")}</TableHead>
+              <TableHead>{t("ipAddress")}</TableHead>
+              <TableHead className="text-right">{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {events.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                  No audit events found
+                  {t("noEvents")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -101,11 +104,11 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
                         {event.userEmail}
                       </Link>
                     ) : (
-                      <span className="text-sm text-muted-foreground">System</span>
+                      <span className="text-sm text-muted-foreground">{t("system")}</span>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
-                    {event.ipAddress || "N/A"}
+                    {event.ipAddress || t("notAvailable")}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
@@ -114,7 +117,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
                       onClick={() => setSelectedEvent(event)}
                     >
                       <Eye className="h-4 w-4 mr-1" />
-                      Details
+                      {t("details")}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -127,7 +130,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Page {currentPage} of {totalPages}
+          {t("pagination.pageOf", { current: currentPage, total: totalPages })}
         </p>
         <div className="flex gap-2">
           <Button
@@ -138,7 +141,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
           >
             <Link href={`/admin/audit?page=${currentPage - 1}`}>
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              {t("pagination.previous")}
             </Link>
           </Button>
           <Button
@@ -148,7 +151,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
             asChild
           >
             <Link href={`/admin/audit?page=${currentPage + 1}`}>
-              Next
+              {t("pagination.next")}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
           </Button>
@@ -159,9 +162,9 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Audit Event Details</DialogTitle>
+            <DialogTitle>{tDetails("title")}</DialogTitle>
             <DialogDescription>
-              Full details for event {selectedEvent?.id}
+              {tDetails("description", { id: selectedEvent?.id })}
             </DialogDescription>
           </DialogHeader>
 
@@ -169,39 +172,39 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Event ID</p>
+                  <p className="text-sm font-medium text-muted-foreground">{tDetails("eventId")}</p>
                   <p className="font-mono text-sm">{selectedEvent.id}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Event Type</p>
+                  <p className="text-sm font-medium text-muted-foreground">{tDetails("eventType")}</p>
                   <Badge variant={getEventTypeColor(selectedEvent.type)}>
                     {getEventTypeLabel(selectedEvent.type)}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Timestamp</p>
+                  <p className="text-sm font-medium text-muted-foreground">{tDetails("timestamp")}</p>
                   <p className="text-sm">
                     {format(new Date(selectedEvent.createdAt), "PPpp")}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">User</p>
-                  <p className="text-sm">{selectedEvent.userEmail || "System"}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{tDetails("user")}</p>
+                  <p className="text-sm">{selectedEvent.userEmail || t("system")}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">IP Address</p>
-                  <p className="font-mono text-sm">{selectedEvent.ipAddress || "N/A"}</p>
+                  <p className="text-sm font-medium text-muted-foreground">{tDetails("ipAddress")}</p>
+                  <p className="font-mono text-sm">{selectedEvent.ipAddress || t("notAvailable")}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">User Agent</p>
+                  <p className="text-sm font-medium text-muted-foreground">{tDetails("userAgent")}</p>
                   <p className="font-mono text-xs truncate">
-                    {selectedEvent.userAgent || "N/A"}
+                    {selectedEvent.userAgent || t("notAvailable")}
                   </p>
                 </div>
               </div>
 
               <div>
-                <p className="text-sm font-medium text-muted-foreground mb-2">Event Data</p>
+                <p className="text-sm font-medium text-muted-foreground mb-2">{tDetails("eventData")}</p>
                 <pre className="p-4 rounded-lg bg-muted text-xs overflow-x-auto">
                   {JSON.stringify(selectedEvent.data, null, 2)}
                 </pre>

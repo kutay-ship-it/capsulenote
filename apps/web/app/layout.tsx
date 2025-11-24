@@ -14,10 +14,11 @@ const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://calsulenote.com"
 const defaultKeywords = ["future self", "time capsule", "letters", "journaling", "reflection"]
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: "metadata" })
   const keywords = (t.raw?.("keywords") as string[]) || defaultKeywords
 
@@ -60,11 +61,12 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: Readonly<{
   children: ReactNode
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }>) {
+  const { locale } = await params
   const messages = await getMessages()
   const clerkLocalization = locale === "tr" ? trTR : enUS
 

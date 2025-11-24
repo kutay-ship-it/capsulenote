@@ -16,7 +16,7 @@ import {
 } from "../../../../../apps/web/server/lib/stripe-helpers"
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
 import { prisma } from "../../../../../apps/web/server/lib/db"
-import { linkPendingSubscription } from "../../../../../apps/web/app/subscribe/actions"
+import { linkPendingSubscription } from "../../../../../apps/web/app/[locale]/subscribe/actions"
 import { sendPaymentConfirmationEmail } from "../../../../../apps/web/server/lib/emails/payment-confirmation"
 import { env } from "../../../../../apps/web/env.mjs"
 import { stripe } from "../../../../../apps/web/server/providers/stripe/client"

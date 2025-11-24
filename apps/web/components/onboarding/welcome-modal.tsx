@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 interface WelcomeModalProps {
   isOpen: boolean
@@ -25,6 +26,7 @@ const TOTAL_STEPS = 3
 
 export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps) {
   const router = useRouter()
+  const t = useTranslations("onboarding.modal")
   const [currentStep, setCurrentStep] = useState(1)
 
   const handleNext = () => {
@@ -62,7 +64,7 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
             className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
           >
             <X className="h-5 w-5 text-charcoal" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{t("close")}</span>
           </button>
 
           {/* Progress indicator */}
@@ -80,7 +82,7 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
           </div>
 
           <Badge variant="outline" className="mb-2 font-mono text-xs">
-            Step {currentStep} of {TOTAL_STEPS}
+            {t("stepOf", { current: currentStep, total: TOTAL_STEPS })}
           </Badge>
         </div>
 
@@ -94,11 +96,10 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
 
               <DialogHeader className="space-y-3">
                 <DialogTitle className="font-mono text-3xl font-bold uppercase tracking-wide text-charcoal">
-                  Welcome to Capsule Note! 👋
+                  {t("step1.title")}
                 </DialogTitle>
                 <DialogDescription className="font-mono text-base text-gray-700 leading-relaxed max-w-lg mx-auto">
-                  Write letters to your future self and receive them at the perfect moment.
-                  Your thoughts are encrypted and delivered exactly when you need them.
+                  {t("step1.description")}
                 </DialogDescription>
               </DialogHeader>
             </div>
@@ -108,9 +109,9 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
               <Card className="p-4 border-2 border-charcoal bg-white" style={{ borderRadius: "2px" }}>
                 <div className="flex flex-col items-center text-center space-y-2">
                   <Shield className="w-6 h-6 text-charcoal" />
-                  <h3 className="font-mono text-sm font-bold uppercase">Encrypted</h3>
+                  <h3 className="font-mono text-sm font-bold uppercase">{t("step1.benefits.encrypted.title")}</h3>
                   <p className="font-mono text-xs text-gray-secondary">
-                    AES-256-GCM encryption keeps your letters private
+                    {t("step1.benefits.encrypted.description")}
                   </p>
                 </div>
               </Card>
@@ -118,9 +119,9 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
               <Card className="p-4 border-2 border-charcoal bg-white" style={{ borderRadius: "2px" }}>
                 <div className="flex flex-col items-center text-center space-y-2">
                   <Calendar className="w-6 h-6 text-charcoal" />
-                  <h3 className="font-mono text-sm font-bold uppercase">Timed</h3>
+                  <h3 className="font-mono text-sm font-bold uppercase">{t("step1.benefits.timed.title")}</h3>
                   <p className="font-mono text-xs text-gray-secondary">
-                    Delivered exactly when you schedule them
+                    {t("step1.benefits.timed.description")}
                   </p>
                 </div>
               </Card>
@@ -128,9 +129,9 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
               <Card className="p-4 border-2 border-charcoal bg-white" style={{ borderRadius: "2px" }}>
                 <div className="flex flex-col items-center text-center space-y-2">
                   <Mail className="w-6 h-6 text-charcoal" />
-                  <h3 className="font-mono text-sm font-bold uppercase">Reliable</h3>
+                  <h3 className="font-mono text-sm font-bold uppercase">{t("step1.benefits.reliable.title")}</h3>
                   <p className="font-mono text-xs text-gray-secondary">
-                    99.95% on-time delivery guarantee
+                    {t("step1.benefits.reliable.description")}
                   </p>
                 </div>
               </Card>
@@ -142,7 +143,7 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                 className="border-2 border-charcoal bg-charcoal font-mono text-cream hover:bg-gray-800 px-8"
                 style={{ borderRadius: "2px" }}
               >
-                Next
+                {t("navigation.next")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -154,10 +155,10 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
           <div className="p-8 space-y-6">
             <div className="text-center space-y-3">
               <DialogTitle className="font-mono text-2xl font-bold uppercase tracking-wide text-charcoal">
-                How It Works
+                {t("step2.title")}
               </DialogTitle>
               <DialogDescription className="font-mono text-sm text-gray-secondary">
-                Three simple steps to send a letter to your future self
+                {t("step2.description")}
               </DialogDescription>
             </div>
 
@@ -173,10 +174,10 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Edit3 className="w-5 h-5 text-charcoal" />
-                      <h3 className="font-mono text-lg font-bold uppercase">Write Your Letter</h3>
+                      <h3 className="font-mono text-lg font-bold uppercase">{t("step2.steps.write.title")}</h3>
                     </div>
                     <p className="font-mono text-sm text-gray-700">
-                      Pour your heart out. We'll keep it safe with military-grade encryption.
+                      {t("step2.steps.write.description")}
                     </p>
                   </div>
                 </div>
@@ -192,10 +193,10 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Calendar className="w-5 h-5 text-charcoal" />
-                      <h3 className="font-mono text-lg font-bold uppercase">Choose When</h3>
+                      <h3 className="font-mono text-lg font-bold uppercase">{t("step2.steps.schedule.title")}</h3>
                     </div>
                     <p className="font-mono text-sm text-gray-700">
-                      6 months? 1 year? 10 years? You decide when you want to receive it.
+                      {t("step2.steps.schedule.description")}
                     </p>
                   </div>
                 </div>
@@ -211,10 +212,10 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Mail className="w-5 h-5 text-charcoal" />
-                      <h3 className="font-mono text-lg font-bold uppercase">We Deliver</h3>
+                      <h3 className="font-mono text-lg font-bold uppercase">{t("step2.steps.deliver.title")}</h3>
                     </div>
                     <p className="font-mono text-sm text-gray-700">
-                      Securely delivered to your inbox at the perfect time. Exactly when you need it.
+                      {t("step2.steps.deliver.description")}
                     </p>
                   </div>
                 </div>
@@ -228,14 +229,14 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                 className="border-2 border-charcoal font-mono"
                 style={{ borderRadius: "2px" }}
               >
-                ← Previous
+                {t("navigation.previous")}
               </Button>
               <Button
                 onClick={handleNext}
                 className="border-2 border-charcoal bg-charcoal font-mono text-cream hover:bg-gray-800"
                 style={{ borderRadius: "2px" }}
               >
-                Next
+                {t("navigation.next")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -251,42 +252,42 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
               </div>
 
               <DialogTitle className="font-mono text-2xl font-bold uppercase tracking-wide text-charcoal">
-                Ready to Start?
+                {t("step3.title")}
               </DialogTitle>
               <DialogDescription className="font-mono text-sm text-gray-secondary">
-                Here are some prompts to help you get started
+                {t("step3.description")}
               </DialogDescription>
             </div>
 
             {/* Writing Prompts */}
             <Card className="p-6 border-2 border-charcoal bg-white" style={{ borderRadius: "2px" }}>
               <h4 className="font-mono text-sm font-bold uppercase text-charcoal mb-4">
-                Try writing about:
+                {t("step3.promptsTitle")}
               </h4>
               <ul className="space-y-2 font-mono text-sm text-gray-700">
                 <li className="flex items-start gap-2">
                   <span className="text-charcoal">•</span>
-                  <span>What you're grateful for today</span>
+                  <span>{t("step3.prompts.grateful")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-charcoal">•</span>
-                  <span>Goals you want to achieve this year</span>
+                  <span>{t("step3.prompts.goals")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-charcoal">•</span>
-                  <span>Advice for your future self</span>
+                  <span>{t("step3.prompts.advice")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-charcoal">•</span>
-                  <span>A moment you want to remember forever</span>
+                  <span>{t("step3.prompts.moment")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-charcoal">•</span>
-                  <span>Challenges you're facing right now</span>
+                  <span>{t("step3.prompts.challenges")}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-charcoal">•</span>
-                  <span>What you hope your life looks like in the future</span>
+                  <span>{t("step3.prompts.future")}</span>
                 </li>
               </ul>
             </Card>
@@ -298,7 +299,7 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                 className="flex-1 border-2 border-charcoal font-mono"
                 style={{ borderRadius: "2px" }}
               >
-                Explore Dashboard
+                {t("step3.buttons.explore")}
               </Button>
               <Button
                 onClick={handleStartWriting}
@@ -306,7 +307,7 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                 style={{ borderRadius: "2px" }}
               >
                 <Edit3 className="mr-2 h-4 w-4" />
-                Start Writing
+                {t("step3.buttons.start")}
               </Button>
             </div>
 
@@ -315,7 +316,7 @@ export function WelcomeModal({ isOpen, onClose, onComplete }: WelcomeModalProps)
                 onClick={handlePrevious}
                 className="font-mono text-xs text-gray-secondary hover:text-charcoal underline"
               >
-                ← Back
+                {t("navigation.back")}
               </button>
             </div>
           </div>

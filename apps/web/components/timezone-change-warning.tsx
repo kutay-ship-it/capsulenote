@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { AlertTriangle } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { getUserTimezone, getTimezoneAbbr } from "@/lib/utils"
@@ -24,6 +25,7 @@ interface TimezoneChangeWarningProps {
 export function TimezoneChangeWarning({
   savedTimezone,
 }: TimezoneChangeWarningProps) {
+  const t = useTranslations("components.timezoneWarning")
   const [currentTimezone, setCurrentTimezone] = useState<string | null>(null)
   const [dismissed, setDismissed] = useState(false)
 
@@ -67,16 +69,20 @@ export function TimezoneChangeWarning({
     >
       <AlertTriangle className="h-5 w-5 text-charcoal" strokeWidth={2} />
       <AlertTitle className="font-mono text-base font-normal uppercase tracking-wide text-charcoal">
-        Timezone Changed
+        {t("title")}
       </AlertTitle>
       <AlertDescription className="font-mono text-sm text-gray-secondary">
         <p className="mb-3">
-          We've detected your timezone has changed from <strong className="text-charcoal">{savedTimezone}</strong> to{" "}
-          <strong className="text-charcoal">{currentTimezone}</strong>.
+          {t.rich("detected", {
+            savedTimezone,
+            currentTimezone,
+            strong: (chunks) => <strong className="text-charcoal">{chunks}</strong>,
+          })}
         </p>
         <p className="mb-4">
-          Your scheduled letter deliveries will still arrive at the <strong className="text-charcoal">same local time</strong> you originally selected,
-          but this will be a different time in your new timezone.
+          {t.rich("explanation", {
+            strong: (chunks) => <strong className="text-charcoal">{chunks}</strong>,
+          })}
         </p>
         <div className="flex flex-wrap gap-3">
           <Button
@@ -85,7 +91,7 @@ export function TimezoneChangeWarning({
             className="border-2 border-charcoal bg-charcoal font-mono text-xs uppercase text-white hover:bg-gray-800"
             style={{ borderRadius: "2px" }}
           >
-            Update Timezone in Settings
+            {t("updateButton")}
           </Button>
           <Button
             onClick={handleDismiss}
@@ -94,7 +100,7 @@ export function TimezoneChangeWarning({
             className="border-2 border-charcoal font-mono text-xs uppercase"
             style={{ borderRadius: "2px" }}
           >
-            Dismiss for Now
+            {t("dismissButton")}
           </Button>
         </div>
       </AlertDescription>

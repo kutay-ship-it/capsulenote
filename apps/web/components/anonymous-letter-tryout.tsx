@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -32,6 +33,7 @@ import { cn, getUserTimezone } from "@/lib/utils"
 
 export function AnonymousLetterTryout() {
   const router = useRouter()
+  const t = useTranslations("forms.anonymousTryout")
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
   const [email, setEmail] = useState("")
@@ -143,10 +145,10 @@ export function AnonymousLetterTryout() {
               <div className="flex-1 space-y-3">
                 <div>
                   <h3 className="font-mono text-lg font-normal uppercase tracking-wide text-charcoal">
-                    Nice writing! 👏
+                    {t("signUpPrompt.title")}
                   </h3>
                   <p className="font-mono text-sm text-gray-secondary mt-1">
-                    You've written {wordCount} words. Want to schedule this letter to your future self?
+                    {t("signUpPrompt.description", { wordCount })}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -155,7 +157,7 @@ export function AnonymousLetterTryout() {
                     className="border-2 border-charcoal bg-charcoal font-mono text-sm uppercase hover:bg-gray-800"
                     style={{ borderRadius: "2px" }}
                   >
-                    Sign Up to Save →
+                    {t("signUpPrompt.signUp")}
                   </Button>
                   <Button
                     variant="outline"
@@ -163,11 +165,11 @@ export function AnonymousLetterTryout() {
                     className="border-2 border-charcoal font-mono text-sm uppercase"
                     style={{ borderRadius: "2px" }}
                   >
-                    Keep Writing
+                    {t("signUpPrompt.keepWriting")}
                   </Button>
                 </div>
                 <p className="font-mono text-xs text-gray-secondary">
-                  ✓ Free forever &nbsp; • &nbsp; ✓ No credit card needed &nbsp; • &nbsp; ✓ Draft saved locally
+                  {t("signUpPrompt.features")}
                 </p>
               </div>
             </div>
@@ -185,21 +187,21 @@ export function AnonymousLetterTryout() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
-                Start Writing
+                {t("editor.title")}
               </h2>
               <p className="font-mono text-sm text-gray-secondary">
-                No account needed • Saved locally
+                {t("editor.subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-2">
               {showSaveIndicator ? (
                 <div className="flex items-center gap-2 text-sm">
                   <Check className="h-4 w-4 text-green-600" />
-                  <span className="font-mono text-xs text-gray-secondary">Saved</span>
+                  <span className="font-mono text-xs text-gray-secondary">{t("editor.saved")}</span>
                 </div>
               ) : lastSaved ? (
                 <span className="font-mono text-xs text-gray-secondary">
-                  Saved {formatLastSaved(lastSaved)}
+                  {t("editor.savedTime", { time: formatLastSaved(lastSaved) })}
                 </span>
               ) : null}
             </div>
@@ -208,10 +210,10 @@ export function AnonymousLetterTryout() {
           {/* Title Input */}
           <div className="space-y-2">
             <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-              Letter Title (optional)
+              {t("fields.titleLabel")}
             </Label>
             <Input
-              placeholder="Give your letter a title..."
+              placeholder={t("fields.titlePlaceholder")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="border-2 border-charcoal font-mono focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -222,17 +224,17 @@ export function AnonymousLetterTryout() {
           {/* Email Input */}
           <div className="space-y-2">
             <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-              Your Email (for scheduling)
+              {t("fields.emailLabel")}
             </Label>
             <Input
-              placeholder="you@example.com"
+              placeholder={t("fields.emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="border-2 border-charcoal font-mono focus-visible:ring-0 focus-visible:ring-offset-0"
               style={{ borderRadius: "2px" }}
             />
             <p className="font-mono text-xs text-gray-secondary">
-              We’ll lock this email for checkout and sign-up so your delivery is tied to you.
+              {t("fields.emailDescription")}
             </p>
           </div>
 
@@ -240,18 +242,18 @@ export function AnonymousLetterTryout() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                Your Letter
+                {t("fields.letterLabel")}
               </Label>
               <Badge
                 variant="outline"
                 className="border-2 border-charcoal font-mono text-xs"
                 style={{ borderRadius: "2px" }}
               >
-                {wordCount} {wordCount === 1 ? 'word' : 'words'}
+                {wordCount === 1 ? t("fields.wordCount", { count: wordCount }) : t("fields.wordCountPlural", { count: wordCount })}
               </Badge>
             </div>
             <Textarea
-              placeholder="Dear Future Me,&#10;&#10;Start writing here... Your thoughts will be saved automatically every 10 seconds."
+              placeholder={t("fields.letterPlaceholder")}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={16}
@@ -269,10 +271,10 @@ export function AnonymousLetterTryout() {
           <div className="flex flex-col gap-3 border-t-2 border-charcoal pt-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <p className="font-mono text-xs text-gray-secondary">
-                ✓ Auto-saves every 10 seconds
+                {t("features.autoSave")}
               </p>
               <p className="font-mono text-xs text-gray-secondary">
-                ✓ Draft kept for 7 days
+                {t("features.draftKept")}
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -284,7 +286,7 @@ export function AnonymousLetterTryout() {
                 style={{ borderRadius: "2px" }}
               >
                 <Save className="mr-2 h-4 w-4" />
-                Save Now
+                {t("actions.saveNow")}
               </Button>
               <Button
                 onClick={handleSendAndSchedule}
@@ -292,7 +294,7 @@ export function AnonymousLetterTryout() {
                 className="border-2 border-charcoal bg-charcoal font-mono text-sm uppercase hover:bg-gray-800"
                 style={{ borderRadius: "2px" }}
               >
-                Send & Schedule →
+                {t("actions.sendSchedule")}
               </Button>
               {wordCount >= 10 && (
                 <Button
@@ -300,7 +302,7 @@ export function AnonymousLetterTryout() {
                   className="border-2 border-charcoal font-mono text-sm uppercase"
                   style={{ borderRadius: "2px" }}
                 >
-                  Sign Up First
+                  {t("actions.signUpFirst")}
                 </Button>
               )}
             </div>
@@ -315,16 +317,16 @@ export function AnonymousLetterTryout() {
       >
         <CardContent className="p-6">
           <h3 className="font-mono text-lg font-normal uppercase tracking-wide text-charcoal mb-4">
-            💡 Writing Prompts
+            {t("prompts.title")}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {[
-              "What am I grateful for today?",
-              "What challenges am I facing?",
-              "What are my goals for the future?",
-              "What advice would I give myself?",
-              "What do I want to remember?",
-              "How have I grown recently?",
+              t("prompts.items.grateful"),
+              t("prompts.items.challenges"),
+              t("prompts.items.goals"),
+              t("prompts.items.advice"),
+              t("prompts.items.remember"),
+              t("prompts.items.grown"),
             ].map((prompt, idx) => (
               <button
                 key={idx}

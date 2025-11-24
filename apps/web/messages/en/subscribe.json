@@ -7,5 +7,52 @@
     "error": {
       "invalid": "Please enter a valid email address"
     }
+  },
+  "error": {
+    "metadata": {
+      "title": "Payment Error - Capsule Note",
+      "description": "There was an issue with your payment. Please try again or contact support."
+    },
+    "whatToDoNext": "What to Do Next",
+    "needHelp": "Need Help?",
+    "contactSupport": "Contact our support team at",
+    "errorCode": "Error Code:",
+    "returnHome": "Return to Homepage",
+    "types": {
+      "payment_failed": {
+        "title": "Payment Failed",
+        "description": "Your payment could not be processed. This could be due to insufficient funds, an expired card, or other payment issues. Please check your payment method and try again.",
+        "action": "Try Again",
+        "secondaryAction": "Contact Support"
+      },
+      "session_expired": {
+        "title": "Checkout Session Expired",
+        "description": "Your checkout session has expired for security reasons. Sessions are valid for 24 hours. Please start a new checkout to subscribe.",
+        "action": "Start Over"
+      },
+      "email_mismatch": {
+        "title": "Email Mismatch",
+        "description": "The email address in your checkout session doesn't match your account. For security, you must sign in with the same email used for payment.",
+        "action": "Sign In",
+        "secondaryAction": "Start New Checkout"
+      },
+      "email_not_verified": {
+        "title": "Email Not Verified",
+        "description": "You must verify your email address before your subscription can be activated. Check your inbox for a verification email from Capsule Note.",
+        "action": "Resend Verification Email"
+      },
+      "pending_subscription_not_found": {
+        "title": "Subscription Not Found",
+        "description": "We couldn't find your pending subscription. This might mean it has expired or was already activated. Please contact support if you believe this is an error.",
+        "action": "Check Billing",
+        "secondaryAction": "Contact Support"
+      },
+      "unknown": {
+        "title": "Something Went Wrong",
+        "description": "An unexpected error occurred during checkout. Please try again or contact support if the problem persists.",
+        "action": "Try Again",
+        "secondaryAction": "Contact Support"
+      }
+    }
   }
 }

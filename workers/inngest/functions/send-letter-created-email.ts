@@ -2,6 +2,8 @@ import { inngest } from "../client"
 import { prisma } from "@dearme/prisma"
 import { NonRetriableError } from "inngest"
 import { generateLetterCreatedEmail, generateLetterCreatedEmailText } from "../templates/letter-created-email"
+import type { Locale } from "../lib/i18n/load-messages"
+import { loadMessages } from "../lib/i18n/load-messages"
 import { getEmailSender } from "../lib/email-config"
 
 /**
@@ -161,20 +163,27 @@ export const sendLetterCreatedEmail = inngest.createFunction(
     const dashboardUrl = `${baseUrl}/dashboard?utm_source=email&utm_medium=notification&utm_campaign=letter_created`
 
     // Generate email HTML and text
-    const emailHtml = generateLetterCreatedEmail({
+    const userLocale: Locale =
+      ((user.profile as any)?.preferredLocale as Locale | undefined) || "en"
+
+    const messages = await loadMessages(userLocale)
+
+    const emailHtml = await generateLetterCreatedEmail({
       letterTitle,
       letterId,
       userFirstName: user.profile?.displayName ?? undefined,
       letterUrl,
       dashboardUrl,
+      locale: userLocale,
     })
 
-    const emailText = generateLetterCreatedEmailText({
+    const emailText = await generateLetterCreatedEmailText({
       letterTitle,
       letterId,
       userFirstName: user.profile?.displayName ?? undefined,
       letterUrl,
       dashboardUrl,
+      locale: userLocale,
     })
 
     // Send email with idempotency key (one email per letter creation)
@@ -204,7 +213,7 @@ export const sendLetterCreatedEmail = inngest.createFunction(
         const result = await provider.send({
           from: sender.from,
           to: user.email!,
-          subject: `Your letter "${letterTitle}" has been created ✓`,
+          subject: messages.emails.letterCreated.subject.replace("{title}", letterTitle),
           html: emailHtml,
           text: emailText,
           headers: {

@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Mail } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import {
   Field,
@@ -54,6 +55,8 @@ export function LetterEditorForm({
   accentColor = "yellow",
   isSubmitting = false,
 }: LetterEditorFormProps) {
+  const t = useTranslations("forms.letterEditor")
+
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [body, setBody] = React.useState(initialData?.body || "")
   const [recipientEmail, setRecipientEmail] = React.useState(
@@ -78,11 +81,11 @@ export function LetterEditorForm({
   const wordCount = body.trim() ? body.trim().split(/\s+/).length : 0
 
   const datePresets = [
-    { label: "6 Months", months: 6 },
-    { label: "1 Year", months: 12 },
-    { label: "3 Years", months: 36 },
-    { label: "5 Years", months: 60 },
-    { label: "10 Years", months: 120 },
+    { label: t("datePresets.6months"), months: 6, key: "6months" },
+    { label: t("datePresets.1year"), months: 12, key: "1year" },
+    { label: t("datePresets.3years"), months: 36, key: "3years" },
+    { label: t("datePresets.5years"), months: 60, key: "5years" },
+    { label: t("datePresets.10years"), months: 120, key: "10years" },
   ]
 
   // Sync with updated initial data (e.g., resume draft)
@@ -106,11 +109,11 @@ export function LetterEditorForm({
     initialData?.recipientName,
   ])
 
-  const handlePresetDate = (months: number, label: string) => {
+  const handlePresetDate = (months: number, key: string) => {
     const today = new Date()
     const futureDate = new Date(today.setMonth(today.getMonth() + months))
     setDeliveryDate(futureDate)
-    setSelectedPreset(label)
+    setSelectedPreset(key)
     setShowCustomDate(false)
     if (errors.deliveryDate) {
       setErrors({ ...errors, deliveryDate: undefined })
@@ -156,31 +159,31 @@ export function LetterEditorForm({
     const newErrors: Partial<Record<keyof LetterFormData, string>> = {}
 
     if (!title.trim()) {
-      newErrors.title = "Title is required"
+      newErrors.title = t("title.required")
     }
 
     if (!body.trim()) {
-      newErrors.body = "Letter content is required"
+      newErrors.body = t("content.required")
     }
 
     if (!recipientEmail.trim()) {
-      newErrors.recipientEmail = "Email address is required"
+      newErrors.recipientEmail = t("delivery.emailRequired")
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
-      newErrors.recipientEmail = "Invalid email address"
+      newErrors.recipientEmail = t("delivery.emailInvalid")
     }
 
     if (recipientType === "other" && !recipientName?.trim()) {
-      newErrors.recipientName = "Recipient name is required"
+      newErrors.recipientName = t("recipient.nameRequired")
     }
 
     if (!deliveryDate) {
-      newErrors.deliveryDate = "Delivery date is required"
+      newErrors.deliveryDate = t("delivery.dateRequired")
     } else {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
       if (deliveryDate < today) {
-        newErrors.deliveryDate = "Delivery date must be in the future"
+        newErrors.deliveryDate = t("delivery.dateFuture")
       }
     }
 
@@ -234,7 +237,7 @@ export function LetterEditorForm({
         <FieldGroup>
           {/* Recipient */}
           <FieldSet>
-            <FieldLegend variant="label">Recipient</FieldLegend>
+            <FieldLegend variant="label">{t("recipient.legend")}</FieldLegend>
             <div className="grid gap-3 sm:grid-cols-2">
               <Button
                 type="button"
@@ -243,7 +246,7 @@ export function LetterEditorForm({
                 className="border-2 border-charcoal font-mono"
                 style={{ borderRadius: "2px" }}
               >
-                To myself
+                {t("recipient.toMyself")}
               </Button>
               <Button
                 type="button"
@@ -252,13 +255,13 @@ export function LetterEditorForm({
                 className="border-2 border-charcoal font-mono"
                 style={{ borderRadius: "2px" }}
               >
-                To someone else
+                {t("recipient.toSomeone")}
               </Button>
             </div>
 
             {recipientType === "other" && (
               <Field data-invalid={!!errors.recipientName}>
-                <FieldLabel htmlFor="recipient-name">Recipient name</FieldLabel>
+                <FieldLabel htmlFor="recipient-name">{t("recipient.nameLabel")}</FieldLabel>
                 <Input
                   id="recipient-name"
                   value={recipientName}
@@ -266,7 +269,7 @@ export function LetterEditorForm({
                     setRecipientName(e.target.value)
                     if (errors.recipientName) setErrors({ ...errors, recipientName: undefined })
                   }}
-                  placeholder="Their name"
+                  placeholder={t("recipient.namePlaceholder")}
                   aria-invalid={!!errors.recipientName}
                 />
                 {errors.recipientName && <FieldError>{errors.recipientName}</FieldError>}
@@ -276,7 +279,7 @@ export function LetterEditorForm({
 
           {/* Letter Title */}
           <Field data-invalid={!!errors.title}>
-            <FieldLabel htmlFor="letter-title">Letter Title</FieldLabel>
+            <FieldLabel htmlFor="letter-title">{t("title.label")}</FieldLabel>
             <Input
               id="letter-title"
               value={title}
@@ -284,12 +287,12 @@ export function LetterEditorForm({
                 setTitle(e.target.value)
                 if (errors.title) setErrors({ ...errors, title: undefined })
               }}
-              placeholder="My Letter to Future Me..."
+              placeholder={t("title.placeholder")}
               aria-invalid={!!errors.title}
               maxLength={100}
             />
             <FieldDescription>
-              Give your letter a memorable title (max 100 characters)
+              {t("title.description")}
             </FieldDescription>
             {errors.title && <FieldError>{errors.title}</FieldError>}
           </Field>
@@ -297,10 +300,10 @@ export function LetterEditorForm({
           {/* Letter Content */}
           <Field data-invalid={!!errors.body}>
             <div className="flex items-center justify-between gap-2">
-              <FieldLabel htmlFor="letter-body">Letter Content</FieldLabel>
+              <FieldLabel htmlFor="letter-body">{t("content.label")}</FieldLabel>
               <div className="flex gap-2 font-mono text-[10px] text-gray-secondary uppercase sm:gap-3 sm:text-xs">
-                <span className="whitespace-nowrap">{wordCount} words</span>
-                <span className="whitespace-nowrap">{characterCount} chars</span>
+                <span className="whitespace-nowrap">{t("content.words", { count: wordCount })}</span>
+                <span className="whitespace-nowrap">{t("content.chars", { count: characterCount })}</span>
               </div>
             </div>
             <Textarea
@@ -310,23 +313,23 @@ export function LetterEditorForm({
                 setBody(e.target.value)
                 if (errors.body) setErrors({ ...errors, body: undefined })
               }}
-              placeholder="Dear Future Me,&#10;&#10;I'm writing this letter to remind you of..."
+              placeholder={t("content.placeholder")}
               aria-invalid={!!errors.body}
               className="min-h-[280px] sm:min-h-[350px] md:min-h-[400px]"
             />
             <FieldDescription>
-              Write your letter to your future self. Be honest, be kind, be you.
+              {t("content.description")}
             </FieldDescription>
             {errors.body && <FieldError>{errors.body}</FieldError>}
           </Field>
 
           {/* Delivery Settings */}
           <FieldSet>
-            <FieldLegend variant="label">Delivery Settings</FieldLegend>
+            <FieldLegend variant="label">{t("delivery.legend")}</FieldLegend>
             <FieldGroup>
               {/* Delivery Type */}
               <Field>
-                <FieldLabel>Delivery Type</FieldLabel>
+                <FieldLabel>{t("delivery.typeLabel")}</FieldLabel>
                 <div className="grid grid-cols-2 gap-3">
                   <Button
                     type="button"
@@ -335,7 +338,7 @@ export function LetterEditorForm({
                     className="border-2 border-charcoal font-mono"
                     style={{ borderRadius: "2px" }}
                   >
-                    Email
+                    {t("delivery.email")}
                   </Button>
                   <Button
                     type="button"
@@ -344,14 +347,14 @@ export function LetterEditorForm({
                     className="border-2 border-charcoal font-mono opacity-60"
                     style={{ borderRadius: "2px" }}
                   >
-                    Physical (soon)
+                    {t("delivery.physical")}
                   </Button>
                 </div>
               </Field>
 
               {/* Recipient Email */}
               <Field data-invalid={!!errors.recipientEmail}>
-                <FieldLabel htmlFor="recipient-email">Your Email Address</FieldLabel>
+                <FieldLabel htmlFor="recipient-email">{t("delivery.emailLabel")}</FieldLabel>
                 <Input
                   id="recipient-email"
                   type="email"
@@ -361,11 +364,11 @@ export function LetterEditorForm({
                     if (errors.recipientEmail)
                       setErrors({ ...errors, recipientEmail: undefined })
                   }}
-                  placeholder="future-me@example.com"
+                  placeholder={t("delivery.emailPlaceholder")}
                   aria-invalid={!!errors.recipientEmail}
                 />
                 <FieldDescription>
-                  Where should we send your letter when it's time?
+                  {t("delivery.emailDescription")}
                 </FieldDescription>
                 {errors.recipientEmail && (
                   <FieldError>{errors.recipientEmail}</FieldError>
@@ -374,20 +377,20 @@ export function LetterEditorForm({
 
               {/* Delivery Date */}
               <Field data-invalid={!!errors.deliveryDate}>
-                <FieldLabel>Delivery Date</FieldLabel>
+                <FieldLabel>{t("delivery.dateLabel")}</FieldLabel>
                 <FieldDescription className="mb-4">
-                  Choose when your future self should receive this letter
+                  {t("delivery.dateDescription")}
                 </FieldDescription>
 
                 {/* Date Preset Buttons */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
                   {datePresets.map((preset) => {
-                    const isSelected = selectedPreset === preset.label
+                    const isSelected = selectedPreset === preset.key
                     return (
                       <button
-                        key={preset.label}
+                        key={preset.key}
                         type="button"
-                        onClick={() => handlePresetDate(preset.months, preset.label)}
+                        onClick={() => handlePresetDate(preset.months, preset.key)}
                         className={cn(
                           "border-2 border-charcoal px-3 py-2.5 font-mono text-xs uppercase tracking-wide transition-all duration-200 hover:-translate-x-1 hover:-translate-y-1 active:translate-x-0 active:translate-y-0 sm:px-4 sm:py-3 sm:text-sm",
                           isSelected
@@ -421,7 +424,7 @@ export function LetterEditorForm({
                         : "-4px 4px 0px 0px rgb(56, 56, 56)",
                     }}
                   >
-                    Custom Date
+                    {t("datePresets.custom")}
                   </button>
                 </div>
 
@@ -431,7 +434,7 @@ export function LetterEditorForm({
                     <DatePicker
                       date={deliveryDate}
                       onSelect={handleDateSelect}
-                      placeholder="Choose a custom date"
+                      placeholder={t("datePicker.placeholder")}
                       minDate={new Date()}
                     />
                   </div>
@@ -441,7 +444,7 @@ export function LetterEditorForm({
                 {deliveryDate && (
                   <div className="mt-3 p-3 bg-bg-blue-pale border-2 border-duck-blue sm:mt-4 sm:p-4" style={{ borderRadius: "2px" }}>
                     <p className="font-mono text-xs text-charcoal sm:text-sm">
-                      <span className="uppercase text-duck-blue font-normal">Scheduled for:</span>{" "}
+                      <span className="uppercase text-duck-blue font-normal">{t("datePicker.scheduledFor")}</span>{" "}
                       {deliveryDate.toLocaleDateString("en-US", {
                         weekday: "long",
                         year: "numeric",
@@ -470,13 +473,13 @@ export function LetterEditorForm({
             disabled={isSubmitting}
           >
             <Mail className="mr-2 h-4 w-4" strokeWidth={2} />
-            {isSubmitting ? "Creating..." : "Schedule Letter"}
+            {isSubmitting ? t("submit.creating") : t("submit.schedule")}
           </Button>
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button type="button" variant="outline" className="h-12 px-4 text-base sm:h-auto sm:px-6">
-                Clear
+                {t("clear.button")}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent
@@ -488,11 +491,10 @@ export function LetterEditorForm({
             >
               <AlertDialogHeader>
                 <AlertDialogTitle className="font-mono text-2xl uppercase tracking-wide text-charcoal">
-                  Clear Form?
+                  {t("clear.title")}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="font-mono text-sm text-gray-secondary">
-                  This will delete all your progress on this letter. This action cannot be undone.
-                  Are you sure you want to clear everything?
+                  {t("clear.description")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="gap-3">
@@ -500,7 +502,7 @@ export function LetterEditorForm({
                   className="border-2 border-charcoal bg-white hover:bg-off-white font-mono uppercase"
                   style={{ borderRadius: "2px" }}
                 >
-                  Cancel
+                  {t("clear.cancel")}
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleClearForm}
@@ -510,7 +512,7 @@ export function LetterEditorForm({
                     boxShadow: "-4px 4px 0px 0px rgb(56, 56, 56)",
                   }}
                 >
-                  Clear Everything
+                  {t("clear.confirm")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

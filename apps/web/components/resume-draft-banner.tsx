@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { getAnonymousDraft, clearAnonymousDraft } from "@/lib/localStorage-letter"
@@ -10,6 +11,7 @@ interface ResumeDraftBannerProps {
 }
 
 export function ResumeDraftBanner({ onResume }: ResumeDraftBannerProps) {
+  const t = useTranslations("components.resumeDraftBanner")
   const [hasDraft, setHasDraft] = useState(false)
   const [draftData, setDraftData] = useState<{ title?: string; body?: string; recipientEmail?: string; deliveryDate?: string }>({})
 
@@ -30,9 +32,9 @@ export function ResumeDraftBanner({ onResume }: ResumeDraftBannerProps) {
 
   return (
     <Alert className="border-2 border-charcoal">
-      <AlertTitle>Continue where you left off?</AlertTitle>
+      <AlertTitle>{t("title")}</AlertTitle>
       <AlertDescription className="flex flex-wrap items-center gap-3">
-        We found a saved draft from your last visit.
+        {t("description")}
         <Button
           size="sm"
           onClick={() => {
@@ -41,7 +43,7 @@ export function ResumeDraftBanner({ onResume }: ResumeDraftBannerProps) {
           }}
           className="border-2 border-charcoal bg-charcoal text-cream hover:bg-gray-800"
         >
-          Resume draft
+          {t("resume")}
         </Button>
         <Button
           size="sm"
@@ -52,7 +54,7 @@ export function ResumeDraftBanner({ onResume }: ResumeDraftBannerProps) {
           }}
           className="border-2 border-charcoal"
         >
-          Start fresh
+          {t("startFresh")}
         </Button>
       </AlertDescription>
     </Alert>

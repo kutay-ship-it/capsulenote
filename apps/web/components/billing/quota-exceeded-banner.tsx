@@ -3,6 +3,7 @@ import { getEntitlements } from "@/server/lib/entitlements"
 import { AlertTriangle, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { getTranslations } from "next-intl/server"
 
 export async function QuotaExceededBanner() {
   const user = await getCurrentUser()
@@ -25,6 +26,8 @@ export async function QuotaExceededBanner() {
 
   if (!shouldShowBanner) return null
 
+  const t = await getTranslations("billing.quotaBanner")
+
   return (
     <div
       className="border-2 border-charcoal bg-duck-yellow p-4 sm:p-6 shadow-sm"
@@ -40,18 +43,18 @@ export async function QuotaExceededBanner() {
           </div>
           <div className="space-y-2">
             <h3 className="font-mono text-lg font-normal uppercase tracking-wide text-charcoal sm:text-xl">
-              {limits.lettersReached ? "Free Plan Limit Reached" : "Approaching Plan Limit"}
+              {limits.lettersReached ? t("limitReached") : t("approaching")}
             </h3>
             <p className="font-mono text-sm text-gray-secondary">
               {limits.lettersReached
-                ? `You've used all ${features.maxLettersPerMonth} letters for this month. Upgrade to Pro for unlimited letters.`
-                : `You've used ${usage.lettersThisMonth} of ${features.maxLettersPerMonth} letters this month. Upgrade to Pro for unlimited access.`}
+                ? t("limitReachedDescription", { max: features.maxLettersPerMonth })
+                : t("approachingDescription", { used: usage.lettersThisMonth, max: features.maxLettersPerMonth })}
             </p>
 
             {/* Usage Progress Bar */}
             <div className="space-y-1">
               <div className="flex items-center justify-between font-mono text-xs text-gray-secondary">
-                <span>Letters Used</span>
+                <span>{t("lettersUsed")}</span>
                 <span>{usage.lettersThisMonth} / {features.maxLettersPerMonth}</span>
               </div>
               <div className="h-2 w-full border border-charcoal bg-white">
@@ -71,7 +74,7 @@ export async function QuotaExceededBanner() {
             className="border-2 border-charcoal bg-lime font-mono text-sm uppercase tracking-wide hover:bg-lime/90"
             style={{ borderRadius: "2px" }}
           >
-            Upgrade to Pro
+            {t("upgrade")}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </Link>

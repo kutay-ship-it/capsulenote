@@ -1,0 +1,63 @@
+{
+  "export": {
+    "button": "Verilerimi Indir",
+    "loading": "Disari aktariliyor...",
+    "toast": {
+      "success": {
+        "title": "Veri Aktarimi Tamamlandi",
+        "description": "Verilerin basariyla {filename} dosyasina aktarildi"
+      },
+      "error": {
+        "title": "Aktarim Basarisiz",
+        "description": "Beklenmeyen bir hata olustu. Lutfen tekrar dene."
+      }
+    }
+  },
+  "delete": {
+    "button": "Verilerimi Sil",
+    "loading": "Siliniyor...",
+    "confirmButton": "Her Seyi Kalici Olarak Sil",
+    "cancel": "Iptal",
+    "dialog": {
+      "title": "Hesabini Kalici Olarak Silmek Istiyor musun?",
+      "warning": "Bu islem kalicidir ve geri alinamaz.",
+      "willBeDeleted": {
+        "title": "Asagidakiler silinecek:",
+        "items": {
+          "profile": "Profil ve hesap ayarlarin",
+          "letters": "Tum mektuplar ve planlanmis teslimatlar",
+          "subscription": "Abonelik kayitlari",
+          "usage": "Kullanim istatistikleri ve gonderim adresleri",
+          "auth": "Kimlik dogrulama hesabin"
+        }
+      },
+      "willBeRetained": {
+        "title": "Saklanacaklar:",
+        "items": {
+          "payments": "Odeme kayitlari (anonimlestirilmis, yasal olarak 7 yil saklanmasi gerekli)",
+          "audit": "Denetim kayitlari (guvenlik ve uyumluluk icin gerekli)"
+        }
+      },
+      "beforeProceeding": {
+        "title": "Devam etmeden once:",
+        "items": {
+          "export": "Bir kopya istiyorsan once verilerini disari aktar",
+          "subscription": "Aktif abonelikler hemen iptal edilecek",
+          "signOut": "Otomatik olarak cikis yaptirilacaksin"
+        }
+      },
+      "confirmPrompt": "Onaylamak icin {keyword} yaz:",
+      "confirmPlaceholder": "Onaylamak icin DELETE yaz"
+    },
+    "toast": {
+      "success": {
+        "title": "Hesap Silindi",
+        "description": "Verilerin kalici olarak silindi. Simdi cikis yaptirilacaksin."
+      },
+      "error": {
+        "title": "Silme Basarisiz",
+        "description": "Beklenmeyen bir hata olustu. Lutfen yardim icin destekle iletisime gec."
+      }
+    }
+  }
+}

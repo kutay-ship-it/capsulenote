@@ -1,0 +1,53 @@
+{
+  "success": {
+    "title": "Capsule Note Pro'ya Hosgeldin!",
+    "subtitle": "Aboneligin basariyla aktif edildi",
+    "subscriptionDetails": "Abonelik Detaylari",
+    "badge": {
+      "trial": "Deneme Aktif",
+      "active": "Aktif"
+    },
+    "planName": "Capsule Note Pro",
+    "planDescription": "Sinirsiz mektup, e-posta teslimati ve fiziksel posta kredisi",
+    "trial": {
+      "title": "14 Gunluk Ucretsiz Deneme",
+      "endsOn": "Deneme suren {date} tarihinde sona eriyor ({days} gun kaldi)",
+      "endingSoon": "Deneme suren yakinda sona eriyor",
+      "noBilling": "Deneme suren bitene kadar ucret alinmayacak. O zamana kadar istedigin zaman iptal edebilirsin."
+    },
+    "features": {
+      "title": "Dahil olanlar:",
+      "unlimited": "Gelecekteki kendine sinirsiz mektup yaz",
+      "emailDelivery": "Sinirsiz e-posta teslimati planla",
+      "mailCredits": "Ayda 2 fiziksel posta kredisi",
+      "support": "Oncelikli destek"
+    },
+    "buttons": {
+      "dashboard": "Panele Git",
+      "writeLetter": "Ilk Mektubunu Yaz"
+    },
+    "confirmEmail": "Gelen kutuna bir onay e-postasi gonderildi.",
+    "manageSubscription": "Aboneligini istedigin zaman {link} uzerinden yonetebilirsin.",
+    "billingSettings": "fatura ayarlari"
+  },
+  "cancel": {
+    "title": "Odeme Iptal Edildi",
+    "description": "Sorun degil! Fiyatlandirma sayfasina donup hazir oldugunda tekrar deneyebilirsin.",
+    "freePlanInfo": "Hesabin ucretsiz planda kalmaya devam ediyor. Istedigin zaman yukseltme yaparak sunlari acabilirsin:",
+    "features": {
+      "unlimited": "Sinirsiz mektup ve e-posta teslimati",
+      "mail": "Fiziksel posta teslimati",
+      "support": "Oncelikli destek"
+    },
+    "buttons": {
+      "dashboard": "Panele Don",
+      "pricing": "Fiyatlandirmayi Gor"
+    },
+    "support": "Sorularin mi var? {link}",
+    "contactSupport": "Destekle iletisime gec"
+  },
+  "metadata": {
+    "cancelTitle": "Odeme Iptal Edildi | Capsule Note",
+    "cancelDescription": "Odeme iptal edildi"
+  }
+}

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Trash2, Loader2, AlertTriangle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useTranslations } from "next-intl"
 
 export function DeleteDataButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -39,6 +40,7 @@ export function DeleteDataButton() {
   const [isDeleting, setIsDeleting] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
+  const t = useTranslations("privacy.delete")
 
   const isConfirmed = confirmText === "DELETE"
 
@@ -53,7 +55,7 @@ export function DeleteDataButton() {
       if (!result.success) {
         toast({
           variant: "destructive",
-          title: "Deletion Failed",
+          title: t("toast.error.title"),
           description: result.error.message,
         })
         setIsDeleting(false)
@@ -62,8 +64,8 @@ export function DeleteDataButton() {
 
       // Success - user will be signed out by Clerk
       toast({
-        title: "Account Deleted",
-        description: "Your data has been permanently deleted. You will now be signed out.",
+        title: t("toast.success.title"),
+        description: t("toast.success.description"),
       })
 
       // Redirect to homepage after a brief delay
@@ -75,8 +77,8 @@ export function DeleteDataButton() {
       console.error("[Delete Data] Unexpected error:", error)
       toast({
         variant: "destructive",
-        title: "Deletion Failed",
-        description: "An unexpected error occurred. Please contact support for assistance.",
+        title: t("toast.error.title"),
+        description: t("toast.error.description"),
       })
       setIsDeleting(false)
     }
@@ -91,7 +93,7 @@ export function DeleteDataButton() {
           className="w-full sm:w-auto"
         >
           <Trash2 className="mr-2 h-4 w-4" />
-          Delete My Data
+          {t("button")}
         </Button>
       </AlertDialogTrigger>
 
@@ -99,48 +101,48 @@ export function DeleteDataButton() {
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            Permanently Delete Your Account?
+            {t("dialog.title")}
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-4 text-left">
             <p className="font-semibold text-foreground">
-              This action is permanent and cannot be undone.
+              {t("dialog.warning")}
             </p>
 
             <div className="space-y-2">
-              <p className="font-medium text-foreground">The following will be deleted:</p>
+              <p className="font-medium text-foreground">{t("dialog.willBeDeleted.title")}</p>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Your profile and account settings</li>
-                <li>All letters and their scheduled deliveries</li>
-                <li>Subscription records</li>
-                <li>Usage statistics and shipping addresses</li>
-                <li>Your authentication account</li>
+                <li>{t("dialog.willBeDeleted.items.profile")}</li>
+                <li>{t("dialog.willBeDeleted.items.letters")}</li>
+                <li>{t("dialog.willBeDeleted.items.subscription")}</li>
+                <li>{t("dialog.willBeDeleted.items.usage")}</li>
+                <li>{t("dialog.willBeDeleted.items.auth")}</li>
               </ul>
             </div>
 
             <div className="space-y-2">
-              <p className="font-medium text-foreground">What will be retained:</p>
+              <p className="font-medium text-foreground">{t("dialog.willBeRetained.title")}</p>
               <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>Payment records (anonymized, required by law for 7 years)</li>
-                <li>Audit logs (required for security and compliance)</li>
+                <li>{t("dialog.willBeRetained.items.payments")}</li>
+                <li>{t("dialog.willBeRetained.items.audit")}</li>
               </ul>
             </div>
 
             <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
-              <p className="font-semibold text-yellow-900 mb-2">Before proceeding:</p>
+              <p className="font-semibold text-yellow-900 mb-2">{t("dialog.beforeProceeding.title")}</p>
               <ul className="list-disc list-inside space-y-1 text-sm text-yellow-800">
-                <li>Export your data first if you want to keep a copy</li>
-                <li>Active subscriptions will be canceled immediately</li>
-                <li>You will be signed out automatically</li>
+                <li>{t("dialog.beforeProceeding.items.export")}</li>
+                <li>{t("dialog.beforeProceeding.items.subscription")}</li>
+                <li>{t("dialog.beforeProceeding.items.signOut")}</li>
               </ul>
             </div>
 
             <div className="space-y-2 pt-4">
               <p className="font-semibold text-foreground">
-                Type <span className="font-mono bg-muted px-2 py-1 rounded">DELETE</span> to confirm:
+                {t("dialog.confirmPrompt", { keyword: <span className="font-mono bg-muted px-2 py-1 rounded">DELETE</span> })}
               </p>
               <Input
                 type="text"
-                placeholder="Type DELETE to confirm"
+                placeholder={t("dialog.confirmPlaceholder")}
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value.toUpperCase())}
                 disabled={isDeleting}
@@ -153,7 +155,7 @@ export function DeleteDataButton() {
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>
-            Cancel
+            {t("cancel")}
           </AlertDialogCancel>
           <Button
             variant="destructive"
@@ -163,12 +165,12 @@ export function DeleteDataButton() {
             {isDeleting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Deleting...
+                {t("loading")}
               </>
             ) : (
               <>
                 <Trash2 className="mr-2 h-4 w-4" />
-                Permanently Delete Everything
+                {t("confirmButton")}
               </>
             )}
           </Button>

@@ -18,7 +18,8 @@ import { PricingFAQ } from "./_components/pricing-faq"
 import type { Locale } from "@/i18n/routing"
 import type { FeatureCategory } from "./_components/feature-matrix"
 
-export async function generateMetadata({ params: { locale } }: { params: { locale: Locale } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: Locale }> }): Promise<Metadata> {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: "pricing.metadata" })
   return {
     title: t("title"),
@@ -31,7 +32,8 @@ export async function generateMetadata({ params: { locale } }: { params: { local
   }
 }
 
-export default async function PricingPage({ params: { locale } }: { params: { locale: Locale } }) {
+export default async function PricingPage({ params }: { params: Promise<{ locale: Locale }> }) {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: "pricing" })
 
   const tiers = (t.raw("tiers") as any[]).map((tier) => {
@@ -223,27 +225,26 @@ export default async function PricingPage({ params: { locale } }: { params: { lo
       <footer className="border-t-2 border-charcoal bg-off-white py-6 sm:py-8">
         <div className="container px-4 flex flex-col items-center gap-3 text-center font-mono text-xs text-gray-secondary sm:gap-4 sm:text-sm md:flex-row md:justify-between md:text-left">
           <p className="max-w-md sm:max-w-none">
-            © {new Date().getFullYear()} Capsule Note™ Time-Capsule Letters. Built with intention
-            and privacy in mind.
+            {t("footer.copyright", { year: new Date().getFullYear() })}
           </p>
           <div className="flex gap-4 sm:gap-6">
             <Link
               href="/privacy"
               className="uppercase tracking-wide hover:opacity-70 transition-opacity"
             >
-              Privacy
+              {t("footer.privacy")}
             </Link>
             <Link
               href="/terms"
               className="uppercase tracking-wide hover:opacity-70 transition-opacity"
             >
-              Terms
+              {t("footer.terms")}
             </Link>
             <Link
               href="/"
               className="uppercase tracking-wide hover:opacity-70 transition-opacity"
             >
-              Home
+              {t("footer.home")}
             </Link>
           </div>
         </div>

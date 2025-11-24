@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { createLetter } from "@/server/actions/letters"
 import { scheduleDelivery } from "@/server/actions/deliveries"
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button"
 export function DashboardLetterEditor() {
   const router = useRouter()
   const { toast } = useToast()
+  const t = useTranslations("forms.dashboardEditor")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [draftData, setDraftData] = useState<LetterFormData | null>(null)
   const [showResumePrompt, setShowResumePrompt] = useState(false)
@@ -117,10 +119,10 @@ export function DashboardLetterEditor() {
         } catch (scheduleError) {
           toast({
             variant: "destructive",
-            title: "Delivery Not Scheduled",
+            title: t("toasts.deliveryNotScheduled.title"),
             description: scheduleError instanceof Error
               ? scheduleError.message
-              : "Letter saved, but scheduling failed. Please try again from the letter page.",
+              : t("toasts.deliveryNotScheduled.description"),
           })
         }
 
@@ -128,8 +130,11 @@ export function DashboardLetterEditor() {
 
         // Show success toast
         toast({
-          title: "Letter Created",
-          description: `"${data.title}" has been saved to your encrypted vault${data.deliveryDate ? " and scheduled." : "."}`,
+          title: t("toasts.letterCreated.title"),
+          description: t("toasts.letterCreated.description", {
+            title: data.title,
+            scheduled: data.deliveryDate ? t("toasts.letterCreated.scheduled") : "",
+          }),
         })
 
         // Redirect to letter detail page
@@ -138,24 +143,24 @@ export function DashboardLetterEditor() {
         // Handle error cases
         if (result.error.code === 'QUOTA_EXCEEDED') {
           toast({
-            title: "Quota Exceeded",
+            title: t("toasts.quotaExceeded.title"),
             description: result.error.message,
             variant: "destructive",
             action: {
-              label: "Upgrade",
+              label: t("toasts.upgrade"),
               onClick: () => router.push('/pricing'),
             },
           })
         } else if (result.error.code === 'VALIDATION_FAILED') {
           toast({
-            title: "Validation Error",
+            title: t("toasts.validationError.title"),
             description: result.error.message,
             variant: "destructive",
           })
         } else {
           toast({
-            title: "Error",
-            description: result.error.message || "Failed to create letter. Please try again.",
+            title: t("toasts.error.title"),
+            description: result.error.message || t("toasts.error.description"),
             variant: "destructive",
           })
         }
@@ -164,8 +169,8 @@ export function DashboardLetterEditor() {
       // Handle unexpected errors
       console.error('Letter creation error:', error)
       toast({
-        title: "Unexpected Error",
-        description: "Something went wrong. Please try again.",
+        title: t("toasts.unexpectedError.title"),
+        description: t("toasts.unexpectedError.description"),
         variant: "destructive",
       })
     } finally {
@@ -177,9 +182,9 @@ export function DashboardLetterEditor() {
     <div className="space-y-4">
       {showResumePrompt && draftData && (
         <Alert>
-          <AlertTitle>Continue where you left off?</AlertTitle>
+          <AlertTitle>{t("resumePrompt.title")}</AlertTitle>
           <AlertDescription className="flex flex-wrap items-center gap-3">
-            We found a saved draft from your last visit.
+            {t("resumePrompt.description")}
             <Button
               size="sm"
               onClick={() => {
@@ -188,7 +193,7 @@ export function DashboardLetterEditor() {
               }}
               className="border-2 border-charcoal bg-charcoal text-cream hover:bg-gray-800"
             >
-              Resume draft
+              {t("resumePrompt.resume")}
             </Button>
             <Button
               size="sm"
@@ -201,7 +206,7 @@ export function DashboardLetterEditor() {
               }}
               className="border-2 border-charcoal"
             >
-              Start fresh
+              {t("resumePrompt.startFresh")}
             </Button>
           </AlertDescription>
         </Alert>
