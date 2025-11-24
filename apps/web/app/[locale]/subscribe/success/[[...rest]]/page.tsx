@@ -12,6 +12,7 @@
 
 import * as React from "react"
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { redirect } from "@/i18n/routing"
 import { currentUser } from "@clerk/nextjs/server"
 import { stripe } from "@/server/providers/stripe/client"
@@ -24,16 +25,19 @@ import { CheckCircle, AlertCircle } from "lucide-react"
 
 import { CustomSignUpForm } from "@/components/auth/custom-sign-up"
 
-export const metadata: Metadata = {
-  title: "Payment Successful - Capsule Note",
-  description: "Your payment was successful. Complete your signup to activate your subscription.",
-  alternates: {
-    canonical: "/subscribe/success",
-  },
-  robots: {
-    index: false,
-    follow: false,
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("subscribe.success")
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+    alternates: {
+      canonical: "/subscribe/success",
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+  }
 }
 
 interface SuccessPageProps {
@@ -43,6 +47,7 @@ interface SuccessPageProps {
 }
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
+  const t = await getTranslations("subscribe.success")
   const params = await searchParams
   const { session_id } = params
 
@@ -89,16 +94,15 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         <div className="mx-auto max-w-2xl space-y-6">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Payment Not Complete</AlertTitle>
+            <AlertTitle>{t("paymentNotComplete.title")}</AlertTitle>
             <AlertDescription>
-              Your payment has not been completed yet. Please check your email for payment
-              instructions or try again.
+              {t("paymentNotComplete.description")}
             </AlertDescription>
           </Alert>
 
           <div className="text-center">
             <Button asChild variant="secondary">
-              <a href="/subscribe">Return to Pricing</a>
+              <a href="/subscribe">{t("returnToPricing")}</a>
             </Button>
           </div>
         </div>
@@ -128,30 +132,30 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                 <CheckCircle className="h-10 w-10 text-duck-blue" />
               </div>
               <CardTitle className="font-mono text-3xl uppercase tracking-wide">
-                Payment Successful!
+                {t("paymentSuccessful")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 text-center">
               <p className="font-mono text-base leading-relaxed text-charcoal">
-                Your subscription to <strong>{planName}</strong> has been activated.
+                {t("subscriptionActivated", { planName })}
                 <br />
-                You can now start writing letters to your future self.
+                {t("startWriting")}
               </p>
 
               <div className="rounded-lg border-2 border-charcoal bg-off-white p-4">
                 <p className="font-mono text-sm text-charcoal">
-                  <strong>What's Next:</strong>
+                  <strong>{t("whatsNext")}</strong>
                   <br />
-                  Head to your dashboard to write your first letter.
+                  {t("headToDashboard")}
                 </p>
               </div>
 
               <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto">
-                <a href="/dashboard">Go to Dashboard</a>
+                <a href="/dashboard">{t("goToDashboard")}</a>
               </Button>
 
               <p className="font-mono text-xs text-gray-secondary">
-                Redirecting automatically in 5 seconds...
+                {t("redirecting")}
               </p>
             </CardContent>
           </Card>
@@ -173,10 +177,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       <div className="container px-4 py-12 sm:px-6">
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Unable to Retrieve Email</AlertTitle>
+          <AlertTitle>{t("unableToRetrieveEmail.title")}</AlertTitle>
           <AlertDescription>
-            We couldn't retrieve your email from the payment session. Please contact support with
-            session ID: {session_id}
+            {t("unableToRetrieveEmail.description", { sessionId: session_id })}
           </AlertDescription>
         </Alert>
       </div>
@@ -190,10 +193,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
         <div className="container px-4 py-4">
           <Alert className="border-2 border-green-600 bg-green-50">
             <CheckCircle className="h-4 w-4 text-green-600" />
-            <AlertTitle className="text-green-900">Payment Successful!</AlertTitle>
+            <AlertTitle className="text-green-900">{t("paymentSuccessful")}</AlertTitle>
             <AlertDescription className="text-green-800">
-              Your payment for <strong>{planName}</strong> has been processed. Complete your signup
-              below to activate your subscription.
+              {t("paymentProcessed", { planName })}
             </AlertDescription>
           </Alert>
         </div>
@@ -203,9 +205,9 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       <div className="flex flex-1 items-center justify-center px-4 py-12">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight">Complete Your Signup</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t("completeSignup.title")}</h1>
             <p className="mt-2 text-muted-foreground">
-              Create your account to activate your subscription
+              {t("completeSignup.description")}
             </p>
           </div>
 
@@ -218,8 +220,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
           {/* Security Notice */}
           <div className="rounded-lg border border-muted bg-muted/50 p-4">
             <p className="text-sm text-muted-foreground">
-              <strong>🔒 Security:</strong> You must verify your email address before your
-              subscription is activated. Check your inbox for a verification email.
+              <strong>🔒</strong> {t("securityNotice")}
             </p>
           </div>
         </div>

@@ -1,4 +1,118 @@
 {
+  "metadata": {
+    "title": "Subscribe - Capsule Note",
+    "description": "Choose your plan and start writing letters to your future self"
+  },
+  "hero": {
+    "badge": "Yearly Plans",
+    "title": "Choose Your Capsule",
+    "description": "Two simple yearly plans. No free tier, no ads—just dependable deliveries to your future self (and others)."
+  },
+  "emailCapture": {
+    "heading": "Enter Your Email",
+    "description": "This email will be used for payment and account creation.",
+    "lockedNotice": "It cannot be changed after payment (locked for security)."
+  },
+  "emailLocked": {
+    "title": "Email Locked",
+    "description": "Your email {email} will be used for payment and account creation. This cannot be changed after payment for security reasons.",
+    "changeEmail": "Change email"
+  },
+  "paymentStatus": {
+    "incomplete": {
+      "title": "Incomplete Payment",
+      "description": "You have an incomplete payment for {plan} plan. You can resume your checkout by selecting a plan below."
+    },
+    "error": {
+      "title": "Error",
+      "description": "There was an issue with your subscription. Please contact support if this persists."
+    }
+  },
+  "plans": {
+    "digital": {
+      "name": "Digital Capsule",
+      "description": "For personal letters to yourself—purely digital delivery.",
+      "features": {
+        "emailDeliveries": "6 email deliveries / year",
+        "scheduleYears": "Schedule up to 100 years out",
+        "timezoneReminders": "Timezone-aware reminders",
+        "encryptedStorage": "Encrypted storage"
+      }
+    },
+    "paper": {
+      "name": "Paper & Pixels",
+      "description": "For gifting and tangible keepsakes—email plus premium mail.",
+      "features": {
+        "emailDeliveries": "24 email deliveries / year",
+        "physicalLetters": "3 physical letters / year",
+        "addressReminders": "Address confirmation reminders",
+        "priorityRouting": "Priority delivery routing"
+      }
+    }
+  },
+  "pricingCard": {
+    "popular": "Most Popular",
+    "perInterval": "/{interval}",
+    "emailLocked": "Email locked:",
+    "cannotChange": "Cannot be changed after payment (security)",
+    "subscribe": "Subscribe to {planName}"
+  },
+  "trustSignals": {
+    "security": {
+      "title": "Bank-Level Security",
+      "description": "AES-256 encryption"
+    },
+    "payments": {
+      "title": "Secure Payments",
+      "description": "Powered by Stripe"
+    },
+    "cancel": {
+      "title": "Cancel Anytime",
+      "description": "No long-term contracts"
+    }
+  },
+  "button": {
+    "loading": "Loading...",
+    "subscribe": "Subscribe to {planName}"
+  },
+  "toast": {
+    "alreadyPaid": {
+      "title": "Payment already completed",
+      "description": "Please sign up to activate your subscription"
+    },
+    "checkoutFailed": {
+      "title": "Failed to start checkout",
+      "description": "An unexpected error occurred. Please try again."
+    }
+  },
+  "success": {
+    "metadata": {
+      "title": "Payment Successful - Capsule Note",
+      "description": "Your payment was successful. Complete your signup to activate your subscription."
+    },
+    "paymentNotComplete": {
+      "title": "Payment Not Complete",
+      "description": "Your payment has not been completed yet. Please check your email for payment instructions or try again."
+    },
+    "returnToPricing": "Return to Pricing",
+    "paymentSuccessful": "Payment Successful!",
+    "subscriptionActivated": "Your subscription to {planName} has been activated.",
+    "startWriting": "You can now start writing letters to your future self.",
+    "whatsNext": "What's Next:",
+    "headToDashboard": "Head to your dashboard to write your first letter.",
+    "goToDashboard": "Go to Dashboard",
+    "redirecting": "Redirecting automatically in 5 seconds...",
+    "unableToRetrieveEmail": {
+      "title": "Unable to Retrieve Email",
+      "description": "We couldn't retrieve your email from the payment session. Please contact support with session ID: {sessionId}"
+    },
+    "completeSignup": {
+      "title": "Complete Your Signup",
+      "description": "Create your account to activate your subscription"
+    },
+    "paymentProcessed": "Your payment for {planName} has been processed. Complete your signup below to activate your subscription.",
+    "securityNotice": "You must verify your email address before your subscription is activated. Check your inbox for a verification email."
+  },
   "emailForm": {
     "label": "Email Address",
     "placeholder": "you@example.com",

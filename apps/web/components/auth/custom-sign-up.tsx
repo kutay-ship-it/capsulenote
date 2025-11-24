@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSignUp } from "@clerk/nextjs"
+import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,6 +19,7 @@ type Step = "form" | "verify"
 export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
   const router = useRouter()
   const { isLoaded, signUp, setActive } = useSignUp()
+  const t = useTranslations("auth.signUp")
 
   const [email, setEmail] = useState(lockedEmail || "")
   const [password, setPassword] = useState("")
@@ -39,7 +41,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
     setIsSubmitting(true)
 
     if (lockedEmail && email !== lockedEmail) {
-      setError("Email must match the one used at checkout.")
+      setError(t("errors.emailMismatch"))
       setIsSubmitting(false)
       return
     }
@@ -58,7 +60,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" })
       setStep("verify")
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Failed to start sign up.")
+      setError(err?.errors?.[0]?.message || t("errors.startFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -79,10 +81,10 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
         await setActive({ session: completeSignUp.createdSessionId })
         router.push("/dashboard")
       } else {
-        setError("Verification incomplete. Please try again.")
+        setError(t("errors.verificationIncomplete"))
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Invalid or expired code.")
+      setError(err?.errors?.[0]?.message || t("errors.invalidCode"))
     } finally {
       setIsSubmitting(false)
     }
@@ -94,7 +96,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
 
     // Google OAuth doesn't support locked email flow - show error
     if (lockedEmail) {
-      setError("Please use email/password signup to complete your checkout with this email.")
+      setError(t("errors.googleNotAllowed"))
       return
     }
 
@@ -105,7 +107,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
         redirectUrlComplete: "/dashboard",
       })
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || "Google sign up failed.")
+      setError(err?.errors?.[0]?.message || t("errors.googleFailed"))
     }
   }
 
@@ -113,7 +115,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
     <div className="space-y-4">
       {error && (
         <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -123,7 +125,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
           {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label>Email</Label>
+              <Label>{t("email.label")}</Label>
               <Input
                 type="email"
                 value={email}
@@ -134,13 +136,13 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
               />
               {lockedEmail && (
                 <p className="text-xs text-muted-foreground">
-                  Email locked from checkout: {lockedEmail}
+                  {t("email.locked", { email: lockedEmail })}
                 </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label>Password</Label>
+              <Label>{t("password.label")}</Label>
               <Input
                 type="password"
                 value={password}
@@ -154,7 +156,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
             <div id="clerk-captcha" data-cl-theme="auto" data-cl-size="flexible" />
 
             <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
-              {isSubmitting ? "Creating account..." : "Continue"}
+              {isSubmitting ? t("submitting") : t("submit")}
             </Button>
           </form>
 
@@ -167,7 +169,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
                   <span className="w-full border-t" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or</span>
+                  <span className="bg-background px-2 text-muted-foreground">{t("divider")}</span>
                 </div>
               </div>
 
@@ -197,7 +199,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                Continue with Google
+                {t("google")}
               </Button>
             </>
           )}
@@ -205,7 +207,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
       ) : (
         <form onSubmit={handleVerify} className="space-y-4">
           <div className="space-y-2">
-            <Label>Verification Code</Label>
+            <Label>{t("verification.label")}</Label>
             <Input
               type="text"
               value={code}
@@ -216,11 +218,11 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
               maxLength={6}
             />
             <p className="text-xs text-muted-foreground">
-              Enter the 6-digit code sent to {email}.
+              {t("verification.helper", { email })}
             </p>
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
-            {isSubmitting ? "Verifying..." : "Verify & Continue"}
+            {isSubmitting ? t("verifying") : t("verify")}
           </Button>
         </form>
       )}

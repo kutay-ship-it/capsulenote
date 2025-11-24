@@ -12,6 +12,7 @@
 "use client"
 
 import { useTransition } from "react"
+import { useTranslations } from "next-intl"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { createAnonymousCheckout } from "../actions"
@@ -47,6 +48,7 @@ export function SubscribeButton({
   className,
 }: SubscribeButtonProps) {
   const [isPending, startTransition] = useTransition()
+  const t = useTranslations("subscribe")
 
   function handleClick() {
     startTransition(async () => {
@@ -75,8 +77,8 @@ export function SubscribeButton({
           case "ALREADY_PAID":
             toast({
               variant: "destructive",
-              title: "Payment already completed",
-              description: "Please sign up to activate your subscription",
+              title: t("toast.alreadyPaid.title"),
+              description: t("toast.alreadyPaid.description"),
             })
             // Redirect to signup with email
             setTimeout(() => {
@@ -87,8 +89,8 @@ export function SubscribeButton({
           default:
             toast({
               variant: "destructive",
-              title: "Failed to start checkout",
-              description: errorMessage || "An unexpected error occurred. Please try again.",
+              title: t("toast.checkoutFailed.title"),
+              description: errorMessage || t("toast.checkoutFailed.description"),
             })
         }
       }
@@ -106,10 +108,10 @@ export function SubscribeButton({
       {isPending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Loading...
+          {t("button.loading")}
         </>
       ) : (
-        `Subscribe to ${planName}`
+        t("button.subscribe", { planName })
       )}
     </Button>
   )

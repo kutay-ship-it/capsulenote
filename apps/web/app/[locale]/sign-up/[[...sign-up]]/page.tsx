@@ -1,5 +1,6 @@
 import { redirect } from "@/i18n/routing"
 import { auth } from "@clerk/nextjs/server"
+import { getTranslations } from "next-intl/server"
 import { Card, CardContent } from "@/components/ui/card"
 import { CustomSignUpForm } from "@/components/auth/custom-sign-up"
 
@@ -16,6 +17,7 @@ export default async function SignUpPage({ searchParams }: PageProps) {
     redirect("/dashboard")
   }
 
+  const t = await getTranslations("auth.signUpPage")
   const params = await searchParams
   const lockedEmail = params.email
 
@@ -23,17 +25,16 @@ export default async function SignUpPage({ searchParams }: PageProps) {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20">
       <div className="w-full max-w-md px-4">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Create Account</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="mt-2 text-muted-foreground">
-            Start writing letters to your future self today
+            {t("subtitle")}
           </p>
         </div>
         {lockedEmail && (
           <Card className="mb-6 border-2 border-charcoal">
             <CardContent className="p-4">
               <p className="font-mono text-xs text-charcoal">
-                Signing up with <strong>{lockedEmail}</strong>. This email was used at checkout and
-                cannot be changed for this account.
+                {t("lockedEmailNotice", { email: lockedEmail })}
               </p>
             </CardContent>
           </Card>

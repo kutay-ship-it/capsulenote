@@ -1,4 +1,118 @@
 {
+  "metadata": {
+    "title": "Abone Ol - Capsule Note",
+    "description": "Planini sec ve gelecekteki kendine mektup yazmaya basla"
+  },
+  "hero": {
+    "badge": "Yillik Planlar",
+    "title": "Kapsulunu Sec",
+    "description": "Iki basit yillik plan. Ucretsiz katman yok, reklam yok—sadece gelecekteki kendine (ve baskalarına) guvenilir teslimatlar."
+  },
+  "emailCapture": {
+    "heading": "E-postani Gir",
+    "description": "Bu e-posta odeme ve hesap olusturma icin kullanilacak.",
+    "lockedNotice": "Odeme sonrasi degistirilemez (guvenlik icin kilitli)."
+  },
+  "emailLocked": {
+    "title": "E-posta Kilitli",
+    "description": "{email} e-postan odeme ve hesap olusturma icin kullanilacak. Guvenlik nedeniyle odeme sonrasi degistirilemez.",
+    "changeEmail": "E-postayi degistir"
+  },
+  "paymentStatus": {
+    "incomplete": {
+      "title": "Tamamlanmamis Odeme",
+      "description": "{plan} plani icin tamamlanmamis bir odemen var. Asagidan bir plan secerek odemeye devam edebilirsin."
+    },
+    "error": {
+      "title": "Hata",
+      "description": "Aboneliginde bir sorun olustu. Sorun devam ederse lutfen destekle iletisime gec."
+    }
+  },
+  "plans": {
+    "digital": {
+      "name": "Dijital Kapsul",
+      "description": "Kendine kisisel mektuplar icin—tamamen dijital teslimat.",
+      "features": {
+        "emailDeliveries": "Yilda 6 e-posta teslimat",
+        "scheduleYears": "100 yil sonrasina kadar planla",
+        "timezoneReminders": "Saat dilimi duyarli hatirlatmalar",
+        "encryptedStorage": "Sifrelenmis depolama"
+      }
+    },
+    "paper": {
+      "name": "Kagit ve Piksel",
+      "description": "Hediye ve somut hatiralor icin—e-posta arti premium posta.",
+      "features": {
+        "emailDeliveries": "Yilda 24 e-posta teslimat",
+        "physicalLetters": "Yilda 3 fiziksel mektup",
+        "addressReminders": "Adres onay hatirlatmalari",
+        "priorityRouting": "Oncelikli teslimat yonlendirme"
+      }
+    }
+  },
+  "pricingCard": {
+    "popular": "En Populer",
+    "perInterval": "/{interval}",
+    "emailLocked": "E-posta kilitli:",
+    "cannotChange": "Odeme sonrasi degistirilemez (guvenlik)",
+    "subscribe": "{planName} Planina Abone Ol"
+  },
+  "trustSignals": {
+    "security": {
+      "title": "Banka Duzeyinde Guvenlik",
+      "description": "AES-256 sifreleme"
+    },
+    "payments": {
+      "title": "Guvenli Odemeler",
+      "description": "Stripe tarafindan destekleniyor"
+    },
+    "cancel": {
+      "title": "Istedigin Zaman Iptal Et",
+      "description": "Uzun vadeli sozlesme yok"
+    }
+  },
+  "button": {
+    "loading": "Yukleniyor...",
+    "subscribe": "{planName} Planina Abone Ol"
+  },
+  "toast": {
+    "alreadyPaid": {
+      "title": "Odeme zaten tamamlandi",
+      "description": "Aboneligini aktif etmek icin kaydol"
+    },
+    "checkoutFailed": {
+      "title": "Odeme baslatilmadi",
+      "description": "Beklenmeyen bir hata olustu. Lutfen tekrar dene."
+    }
+  },
+  "success": {
+    "metadata": {
+      "title": "Odeme Basarili - Capsule Note",
+      "description": "Odemen basarili. Aboneligini aktif etmek icin kaydini tamamla."
+    },
+    "paymentNotComplete": {
+      "title": "Odeme Tamamlanmadi",
+      "description": "Odemen henuz tamamlanmadi. Lutfen odeme talimatlari icin e-postani kontrol et veya tekrar dene."
+    },
+    "returnToPricing": "Fiyatlandirmaya Don",
+    "paymentSuccessful": "Odeme Basarili!",
+    "subscriptionActivated": "{planName} aboneligin aktif edildi.",
+    "startWriting": "Artik gelecekteki kendine mektup yazmaya baslayabilirsin.",
+    "whatsNext": "Simdi Ne Yapmaliyim:",
+    "headToDashboard": "Ilk mektubunu yazmak icin paneline git.",
+    "goToDashboard": "Panele Git",
+    "redirecting": "5 saniye icinde otomatik yonlendiriliyorsun...",
+    "unableToRetrieveEmail": {
+      "title": "E-posta Alinamadi",
+      "description": "Odeme oturumundan e-postani alamadik. Lutfen oturum kimligiyle destekle iletisime gec: {sessionId}"
+    },
+    "completeSignup": {
+      "title": "Kaydini Tamamla",
+      "description": "Aboneligini aktif etmek icin hesabini olustur"
+    },
+    "paymentProcessed": "{planName} icin odemen islendi. Aboneligini aktif etmek icin asagidan kaydini tamamla.",
+    "securityNotice": "Aboneligin aktif edilmeden once e-posta adresini dogrulaman gerekiyor. Gelen kutunu dogrulama e-postasi icin kontrol et."
+  },
   "emailForm": {
     "label": "E-posta adresi",
     "placeholder": "sen@example.com",

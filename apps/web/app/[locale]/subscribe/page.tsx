@@ -12,6 +12,7 @@
 
 import * as React from "react"
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { redirect } from "@/i18n/routing"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
@@ -24,12 +25,15 @@ import { AlertCircle, Info } from "lucide-react"
 import { EmailCaptureForm } from "./_components/email-capture-form"
 import { SubscribePricingCard } from "./_components/subscribe-pricing-card"
 
-export const metadata: Metadata = {
-  title: "Subscribe - Capsule Note",
-  description: "Choose your plan and start writing letters to your future self",
-  alternates: {
-    canonical: "/subscribe",
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("subscribe")
+  return {
+    title: t("metadata.title"),
+    description: t("metadata.description"),
+    alternates: {
+      canonical: "/subscribe",
+    },
+  }
 }
 
 interface SubscribePageProps {
@@ -45,6 +49,7 @@ interface SubscribePageProps {
 }
 
 export default async function SubscribePage({ searchParams }: SubscribePageProps) {
+  const t = await getTranslations("subscribe")
   const params = await searchParams
   const { email, letterId, deliveryDate, deliveryType, timezone, recipientName, recipientType } = params
 
@@ -99,15 +104,15 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
         {/* Hero Section */}
         <div className="space-y-6 text-center">
           <Badge variant="outline" className="text-xs uppercase tracking-wide">
-            Yearly Plans
+            {t("hero.badge")}
           </Badge>
 
           <h1 className="font-mono text-4xl font-normal uppercase tracking-wide text-charcoal sm:text-5xl md:text-6xl">
-            Choose Your Capsule
+            {t("hero.title")}
           </h1>
 
           <p className="mx-auto max-w-2xl font-mono text-base leading-relaxed text-gray-secondary sm:text-lg">
-            Two simple yearly plans. No free tier, no ads—just dependable deliveries to your future self (and others).
+            {t("hero.description")}
           </p>
         </div>
 
@@ -119,19 +124,17 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
             {pendingSubscription.status === "awaiting_payment" ? (
               <>
                 <Info className="h-4 w-4" />
-                <AlertTitle>Incomplete Payment</AlertTitle>
+                <AlertTitle>{t("paymentStatus.incomplete.title")}</AlertTitle>
                 <AlertDescription>
-                  You have an incomplete payment for {pendingSubscription.plan} plan. You can resume
-                  your checkout by selecting a plan below.
+                  {t("paymentStatus.incomplete.description", { plan: pendingSubscription.plan })}
                 </AlertDescription>
               </>
             ) : (
               <>
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
+                <AlertTitle>{t("paymentStatus.error.title")}</AlertTitle>
                 <AlertDescription>
-                  There was an issue with your subscription. Please contact support if this
-                  persists.
+                  {t("paymentStatus.error.description")}
                 </AlertDescription>
               </>
             )}
@@ -145,12 +148,12 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
             <CardContent className="space-y-6 p-8">
               <div className="space-y-2 text-center">
                 <h2 className="font-mono text-2xl font-normal uppercase tracking-wide text-charcoal">
-                  Enter Your Email
+                  {t("emailCapture.heading")}
                 </h2>
                 <p className="font-mono text-sm text-gray-secondary">
-                  This email will be used for payment and account creation.
+                  {t("emailCapture.description")}
                   <br />
-                  <strong>It cannot be changed after payment</strong> (locked for security).
+                  <strong>{t("emailCapture.lockedNotice")}</strong>
                 </p>
               </div>
 
@@ -163,15 +166,14 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
             {/* Email Locked Notice */}
             <Alert>
               <Info className="h-4 w-4" />
-              <AlertTitle>Email Locked</AlertTitle>
+              <AlertTitle>{t("emailLocked.title")}</AlertTitle>
               <AlertDescription>
-                Your email <strong>{email}</strong> will be used for payment and account creation.
-                This cannot be changed after payment for security reasons.{" "}
+                {t("emailLocked.description", { email })}{" "}
                 <a
                   href={`/subscribe${letterId ? `?letterId=${letterId}` : ""}`}
                   className="underline hover:opacity-70"
                 >
-                  Change email
+                  {t("emailLocked.changeEmail")}
                 </a>
               </AlertDescription>
             </Alert>
@@ -180,15 +182,15 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
             <div className="grid gap-8 lg:grid-cols-2 lg:gap-6">
               <SubscribePricingCard
                 email={email}
-                name="Digital Capsule"
+                name={t("plans.digital.name")}
                 price={9}
                 interval="year"
-                description="For personal letters to yourself—purely digital delivery."
+                description={t("plans.digital.description")}
                 features={[
-                  "6 email deliveries / year",
-                  "Schedule up to 100 years out",
-                  "Timezone-aware reminders",
-                  "Encrypted storage",
+                  t("plans.digital.features.emailDeliveries"),
+                  t("plans.digital.features.scheduleYears"),
+                  t("plans.digital.features.timezoneReminders"),
+                  t("plans.digital.features.encryptedStorage"),
                 ]}
                 priceId={digitalPriceId}
                 letterId={letterId}
@@ -197,15 +199,15 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
 
               <SubscribePricingCard
                 email={email}
-                name="Paper & Pixels"
+                name={t("plans.paper.name")}
                 price={29}
                 interval="year"
-                description="For gifting and tangible keepsakes—email plus premium mail."
+                description={t("plans.paper.description")}
                 features={[
-                  "24 email deliveries / year",
-                  "3 physical letters / year",
-                  "Address confirmation reminders",
-                  "Priority delivery routing",
+                  t("plans.paper.features.emailDeliveries"),
+                  t("plans.paper.features.physicalLetters"),
+                  t("plans.paper.features.addressReminders"),
+                  t("plans.paper.features.priorityRouting"),
                 ]}
                 priceId={paperPriceId}
                 letterId={letterId}
@@ -220,24 +222,24 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
               <div className="grid gap-4 sm:grid-cols-3 text-center">
                 <div>
                   <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                    🔒 Bank-Level Security
+                    🔒 {t("trustSignals.security.title")}
                   </p>
                   <p className="font-mono text-xs text-gray-secondary mt-1">
-                    AES-256 encryption
+                    {t("trustSignals.security.description")}
                   </p>
                 </div>
                 <div>
                   <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                    💳 Secure Payments
+                    💳 {t("trustSignals.payments.title")}
                   </p>
-                  <p className="font-mono text-xs text-gray-secondary mt-1">Powered by Stripe</p>
+                  <p className="font-mono text-xs text-gray-secondary mt-1">{t("trustSignals.payments.description")}</p>
                 </div>
                 <div>
                   <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                    ❌ Cancel Anytime
+                    ❌ {t("trustSignals.cancel.title")}
                   </p>
                   <p className="font-mono text-xs text-gray-secondary mt-1">
-                    No long-term contracts
+                    {t("trustSignals.cancel.description")}
                   </p>
                 </div>
               </div>

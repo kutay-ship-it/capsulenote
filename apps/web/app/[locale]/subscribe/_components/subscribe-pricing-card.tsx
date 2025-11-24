@@ -6,6 +6,7 @@
  */
 
 import * as React from "react"
+import { getTranslations } from "next-intl/server"
 import { Check } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -41,7 +42,7 @@ interface SubscribePricingCardProps {
   className?: string
 }
 
-export function SubscribePricingCard({
+export async function SubscribePricingCard({
   email,
   name,
   price,
@@ -56,6 +57,8 @@ export function SubscribePricingCard({
   badge,
   className,
 }: SubscribePricingCardProps) {
+  const t = await getTranslations("subscribe.pricingCard")
+
   return (
     <Card
       className={cn(
@@ -68,7 +71,7 @@ export function SubscribePricingCard({
       {popular && (
         <div className="absolute -top-4 left-1/2 -translate-x-1/2">
           <Badge variant="default" className="px-4 py-1.5 text-sm">
-            Most Popular
+            {t("popular")}
           </Badge>
         </div>
       )}
@@ -93,7 +96,7 @@ export function SubscribePricingCard({
           </span>
           {interval && (
             <span className="font-mono text-lg text-gray-secondary">
-              /{interval}
+              {t("perInterval", { interval })}
             </span>
           )}
         </div>
@@ -123,10 +126,10 @@ export function SubscribePricingCard({
         {/* Email Locked Notice */}
         <div className="mb-4 rounded-lg border-2 border-charcoal bg-off-white p-3">
           <p className="font-mono text-xs text-charcoal">
-            <strong>Email locked:</strong> {email}
+            <strong>{t("emailLocked")}</strong> {email}
           </p>
           <p className="font-mono text-xs text-gray-secondary mt-1">
-            Cannot be changed after payment (security)
+            {t("cannotChange")}
           </p>
         </div>
 
