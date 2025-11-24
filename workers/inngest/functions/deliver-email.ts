@@ -294,15 +294,19 @@ export const deliverEmail = inngest.createFunction(
     }
 
     // If rescheduled to a future date, wait until the new deliverAt
-    if (refreshed.deliverAt.getTime() !== delivery.deliverAt.getTime()) {
+    // Convert to Date objects for comparison (Prisma may return string from serialization)
+    const refreshedDeliverAt = new Date(refreshed.deliverAt)
+    const originalDeliverAt = new Date(delivery.deliverAt)
+
+    if (refreshedDeliverAt.getTime() !== originalDeliverAt.getTime()) {
       logger.info("Delivery was rescheduled while waiting, adjusting", {
         deliveryId,
         previousDeliverAt: delivery.deliverAt,
         newDeliverAt: refreshed.deliverAt,
       })
 
-      if (refreshed.deliverAt > new Date()) {
-        await step.sleepUntil("wait-for-updated-time", refreshed.deliverAt)
+      if (refreshedDeliverAt > new Date()) {
+        await step.sleepUntil("wait-for-updated-time", refreshedDeliverAt)
       }
     }
 
