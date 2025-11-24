@@ -18,15 +18,50 @@ import { stripe } from "@/server/providers/stripe"
 import { isValidPriceId } from "@/server/providers/stripe/client"
 
 // Mock external dependencies
-vi.mock("@/server/lib/db")
+const { mockPrisma } = vi.hoisted(() => {
+  return {
+    mockPrisma: {
+      pendingSubscription: {
+        findFirst: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+      },
+      user: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
+      },
+      subscription: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+      },
+      profile: {
+        update: vi.fn(),
+      },
+      $transaction: vi.fn(async (callback: any) => await callback({
+        subscription: { create: vi.fn(), findUnique: vi.fn() },
+        user: { update: vi.fn() },
+        profile: { update: vi.fn() },
+        pendingSubscription: { update: vi.fn() },
+      })),
+      $executeRaw: vi.fn().mockResolvedValue(undefined),
+    },
+  }
+})
+
+vi.mock("@/server/lib/db", () => ({ prisma: mockPrisma }))
 vi.mock("@/server/providers/stripe")
-const mockClerk = {
-  users: {
-    getUser: vi.fn(),
-    deleteUser: vi.fn(),
-  },
-}
-const mockClerkFactory = vi.fn(() => Promise.resolve(mockClerk))
+const { mockClerk, mockClerkFactory } = vi.hoisted(() => {
+  const clerk = {
+    users: {
+      getUser: vi.fn(),
+      deleteUser: vi.fn(),
+    },
+  }
+  return {
+    mockClerk: clerk,
+    mockClerkFactory: vi.fn(() => Promise.resolve(clerk)),
+  }
+})
 
 vi.mock("@clerk/nextjs/server", () => ({
   clerkClient: mockClerkFactory,
@@ -36,6 +71,34 @@ vi.mock("@/server/lib/stripe-helpers")
 vi.mock("@/server/providers/stripe/client", () => ({
   isValidPriceId: vi.fn(() => true),
 }))
+
+const { mockPrisma } = vi.hoisted(() => {
+  const prismaMock: any = {
+    pendingSubscription: {
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+    user: {
+      findUnique: vi.fn(),
+      update: vi.fn(),
+    },
+    subscription: {
+      findUnique: vi.fn(),
+      create: vi.fn(),
+    },
+    profile: {
+      update: vi.fn(),
+    },
+  }
+
+  prismaMock.$transaction = vi.fn(async (cb: any) => cb(prismaMock))
+  prismaMock.$executeRaw = vi.fn(async () => undefined)
+
+  return { mockPrisma: prismaMock }
+})
+
+vi.mock("@/server/lib/db", () => ({ prisma: mockPrisma }))
 
 describe("createAnonymousCheckout", () => {
   it("smoke: module imports", () => {
@@ -56,7 +119,7 @@ describe("createAnonymousCheckout", () => {
       const input = {
         email: "test@example.com",
         priceId: "price_test123",
-        letterId: "letter_abc",
+        letterId: "550e8400-e29b-41d4-a716-446655440000",
         metadata: { source: "letter_form" },
       }
 
@@ -504,6 +567,7 @@ describe("linkPendingSubscription", () => {
       expect(result.success).toBe(true)
       // Should not attempt to link again
       expect(prisma.subscription.create).not.toHaveBeenCalled()
+      expect(prisma.pendingSubscription.update).not.toHaveBeenCalled()
     })
 
     it("should return existing subscription without duplicating", async () => {

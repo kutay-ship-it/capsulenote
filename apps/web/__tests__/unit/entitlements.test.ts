@@ -18,8 +18,8 @@ import {
   invalidateEntitlementsCache,
 } from "../../server/lib/entitlements"
 
-vi.mock("../../server/lib/db", () => ({
-  prisma: {
+const { mockPrisma, mockRedis } = vi.hoisted(() => {
+  const prismaMock = {
     user: {
       findUnique: vi.fn(),
       update: vi.fn(),
@@ -27,14 +27,19 @@ vi.mock("../../server/lib/db", () => ({
     letter: {
       count: vi.fn(),
     },
-  },
-}))
+  }
 
-const mockRedis = {
-  get: vi.fn(() => Promise.resolve(null)),
-  setex: vi.fn(() => Promise.resolve("OK")),
-  del: vi.fn(() => Promise.resolve(1)),
-}
+  const redisMock = {
+    get: vi.fn(() => Promise.resolve(null)),
+    setex: vi.fn(() => Promise.resolve("OK")),
+    del: vi.fn(() => Promise.resolve(1)),
+  }
+  return { mockPrisma: prismaMock, mockRedis: redisMock }
+})
+
+vi.mock("../../server/lib/db", () => ({
+  prisma: mockPrisma,
+}))
 
 vi.mock("../../server/lib/redis", () => ({
   redis: mockRedis,

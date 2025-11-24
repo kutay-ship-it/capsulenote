@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { scheduleDelivery } from "@/server/actions/deliveries"
 import { useToast } from "@/hooks/use-toast"
 import { TimezoneTooltip, DSTTooltip } from "@/components/timezone-tooltip"
-import { formatDateTimeWithTimezone, getUserTimezone, isDST } from "@/lib/utils"
+import { formatDateTimeWithTimezone, getUserTimezone, isDST, buildDeliverAtParams } from "@/lib/utils"
 import { cn } from "@/lib/utils"
 
 interface ScheduleDeliveryFormProps {
@@ -83,9 +83,11 @@ export function ScheduleDeliveryForm({
   const formatDeliveryTime = (): string | null => {
     if (!deliveryDate) return null
 
-    const timezone = getUserTimezone()
-    const dateOnly = deliveryDate.toISOString().split('T')[0]
-    const deliverAt = fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
+    const { dateTimeStr, timezone } = buildDeliverAtParams({
+      date: deliveryDate,
+      time: deliverTime,
+    })
+    const deliverAt = fromZonedTime(dateTimeStr, timezone)
 
     return formatDateTimeWithTimezone(deliverAt)
   }
@@ -117,10 +119,12 @@ export function ScheduleDeliveryForm({
     const minDate = new Date(now.getTime() + 5 * 60 * 1000)
     const maxDate = new Date()
     maxDate.setUTCFullYear(maxDate.getUTCFullYear() + 100)
-    const proposed = zonedTimeToUtc(
-      `${deliveryDate.toISOString().split("T")[0]}T${deliverTime}`,
-      getUserTimezone()
-    )
+
+    const { dateTimeStr, timezone } = buildDeliverAtParams({
+      date: deliveryDate,
+      time: deliverTime,
+    })
+    const proposed = fromZonedTime(dateTimeStr, timezone)
 
     if (proposed < minDate) {
       setValidationError("Delivery must be at least 5 minutes from now.")
@@ -137,9 +141,11 @@ export function ScheduleDeliveryForm({
     setIsSubmitting(true)
 
     try {
-      const timezone = getUserTimezone()
-      const dateOnly = deliveryDate.toISOString().split('T')[0]
-      const deliverAt = fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
+      const { dateTimeStr, timezone } = buildDeliverAtParams({
+        date: deliveryDate,
+        time: deliverTime,
+      })
+      const deliverAt = fromZonedTime(dateTimeStr, timezone)
 
       const result = await scheduleDelivery({
         letterId,
@@ -365,17 +371,21 @@ export function ScheduleDeliveryForm({
                 <div className="flex items-center gap-1">
                   <TimezoneTooltip
                     deliveryDate={(() => {
-                      const timezone = getUserTimezone()
-                      const dateOnly = deliveryDate.toISOString().split('T')[0]
-                      return fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
+                      const { dateTimeStr, timezone } = buildDeliverAtParams({
+                        date: deliveryDate,
+                        time: deliverTime,
+                      })
+                      return fromZonedTime(dateTimeStr, timezone)
                     })()}
                     variant="globe"
                   />
                   {isDST((() => {
-                    const timezone = getUserTimezone()
-                    const dateOnly = deliveryDate.toISOString().split('T')[0]
-                    return fromZonedTime(`${dateOnly}T${deliverTime}`, timezone)
-                  })()) && <DSTTooltip />}
+                      const { dateTimeStr, timezone } = buildDeliverAtParams({
+                        date: deliveryDate,
+                        time: deliverTime,
+                      })
+                      return fromZonedTime(dateTimeStr, timezone)
+                    })()) && <DSTTooltip />}
                 </div>
               </div>
             </div>

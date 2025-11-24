@@ -5,6 +5,9 @@
  */
 
 import { describe, it, expect } from "vitest"
+vi.mock("@prisma/client", () => ({
+  PrismaClient: vi.fn(),
+}))
 
 describe("Race Conditions Suite", () => {
   it("smoke: placeholder to keep suite active", () => {

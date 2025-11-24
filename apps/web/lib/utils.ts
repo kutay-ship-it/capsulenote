@@ -97,3 +97,30 @@ export function getUTCOffset(date: Date | string = new Date()): string {
   }
   return `UTC${sign}${hours}:${minutes.toString().padStart(2, "0")}`
 }
+
+/**
+ * Build date-time string and timezone for delivery
+ * This ensures consistent datetime construction across the app
+ *
+ * @param date - Date object or ISO string (YYYY-MM-DD)
+ * @param time - Time string (HH:MM)
+ * @param timezone - IANA timezone name (e.g., "America/New_York")
+ * @returns Object with dateTimeStr and timezone for use with fromZonedTime
+ */
+export function buildDeliverAtParams(params: {
+  date: Date | string
+  time: string
+  timezone?: string
+}): { dateTimeStr: string; timezone: string } {
+  const { date, time, timezone = getUserTimezone() } = params
+
+  // Extract date-only part (YYYY-MM-DD)
+  const dateOnly = typeof date === "string"
+    ? date
+    : date.toISOString().split('T')[0]
+
+  // Combine date and time for use with fromZonedTime
+  const dateTimeStr = `${dateOnly}T${time}`
+
+  return { dateTimeStr, timezone }
+}

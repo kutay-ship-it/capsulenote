@@ -227,7 +227,16 @@ async function buildEntitlements(userId: string): Promise<Entitlements> {
 
   const subscription = user.subscriptions[0]
   const plan = subscription?.plan ?? user.planType ?? null
-  const status = subscription?.status ?? ("none" as const)
+
+  // Check if credits are still valid (hybrid status detection)
+  const hasValidCredits = user.creditExpiresAt
+    ? user.creditExpiresAt > new Date()
+    : !!user.planType  // If no expiry but has planType, assume valid
+
+  // Status determination: use subscription status if available, otherwise check planType/credits
+  const status = subscription?.status
+    ?? (hasValidCredits ? ("active" as const) : ("none" as const))
+
   const planCredits = plan ? PLAN_CREDITS[plan] : { email: 0, physical: 0 }
   const lettersThisMonth = await prisma.letter.count({
     where: {

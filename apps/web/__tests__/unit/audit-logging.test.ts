@@ -11,14 +11,22 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createAuditEvent, redactSensitiveData, AuditEventType } from '../../server/lib/audit'
 
 // Mock Prisma
-vi.mock('../../server/lib/db', () => ({
-  prisma: {
-    auditEvent: {
-      create: vi.fn(),
-      findMany: vi.fn(),
-      groupBy: vi.fn(),
+const { mockCreate, mockPrisma } = vi.hoisted(() => {
+  const create = vi.fn()
+  return {
+    mockCreate: create,
+    mockPrisma: {
+      auditEvent: {
+        create,
+        findMany: vi.fn(),
+        groupBy: vi.fn(),
+      },
     },
-  },
+  }
+})
+
+vi.mock('../../server/lib/db', () => ({
+  prisma: mockPrisma,
 }))
 
 describe('Audit Logging System', () => {
