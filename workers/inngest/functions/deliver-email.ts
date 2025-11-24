@@ -12,22 +12,11 @@ import {
   shouldRetry,
   calculateBackoff,
 } from "../lib/errors"
+import { createLogger, logBufferSerializationDetected } from "../lib/logger"
+import { assertRealBuffer } from "../lib/buffer-utils"
 
-/**
- * Structured logger for workers
- * In production, this should use the shared logger from apps/web/server/lib/logger.ts
- */
-const logger = {
-  info: (message: string, meta?: Record<string, unknown>) => {
-    console.log(JSON.stringify({ level: 'info', message, ...meta, timestamp: new Date().toISOString() }))
-  },
-  error: (message: string, meta?: Record<string, unknown>) => {
-    console.error(JSON.stringify({ level: 'error', message, ...meta, timestamp: new Date().toISOString() }))
-  },
-  warn: (message: string, meta?: Record<string, unknown>) => {
-    console.warn(JSON.stringify({ level: 'warn', message, ...meta, timestamp: new Date().toISOString() }))
-  },
-}
+// Create logger with service context
+const logger = createLogger({ service: "deliver-email" })
 
 /**
  * Decrypt letter content
@@ -192,13 +181,31 @@ export const deliverEmail = inngest.createFunction(
       )
     }
 
-    // Fetch delivery details
+    // Fetch delivery details (excluding encrypted fields to avoid step boundary serialization issues)
+    // IMPORTANT: Encrypted fields (bodyCiphertext, bodyNonce) are fetched fresh in the decrypt step
+    // to prevent Buffer serialization issues when data crosses Inngest step boundaries.
+    // See: https://github.com/inngest/inngest/issues/XXX (Buffer serialization bug)
     let delivery = await step.run("fetch-delivery", async () => {
       try {
         const result = await prisma.delivery.findUnique({
           where: { id: deliveryId },
           include: {
-            letter: true,
+            letter: {
+              // Explicitly select non-encrypted fields only
+              // bodyCiphertext and bodyNonce are fetched fresh in decrypt-letter step
+              select: {
+                id: true,
+                title: true,
+                shareLinkToken: true,
+                keyVersion: true,
+                userId: true,
+                createdAt: true,
+                updatedAt: true,
+                visibility: true,
+                tags: true,
+                bodyFormat: true,
+              },
+            },
             emailDelivery: true,
             user: {
               include: { profile: true },
@@ -268,11 +275,25 @@ export const deliverEmail = inngest.createFunction(
     await step.sleepUntil("wait-for-delivery-time", delivery.deliverAt)
 
     // Refresh delivery after any potential reschedule/cancel while waiting
+    // Again, exclude encrypted fields to avoid step boundary serialization issues
     const refreshed = await step.run("refresh-delivery-after-wait", async () => {
       const current = await prisma.delivery.findUnique({
         where: { id: deliveryId },
         include: {
-          letter: true,
+          letter: {
+            select: {
+              id: true,
+              title: true,
+              shareLinkToken: true,
+              keyVersion: true,
+              userId: true,
+              createdAt: true,
+              updatedAt: true,
+              visibility: true,
+              tags: true,
+              bodyFormat: true,
+            },
+          },
           emailDelivery: true,
           user: {
             include: { profile: true },
@@ -341,12 +362,44 @@ export const deliverEmail = inngest.createFunction(
     })
 
     // Decrypt letter content
+    // CRITICAL: Fetch encrypted data FRESH inside this step to avoid Buffer serialization issues.
+    // When data crosses Inngest step boundaries, Buffer objects get JSON-serialized to
+    // { type: "Buffer", data: [...] } format. Fetching fresh ensures we have real Buffer instances.
     const decryptedContent = await step.run("decrypt-letter", async () => {
       try {
+        // Fetch encrypted fields fresh from database (not from previous step's return value)
+        const letterWithEncryptedData = await prisma.letter.findUnique({
+          where: { id: delivery.letterId },
+          select: {
+            bodyCiphertext: true,
+            bodyNonce: true,
+            keyVersion: true,
+          },
+        })
+
+        if (!letterWithEncryptedData) {
+          throw new DecryptionError("Letter not found for decryption", {
+            letterId: delivery.letterId,
+          })
+        }
+
+        // Validate that Prisma returned real Buffers (not serialized objects)
+        // This assertion will fail fast if something unexpected happens
+        assertRealBuffer(letterWithEncryptedData.bodyCiphertext, "bodyCiphertext")
+        assertRealBuffer(letterWithEncryptedData.bodyNonce, "bodyNonce")
+
+        logger.info("Fetched fresh encrypted data for decryption", {
+          deliveryId,
+          letterId: delivery.letterId,
+          keyVersion: letterWithEncryptedData.keyVersion,
+          ciphertextLength: letterWithEncryptedData.bodyCiphertext.length,
+          nonceLength: letterWithEncryptedData.bodyNonce.length,
+        })
+
         const content = await decryptLetter(
-          Buffer.from(delivery.letter.bodyCiphertext),
-          Buffer.from(delivery.letter.bodyNonce),
-          delivery.letter.keyVersion
+          letterWithEncryptedData.bodyCiphertext,
+          letterWithEncryptedData.bodyNonce,
+          letterWithEncryptedData.keyVersion
         )
 
         logger.info("Letter decrypted successfully", {

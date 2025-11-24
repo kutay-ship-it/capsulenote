@@ -5,7 +5,9 @@
   "main": "./index.ts",
   "scripts": {
     "dev": "inngest-cli dev",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@dearme/prisma": "workspace:*",
@@ -17,6 +19,7 @@
   "devDependencies": {
     "@dearme/config": "workspace:*",
     "@types/html-escaper": "^3.0.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^2.0.0"
   }
 }
