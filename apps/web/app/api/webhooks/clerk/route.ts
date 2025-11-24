@@ -6,6 +6,7 @@ import { env } from "@/env.mjs"
 import { linkPendingSubscription } from "@/app/[locale]/subscribe/actions"
 import { getClerkClient } from "@/server/lib/clerk"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
+import { getDetectedTimezoneFromMetadata, isValidTimezone } from "@dearme/types"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
   try {
     switch (eventType) {
       case "user.created": {
-        const { id, email_addresses } = evt.data
+        const { id, email_addresses, unsafe_metadata } = evt.data
         const email = email_addresses[0]?.email_address
         const lockedEmail =
           (evt.data.unsafe_metadata as { lockedEmail?: string } | undefined)?.lockedEmail ||
@@ -85,7 +86,19 @@ export async function POST(req: Request) {
           return new Response("Email mismatch for locked signup", { status: 400 })
         }
 
-        // Create user and profile with default timezone (user can update in settings)
+        // Extract detected timezone from Clerk metadata (set by TimezoneDetector component)
+        const detectedTimezone = getDetectedTimezoneFromMetadata(unsafe_metadata)
+        const timezone =
+          detectedTimezone && isValidTimezone(detectedTimezone)
+            ? detectedTimezone
+            : "UTC" // Fallback only if detection failed
+
+        console.log(`[Clerk Webhook] Creating user with timezone: ${timezone}`, {
+          detected: detectedTimezone,
+          usingFallback: !detectedTimezone,
+        })
+
+        // Create user and profile with detected or fallback timezone
         // Handle race condition: concurrent webhook deliveries or retries
         let user
         let attempts = 0
@@ -99,8 +112,8 @@ export async function POST(req: Request) {
                 email: email,
                 profile: {
                   create: {
-                    // Default to UTC - user can update in settings
-                    timezone: "UTC",
+                    // Use detected timezone or UTC fallback
+                    timezone,
                   },
                 },
               },

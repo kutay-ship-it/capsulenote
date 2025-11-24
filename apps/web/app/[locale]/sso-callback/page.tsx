@@ -1,33 +1,59 @@
 "use client"
 
 import { useEffect } from "react"
-import { useClerk } from "@clerk/nextjs"
-import { useRouter } from "@/i18n/routing"
+import { AuthenticateWithRedirectCallback, useUser } from "@clerk/nextjs"
+import { detectBrowserTimezone } from "@/lib/timezone"
 
+/**
+ * SSO Callback Page
+ *
+ * Handles OAuth/SSO redirect callbacks using Clerk's AuthenticateWithRedirectCallback.
+ * Also detects and stores the user's browser timezone in Clerk metadata for new users.
+ */
 export default function SSOCallbackPage() {
-  const { handleRedirectCallback } = useClerk()
-  const router = useRouter()
+  return (
+    <>
+      <TimezoneDetectionOnAuth />
+      <AuthenticateWithRedirectCallback
+        signInFallbackRedirectUrl="/dashboard"
+        signUpFallbackRedirectUrl="/dashboard"
+      />
+    </>
+  )
+}
+
+/**
+ * Silent component that detects and stores timezone after OAuth authentication
+ */
+function TimezoneDetectionOnAuth() {
+  const { user, isLoaded } = useUser()
 
   useEffect(() => {
-    async function handleCallback() {
+    async function storeTimezone() {
+      if (!isLoaded || !user) return
+
+      // Only set timezone if user doesn't already have one in metadata
+      const existingTimezone = user.unsafeMetadata?.detectedTimezone
+      if (existingTimezone) return
+
+      const detectedTimezone = detectBrowserTimezone()
+      if (!detectedTimezone) return
+
       try {
-        await handleRedirectCallback()
-        router.push("/dashboard")
-      } catch (err) {
-        console.error("SSO callback error:", err)
-        router.push("/sign-in")
+        await user.update({
+          unsafeMetadata: {
+            ...user.unsafeMetadata,
+            detectedTimezone,
+          },
+        })
+      } catch (error) {
+        // Non-critical - timezone can be set later
+        console.warn("[Timezone] Failed to store timezone on SSO callback:", error)
       }
     }
 
-    handleCallback()
-  }, [handleRedirectCallback, router])
+    storeTimezone()
+  }, [user, isLoaded])
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20">
-      <div className="text-center">
-        <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-        <p className="text-sm text-muted-foreground">Completing sign in...</p>
-      </div>
-    </div>
-  )
+  return null
 }

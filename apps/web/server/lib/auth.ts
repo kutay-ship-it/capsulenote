@@ -3,6 +3,7 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { prisma } from "./db"
 import { getClerkClient } from "./clerk"
 import { env } from "@/env.mjs"
+import { getDetectedTimezoneFromMetadata, isValidTimezone } from "@dearme/types"
 
 /**
  * Get current user with auto-sync fallback
@@ -64,6 +65,18 @@ export async function getCurrentUser() {
         return null
       }
 
+      // Extract detected timezone from Clerk metadata (set by TimezoneDetector component)
+      const detectedTimezone = getDetectedTimezoneFromMetadata(clerkUser.unsafeMetadata)
+      const timezone =
+        detectedTimezone && isValidTimezone(detectedTimezone)
+          ? detectedTimezone
+          : "UTC" // Fallback only if detection failed
+
+      console.log(`[Auth] Auto-provisioning user with timezone: ${timezone}`, {
+        detected: detectedTimezone,
+        usingFallback: !detectedTimezone,
+      })
+
       // Use findFirst + create pattern with retry to handle race conditions
       // This is more reliable than instanceof checks across module boundaries
       let attempts = 0
@@ -78,7 +91,8 @@ export async function getCurrentUser() {
               email,
               profile: {
                 create: {
-                  timezone: "UTC", // User can update in settings
+                  // Use detected timezone or UTC fallback
+                  timezone,
                 },
               },
             },

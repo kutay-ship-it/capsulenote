@@ -55,7 +55,8 @@ model User {
   emailCredits    Int      @default(0) @map("email_credits")
   physicalCredits Int      @default(0) @map("physical_credits")
   creditExpiresAt DateTime? @map("credit_expires_at") @db.Timestamptz(3)
-  timezone        String   @default("UTC")
+  /// @deprecated Use Profile.timezone instead. This field is kept for backward compatibility.
+  timezone        String?  @default("UTC")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -75,7 +76,7 @@ model User {
 model Profile {
   userId              String   @id @map("user_id") @db.Uuid
   displayName         String?  @map("display_name")
-  timezone            String   @default("America/New_York") // IANA timezone
+  timezone            String   @default("UTC") // IANA timezone - canonical source for user timezone
   marketingOptIn      Boolean  @default(false) @map("marketing_opt_in")
   onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
   stripeCustomerId    String?  @unique @map("stripe_customer_id")

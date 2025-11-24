@@ -54,6 +54,15 @@ export function formatDateTimeWithTimezone(date: Date | string): string {
 /**
  * Get user's current timezone name (IANA format)
  * Example: "America/New_York"
+ *
+ * @deprecated Use `detectBrowserTimezone()` from '@/lib/timezone' for client-side detection,
+ * or `getUserTimezone()` from '@/server/lib/get-user-timezone' for server-side with fallbacks.
+ *
+ * This function only returns the browser's timezone without any fallback chain
+ * or validation. The new utilities provide:
+ * - Validation of IANA timezone strings
+ * - Proper fallback chain (profile → user → browser → UTC)
+ * - Server-side support with user profile integration
  */
 export function getUserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone

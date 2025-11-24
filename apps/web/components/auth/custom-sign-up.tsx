@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { detectBrowserTimezone } from "@/lib/timezone"
 
 interface CustomSignUpFormProps {
   lockedEmail?: string
@@ -44,10 +45,14 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
     }
 
     try {
+      const detectedTimezone = detectBrowserTimezone()
       await signUp.create({
         emailAddress: email,
         password,
-        unsafeMetadata: lockedEmail ? { lockedEmail } : undefined,
+        unsafeMetadata: {
+          ...(lockedEmail && { lockedEmail }),
+          ...(detectedTimezone && { detectedTimezone }),
+        },
       })
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" })
