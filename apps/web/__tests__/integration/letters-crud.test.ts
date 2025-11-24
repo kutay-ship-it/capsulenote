@@ -70,7 +70,7 @@ vi.mock("../../server/lib/logger", () => ({
 }))
 
 vi.mock("../../server/lib/trigger-inngest", () => ({
-  triggerInngestEvent: vi.fn(() => Promise.resolve({ ids: ["event_123"] })),
+  triggerInngestEvent: vi.fn(() => Promise.resolve("event_123")),
 }))
 
 vi.mock("next/cache", () => ({

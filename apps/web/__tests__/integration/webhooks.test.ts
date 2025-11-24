@@ -93,7 +93,7 @@ vi.mock('@/server/lib/db', () => ({
 }))
 
 vi.mock('@/server/lib/trigger-inngest', () => ({
-  triggerInngestEvent: vi.fn(() => Promise.resolve({ ids: ['event_123'] })),
+  triggerInngestEvent: vi.fn(() => Promise.resolve('event_123')),
 }))
 
 vi.mock('@/server/providers/stripe/client', () => ({
