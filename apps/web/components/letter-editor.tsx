@@ -79,7 +79,7 @@ export function LetterEditor({
   const wordCount = editor.storage.characterCount.words()
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("space-y-3 h-full flex flex-col", className)}>
       {/* Toolbar - Brutalist Design */}
       <div
         className="flex flex-wrap gap-1.5 border-2 border-charcoal bg-off-white p-2"
@@ -159,12 +159,12 @@ export function LetterEditor({
         </Button>
       </div>
 
-      {/* Editor - Brutalist Design */}
-      <div
-        className="border-2 border-charcoal bg-white p-4"
-        style={{ borderRadius: "2px", minHeight }}
-      >
-        <EditorContent editor={editor} className="min-h-[inherit]" />
+      {/* Editor Content */}
+      <div className="editor-wrapper" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <EditorContent
+          editor={editor}
+          style={{ flex: 1, display: "flex", flexDirection: "column" }}
+        />
       </div>
 
       {/* Character/Word count */}

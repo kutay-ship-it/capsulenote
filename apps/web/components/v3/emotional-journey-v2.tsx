@@ -34,35 +34,26 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
     const pxPerDay = 3
     const cardWidth = 288 // w-72 = 18rem = 288px
     const minCardGap = 380 // Generous spacing between cards
-    const extraNowGap = 600 // Extra spacing around the NOW indicator
+    const nowGap = 350 // Balanced spacing around the NOW indicator
 
     let currentX = 200 // Initial padding
     const calculatedItems: any[] = []
-    let hasAddedNowGap = false
     const nowTime = now.getTime()
 
-    // First pass: position all cards
-    sortedDeliveries.forEach((item, index) => {
+    // Split deliveries into past and future
+    const pastDeliveries = sortedDeliveries.filter(d => new Date(d.deliverAt).getTime() <= nowTime)
+    const futureDeliveries = sortedDeliveries.filter(d => new Date(d.deliverAt).getTime() > nowTime)
+
+    // 1. Position Past Items
+    pastDeliveries.forEach((item, index) => {
       const date = new Date(item.deliverAt)
-      const itemTime = date.getTime()
-
-      // Calculate required gap
-      let requiredGap = minCardGap
-
-      // If we are crossing from past to future (or at the start of future), add extra gap for NOW
-      if (!hasAddedNowGap && itemTime > nowTime) {
-        if (index > 0) {
-          requiredGap += extraNowGap
-        }
-        hasAddedNowGap = true
-      }
-
       const daysFromStart = differenceInDays(date, startDate)
       const idealX = 200 + daysFromStart * pxPerDay
 
       const isTop = index % 2 === 0
 
-      const x = Math.max(idealX, currentX + requiredGap)
+      // Standard gap logic for past items
+      const x = Math.max(idealX, currentX + minCardGap)
       currentX = x
 
       calculatedItems.push({
@@ -73,35 +64,62 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
       })
     })
 
-    // Calculate NOW position - find where it should go between cards
-    let calculatedNowX = 0
+    const lastPastItem = calculatedItems.length > 0 ? calculatedItems[calculatedItems.length - 1] : null
+    const lastPastX = lastPastItem ? lastPastItem.x : 200
 
-    // Find the cards before and after NOW
-    let cardBeforeNow: any = null
-    let cardAfterNow: any = null
+    // 2. Position Future Items
+    // Create a large gap between past and future to fit NOW in the center
+    const gapForNow = 800
 
-    for (let i = 0; i < calculatedItems.length; i++) {
-      const cardTime = new Date(calculatedItems[i].deliverAt).getTime()
-      if (cardTime <= nowTime) {
-        cardBeforeNow = calculatedItems[i]
-      } else if (cardTime > nowTime && !cardAfterNow) {
-        cardAfterNow = calculatedItems[i]
-        break
+    futureDeliveries.forEach((item, index) => {
+      const date = new Date(item.deliverAt)
+      const daysFromStart = differenceInDays(date, startDate)
+      const idealX = 200 + daysFromStart * pxPerDay
+
+      // Determine previous X and required gap
+      let prevX
+      let requiredGap
+
+      if (index === 0) {
+        // First future item: gap from last past item (or start)
+        prevX = lastPastX
+        requiredGap = gapForNow
+      } else {
+        // Subsequent future items: standard gap from previous future item
+        prevX = calculatedItems[calculatedItems.length - 1].x
+        requiredGap = minCardGap
       }
-    }
 
-    // Position NOW between the two cards
-    if (cardBeforeNow && cardAfterNow) {
-      // NOW is between two cards - position in the middle
-      calculatedNowX = (cardBeforeNow.x + cardAfterNow.x) / 2
-    } else if (cardBeforeNow && !cardAfterNow) {
-      // NOW is after all cards
-      calculatedNowX = cardBeforeNow.x + minCardGap / 2
-    } else if (!cardBeforeNow && cardAfterNow) {
-      // NOW is before all cards
-      calculatedNowX = cardAfterNow.x - minCardGap / 2
+      // Continue the zigzag pattern based on total count
+      const isTop = calculatedItems.length % 2 === 0
+
+      const x = Math.max(idealX, prevX + requiredGap)
+      // Update currentX for total width calculation later
+      currentX = x
+
+      calculatedItems.push({
+        ...item,
+        x,
+        isTop,
+        date,
+      })
+    })
+
+    // 3. Calculate NOW position (Exact Center)
+    let calculatedNowX = 0
+    const firstFutureItem = calculatedItems.find(item => new Date(item.deliverAt).getTime() > nowTime)
+
+    if (lastPastItem && firstFutureItem) {
+      // Center between last past and first future
+      calculatedNowX = (lastPastItem.x + firstFutureItem.x) / 2
+    } else if (lastPastItem) {
+      // Only past items: place after last item
+      calculatedNowX = lastPastItem.x + gapForNow / 2
+    } else if (firstFutureItem) {
+      // Only future items: place before first item
+      calculatedNowX = firstFutureItem.x - gapForNow / 2
     } else {
-      // No cards at all
+      // No items
       calculatedNowX = 400
     }
 
@@ -227,67 +245,93 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                   className="absolute top-0 bottom-0 border-l border-dashed border-charcoal/10"
                   style={{ left: markerX }}
                 >
-                  <span className="absolute top-8 ml-4 font-mono text-8xl font-black text-charcoal/[0.04] pointer-events-none select-none">
+                  <span className="absolute top-8 ml-4 font-mono text-8xl font-black text-charcoal/[0.08] pointer-events-none select-none">
                     {year}
                   </span>
                 </div>
               )
             })}
 
-            {/* NOW Indicator - V2: Full height with enhanced visual effects */}
+            {/* NOW Indicator - V2: Unified "Living Presence" Animation System */}
             <motion.div
-              className="absolute top-0 bottom-0 z-30 pointer-events-none"
-              style={{ left: nowX }}
+              className="absolute top-0 bottom-0 z-30 pointer-events-none flex flex-col items-center justify-center"
+              style={{ left: nowX, transform: 'translateX(-50%)' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              {/* Subtle vertical guide line - full height, centered on nowX */}
-              <div className="absolute inset-y-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-teal-primary/20 to-transparent" />
+              {/* Vertical Guide Line */}
+              <div className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-teal-primary/40 to-transparent" />
 
-              {/* NOW Badge - Above center */}
+              {/* NOW Badge Area - Gentle float synced to 4s cycle */}
               <motion.div
-                className="absolute -translate-x-1/2 flex flex-col items-center"
-                style={{ top: 'calc(50% - 70px)' }}
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute flex flex-col items-center"
+                style={{ top: 'calc(50% - 85px)' }}
+                animate={{ y: [0, -3, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span
-                  className="font-mono text-xs font-bold uppercase text-white bg-teal-primary px-5 py-2 border-2 border-teal-primary shadow-[4px_4px_0_theme(colors.charcoal)] whitespace-nowrap"
-                  style={{ borderRadius: "2px", letterSpacing: "0.2em" }}
-                >
-                  Now
-                </span>
-                <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-teal-primary" />
+                <div className="relative">
+                  {/* Hard Shadow (Black Layer) */}
+                  <div className="absolute top-1 left-1 w-full h-full bg-charcoal rounded-[2px]" />
+
+                  {/* Main Badge (Green Layer) */}
+                  <div className="relative bg-teal-primary px-5 py-2 border-2 border-teal-primary rounded-[2px] flex items-center justify-center">
+                    <span className="font-mono text-xs font-bold uppercase text-white tracking-[0.2em] translate-x-[1px]">
+                      Now
+                    </span>
+                  </div>
+                </div>
+
+                {/* Triangle Pointer */}
+                <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-teal-primary mt-[-2px] relative z-10" />
               </motion.div>
 
-              {/* Center dot area - at vertical center */}
-              <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2">
-                {/* Outer pulse ring */}
+              {/* Center Dot Area - All animations on unified 4s cycle */}
+              <div className="relative w-24 h-24 flex items-center justify-center">
+                {/* Single Elegant Ripple - expands outward */}
                 <motion.div
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full border-2 border-teal-primary/40"
-                  animate={{ scale: [1, 1.8, 1], opacity: [0.6, 0, 0.6] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute inset-0 rounded-full border-2 border-teal-primary/40"
+                  animate={{ scale: [0.3, 1.3], opacity: [0.6, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeOut" }}
                 />
-                {/* Inner glow pulse */}
+
+                {/* Ambient Glow - synced breathing effect */}
                 <motion.div
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-teal-primary/30"
-                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.1, 0.5] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                  className="absolute inset-4 rounded-full bg-teal-primary/20 blur-sm"
+                  animate={{ scale: [1, 1.4, 1], opacity: [0.15, 0.35, 0.15] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 />
-                {/* Solid center dot */}
-                <div className="w-6 h-6 rounded-full bg-teal-primary border-2 border-white shadow-lg" />
+
+                {/* Dots Layering */}
+                <div className="relative w-6 h-6 z-10">
+                  {/* Black Shadow Dot (Behind) */}
+                  <div className="absolute top-1 -left-1 w-full h-full bg-charcoal rounded-full" />
+
+                  {/* Green Main Dot - "Ba-bump" Heartbeat Rhythm */}
+                  <motion.div
+                    className="absolute inset-0 bg-teal-primary rounded-full border-2 border-white shadow-sm"
+                    animate={{ scale: [1, 1.15, 1.05, 1.12, 1] }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      times: [0, 0.12, 0.24, 0.36, 1],
+                      ease: "easeInOut"
+                    }}
+                  />
+                </div>
               </div>
 
-              {/* Date label - Below center with upward triangle */}
-              <div
-                className="absolute -translate-x-1/2 flex flex-col items-center"
-                style={{ top: 'calc(50% + 30px)' }}
-              >
-                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[6px] border-l-transparent border-r-transparent border-b-teal-primary/30" />
-                <span className="font-mono text-[11px] font-bold text-teal-primary bg-duck-cream px-3 py-1 border border-teal-primary/30 rounded-sm shadow-sm whitespace-nowrap">
-                  {format(new Date(), "MMM d, yyyy")}
-                </span>
+              {/* Date Label Area */}
+              <div className="absolute top-1/2 translate-y-[45px] flex flex-col items-center">
+                {/* Upward Triangle */}
+                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[6px] border-l-transparent border-r-transparent border-b-teal-primary/30 mb-[-1px]" />
+
+                {/* Date Box */}
+                <div className="relative bg-duck-cream border border-teal-primary/30 px-3 py-1 rounded-sm shadow-sm">
+                  <span className="font-mono text-[11px] font-bold text-teal-primary whitespace-nowrap">
+                    {format(new Date(), "MMM d, yyyy")}
+                  </span>
+                </div>
               </div>
             </motion.div>
 

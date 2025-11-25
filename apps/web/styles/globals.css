@@ -48,9 +48,23 @@
 
 /* TipTap Editor Styles - MotherDuck brutalist edition */
 .ProseMirror {
-  @apply min-h-[200px] w-full border-2 border-charcoal bg-white px-6 py-4 text-base font-mono text-charcoal;
+  @apply w-full border-2 border-charcoal bg-white px-6 py-4 text-base font-mono text-charcoal;
   border-radius: 2px;
   outline: none;
+  flex: 1;
+}
+
+/* Editor wrapper fills flex container */
+.editor-wrapper .tiptap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.editor-wrapper .tiptap > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .ProseMirror:focus {

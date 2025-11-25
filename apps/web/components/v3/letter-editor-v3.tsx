@@ -6,7 +6,6 @@ import { useTransition } from "react"
 import {
   Mail,
   Calendar,
-  Send,
   Clock,
   AtSign,
   Trash2,
@@ -17,6 +16,7 @@ import {
   Users,
   Sparkles,
   Truck,
+  Stamp,
 } from "lucide-react"
 import { toast } from "sonner"
 import { fromZonedTime } from "date-fns-tz"
@@ -42,6 +42,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { TemplateSelectorV3 } from "@/components/v3/template-selector-v3"
 import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-type-v3"
+import { SealConfirmationV3 } from "@/components/v3/seal-confirmation-v3"
+import { SealCelebrationV3 } from "@/components/v3/seal-celebration-v3"
 import type { LetterTemplate } from "@/server/actions/templates"
 
 type RecipientType = "myself" | "someone-else"
@@ -80,6 +82,9 @@ export function LetterEditorV3() {
   const [deliveryDate, setDeliveryDate] = React.useState<Date | undefined>(undefined)
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
   const [showCustomDate, setShowCustomDate] = React.useState(false)
+  const [showSealConfirmation, setShowSealConfirmation] = React.useState(false)
+  const [showCelebration, setShowCelebration] = React.useState(false)
+  const [sealedLetterId, setSealedLetterId] = React.useState<string | null>(null)
   const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
 
   // Word/char count
@@ -180,10 +185,19 @@ export function LetterEditorV3() {
     return Object.keys(newErrors).length === 0
   }
 
+  // Open confirmation modal after validation
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!validateForm() || !deliveryDate || isPending) return
+
+    // Open confirmation modal instead of submitting directly
+    setShowSealConfirmation(true)
+  }
+
+  // Actual submission after user confirms
+  const handleConfirmSeal = () => {
+    if (!deliveryDate || isPending) return
 
     startTransition(async () => {
       try {
@@ -202,30 +216,33 @@ export function LetterEditorV3() {
             timezone
           )
 
-          try {
-            await scheduleDelivery({
+          // Schedule deliveries for each selected channel
+          const deliveryPromises = deliveryChannels.map((channel) =>
+            scheduleDelivery({
               letterId,
-              channel: "email",
+              channel: channel === "physical" ? "mail" : "email",
               deliverAt,
               timezone,
               toEmail: recipientEmail,
             })
+          )
 
-            toast.success("Letter scheduled!", {
-              description: `Your letter will be delivered on ${deliveryDate.toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}`,
-            })
+          try {
+            await Promise.all(deliveryPromises)
+
+            // Close confirmation and show celebration
+            setShowSealConfirmation(false)
+            setSealedLetterId(letterId)
+            setShowCelebration(true)
           } catch {
-            toast.error("Letter saved but delivery not scheduled", {
+            toast.error("Letter saved but some deliveries not scheduled", {
               description: "You can schedule delivery from the letter page.",
             })
+            setShowSealConfirmation(false)
+            router.push(`/letters-v3/${letterId}`)
           }
-
-          router.push(`/letters-v3/${letterId}`)
         } else {
+          setShowSealConfirmation(false)
           if (result.error.code === "QUOTA_EXCEEDED") {
             toast.error("Quota exceeded", {
               description: result.error.message,
@@ -242,6 +259,7 @@ export function LetterEditorV3() {
         }
       } catch (error) {
         console.error("Letter creation error:", error)
+        setShowSealConfirmation(false)
         toast.error("Something went wrong", {
           description: "Please try again later.",
         })
@@ -249,13 +267,20 @@ export function LetterEditorV3() {
     })
   }
 
+  const handleCelebrationComplete = React.useCallback(() => {
+    setShowCelebration(false)
+    if (sealedLetterId) {
+      router.push(`/letters-v3/${sealedLetterId}`)
+    }
+  }, [sealedLetterId, router])
+
   return (
     <form onSubmit={handleSubmit}>
       {/* Grid Layout: Editor Left, Settings Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6 items-start">
         {/* Left Column - Letter Editor */}
         <div
-          className="relative border-2 border-charcoal bg-white p-6 md:p-8 shadow-[2px_2px_0_theme(colors.charcoal)] h-fit"
+          className="relative border-2 border-charcoal bg-white p-6 md:p-8 shadow-[2px_2px_0_theme(colors.charcoal)] min-h-[720px] flex flex-col"
           style={{ borderRadius: "2px" }}
         >
           {/* Floating badge */}
@@ -275,7 +300,7 @@ export function LetterEditorV3() {
             <Mail className="h-7 w-7 text-charcoal" strokeWidth={2} />
           </div>
 
-          <div className="space-y-6 mt-4">
+          <div className="flex flex-col flex-1 mt-4">
             {/* Title Field */}
             <div className="space-y-2">
               <label
@@ -303,11 +328,11 @@ export function LetterEditorV3() {
             </div>
 
             {/* Dashed separator */}
-            <div className="w-full border-t-2 border-dashed border-charcoal/10" />
+            <div className="w-full border-t-2 border-dashed border-charcoal/10 my-6" />
 
-            {/* Content Field */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
+            {/* Content Field - Fills remaining space */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-2 flex-shrink-0">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
                   Your Message
                 </label>
@@ -316,18 +341,21 @@ export function LetterEditorV3() {
                   <span>{characterCount} chars</span>
                 </div>
               </div>
-              <LetterEditor
-                content={bodyRich || bodyHtml}
-                onChange={(json, html) => {
-                  setBodyRich(json)
-                  setBodyHtml(html)
-                  if (errors.bodyHtml) setErrors({ ...errors, bodyHtml: undefined })
-                }}
-                placeholder="Dear future me..."
-                minHeight="400px"
-              />
+              <div className="flex-1 min-h-0" style={{ height: "100%" }}>
+                <LetterEditor
+                  content={bodyRich || bodyHtml}
+                  onChange={(json, html) => {
+                    setBodyRich(json)
+                    setBodyHtml(html)
+                    if (errors.bodyHtml) setErrors({ ...errors, bodyHtml: undefined })
+                  }}
+                  placeholder="Dear future me..."
+                  minHeight="100%"
+                  className="h-full"
+                />
+              </div>
               {errors.bodyHtml && (
-                <p className="font-mono text-xs text-coral">{errors.bodyHtml}</p>
+                <p className="font-mono text-xs text-coral mt-2 flex-shrink-0">{errors.bodyHtml}</p>
               )}
             </div>
           </div>
@@ -585,8 +613,8 @@ export function LetterEditorV3() {
                 disabled={isPending}
                 className="w-full gap-2 h-12"
               >
-                <Send className="h-4 w-4" strokeWidth={2} />
-                {isPending ? "Scheduling..." : "Schedule Letter"}
+                <Stamp className="h-4 w-4" strokeWidth={2} />
+                {isPending ? "Sealing..." : "Seal & Schedule Letter"}
               </Button>
 
               {/* Secondary actions row */}
@@ -652,6 +680,34 @@ export function LetterEditorV3() {
           </div>
         </div>
       </div>
+
+      {/* Seal Confirmation Modal */}
+      {deliveryDate && (
+        <SealConfirmationV3
+          open={showSealConfirmation}
+          onOpenChange={setShowSealConfirmation}
+          onConfirm={handleConfirmSeal}
+          isSubmitting={isPending}
+          letterTitle={title}
+          recipientType={recipientType}
+          recipientName={recipientName}
+          recipientEmail={recipientEmail}
+          deliveryChannels={deliveryChannels}
+          deliveryDate={deliveryDate}
+        />
+      )}
+
+      {/* Seal Celebration Modal */}
+      {deliveryDate && (
+        <SealCelebrationV3
+          open={showCelebration}
+          onOpenChange={setShowCelebration}
+          letterTitle={title || "Untitled Letter"}
+          deliveryDate={deliveryDate}
+          recipientEmail={recipientEmail}
+          onComplete={handleCelebrationComplete}
+        />
+      )}
     </form>
   )
 }
