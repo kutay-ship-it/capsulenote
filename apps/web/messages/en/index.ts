@@ -24,6 +24,7 @@ import templates from "./templates.json"
 import preview from "./preview.json"
 import referral from "./referral.json"
 import timeline from "./timeline.json"
+import redesign from "./redesign.json"
 
 const messages = {
   admin,
@@ -52,6 +53,7 @@ const messages = {
   preview,
   referral,
   timeline,
+  redesign,
 }
 
 export default messages

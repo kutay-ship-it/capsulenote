@@ -23,8 +23,10 @@ export const routing = defineRouting({
     "/checkout/cancel": "/checkout/cancel",
     "/dashboard": "/dashboard",
     "/letters": "/letters",
+    "/letters/new": "/letters/new",
     "/letters/drafts": "/letters/drafts",
     "/letters/[id]": "/letters/[id]",
+    "/letters/[id]/schedule": "/letters/[id]/schedule",
     "/deliveries": "/deliveries",
     "/settings": "/settings",
     "/view/[token]": "/view/[token]",
@@ -42,6 +44,17 @@ export const routing = defineRouting({
     "/sandbox/entitlements": "/sandbox/entitlements",
     "/sandbox/schedule": "/sandbox/schedule",
     "/sandbox/settings": "/sandbox/settings",
+    "/dashboard-v2": "/dashboard-v2",
+    "/letters-v2": "/letters-v2",
+    "/letters-v2/new": "/letters-v2/new",
+    "/letters-v2/[id]": "/letters-v2/[id]",
+    // V3 routes
+    "/journey-v3": "/journey-v3",
+    "/letters-v3": "/letters-v3",
+    "/letters-v3/new": "/letters-v3/new",
+    "/letters-v3/[id]": "/letters-v3/[id]",
+    "/letters-v3/[id]/schedule": "/letters-v3/[id]/schedule",
+    "/settings-v3": "/settings-v3",
   },
 })
 

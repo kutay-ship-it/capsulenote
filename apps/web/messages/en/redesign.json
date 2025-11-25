@@ -1,0 +1,182 @@
+{
+  "page": {
+    "title": "My Letters",
+    "subtitle": "Letters to your future self",
+    "writeButton": "Write Letter"
+  },
+  "dashboard": {
+    "title": "Your Emotional Journey",
+    "subtitle": "A timeline of your messages through time",
+    "yourLetters": "Your Letters"
+  },
+  "hero": {
+    "nextLetterArrives": "Your next letter arrives in",
+    "arrivesToday": "Your letter arrives today!",
+    "arrivesTomorrow": "Your letter arrives tomorrow!",
+    "years": "{count, plural, one {# year} other {# years}}",
+    "months": "{count, plural, one {# month} other {# months}}",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "writtenOn": "Written on {date}",
+    "previewLetter": "Preview Letter",
+    "reschedule": "Reschedule"
+  },
+  "empty": {
+    "tagline": "Your first letter awaits",
+    "title": "What would you tell your future self?",
+    "description": "Write a letter today. Choose when it arrives. Experience the joy of hearing from your past self.",
+    "cta": "Write Your First Letter",
+    "learnMore": "How it works"
+  },
+  "timeline": {
+    "title": "Your Journey",
+    "delivered": "Delivered",
+    "failed": "Failed",
+    "waiting": "Waiting",
+    "sent": "Sent",
+    "scheduled": "Scheduled"
+  },
+  "filters": {
+    "all": "All",
+    "drafts": "Drafts",
+    "scheduled": "Scheduled",
+    "delivered": "Delivered"
+  },
+  "card": {
+    "untitled": "Untitled Letter",
+    "noContent": "No content yet...",
+    "written": "Written {date}",
+    "scheduledFor": "Scheduled for {date}",
+    "deliveredOn": "Delivered {date}",
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "sent": "Delivered",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "daysUntil": "{count, plural, one {# day} other {# days}}"
+    }
+  },
+  "grid": {
+    "noLetters": "No letters yet",
+    "noMatchingLetters": "No {filter} letters",
+    "clearFilter": "Clear filter",
+    "startWriting": "Start writing to see your letters here."
+  },
+  "banner": {
+    "cta": "Start Writing"
+  },
+  "journey": {
+    "progress": {
+      "phase1": "When",
+      "phase2": "Inspire",
+      "phase3": "Write",
+      "phase4": "Seal",
+      "back": "Back"
+    },
+    "phase1": {
+      "emoji": "📅",
+      "title": "When should this letter arrive?",
+      "subtitle": "Choose a meaningful moment for your future self to receive this message",
+      "presets": {
+        "6months": "6 Months",
+        "1year": "1 Year",
+        "2years": "2 Years",
+        "5years": "5 Years",
+        "10years": "10 Years"
+      },
+      "customDate": "Pick a specific date",
+      "selectedDateLabel": "Your letter will arrive",
+      "selectedDatePreposition": "in",
+      "selectedDateFuture": "from now",
+      "selectedDateDays": "{count, plural, one {# day} other {# days}}",
+      "cta": "Set Delivery Date"
+    },
+    "phase2": {
+      "emoji": "✨",
+      "title": "Need some inspiration?",
+      "subtitle": "Choose a reflection prompt to guide your writing, or start with a blank page",
+      "templates": {
+        "memory": {
+          "icon": "📸",
+          "title": "Memory Keeper",
+          "description": "Preserve a moment you never want to forget",
+          "prompt": "Today I want to remember...\n\nThe way it felt:\n\nWhy it matters to me:"
+        },
+        "goals": {
+          "icon": "🎯",
+          "title": "Future Goals",
+          "description": "Set intentions and dreams for your future self",
+          "prompt": "By the time you read this, I hope you have:\n\n1.\n2.\n3.\n\nRemember why these matter:"
+        },
+        "gratitude": {
+          "icon": "🙏",
+          "title": "Gratitude Note",
+          "description": "Capture what you're thankful for right now",
+          "prompt": "Right now, I'm grateful for:\n\nPeople who matter:\n\nSmall joys I don't want to forget:"
+        },
+        "advice": {
+          "icon": "💭",
+          "title": "Advice to Self",
+          "description": "Share wisdom with your future self",
+          "prompt": "Dear Future Me,\n\nHere's what I wish I knew earlier:\n\nDon't forget:\n\nWith love from your past self"
+        },
+        "checkpoint": {
+          "icon": "📍",
+          "title": "Life Checkpoint",
+          "description": "Document where you are in life right now",
+          "prompt": "Current state of my life:\n\nWhat's going well:\n\nWhat I'm working on:\n\nHow I'm feeling:"
+        },
+        "encouragement": {
+          "icon": "💪",
+          "title": "Encouragement",
+          "description": "Send motivation to your future self",
+          "prompt": "Hey future me,\n\nI know things might be hard, but remember:\n\nYou've overcome:\n\nYou are capable of:"
+        }
+      },
+      "cta": "Use This Prompt",
+      "skipText": "Skip",
+      "skipSubtext": "I know what to write"
+    },
+    "phase3": {
+      "back": "Back",
+      "saved": "Saved",
+      "saving": "Saving...",
+      "words": "{count} words",
+      "titlePlaceholder": "Give this letter a title...",
+      "editorPlaceholder": "Start writing to your future self...",
+      "charactersLabel": "{count} characters",
+      "defaultFooter": "Your words will travel through time",
+      "cta": "I'm Finished Writing"
+    },
+    "phase4": {
+      "emoji": "✉️",
+      "title": "Seal Your Letter",
+      "subtitle": "Review your letter before sending it through time",
+      "letterPreview": {
+        "title": "Your Letter",
+        "untitled": "Untitled Letter",
+        "arrivesIn": "Arrives in {days}",
+        "arrivedOn": "Arrives on {date}"
+      },
+      "recipient": {
+        "title": "Delivery Details",
+        "emailLabel": "Deliver to",
+        "emailPlaceholder": "your@email.com"
+      },
+      "promise": {
+        "title": "My Promise",
+        "text": "This letter will be kept safe and delivered on {date}. Until then, it will remain sealed."
+      },
+      "cta": "Seal & Schedule",
+      "sealing": "Sealing...",
+      "celebration": {
+        "emoji": "🎉",
+        "title": "Letter Sealed!",
+        "subtitle": "Your message is on its way through time",
+        "redirecting": "Taking you to your letters..."
+      }
+    }
+  }
+}

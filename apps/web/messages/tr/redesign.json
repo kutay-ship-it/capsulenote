@@ -1,0 +1,177 @@
+{
+  "page": {
+    "title": "Mektuplarım",
+    "subtitle": "Gelecekteki kendinize mektuplar",
+    "writeButton": "Mektup Yaz"
+  },
+  "hero": {
+    "nextLetterArrives": "Sonraki mektubunuz şu sürede gelecek",
+    "arrivesToday": "Mektubunuz bugün geliyor!",
+    "arrivesTomorrow": "Mektubunuz yarın geliyor!",
+    "years": "{count, plural, one {# yıl} other {# yıl}}",
+    "months": "{count, plural, one {# ay} other {# ay}}",
+    "days": "{count, plural, one {# gün} other {# gün}}",
+    "writtenOn": "{date} tarihinde yazıldı",
+    "previewLetter": "Mektubu Önizle",
+    "reschedule": "Yeniden Planla"
+  },
+  "empty": {
+    "tagline": "İlk mektubunuz sizi bekliyor",
+    "title": "Gelecekteki kendinize ne söylerdiniz?",
+    "description": "Bugün bir mektup yazın. Ne zaman geleceğini seçin. Geçmişten gelen kendinizden haber almanın keyfini yaşayın.",
+    "cta": "İlk Mektubunuzu Yazın",
+    "learnMore": "Nasıl çalışır"
+  },
+  "timeline": {
+    "title": "Yolculuğunuz",
+    "delivered": "Teslim Edildi",
+    "failed": "Başarısız",
+    "waiting": "Bekliyor",
+    "sent": "Gönderildi",
+    "scheduled": "Planlandı"
+  },
+  "filters": {
+    "all": "Tümü",
+    "drafts": "Taslaklar",
+    "scheduled": "Planlanmış",
+    "delivered": "Teslim Edilmiş"
+  },
+  "card": {
+    "untitled": "Başlıksız Mektup",
+    "noContent": "Henüz içerik yok...",
+    "written": "{date} tarihinde yazıldı",
+    "scheduledFor": "{date} için planlandı",
+    "deliveredOn": "{date} tarihinde teslim edildi",
+    "status": {
+      "draft": "Taslak",
+      "scheduled": "Planlandı",
+      "sent": "Teslim Edildi",
+      "delivered": "Teslim Edildi",
+      "failed": "Başarısız",
+      "today": "Bugün",
+      "tomorrow": "Yarın",
+      "daysUntil": "{count, plural, one {# gün} other {# gün}}"
+    }
+  },
+  "grid": {
+    "noLetters": "Henüz mektup yok",
+    "noMatchingLetters": "{filter} mektup yok",
+    "clearFilter": "Filtreyi temizle",
+    "startWriting": "Mektuplarınızı burada görmek için yazmaya başlayın."
+  },
+  "banner": {
+    "cta": "Yazmaya Başla"
+  },
+  "journey": {
+    "progress": {
+      "phase1": "Ne Zaman",
+      "phase2": "İlham",
+      "phase3": "Yaz",
+      "phase4": "Mühürle",
+      "back": "Geri"
+    },
+    "phase1": {
+      "emoji": "📅",
+      "title": "Bu mektup ne zaman ulaşsın?",
+      "subtitle": "Gelecekteki kendinizin bu mesajı alması için anlamlı bir an seçin",
+      "presets": {
+        "6months": "6 Ay",
+        "1year": "1 Yıl",
+        "2years": "2 Yıl",
+        "5years": "5 Yıl",
+        "10years": "10 Yıl"
+      },
+      "customDate": "Belirli bir tarih seç",
+      "selectedDateLabel": "Mektubunuz ulaşacak",
+      "selectedDatePreposition": "",
+      "selectedDateFuture": "sonra",
+      "selectedDateDays": "{count, plural, one {# gün} other {# gün}}",
+      "cta": "Teslimat Tarihini Ayarla"
+    },
+    "phase2": {
+      "emoji": "✨",
+      "title": "Biraz ilham ister misiniz?",
+      "subtitle": "Yazınıza rehberlik edecek bir düşünce istemi seçin veya boş bir sayfayla başlayın",
+      "templates": {
+        "memory": {
+          "icon": "📸",
+          "title": "Anı Koruyucu",
+          "description": "Asla unutmak istemediğiniz bir anı saklayın",
+          "prompt": "Bugün hatırlamak istediğim...\n\nNasıl hissettirdi:\n\nNeden benim için önemli:"
+        },
+        "goals": {
+          "icon": "🎯",
+          "title": "Gelecek Hedefler",
+          "description": "Gelecekteki kendiniz için niyet ve hayaller belirleyin",
+          "prompt": "Bunu okuduğunda, umarım şunları başarmışsındır:\n\n1.\n2.\n3.\n\nBunların neden önemli olduğunu hatırla:"
+        },
+        "gratitude": {
+          "icon": "🙏",
+          "title": "Şükran Notu",
+          "description": "Şu anda minnettar olduğunuz şeyleri kaydedin",
+          "prompt": "Şu anda minnettar olduğum şeyler:\n\nÖnemli insanlar:\n\nUnutmak istemediğim küçük mutluluklar:"
+        },
+        "advice": {
+          "icon": "💭",
+          "title": "Kendime Tavsiye",
+          "description": "Gelecekteki kendinizle bilgelik paylaşın",
+          "prompt": "Sevgili Gelecekteki Ben,\n\nKeşke daha önce bilseydim:\n\nUnutma:\n\nGeçmişten sevgilerle"
+        },
+        "checkpoint": {
+          "icon": "📍",
+          "title": "Hayat Kontrol Noktası",
+          "description": "Şu anda hayatınızda nerede olduğunuzu belgeleyin",
+          "prompt": "Hayatımın şu anki durumu:\n\nİyi giden şeyler:\n\nÜzerinde çalıştığım şeyler:\n\nNasıl hissediyorum:"
+        },
+        "encouragement": {
+          "icon": "💪",
+          "title": "Cesaret",
+          "description": "Gelecekteki kendinize motivasyon gönderin",
+          "prompt": "Hey gelecekteki ben,\n\nİşler zor olabilir biliyorum ama unutma:\n\nÜstesinden geldiğin şeyler:\n\nYapabileceklerim:"
+        }
+      },
+      "cta": "Bu İstemi Kullan",
+      "skipText": "Atla",
+      "skipSubtext": "Ne yazacağımı biliyorum"
+    },
+    "phase3": {
+      "back": "Geri",
+      "saved": "Kaydedildi",
+      "saving": "Kaydediliyor...",
+      "words": "{count} kelime",
+      "titlePlaceholder": "Bu mektuba bir başlık verin...",
+      "editorPlaceholder": "Gelecekteki kendinize yazmaya başlayın...",
+      "charactersLabel": "{count} karakter",
+      "defaultFooter": "Sözleriniz zamanda yolculuk edecek",
+      "cta": "Yazmayı Bitirdim"
+    },
+    "phase4": {
+      "emoji": "✉️",
+      "title": "Mektubunuzu Mühürleyin",
+      "subtitle": "Zamanda göndermeden önce mektubunuzu gözden geçirin",
+      "letterPreview": {
+        "title": "Mektubunuz",
+        "untitled": "Başlıksız Mektup",
+        "arrivesIn": "{days} sonra ulaşır",
+        "arrivedOn": "{date} tarihinde ulaşır"
+      },
+      "recipient": {
+        "title": "Teslimat Detayları",
+        "emailLabel": "Teslim edilecek adres",
+        "emailPlaceholder": "email@adresiniz.com"
+      },
+      "promise": {
+        "title": "Sözüm",
+        "text": "Bu mektup güvenle saklanacak ve {date} tarihinde teslim edilecek. O zamana kadar mühürlü kalacak."
+      },
+      "cta": "Mühürle ve Planla",
+      "sealing": "Mühürleniyor...",
+      "celebration": {
+        "emoji": "🎉",
+        "title": "Mektup Mühürlendi!",
+        "subtitle": "Mesajınız zamanda yolculuğuna başladı",
+        "redirecting": "Mektuplarınıza yönlendiriliyorsunuz..."
+      }
+    }
+  }
+}
