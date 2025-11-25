@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import DOMPurify from "dompurify"
 import { FileText, Sparkles, ChevronRight, ArrowLeft, Eye, Check } from "lucide-react"
 import {
   Dialog,
@@ -126,7 +127,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                 >
                   <div
                     className="prose prose-sm max-w-none font-mono text-sm text-charcoal leading-relaxed pr-2"
-                    dangerouslySetInnerHTML={{ __html: previewTemplate.promptText }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewTemplate.promptText) }}
                   />
                 </div>
               </div>

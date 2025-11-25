@@ -211,10 +211,13 @@ export function LetterEditorV3() {
 
         if (result.success) {
           const letterId = result.data.letterId
-          const deliverAt = fromZonedTime(
-            `${deliveryDate.toISOString().split("T")[0]}T09:00`,
-            timezone
-          )
+
+          // Create delivery time in user's local timezone (9:00 AM on selected date)
+          // Using date parts to avoid timezone offset issues with toISOString()
+          const year = deliveryDate.getFullYear()
+          const month = String(deliveryDate.getMonth() + 1).padStart(2, "0")
+          const day = String(deliveryDate.getDate()).padStart(2, "0")
+          const deliverAt = fromZonedTime(`${year}-${month}-${day}T09:00:00`, timezone)
 
           // Schedule deliveries for each selected channel
           const deliveryPromises = deliveryChannels.map((channel) =>
@@ -227,18 +230,36 @@ export function LetterEditorV3() {
             })
           )
 
-          try {
-            await Promise.all(deliveryPromises)
+          const deliveryResults = await Promise.allSettled(deliveryPromises)
+          const failedCount = deliveryResults.filter(r => r.status === "rejected").length
+          const successCount = deliveryResults.filter(r => r.status === "fulfilled").length
 
-            // Close confirmation and show celebration
-            setShowSealConfirmation(false)
+          setShowSealConfirmation(false)
+
+          if (failedCount === 0) {
+            // All deliveries scheduled successfully
             setSealedLetterId(letterId)
             setShowCelebration(true)
-          } catch {
-            toast.error("Letter saved but some deliveries not scheduled", {
-              description: "You can schedule delivery from the letter page.",
+          } else if (successCount > 0) {
+            // Partial success - some deliveries failed
+            const failedChannels = deliveryResults
+              .map((r, i) => r.status === "rejected" ? deliveryChannels[i] : null)
+              .filter(Boolean)
+              .join(", ")
+            toast.warning("Letter saved with partial delivery", {
+              description: `Some delivery channels failed (${failedChannels}). You can retry from the letter page.`,
             })
-            setShowSealConfirmation(false)
+            setSealedLetterId(letterId)
+            setShowCelebration(true)
+          } else {
+            // All deliveries failed
+            const firstRejected = deliveryResults.find(r => r.status === "rejected") as PromiseRejectedResult | undefined
+            const errorMessage = firstRejected?.reason instanceof Error
+              ? firstRejected.reason.message
+              : "Unknown error"
+            toast.error("Letter saved but delivery scheduling failed", {
+              description: `${errorMessage}. You can schedule delivery from the letter page.`,
+            })
             router.push(`/letters-v3/${letterId}`)
           }
         } else {

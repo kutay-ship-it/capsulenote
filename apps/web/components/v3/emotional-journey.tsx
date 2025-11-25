@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { format, differenceInDays, startOfYear } from "date-fns"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Mail, Lock } from "lucide-react"
@@ -11,9 +11,27 @@ interface EmotionalJourneyProps {
   deliveries: DeliveryTimelineItem[]
 }
 
+interface CalculatedItem extends DeliveryTimelineItem {
+  x: number
+  isTop: boolean
+  date: Date
+}
+
 export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const [viewportWidth, setViewportWidth] = useState(1200)
+
+  // Handle hydration and viewport width
+  useEffect(() => {
+    setMounted(true)
+    setViewportWidth(window.innerWidth)
+
+    const handleResize = () => setViewportWidth(window.innerWidth)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   // Calculate layout with "Elastic Time"
   const { items, totalWidth, yearMarkers, nowX } = useMemo(() => {
@@ -35,7 +53,7 @@ export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
     const minCardGap = 380 // Generous spacing between cards
 
     let currentX = 200 // Initial padding
-    const calculatedItems: any[] = []
+    const calculatedItems: CalculatedItem[] = []
 
     // First pass: position all cards
     sortedDeliveries.forEach((item, index) => {
@@ -61,15 +79,17 @@ export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
     let calculatedNowX = 0
 
     // Find the cards before and after NOW
-    let cardBeforeNow: any = null
-    let cardAfterNow: any = null
+    let cardBeforeNow: CalculatedItem | null = null
+    let cardAfterNow: CalculatedItem | null = null
 
     for (let i = 0; i < calculatedItems.length; i++) {
-      const cardTime = new Date(calculatedItems[i].deliverAt).getTime()
+      const item = calculatedItems[i]
+      if (!item) continue
+      const cardTime = new Date(item.deliverAt).getTime()
       if (cardTime <= nowTime) {
-        cardBeforeNow = calculatedItems[i]
+        cardBeforeNow = item
       } else if (cardTime > nowTime && !cardAfterNow) {
-        cardAfterNow = calculatedItems[i]
+        cardAfterNow = item
         break
       }
     }
@@ -128,7 +148,6 @@ export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
   })
 
   // Calculate how much horizontal scroll distance we need
-  const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1200
   const scrollDistance = Math.max(0, totalWidth - viewportWidth)
 
   // Transform: as we scroll through the container vertically, move content horizontally
@@ -138,6 +157,28 @@ export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
   const stickyHeight = 600
   const containerHeight = stickyHeight + scrollDistance
   const timelineAreaHeight = stickyHeight - 73 // Minus header
+
+  // Prevent hydration mismatch by showing skeleton until mounted
+  if (!mounted) {
+    return (
+      <section className="w-full border-y-2 border-charcoal bg-duck-cream">
+        <div className="bg-duck-cream border-b-2 border-charcoal">
+          <div className="container py-6">
+            <div className="flex items-center justify-between">
+              <div className="h-4 w-40 bg-charcoal/20 animate-pulse" style={{ borderRadius: "2px" }} />
+              <div className="flex gap-6">
+                <div className="h-3 w-20 bg-charcoal/10 animate-pulse" style={{ borderRadius: "2px" }} />
+                <div className="h-3 w-20 bg-charcoal/10 animate-pulse" style={{ borderRadius: "2px" }} />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="h-[500px] flex items-center justify-center">
+          <div className="h-0.5 w-full max-w-4xl bg-charcoal/20" />
+        </div>
+      </section>
+    )
+  }
 
   if (deliveries.length === 0) {
     return (
@@ -282,6 +323,7 @@ export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
 
                     // Start from first dot position
                     const firstItem = items[0]
+                    if (!firstItem) return ""
                     const firstY = firstItem.isTop ? centerY - dotOffset : centerY + dotOffset
                     let path = `M ${firstItem.x},${firstY}`
 
@@ -290,6 +332,7 @@ export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
                     for (let i = 1; i < items.length; i++) {
                       const prevItem = items[i - 1]
                       const currItem = items[i]
+                      if (!prevItem || !currItem) continue
                       const prevY = prevItem.isTop ? centerY - dotOffset : centerY + dotOffset
                       const currY = currItem.isTop ? centerY - dotOffset : centerY + dotOffset
 

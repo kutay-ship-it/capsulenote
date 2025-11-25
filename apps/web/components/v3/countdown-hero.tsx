@@ -87,7 +87,7 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
           </div>
 
           {/* CTA */}
-          <Link href={`/letters-v3/${delivery.letter.id}` as any}>
+          <Link href={{ pathname: "/letters-v3/[id]", params: { id: delivery.letter.id } }}>
             <Button className="gap-2">
               Open Letter
               <ArrowRight className="h-4 w-4" />
@@ -145,12 +145,12 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
 
       {/* Bottom: Action buttons */}
       <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <Link href={`/letters-v3/${delivery.letter.id}` as any}>
+        <Link href={{ pathname: "/letters-v3/[id]", params: { id: delivery.letter.id } }}>
           <Button variant="outline" size="sm">
             Preview Letter
           </Button>
         </Link>
-        <Link href={`/letters-v3/${delivery.letter.id}/schedule` as any}>
+        <Link href={{ pathname: "/letters-v3/[id]/schedule", params: { id: delivery.letter.id } }}>
           <Button variant="ghost" size="sm">
             Reschedule
           </Button>
