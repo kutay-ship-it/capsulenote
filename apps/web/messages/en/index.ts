@@ -22,6 +22,8 @@ import forms from "./forms.json"
 import components from "./components.json"
 import templates from "./templates.json"
 import preview from "./preview.json"
+import referral from "./referral.json"
+import timeline from "./timeline.json"
 
 const messages = {
   admin,
@@ -48,6 +50,8 @@ const messages = {
   privacy,
   templates,
   preview,
+  referral,
+  timeline,
 }
 
 export default messages

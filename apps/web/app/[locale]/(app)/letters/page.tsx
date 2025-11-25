@@ -106,7 +106,7 @@ export default async function LettersPage({ searchParams }: LettersPageProps) {
         <Link href="/letters/new" className="w-full sm:w-auto">
           <Button size="lg" className="h-12 w-full uppercase sm:h-auto sm:w-auto">
             <PenSquare className="mr-2 h-4 w-4" strokeWidth={2} />
-            {t("new")}
+            {t("newButton")}
           </Button>
         </Link>
       </div>
