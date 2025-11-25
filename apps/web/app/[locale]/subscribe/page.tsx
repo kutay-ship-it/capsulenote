@@ -13,7 +13,7 @@
 import * as React from "react"
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
-import { redirect } from "@/i18n/routing"
+import { redirect } from "next/navigation"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
 

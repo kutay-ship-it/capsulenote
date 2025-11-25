@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { getCurrentUser } from "@/server/lib/auth"
-import { redirect } from "@/i18n/routing"
+import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"

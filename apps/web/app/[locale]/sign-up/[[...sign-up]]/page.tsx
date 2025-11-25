@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/routing"
+import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import { getTranslations } from "next-intl/server"
 import { Card, CardContent } from "@/components/ui/card"

@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/routing"
+import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
 
 import { Badge } from "@/components/ui/badge"

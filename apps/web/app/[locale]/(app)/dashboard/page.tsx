@@ -1,7 +1,8 @@
 import { Suspense } from "react"
 import { getLocale, getTranslations } from "next-intl/server"
 
-import { redirect, Link } from "@/i18n/routing"
+import { Link } from "@/i18n/routing"
+import { redirect } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardLetterEditor } from "@/components/dashboard-letter-editor"

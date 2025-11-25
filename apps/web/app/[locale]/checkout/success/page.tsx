@@ -7,7 +7,7 @@
  * Server Component - performs initial polling server-side for performance.
  */
 
-import { redirect } from "@/i18n/routing"
+import { redirect } from "next/navigation"
 import { requireUser } from "@/server/lib/auth"
 import { prisma } from "@/server/lib/db"
 import { CheckoutSuccess } from "./_components/checkout-success"

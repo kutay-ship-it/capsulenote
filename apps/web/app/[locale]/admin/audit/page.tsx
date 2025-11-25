@@ -11,7 +11,7 @@
  * @module app/admin/audit
  */
 
-import { redirect } from "@/i18n/routing"
+import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import { prisma } from "@/server/lib/db"
 import { AuditLogTable } from "./_components/audit-log-table"
