@@ -3,7 +3,7 @@
 import { useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { createAddOnCheckoutSession } from "@/server/actions/addons"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
 interface AddOnPurchaseProps {
@@ -12,7 +12,6 @@ interface AddOnPurchaseProps {
 }
 
 export function AddOnPurchase({ type, label }: AddOnPurchaseProps) {
-  const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
   const t = useTranslations("billing.addons.toast")
 
@@ -22,9 +21,7 @@ export function AddOnPurchase({ type, label }: AddOnPurchaseProps) {
       if (result.success && result.data?.url) {
         window.location.href = result.data.url
       } else {
-        toast({
-          variant: "destructive",
-          title: t("failedTitle"),
+        toast.error(t("failedTitle"), {
           description: result.error?.message || t("failedDescription"),
         })
       }

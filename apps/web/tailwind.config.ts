@@ -207,11 +207,16 @@ const config = {
             boxShadow: "rgb(56, 56, 56) -8px 8px 0px 0px",
           },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "brutalist-hover": "brutalist-hover 0.12s ease-in-out forwards",
+        shimmer: "shimmer 1.5s ease-in-out infinite",
       },
     },
   },

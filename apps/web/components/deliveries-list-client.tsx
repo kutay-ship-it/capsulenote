@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { TimezoneTooltip } from "@/components/timezone-tooltip"
 import { DownloadCalendarButton } from "@/components/download-calendar-button"
 import { DeliveryErrorCard } from "@/components/delivery-error-card"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { cancelDelivery } from "@/server/actions/deliveries"
 import { cn } from "@/lib/utils"
 
@@ -40,7 +40,6 @@ type OptimisticAction = { type: "cancel"; id: string }
 
 export function DeliveriesListClient({ deliveries, locale }: DeliveriesListClientProps) {
   const t = useTranslations("deliveries")
-  const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
 
   const [optimisticDeliveries, updateOptimisticDeliveries] = useOptimistic(
@@ -121,22 +120,17 @@ export function DeliveriesListClient({ deliveries, locale }: DeliveriesListClien
 
         if (!result.success) {
           // Revert will happen automatically on next render
-          toast({
-            variant: "destructive",
-            title: t("toasts.cancelError.title"),
+          toast.error(t("toasts.cancelError.title"), {
             description: result.error?.message || t("toasts.cancelError.description"),
           })
           return
         }
 
-        toast({
-          title: t("toasts.canceled.title"),
+        toast.success(t("toasts.canceled.title"), {
           description: t("toasts.canceled.description"),
         })
       } catch (error) {
-        toast({
-          variant: "destructive",
-          title: t("toasts.cancelError.title"),
+        toast.error(t("toasts.cancelError.title"), {
           description: t("toasts.cancelError.description"),
         })
       }

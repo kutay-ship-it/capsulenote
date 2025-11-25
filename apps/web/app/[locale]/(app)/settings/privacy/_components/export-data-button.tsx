@@ -11,12 +11,11 @@ import { useTransition } from "react"
 import { exportUserData } from "@/server/actions/gdpr"
 import { Button } from "@/components/ui/button"
 import { Download, Loader2 } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
 export function ExportDataButton() {
   const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
   const t = useTranslations("privacy.export")
 
   const handleExport = () => {
@@ -25,9 +24,7 @@ export function ExportDataButton() {
         const result = await exportUserData()
 
         if (!result.success) {
-          toast({
-            variant: "destructive",
-            title: t("toast.error.title"),
+          toast.error(t("toast.error.title"), {
             description: result.error.message,
           })
           return
@@ -41,15 +38,12 @@ export function ExportDataButton() {
         link.click()
         document.body.removeChild(link)
 
-        toast({
-          title: t("toast.success.title"),
+        toast.success(t("toast.success.title"), {
           description: t("toast.success.description", { filename: result.data.filename }),
         })
       } catch (error) {
         console.error("[Export Data] Unexpected error:", error)
-        toast({
-          variant: "destructive",
-          title: t("toast.error.title"),
+        toast.error(t("toast.error.title"), {
           description: t("toast.error.description"),
         })
       }

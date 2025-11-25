@@ -8,7 +8,7 @@ import { Link } from "@/i18n/routing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { deleteLetter } from "@/server/actions/letters"
 import { cn } from "@/lib/utils"
 
@@ -30,7 +30,6 @@ type OptimisticAction = { type: "delete"; id: string }
 
 export function LettersListClient({ letters, locale }: LettersListClientProps) {
   const t = useTranslations("letters")
-  const { toast } = useToast()
   const [isPending, startTransition] = useTransition()
 
   const [optimisticLetters, updateOptimisticLetters] = useOptimistic(
@@ -71,22 +70,17 @@ export function LettersListClient({ letters, locale }: LettersListClientProps) {
 
         if (!result.success) {
           // Revert will happen automatically on next render since server state didn't change
-          toast({
-            variant: "destructive",
-            title: t("toasts.deleteError.title"),
+          toast.error(t("toasts.deleteError.title"), {
             description: result.error?.message || t("toasts.deleteError.description"),
           })
           return
         }
 
-        toast({
-          title: t("toasts.deleted.title"),
+        toast.success(t("toasts.deleted.title"), {
           description: t("toasts.deleted.description"),
         })
       } catch (error) {
-        toast({
-          variant: "destructive",
-          title: t("toasts.deleteError.title"),
+        toast.error(t("toasts.deleteError.title"), {
           description: t("toasts.deleteError.description"),
         })
       }

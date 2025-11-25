@@ -5,7 +5,7 @@ import { AlertCircle, RefreshCw, Mail } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { retryDelivery } from "@/server/actions/deliveries"
 import {
   getErrorRecoveryInfo,
@@ -35,7 +35,6 @@ export function DeliveryErrorCard({
   attemptCount,
   letterTitle,
 }: DeliveryErrorCardProps) {
-  const { toast } = useToast()
   const t = useTranslations("components.deliveryError")
   const [isRetrying, setIsRetrying] = useState(false)
 
@@ -51,21 +50,16 @@ export function DeliveryErrorCard({
       const result = await retryDelivery(deliveryId)
 
       if (result.success) {
-        toast({
-          title: t("toasts.retryScheduled.title"),
+        toast.success(t("toasts.retryScheduled.title"), {
           description: t("toasts.retryScheduled.description", { title: letterTitle }),
         })
       } else {
-        toast({
-          variant: "destructive",
-          title: t("toasts.retryFailed.title"),
+        toast.error(t("toasts.retryFailed.title"), {
           description: result.error.message,
         })
       }
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: t("toasts.error.title"),
+      toast.error(t("toasts.error.title"), {
         description: error instanceof Error ? error.message : t("toasts.error.description"),
       })
     } finally {

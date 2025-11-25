@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ExternalLink, Loader2 } from "lucide-react"
 import { createBillingPortalSession } from "@/server/actions/billing"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
 interface ManageSubscriptionButtonProps {
@@ -13,7 +13,6 @@ interface ManageSubscriptionButtonProps {
 
 export function ManageSubscriptionButton({ hasSubscription }: ManageSubscriptionButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
   const t = useTranslations("billing")
 
   const handleClick = async () => {
@@ -29,10 +28,8 @@ export function ManageSubscriptionButton({ hasSubscription }: ManageSubscription
       const result = await createBillingPortalSession()
 
       if (!result.success) {
-        toast({
-          title: t("toasts.errorTitle"),
+        toast.error(t("toasts.errorTitle"), {
           description: result.error.message || t("toasts.portalFailed"),
-          variant: "destructive",
         })
         return
       }
@@ -40,10 +37,8 @@ export function ManageSubscriptionButton({ hasSubscription }: ManageSubscription
       // Redirect to Stripe portal
       window.location.href = result.data.url
     } catch (error) {
-      toast({
-        title: t("toasts.errorTitle"),
+      toast.error(t("toasts.errorTitle"), {
         description: t("toasts.portalUnexpected"),
-        variant: "destructive",
       })
     } finally {
       setIsLoading(false)

@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { useTranslations } from "next-intl"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 /**
  * Client-side guard to ensure lockedEmail (from checkout) matches current Clerk email.
@@ -23,9 +23,7 @@ export function EmailLockGuard({ children }: { children: React.ReactNode }) {
     if (lockedEmail) {
       const primaryEmail = user.primaryEmailAddress?.emailAddress?.toLowerCase()
       if (primaryEmail && primaryEmail !== lockedEmail.toLowerCase()) {
-        toast({
-          variant: "destructive",
-          title: t("title"),
+        toast.error(t("title"), {
           description: t("description"),
         })
         signOut().then(() => router.push("/sign-in"))

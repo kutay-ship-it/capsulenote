@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { WelcomeModal } from "@/components/onboarding/welcome-modal"
 import { completeOnboarding } from "@/server/actions/onboarding"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 interface DashboardWrapperProps {
   showOnboarding: boolean
@@ -12,7 +12,6 @@ interface DashboardWrapperProps {
 
 export function DashboardWrapper({ showOnboarding, children }: DashboardWrapperProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { toast } = useToast()
 
   // Show modal on mount if onboarding not completed
   useEffect(() => {
@@ -32,8 +31,7 @@ export function DashboardWrapper({ showOnboarding, children }: DashboardWrapperP
 
       if (result.success) {
         setIsModalOpen(false)
-        toast({
-          title: "Welcome aboard! 🎉",
+        toast.success("Welcome aboard! 🎉", {
           description: "You're all set. Start writing your first letter!",
         })
       } else {

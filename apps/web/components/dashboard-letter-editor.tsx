@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { createLetter } from "@/server/actions/letters"
 import { scheduleDelivery } from "@/server/actions/deliveries"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { fromZonedTime } from "date-fns-tz"
 import { getUserTimezone } from "@/lib/utils"
 import { getAnonymousDraft, clearAnonymousDraft } from "@/lib/localStorage-letter"
@@ -21,7 +21,6 @@ import { Button } from "@/components/ui/button"
  */
 export function DashboardLetterEditor() {
   const router = useRouter()
-  const { toast } = useToast()
   const t = useTranslations("forms.dashboardEditor")
   const [isPending, startTransition] = useTransition()
   const [draftData, setDraftData] = useState<LetterFormData | null>(null)
@@ -116,9 +115,7 @@ export function DashboardLetterEditor() {
               toEmail: data.recipientEmail,
             })
           } catch (scheduleError) {
-            toast({
-              variant: "destructive",
-              title: t("toasts.deliveryNotScheduled.title"),
+            toast.error(t("toasts.deliveryNotScheduled.title"), {
               description: scheduleError instanceof Error
                 ? scheduleError.message
                 : t("toasts.deliveryNotScheduled.description"),
@@ -128,8 +125,7 @@ export function DashboardLetterEditor() {
           clearAnonymousDraft()
 
           // Show success toast
-          toast({
-            title: t("toasts.letterCreated.title"),
+          toast.success(t("toasts.letterCreated.title"), {
             description: t("toasts.letterCreated.description", {
               title: data.title,
               scheduled: data.deliveryDate ? t("toasts.letterCreated.scheduled") : "",
@@ -141,36 +137,28 @@ export function DashboardLetterEditor() {
         } else {
           // Handle error cases
           if (result.error.code === 'QUOTA_EXCEEDED') {
-            toast({
-              title: t("toasts.quotaExceeded.title"),
+            toast.error(t("toasts.quotaExceeded.title"), {
               description: result.error.message,
-              variant: "destructive",
               action: {
                 label: t("toasts.upgrade"),
                 onClick: () => router.push('/pricing'),
               },
             })
           } else if (result.error.code === 'VALIDATION_FAILED') {
-            toast({
-              title: t("toasts.validationError.title"),
+            toast.error(t("toasts.validationError.title"), {
               description: result.error.message,
-              variant: "destructive",
             })
           } else {
-            toast({
-              title: t("toasts.error.title"),
+            toast.error(t("toasts.error.title"), {
               description: result.error.message || t("toasts.error.description"),
-              variant: "destructive",
             })
           }
         }
       } catch (error) {
         // Handle unexpected errors
         console.error('Letter creation error:', error)
-        toast({
-          title: t("toasts.unexpectedError.title"),
+        toast.error(t("toasts.unexpectedError.title"), {
           description: t("toasts.unexpectedError.description"),
-          variant: "destructive",
         })
       }
     })

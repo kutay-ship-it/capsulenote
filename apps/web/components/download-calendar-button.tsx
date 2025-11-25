@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { generateDeliveryCalendarEvent, createICSBlob } from "@/lib/calendar"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 interface DownloadCalendarButtonProps {
   letterTitle: string
@@ -32,7 +32,6 @@ export function DownloadCalendarButton({
   variant = "outline",
   size = "sm",
 }: DownloadCalendarButtonProps) {
-  const { toast } = useToast()
   const t = useTranslations("common")
 
   const handleDownload = (e: React.MouseEvent) => {
@@ -67,16 +66,13 @@ export function DownloadCalendarButton({
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast({
-        title: t("toasts.calendarDownloaded.title"),
+      toast.success(t("toasts.calendarDownloaded.title"), {
         description: t("toasts.calendarDownloaded.description"),
       })
     } catch (error) {
       console.error("Failed to download calendar file:", error)
 
-      toast({
-        variant: "destructive",
-        title: t("toasts.calendarFailed.title"),
+      toast.error(t("toasts.calendarFailed.title"), {
         description: t("toasts.calendarFailed.description"),
       })
     }

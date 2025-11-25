@@ -31,14 +31,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Trash2, Loader2, AlertTriangle } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 
 export function DeleteDataButton() {
   const [isOpen, setIsOpen] = useState(false)
   const [confirmText, setConfirmText] = useState("")
   const [isPending, startTransition] = useTransition()
-  const { toast } = useToast()
   const router = useRouter()
   const t = useTranslations("privacy.delete")
 
@@ -52,17 +51,14 @@ export function DeleteDataButton() {
         const result = await deleteUserAccount()
 
         if (!result.success) {
-          toast({
-            variant: "destructive",
-            title: t("toast.error.title"),
+          toast.error(t("toast.error.title"), {
             description: result.error.message,
           })
           return
         }
 
         // Success - user will be signed out by Clerk
-        toast({
-          title: t("toast.success.title"),
+        toast.success(t("toast.success.title"), {
           description: t("toast.success.description"),
         })
 
@@ -73,9 +69,7 @@ export function DeleteDataButton() {
         }, 2000)
       } catch (error) {
         console.error("[Delete Data] Unexpected error:", error)
-        toast({
-          variant: "destructive",
-          title: t("toast.error.title"),
+        toast.error(t("toast.error.title"), {
           description: t("toast.error.description"),
         })
       }

@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { createLetter } from "@/server/actions/letters"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { getAnonymousDraft, saveAnonymousDraft, clearAnonymousDraft } from "@/lib/localStorage-letter"
 
 interface LetterDraftFormProps {
@@ -27,7 +27,6 @@ export function LetterDraftForm({
   accentColor = "yellow",
 }: LetterDraftFormProps) {
   const router = useRouter()
-  const { toast } = useToast()
   const t = useTranslations("letters")
   const tf = useTranslations("forms.letterDraft")
 
@@ -181,8 +180,7 @@ export function LetterDraftForm({
 
     await autoSave()
 
-    toast({
-      title: t("toasts.draftSaved.title"),
+    toast.success(t("toasts.draftSaved.title"), {
       description: t("toasts.draftSaved.description"),
     })
   }
@@ -239,12 +237,10 @@ export function LetterDraftForm({
         })
 
         if (!result.success) {
-          toast({
-            title: t("toasts.createError.title"),
+          toast.error(t("toasts.createError.title"), {
             description: t("toasts.createError.description", {
               message: result.error.message || t("toasts.scheduleForm.failed"),
             }),
-            variant: "destructive",
           })
           return
         }
@@ -259,10 +255,8 @@ export function LetterDraftForm({
       router.push(`/letters/${letterId}/schedule`)
     } catch (error) {
       console.error('Error saving letter:', error)
-      toast({
-        title: t("toasts.scheduleForm.errorTitle"),
+      toast.error(t("toasts.scheduleForm.errorTitle"), {
         description: t("toasts.scheduleForm.unexpected"),
-        variant: "destructive",
       })
     } finally {
       setIsSubmitting(false)

@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { TimezoneTooltip, DSTTooltip } from "@/components/timezone-tooltip"
 import { buildDeliverAtParams, formatDateTimeWithTimezone, getUserTimezone, isDST } from "@/lib/utils"
 import { cn } from "@/lib/utils"
@@ -31,7 +32,6 @@ export function ScheduleDeliveryForm({
   userEmail,
 }: ScheduleDeliveryFormProps) {
   const router = useRouter()
-  const { toast } = useToast()
   const t = useTranslations("letters.toasts.scheduleForm")
   const tf = useTranslations("forms.scheduleDelivery")
 
@@ -101,18 +101,14 @@ export function ScheduleDeliveryForm({
     e.preventDefault()
 
     if (!deliveryDate) {
-      toast({
-        variant: "destructive",
-        title: t("errorTitle"),
+      toast.error(t("errorTitle"), {
         description: t("missingDate"),
       })
       return
     }
 
     if (!recipientEmail) {
-      toast({
-        variant: "destructive",
-        title: t("errorTitle"),
+      toast.error(t("errorTitle"), {
         description: t("missingEmail"),
       })
       return
@@ -167,24 +163,19 @@ export function ScheduleDeliveryForm({
                 : t("subscriptionRequired"))) ||
             result.error?.message ||
             t("failed")
-          toast({
-            variant: "destructive",
-            title: t("errorTitle"),
+          toast.error(t("errorTitle"), {
             description: message,
           })
           return
         }
 
-        toast({
-          title: t("scheduledTitle"),
+        toast.success(t("scheduledTitle"), {
           description: t("scheduledDescription", { date: formatDeliveryTime() || "" }),
         })
 
         router.push(`/letters/${letterId}`)
       } catch (error) {
-        toast({
-          variant: "destructive",
-          title: t("errorTitle"),
+        toast.error(t("errorTitle"), {
           description: error instanceof Error ? error.message : t("unexpected"),
         })
       }
@@ -266,16 +257,19 @@ export function ScheduleDeliveryForm({
               <Label htmlFor="recipientEmail" className="font-mono text-sm font-normal uppercase tracking-wide">
                 {tf("sendTo.label")}
               </Label>
-              <Input
-                id="recipientEmail"
-                type="email"
-                value={recipientEmail}
-                onChange={(e) => setRecipientEmail(e.target.value)}
-                placeholder={tf("sendTo.placeholder")}
-                required
-                className="border-2 border-charcoal font-mono"
-                style={{ borderRadius: "2px" }}
-              />
+              <InputGroup>
+                <InputGroupAddon position="start">
+                  <MailIcon className="h-4 w-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="recipientEmail"
+                  type="email"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  placeholder={tf("sendTo.placeholder")}
+                  required
+                />
+              </InputGroup>
               <p className="font-mono text-xs text-gray-secondary">
                 {tf("sendTo.description")}
               </p>

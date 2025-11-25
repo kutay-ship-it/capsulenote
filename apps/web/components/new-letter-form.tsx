@@ -7,13 +7,12 @@ import { zonedTimeToUtc } from "date-fns-tz"
 
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { scheduleDelivery } from "@/server/actions/deliveries"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { getUserTimezone } from "@/lib/utils"
 import { createLetter } from "@/server/actions/letters"
 
 export function NewLetterForm() {
   const router = useRouter()
-  const { toast } = useToast()
   const t = useTranslations("letters.toasts")
   const [isPending, startTransition] = useTransition()
 
@@ -43,17 +42,14 @@ export function NewLetterForm() {
           toEmail: data.recipientEmail,
         })
 
-        toast({
-          title: t("letterScheduled.title"),
+        toast.success(t("letterScheduled.title"), {
           description: t("letterScheduled.description", {
             title: data.title || "",
             date: new Intl.DateTimeFormat(undefined, { dateStyle: "long", timeStyle: "short" }).format(deliverAt),
           }),
         })
       } catch (scheduleError) {
-        toast({
-          variant: "destructive",
-          title: t("scheduleFailed.title"),
+        toast.error(t("scheduleFailed.title"), {
           description:
             scheduleError instanceof Error
               ? scheduleError.message
@@ -63,9 +59,7 @@ export function NewLetterForm() {
 
       router.push(`/letters/${letterId}`)
     } else {
-      toast({
-        variant: "destructive",
-        title: t("createError.title"),
+      toast.error(t("createError.title"), {
         description: t("createError.description", { message: result.error.message }),
       })
     }

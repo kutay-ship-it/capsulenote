@@ -11,8 +11,9 @@ import { useState } from "react"
 import { z } from "zod"
 import { useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
+import { Mail } from "lucide-react"
 
-import { Input } from "@/components/ui/input"
+import { InputGroup, InputGroupInput, InputGroupAddon } from "@/components/ui/input-group"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useRouter } from "@/i18n/routing"
@@ -59,17 +60,21 @@ export function EmailCaptureForm({ letterId }: EmailCaptureFormProps) {
         <Label htmlFor="email" className="font-mono text-sm uppercase tracking-wide text-charcoal">
           {t("label")}
         </Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={t("placeholder")}
-          className="border-2 border-charcoal font-mono"
-          autoFocus
-          autoComplete="email"
-          required
-        />
+        <InputGroup>
+          <InputGroupAddon position="start">
+            <Mail className="h-4 w-4" />
+          </InputGroupAddon>
+          <InputGroupInput
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={t("placeholder")}
+            autoFocus
+            autoComplete="email"
+            required
+          />
+        </InputGroup>
         {error && (
           <p className="font-mono text-xs text-red-600">{error}</p>
         )}

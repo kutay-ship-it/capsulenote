@@ -16,7 +16,7 @@ import { useTranslations } from "next-intl"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { createAnonymousCheckout } from "../actions"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 
 interface SubscribeButtonProps {
   /** User's email (locked in Stripe) */
@@ -75,9 +75,7 @@ export function SubscribeButton({
 
         switch (errorMessage) {
           case "ALREADY_PAID":
-            toast({
-              variant: "destructive",
-              title: t("toast.alreadyPaid.title"),
+            toast.error(t("toast.alreadyPaid.title"), {
               description: t("toast.alreadyPaid.description"),
             })
             // Redirect to signup with email
@@ -87,9 +85,7 @@ export function SubscribeButton({
             break
 
           default:
-            toast({
-              variant: "destructive",
-              title: t("toast.checkoutFailed.title"),
+            toast.error(t("toast.checkoutFailed.title"), {
               description: errorMessage || t("toast.checkoutFailed.description"),
             })
         }

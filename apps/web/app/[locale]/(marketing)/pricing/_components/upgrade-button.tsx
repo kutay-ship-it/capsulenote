@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
-import { toast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { useRouter } from "@/i18n/routing"
 import { createCheckoutSession } from "@/server/actions/billing"
 
@@ -55,41 +55,31 @@ export function UpgradeButton({
         // Handle specific error codes
         switch (result.error.code) {
           case "ALREADY_SUBSCRIBED":
-            toast({
-              variant: "destructive",
-              title: t("errors.alreadySubscribed.title"),
+            toast.error(t("errors.alreadySubscribed.title"), {
               description: t("errors.alreadySubscribed.description"),
             })
             break
 
           case "INVALID_INPUT":
-            toast({
-              variant: "destructive",
-              title: t("errors.invalidPlan.title"),
+            toast.error(t("errors.invalidPlan.title"), {
               description: t("errors.invalidPlan.description"),
             })
             break
 
           case "UNAUTHORIZED":
-            toast({
-              variant: "destructive",
-              title: t("errors.unauthorized.title"),
+            toast.error(t("errors.unauthorized.title"), {
               description: t("errors.unauthorized.description"),
             })
             break
 
           case "PAYMENT_PROVIDER_ERROR":
-            toast({
-              variant: "destructive",
-              title: t("errors.payment.title"),
+            toast.error(t("errors.payment.title"), {
               description: result.error.message || t("errors.payment.description"),
             })
             break
 
           default:
-            toast({
-              variant: "destructive",
-              title: t("errors.generic.title"),
+            toast.error(t("errors.generic.title"), {
               description: result.error.message || t("errors.generic.description"),
             })
         }
@@ -98,9 +88,7 @@ export function UpgradeButton({
       }
     } catch (error) {
       console.error("[UpgradeButton] Checkout error:", error)
-      toast({
-        variant: "destructive",
-        title: t("errors.checkoutFailed.title"),
+      toast.error(t("errors.checkoutFailed.title"), {
         description: t("errors.checkoutFailed.description"),
       })
       setIsLoading(false)
