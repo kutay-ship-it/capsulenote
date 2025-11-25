@@ -91,7 +91,7 @@ export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
   if (viewMode === "list") {
     return (
       <Link
-        href={{ pathname: "/letters-v3/[id]", params: { id: letter.id } } as any}
+        href={`/letters-v3/${letter.id}`}
         className="block group"
       >
         <article
@@ -151,7 +151,7 @@ export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
   // Grid view - vertical card layout (default)
   return (
     <Link
-      href={{ pathname: "/letters-v3/[id]", params: { id: letter.id } } as any}
+      href={`/letters-v3/${letter.id}`}
       className="block group"
     >
       <article

@@ -94,7 +94,7 @@ async function LetterContent({ id, userEmail }: { id: string; userEmail: string 
                             <div className="px-3 py-1 bg-stone-100 rounded-full text-xs font-medium uppercase tracking-wider text-stone-600">
                                 {statusLabel(letter.status)}
                             </div>
-                            <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
+                            <Link href={`/letters/${id}/schedule`}>
                                 <Button variant="outline" className="rounded-full">
                                     <Calendar className="mr-2 h-4 w-4" />
                                     {t("detail.scheduleCta")}

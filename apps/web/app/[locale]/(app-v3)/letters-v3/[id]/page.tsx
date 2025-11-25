@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
-import { format } from "date-fns"
+import { format, differenceInDays } from "date-fns"
 import {
   ArrowLeft,
   Mail,
@@ -12,6 +12,7 @@ import {
   Trash2,
   Lock,
   CheckCircle2,
+  ArrowRight,
 } from "lucide-react"
 
 import { Link } from "@/i18n/routing"
@@ -101,35 +102,36 @@ function getStatusConfig(
 function LetterDetailV3Skeleton() {
   return (
     <div className="space-y-6">
-      {/* Header skeleton */}
-      <div
-        className="border-2 border-charcoal bg-white p-6 animate-pulse"
-        style={{ borderRadius: "2px" }}
-      >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="space-y-3">
-            <div className="h-5 w-20 bg-charcoal/20" style={{ borderRadius: "2px" }} />
-            <div className="h-8 w-64 bg-charcoal/10" style={{ borderRadius: "2px" }} />
-            <div className="h-4 w-40 bg-charcoal/10" style={{ borderRadius: "2px" }} />
-          </div>
-          <div className="flex gap-2">
-            <div className="h-10 w-24 bg-charcoal/10" style={{ borderRadius: "2px" }} />
-            <div className="h-10 w-24 bg-charcoal/10" style={{ borderRadius: "2px" }} />
-          </div>
-        </div>
-      </div>
-
       {/* Content skeleton */}
       <div
-        className="border-2 border-charcoal bg-white p-6 animate-pulse"
+        className="border-2 border-charcoal bg-white p-8 animate-pulse shadow-[2px_2px_0_theme(colors.charcoal)]"
         style={{ borderRadius: "2px" }}
       >
+        {/* Badge */}
+        <div className="h-6 w-20 bg-charcoal/20 mb-4" style={{ borderRadius: "2px" }} />
+
+        {/* Title */}
+        <div className="h-8 w-3/4 bg-charcoal/10 mb-6" style={{ borderRadius: "2px" }} />
+
+        {/* Dashed separator */}
+        <div className="w-full border-t-2 border-dashed border-charcoal/10 my-6" />
+
+        {/* Content lines */}
         <div className="space-y-3">
-          <div className="h-4 w-full bg-charcoal/10" style={{ borderRadius: "2px" }} />
-          <div className="h-4 w-full bg-charcoal/10" style={{ borderRadius: "2px" }} />
-          <div className="h-4 w-3/4 bg-charcoal/10" style={{ borderRadius: "2px" }} />
-          <div className="h-4 w-full bg-charcoal/10" style={{ borderRadius: "2px" }} />
-          <div className="h-4 w-2/3 bg-charcoal/10" style={{ borderRadius: "2px" }} />
+          <div className="h-5 w-full bg-charcoal/10" style={{ borderRadius: "2px" }} />
+          <div className="h-5 w-full bg-charcoal/10" style={{ borderRadius: "2px" }} />
+          <div className="h-5 w-3/4 bg-charcoal/10" style={{ borderRadius: "2px" }} />
+          <div className="h-5 w-full bg-charcoal/10" style={{ borderRadius: "2px" }} />
+          <div className="h-5 w-2/3 bg-charcoal/10" style={{ borderRadius: "2px" }} />
+        </div>
+
+        {/* Dashed separator */}
+        <div className="w-full border-t-2 border-dashed border-charcoal/10 my-6" />
+
+        {/* Footer */}
+        <div className="flex justify-between">
+          <div className="h-4 w-32 bg-charcoal/10" style={{ borderRadius: "2px" }} />
+          <div className="h-4 w-24 bg-charcoal/10" style={{ borderRadius: "2px" }} />
         </div>
       </div>
     </div>
@@ -150,9 +152,7 @@ async function LetterDetailContent({ id }: { id: string }) {
   const hasDelivery = letter.deliveries.length > 0
   const latestDelivery = hasDelivery ? letter.deliveries[0] : null
   const daysUntil = latestDelivery
-    ? Math.ceil(
-        (new Date(latestDelivery.deliverAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-      )
+    ? differenceInDays(new Date(latestDelivery.deliverAt), new Date())
     : undefined
 
   const statusConfig = getStatusConfig(hasDelivery, latestDelivery?.status, daysUntil)
@@ -162,91 +162,106 @@ async function LetterDetailContent({ id }: { id: string }) {
 
   return (
     <div className="space-y-6">
-      {/* Header Card */}
-      <div
+      {/* Main Letter Card */}
+      <article
         className={cn(
-          "border-2 bg-white p-6",
+          "relative border-2 bg-white p-6 md:p-8",
+          "shadow-[2px_2px_0_theme(colors.charcoal)]",
           statusConfig.borderColor
         )}
         style={{ borderRadius: "2px" }}
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          {/* Left: Title & Meta */}
-          <div className="space-y-3">
-            {/* Status Badge */}
-            <div
-              className={cn(
-                "inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider",
-                statusConfig.badgeBg,
-                statusConfig.badgeTextColor
-              )}
-              style={{ borderRadius: "2px" }}
-            >
-              {statusConfig.icon}
-              <span>{statusConfig.badgeText}</span>
-            </div>
+        {/* Status Badge - Floating */}
+        <div
+          className={cn(
+            "absolute -top-3 left-6 flex items-center gap-1.5 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider",
+            statusConfig.badgeBg,
+            statusConfig.badgeTextColor
+          )}
+          style={{ borderRadius: "2px" }}
+        >
+          {statusConfig.icon}
+          <span>{statusConfig.badgeText}</span>
+        </div>
 
-            {/* Title */}
-            <h1 className="font-mono text-2xl md:text-3xl font-bold text-charcoal">
-              {letter.title || "Untitled Letter"}
-            </h1>
-
-            {/* Meta info */}
-            <div className="flex flex-wrap items-center gap-3 font-mono text-xs text-charcoal/60">
-              <span>Written on {formattedDate}</span>
-              {isLocked && (
-                <span className="flex items-center gap-1 text-charcoal/40">
-                  <Lock className="h-3 w-3" strokeWidth={2} />
-                  Locked for delivery
-                </span>
-              )}
-            </div>
+        {/* Lock indicator */}
+        {isLocked && (
+          <div className="absolute top-4 right-6">
+            <Lock className="h-5 w-5 text-charcoal/30" strokeWidth={2} />
           </div>
+        )}
 
-          {/* Right: Actions */}
-          <div className="flex flex-wrap gap-2">
+        {/* Title */}
+        <h1 className="mt-4 mb-2 font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal">
+          {letter.title || "Untitled Letter"}
+        </h1>
+
+        {/* Meta */}
+        <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-6">
+          Written on {formattedDate}
+        </p>
+
+        {/* Dashed separator */}
+        <div className="w-full border-t-2 border-dashed border-charcoal/10 mb-6" />
+
+        {/* Content */}
+        <div
+          className="prose prose-sm sm:prose max-w-none prose-p:font-mono prose-p:text-charcoal/80 prose-p:leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
+        />
+
+        {/* Dashed separator */}
+        <div className="w-full border-t-2 border-dashed border-charcoal/10 mt-8 mb-4" />
+
+        {/* Actions Footer */}
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* Left: Edit action */}
+          <div>
             {!isLocked && (
-              <Link href={{ pathname: "/letters-v3/[id]/edit", params: { id } } as any}>
-                <Button variant="outline" size="sm" className="gap-2">
+              <Link href={`/letters-v3/${id}/edit`}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 font-mono text-xs uppercase tracking-wider text-charcoal/60 hover:text-charcoal"
+                >
                   <PenLine className="h-4 w-4" />
-                  Edit
+                  Edit Letter
                 </Button>
               </Link>
             )}
-            {!hasDelivery && (
-              <Link href={{ pathname: "/letters-v3/[id]/schedule", params: { id } } as any}>
+          </div>
+
+          {/* Right: Schedule/View delivery */}
+          <div>
+            {!hasDelivery ? (
+              <Link href={`/letters-v3/${id}/schedule`}>
                 <Button size="sm" className="gap-2">
                   <Calendar className="h-4 w-4" />
-                  Schedule
+                  Schedule Delivery
                 </Button>
               </Link>
+            ) : (
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
+                {latestDelivery?.status === "sent"
+                  ? `Delivered ${format(new Date(latestDelivery.deliverAt), "MMM d, yyyy")}`
+                  : `Delivers ${format(new Date(latestDelivery!.deliverAt), "MMM d, yyyy")}`}
+              </span>
             )}
           </div>
         </div>
-      </div>
+      </article>
 
-      {/* Content Card */}
-      <div
-        className="border-2 border-charcoal bg-white p-6 md:p-8"
-        style={{ borderRadius: "2px" }}
-      >
-        <div
-          className="prose prose-sm sm:prose max-w-none font-serif"
-          dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
-        />
-      </div>
-
-      {/* Delivery Timeline Card - only if has deliveries */}
+      {/* Delivery Timeline - only if has deliveries */}
       {hasDelivery && (
         <div
-          className="border-2 border-charcoal bg-white p-6"
+          className="border-2 border-charcoal bg-white p-6 shadow-[2px_2px_0_theme(colors.charcoal)]"
           style={{ borderRadius: "2px" }}
         >
-          <h2 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
+          <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal mb-4">
             Delivery Timeline
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {letter.deliveries.map((delivery) => {
               const deliveryDate = format(new Date(delivery.deliverAt), "MMMM d, yyyy 'at' h:mm a")
               const isDelivered = delivery.status === "sent"
@@ -258,13 +273,13 @@ async function LetterDetailContent({ id }: { id: string }) {
                 <div
                   key={delivery.id}
                   className={cn(
-                    "flex items-start gap-4 border-l-4 p-4",
-                    isDelivered && "border-l-teal-primary bg-teal-primary/5",
-                    isFailed && "border-l-coral bg-coral/5",
-                    isScheduled && "border-l-duck-blue bg-duck-blue/5",
-                    isProcessing && "border-l-duck-yellow bg-duck-yellow/5"
+                    "flex items-center gap-4 border-2 border-l-4 p-4",
+                    isDelivered && "border-teal-primary bg-white",
+                    isFailed && "border-coral bg-white",
+                    isScheduled && "border-duck-blue bg-white",
+                    isProcessing && "border-duck-yellow bg-white"
                   )}
-                  style={{ borderRadius: "0 2px 2px 0" }}
+                  style={{ borderRadius: "2px" }}
                 >
                   {/* Icon */}
                   <div
@@ -286,12 +301,12 @@ async function LetterDetailContent({ id }: { id: string }) {
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-sm font-bold uppercase text-charcoal">
-                        {delivery.channel === "email" ? "Email Delivery" : "Physical Mail"}
+                      <span className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
+                        {delivery.channel === "email" ? "Email" : "Mail"}
                       </span>
                       <span
                         className={cn(
-                          "px-2 py-0.5 font-mono text-[10px] font-bold uppercase",
+                          "px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider",
                           isDelivered && "bg-teal-primary text-white",
                           isFailed && "bg-coral text-white",
                           isScheduled && "bg-duck-blue text-charcoal",
@@ -304,27 +319,26 @@ async function LetterDetailContent({ id }: { id: string }) {
                     </div>
 
                     <p className="mt-1 font-mono text-xs text-charcoal/60">
-                      {isDelivered ? "Delivered on " : isScheduled ? "Scheduled for " : ""}
                       {deliveryDate}
                     </p>
 
                     {delivery.channel === "email" && delivery.emailDelivery?.toEmail && (
-                      <p className="mt-1 font-mono text-xs text-charcoal/60">
+                      <p className="font-mono text-xs text-charcoal/40">
                         To: {delivery.emailDelivery.toEmail}
                       </p>
                     )}
 
                     {isFailed && delivery.lastError && (
-                      <p className="mt-2 font-mono text-xs text-coral">
-                        Error: {delivery.lastError}
+                      <p className="mt-1 font-mono text-xs text-coral">
+                        {delivery.lastError}
                       </p>
                     )}
                   </div>
 
                   {/* Actions */}
                   {isScheduled && (
-                    <Link href={{ pathname: "/letters-v3/[id]/schedule", params: { id } } as any}>
-                      <Button variant="ghost" size="sm" className="text-xs">
+                    <Link href={`/letters-v3/${id}/schedule`}>
+                      <Button variant="outline" size="sm" className="font-mono text-xs uppercase tracking-wider">
                         Reschedule
                       </Button>
                     </Link>
@@ -339,55 +353,62 @@ async function LetterDetailContent({ id }: { id: string }) {
       {/* Schedule CTA - only if no deliveries */}
       {!hasDelivery && (
         <div
-          className="border-2 border-dashed border-charcoal/30 bg-duck-cream/50 p-8 text-center"
+          className="border-2 border-charcoal bg-duck-cream p-8 md:p-12 shadow-[2px_2px_0_theme(colors.charcoal)]"
           style={{ borderRadius: "2px" }}
         >
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center justify-center text-center space-y-6">
+            {/* Icon */}
             <div
-              className="flex h-12 w-12 items-center justify-center border-2 border-charcoal bg-white"
+              className="flex h-16 w-16 items-center justify-center border-2 border-charcoal bg-duck-yellow"
               style={{ borderRadius: "2px" }}
             >
-              <Calendar className="h-6 w-6 text-charcoal" strokeWidth={2} />
+              <Calendar className="h-8 w-8 text-charcoal" strokeWidth={2} />
             </div>
 
-            <div className="space-y-1">
-              <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
-                Ready to send?
-              </h3>
-              <p className="font-mono text-xs text-charcoal/60">
-                Schedule this letter to be delivered to your future self
+            {/* Message */}
+            <div className="space-y-2 max-w-md">
+              <h2 className="font-mono text-xl md:text-2xl font-bold uppercase tracking-wide text-charcoal">
+                Ready to send this letter?
+              </h2>
+              <p className="font-mono text-sm text-charcoal/70">
+                Schedule a delivery date and your letter will arrive in your inbox when the time comes.
               </p>
             </div>
 
-            <Link href={{ pathname: "/letters-v3/[id]/schedule", params: { id } } as any}>
+            {/* CTA */}
+            <Link href={`/letters-v3/${id}/schedule`}>
               <Button className="gap-2">
-                <Calendar className="h-4 w-4" />
                 Schedule Delivery
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
           </div>
         </div>
       )}
 
-      {/* Danger Zone - Delete */}
+      {/* Danger Zone */}
       <div
         className="border-2 border-charcoal/20 bg-white p-6"
         style={{ borderRadius: "2px" }}
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal/60">
               Danger Zone
             </h3>
-            <p className="mt-1 font-mono text-xs text-charcoal/60">
+            <p className="mt-1 font-mono text-xs text-charcoal/40">
               {hasDelivery
-                ? "This will cancel any scheduled deliveries and permanently delete this letter."
-                : "This will permanently delete this letter."}
+                ? "Cancel deliveries and permanently delete this letter."
+                : "Permanently delete this letter."}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="gap-2 text-coral hover:bg-coral/10 hover:text-coral border-coral/30">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 font-mono text-xs uppercase tracking-wider text-coral/70 hover:text-coral hover:bg-coral/5"
+          >
             <Trash2 className="h-4 w-4" />
-            Delete Letter
+            Delete
           </Button>
         </div>
       </div>
@@ -402,25 +423,29 @@ export default async function LetterDetailV3Page({ params }: PageProps) {
   await requireUser()
 
   return (
-    <div className="container py-8">
-      {/* Back Link */}
-      <div className="mb-6">
-        <Link href="/letters-v3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="gap-2 font-mono text-xs uppercase tracking-wider text-charcoal/70 hover:text-charcoal"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Letters
-          </Button>
-        </Link>
-      </div>
+    <div className="container">
+      {/* Header - matches letters-v3 page pattern */}
+      <header className="flex flex-col gap-4 py-12 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <Link href="/letters-v3">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 -ml-4 font-mono text-xs uppercase tracking-wider text-charcoal/60 hover:text-charcoal"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Letters
+            </Button>
+          </Link>
+        </div>
+      </header>
 
-      {/* Letter Content - Streams with Suspense */}
-      <Suspense fallback={<LetterDetailV3Skeleton />}>
-        <LetterDetailContent id={id} />
-      </Suspense>
+      {/* Letter Content */}
+      <section className="pb-12">
+        <Suspense fallback={<LetterDetailV3Skeleton />}>
+          <LetterDetailContent id={id} />
+        </Suspense>
+      </section>
     </div>
   )
 }

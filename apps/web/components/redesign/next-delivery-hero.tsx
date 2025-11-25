@@ -161,13 +161,13 @@ export async function NextDeliveryHero({ delivery }: NextDeliveryHeroProps) {
 
       {/* Action buttons */}
       <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-        <Link href={{ pathname: "/letters/[id]", params: { id: delivery.letter.id } }}>
+        <Link href={`/letters/${delivery.letter.id}`}>
           <Button variant="ghost" className="w-full sm:w-auto">
             <Eye className="mr-2 h-4 w-4" strokeWidth={2} />
             {t("previewLetter")}
           </Button>
         </Link>
-        <Link href={{ pathname: "/letters/[id]/schedule", params: { id: delivery.letter.id } }}>
+        <Link href={`/letters/${delivery.letter.id}/schedule`}>
           <Button variant="ghost" className="w-full sm:w-auto">
             <Calendar className="mr-2 h-4 w-4" strokeWidth={2} />
             {t("reschedule")}

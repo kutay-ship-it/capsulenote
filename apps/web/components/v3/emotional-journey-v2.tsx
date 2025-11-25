@@ -34,19 +34,35 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
     const pxPerDay = 3
     const cardWidth = 288 // w-72 = 18rem = 288px
     const minCardGap = 380 // Generous spacing between cards
+    const extraNowGap = 600 // Extra spacing around the NOW indicator
 
     let currentX = 200 // Initial padding
     const calculatedItems: any[] = []
+    let hasAddedNowGap = false
+    const nowTime = now.getTime()
 
     // First pass: position all cards
     sortedDeliveries.forEach((item, index) => {
       const date = new Date(item.deliverAt)
+      const itemTime = date.getTime()
+
+      // Calculate required gap
+      let requiredGap = minCardGap
+
+      // If we are crossing from past to future (or at the start of future), add extra gap for NOW
+      if (!hasAddedNowGap && itemTime > nowTime) {
+        if (index > 0) {
+          requiredGap += extraNowGap
+        }
+        hasAddedNowGap = true
+      }
+
       const daysFromStart = differenceInDays(date, startDate)
       const idealX = 200 + daysFromStart * pxPerDay
 
       const isTop = index % 2 === 0
 
-      const x = Math.max(idealX, currentX + minCardGap)
+      const x = Math.max(idealX, currentX + requiredGap)
       currentX = x
 
       calculatedItems.push({
@@ -58,7 +74,6 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
     })
 
     // Calculate NOW position - find where it should go between cards
-    const nowTime = now.getTime()
     let calculatedNowX = 0
 
     // Find the cards before and after NOW
@@ -221,24 +236,24 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
 
             {/* NOW Indicator - V2: Full height with enhanced visual effects */}
             <motion.div
-              className="absolute top-0 bottom-0 flex flex-col items-center z-30 pointer-events-none"
-              style={{ left: nowX, transform: 'translateX(-50%)' }}
+              className="absolute top-0 bottom-0 z-30 pointer-events-none"
+              style={{ left: nowX }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              {/* Subtle vertical guide line - full height */}
-              <div className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-teal-primary/20 to-transparent" />
+              {/* Subtle vertical guide line - full height, centered on nowX */}
+              <div className="absolute inset-y-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-teal-primary/20 to-transparent" />
 
-              {/* NOW Badge - Above center with improved styling */}
+              {/* NOW Badge - Above center */}
               <motion.div
-                className="absolute flex flex-col items-center"
-                style={{ top: '50%', transform: 'translateY(-80px)' }}
+                className="absolute -translate-x-1/2 flex flex-col items-center"
+                style={{ top: 'calc(50% - 70px)' }}
                 animate={{ y: [0, -4, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               >
                 <span
-                  className="font-mono text-xs font-bold uppercase text-white bg-teal-primary px-5 py-2 border-2 border-teal-primary shadow-[4px_4px_0_theme(colors.charcoal)]"
+                  className="font-mono text-xs font-bold uppercase text-white bg-teal-primary px-5 py-2 border-2 border-teal-primary shadow-[4px_4px_0_theme(colors.charcoal)] whitespace-nowrap"
                   style={{ borderRadius: "2px", letterSpacing: "0.2em" }}
                 >
                   Now
@@ -246,21 +261,19 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                 <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-teal-primary" />
               </motion.div>
 
-              {/* Center dot with double pulse effect */}
-              <div className="absolute top-1/2 -translate-y-1/2">
+              {/* Center dot area - at vertical center */}
+              <div className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2">
                 {/* Outer pulse ring */}
                 <motion.div
-                  className="absolute w-10 h-10 rounded-full border-2 border-teal-primary/40 -translate-x-1/2 -translate-y-1/2"
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full border-2 border-teal-primary/40"
                   animate={{ scale: [1, 1.8, 1], opacity: [0.6, 0, 0.6] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
-                  style={{ left: '50%', top: '50%' }}
                 />
                 {/* Inner glow pulse */}
                 <motion.div
-                  className="absolute w-6 h-6 rounded-full bg-teal-primary/30 -translate-x-1/2 -translate-y-1/2"
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-teal-primary/30"
                   animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.1, 0.5] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-                  style={{ left: '50%', top: '50%' }}
                 />
                 {/* Solid center dot */}
                 <div className="w-6 h-6 rounded-full bg-teal-primary border-2 border-white shadow-lg" />
@@ -268,11 +281,11 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
 
               {/* Date label - Below center with upward triangle */}
               <div
-                className="absolute flex flex-col items-center"
-                style={{ top: '50%', transform: 'translateY(50px)' }}
+                className="absolute -translate-x-1/2 flex flex-col items-center"
+                style={{ top: 'calc(50% + 30px)' }}
               >
                 <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[6px] border-l-transparent border-r-transparent border-b-teal-primary/30" />
-                <span className="font-mono text-[11px] font-bold text-teal-primary bg-duck-cream px-3 py-1 border border-teal-primary/30 rounded-sm shadow-sm">
+                <span className="font-mono text-[11px] font-bold text-teal-primary bg-duck-cream px-3 py-1 border border-teal-primary/30 rounded-sm shadow-sm whitespace-nowrap">
                   {format(new Date(), "MMM d, yyyy")}
                 </span>
               </div>
@@ -354,13 +367,19 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                   onMouseEnter={() => setHoveredId(item.id)}
                   onMouseLeave={() => setHoveredId(null)}
                 >
-                  {/* Connector Line (Dashed) */}
+                  {/* Connector Line - V2: Gradient-based with mask for dashed effect */}
                   <div
                     className={cn(
-                      "absolute w-px border-l-2 border-dashed transition-all duration-300",
-                      item.isTop ? "-bottom-12 h-12" : "-top-12 h-12",
-                      isSent ? "border-teal-primary/40" : "border-charcoal/30"
+                      "absolute w-[2px] transition-all duration-300",
+                      item.isTop ? "-bottom-12 h-12" : "-top-12 h-12"
                     )}
+                    style={{
+                      background: item.isTop
+                        ? `linear-gradient(to bottom, ${isSent ? 'rgba(45,212,191,0.5)' : 'rgba(29,29,29,0.4)'}, ${isSent ? 'rgba(45,212,191,0.2)' : 'rgba(29,29,29,0.15)'})`
+                        : `linear-gradient(to top, ${isSent ? 'rgba(45,212,191,0.5)' : 'rgba(29,29,29,0.4)'}, ${isSent ? 'rgba(45,212,191,0.2)' : 'rgba(29,29,29,0.15)'})`,
+                      maskImage: 'repeating-linear-gradient(to bottom, transparent, transparent 2px, black 2px, black 6px)',
+                      WebkitMaskImage: 'repeating-linear-gradient(to bottom, transparent, transparent 2px, black 2px, black 6px)',
+                    }}
                   />
 
                   {/* The Card */}

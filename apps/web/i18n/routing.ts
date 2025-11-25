@@ -53,6 +53,7 @@ export const routing = defineRouting({
     "/letters-v3": "/letters-v3",
     "/letters-v3/new": "/letters-v3/new",
     "/letters-v3/[id]": "/letters-v3/[id]",
+    "/letters-v3/[id]/edit": "/letters-v3/[id]/edit",
     "/letters-v3/[id]/schedule": "/letters-v3/[id]/schedule",
     "/settings-v3": "/settings-v3",
   },
