@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server"
 import { EmailLockGuard } from "@/components/auth/email-lock-guard"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { MobileNavigation } from "@/components/mobile-navigation"
+import { PushNotificationProvider } from "@/components/providers/push-notification-provider"
 import { Link } from "@/i18n/routing"
 import type { Locale } from "@/i18n/routing"
 
@@ -78,7 +79,9 @@ export default async function AppLayout({
 
         {/* Main Content */}
         <main className="flex-1">
-          <div className="container py-12">{children}</div>
+          <div className="container py-12">
+            <PushNotificationProvider>{children}</PushNotificationProvider>
+          </div>
         </main>
       </div>
     </EmailLockGuard>

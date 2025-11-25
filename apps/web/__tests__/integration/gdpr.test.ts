@@ -124,6 +124,8 @@ describe('GDPR Integration Tests', () => {
         marketingOptIn: false,
         onboardingCompleted: true,
         stripeCustomerId: 'cus_123',
+        pushEnabled: false,
+        referredByCode: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -178,6 +180,8 @@ describe('GDPR Integration Tests', () => {
         marketingOptIn: false,
         onboardingCompleted: true,
         stripeCustomerId: null,
+        pushEnabled: false,
+        referredByCode: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -238,6 +242,8 @@ describe('GDPR Integration Tests', () => {
         marketingOptIn: false,
         onboardingCompleted: true,
         stripeCustomerId: null,
+        pushEnabled: false,
+        referredByCode: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -282,6 +288,8 @@ describe('GDPR Integration Tests', () => {
         marketingOptIn: false,
         onboardingCompleted: true,
         stripeCustomerId: null,
+        pushEnabled: false,
+        referredByCode: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

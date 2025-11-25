@@ -1,0 +1,31 @@
+{
+  "heading": "Letter Journey",
+  "steps": {
+    "created": "Created",
+    "scheduled": "Scheduled",
+    "processing": "Processing",
+    "delivered": "Delivered",
+    "failed": "Failed"
+  },
+  "status": {
+    "completed": "Completed",
+    "current": "In Progress",
+    "upcoming": "Upcoming",
+    "error": "Error"
+  },
+  "timestamps": {
+    "created": "Created on {date}",
+    "scheduled": "Scheduled for {date}",
+    "processing": "Processing since {date}",
+    "delivered": "Delivered on {date}",
+    "failed": "Failed on {date}"
+  },
+  "minimap": {
+    "heading": "Next Delivery",
+    "noDeliveries": "No upcoming deliveries",
+    "viewLetter": "View Letter",
+    "daysUntil": "{count, plural, one {# day} other {# days}} until delivery",
+    "today": "Delivering today",
+    "overdue": "Delivery overdue"
+  }
+}

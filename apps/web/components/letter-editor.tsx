@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
@@ -7,14 +8,31 @@ import CharacterCount from "@tiptap/extension-character-count"
 import Link from "@tiptap/extension-link"
 import { Button } from "@/components/ui/button"
 import { Bold, Italic, List, ListOrdered, Quote } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 interface LetterEditorProps {
-  content?: string
+  /** Initial content as HTML string or TipTap JSON */
+  content?: string | Record<string, unknown>
+  /** Called when content changes with JSON and HTML */
   onChange?: (json: Record<string, unknown>, html: string) => void
+  /** Placeholder text for empty editor */
   placeholder?: string
+  /** Minimum height for editor area */
+  minHeight?: string
+  /** Additional CSS classes for container */
+  className?: string
+  /** Show/hide character count */
+  showCharCount?: boolean
 }
 
-export function LetterEditor({ content, onChange, placeholder }: LetterEditorProps) {
+export function LetterEditor({
+  content,
+  onChange,
+  placeholder,
+  minHeight = "280px",
+  className,
+  showCharCount = false,
+}: LetterEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -29,7 +47,7 @@ export function LetterEditor({ content, onChange, placeholder }: LetterEditorPro
     content,
     editorProps: {
       attributes: {
-        class: "prose prose-sm sm:prose lg:prose-lg focus:outline-none max-w-none",
+        class: "prose prose-sm sm:prose focus:outline-none max-w-none font-mono text-charcoal",
       },
     },
     onUpdate: ({ editor }) => {
@@ -39,22 +57,45 @@ export function LetterEditor({ content, onChange, placeholder }: LetterEditorPro
     },
   })
 
+  // Update content when prop changes (for template injection)
+  useEffect(() => {
+    if (editor && content) {
+      // Only update if content is different to avoid cursor issues
+      const currentContent = editor.getHTML()
+      const newContent = typeof content === "string" ? content : ""
+      if (typeof content === "object") {
+        editor.commands.setContent(content)
+      } else if (newContent && newContent !== currentContent) {
+        editor.commands.setContent(content)
+      }
+    }
+  }, [editor, content])
+
   if (!editor) {
     return null
   }
 
   const characterCount = editor.storage.characterCount.characters()
+  const wordCount = editor.storage.characterCount.words()
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex flex-wrap gap-2 rounded-lg border bg-muted/50 p-2">
+    <div className={cn("space-y-3", className)}>
+      {/* Toolbar - Brutalist Design */}
+      <div
+        className="flex flex-wrap gap-1.5 border-2 border-charcoal bg-off-white p-2"
+        style={{ borderRadius: "2px" }}
+      >
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive("bold") ? "bg-muted" : ""}
+          className={cn(
+            "h-8 w-8 p-0 border border-transparent hover:border-charcoal",
+            editor.isActive("bold") && "bg-duck-yellow border-charcoal"
+          )}
+          style={{ borderRadius: "2px" }}
+          title="Bold"
         >
           <Bold className="h-4 w-4" />
         </Button>
@@ -63,16 +104,27 @@ export function LetterEditor({ content, onChange, placeholder }: LetterEditorPro
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive("italic") ? "bg-muted" : ""}
+          className={cn(
+            "h-8 w-8 p-0 border border-transparent hover:border-charcoal",
+            editor.isActive("italic") && "bg-duck-yellow border-charcoal"
+          )}
+          style={{ borderRadius: "2px" }}
+          title="Italic"
         >
           <Italic className="h-4 w-4" />
         </Button>
+        <div className="w-px h-6 bg-charcoal/20 mx-1 self-center" />
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={editor.isActive("bulletList") ? "bg-muted" : ""}
+          className={cn(
+            "h-8 w-8 p-0 border border-transparent hover:border-charcoal",
+            editor.isActive("bulletList") && "bg-duck-yellow border-charcoal"
+          )}
+          style={{ borderRadius: "2px" }}
+          title="Bullet List"
         >
           <List className="h-4 w-4" />
         </Button>
@@ -81,30 +133,47 @@ export function LetterEditor({ content, onChange, placeholder }: LetterEditorPro
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={editor.isActive("orderedList") ? "bg-muted" : ""}
+          className={cn(
+            "h-8 w-8 p-0 border border-transparent hover:border-charcoal",
+            editor.isActive("orderedList") && "bg-duck-yellow border-charcoal"
+          )}
+          style={{ borderRadius: "2px" }}
+          title="Numbered List"
         >
           <ListOrdered className="h-4 w-4" />
         </Button>
+        <div className="w-px h-6 bg-charcoal/20 mx-1 self-center" />
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={editor.isActive("blockquote") ? "bg-muted" : ""}
+          className={cn(
+            "h-8 w-8 p-0 border border-transparent hover:border-charcoal",
+            editor.isActive("blockquote") && "bg-duck-yellow border-charcoal"
+          )}
+          style={{ borderRadius: "2px" }}
+          title="Quote"
         >
           <Quote className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Editor */}
-      <div className="min-h-[400px] rounded-lg border bg-background p-4">
-        <EditorContent editor={editor} />
+      {/* Editor - Brutalist Design */}
+      <div
+        className="border-2 border-charcoal bg-white p-4"
+        style={{ borderRadius: "2px", minHeight }}
+      >
+        <EditorContent editor={editor} className="min-h-[inherit]" />
       </div>
 
-      {/* Character count */}
-      <div className="text-sm text-muted-foreground">
-        {characterCount} {characterCount === 1 ? "character" : "characters"}
-      </div>
+      {/* Character/Word count */}
+      {showCharCount && (
+        <div className="flex gap-3 font-mono text-xs text-gray-secondary uppercase">
+          <span>{wordCount} {wordCount === 1 ? "word" : "words"}</span>
+          <span>{characterCount} {characterCount === 1 ? "char" : "chars"}</span>
+        </div>
+      )}
     </div>
   )
 }

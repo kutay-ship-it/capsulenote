@@ -182,3 +182,85 @@ export async function getNextDelivery(userId: string): Promise<NextDelivery | nu
     return null
   }
 }
+
+/**
+ * Next delivery with timeline info for minimap widget
+ */
+export interface NextDeliveryWithTimeline {
+  id: string
+  letterId: string
+  deliverAt: Date
+  letterTitle: string
+  channel: "email" | "mail"
+  status: string
+  createdAt: Date
+}
+
+/**
+ * Get the next scheduled delivery with status for timeline minimap
+ *
+ * Shows the delivery journey progress in a compact format
+ */
+export async function getNextDeliveryWithTimeline(
+  userId: string
+): Promise<NextDeliveryWithTimeline | null> {
+  try {
+    // First try to find an active delivery (scheduled or processing)
+    let delivery = await prisma.delivery.findFirst({
+      where: {
+        userId,
+        status: {
+          in: ["scheduled", "processing"],
+        },
+      },
+      orderBy: {
+        deliverAt: "asc",
+      },
+      include: {
+        letter: {
+          select: {
+            title: true,
+            createdAt: true,
+          },
+        },
+      },
+    })
+
+    // If no active delivery, get the most recent one (sent or failed)
+    if (!delivery) {
+      delivery = await prisma.delivery.findFirst({
+        where: {
+          userId,
+        },
+        orderBy: {
+          deliverAt: "desc",
+        },
+        include: {
+          letter: {
+            select: {
+              title: true,
+              createdAt: true,
+            },
+          },
+        },
+      })
+    }
+
+    if (!delivery) {
+      return null
+    }
+
+    return {
+      id: delivery.id,
+      letterId: delivery.letterId,
+      deliverAt: delivery.deliverAt,
+      letterTitle: delivery.letter.title,
+      channel: delivery.channel,
+      status: delivery.status,
+      createdAt: delivery.letter.createdAt,
+    }
+  } catch (error) {
+    console.error("[Stats] Failed to fetch next delivery with timeline:", error)
+    return null
+  }
+}

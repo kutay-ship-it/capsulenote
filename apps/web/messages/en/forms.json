@@ -20,7 +20,8 @@
       "description": "Write your letter to your future self. Be honest, be kind, be you.",
       "required": "Letter content is required",
       "words": "{count} words",
-      "chars": "{count} chars"
+      "chars": "{count} chars",
+      "templateHint": "or start from scratch"
     },
     "delivery": {
       "legend": "Delivery Settings",

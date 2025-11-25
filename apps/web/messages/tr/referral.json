@@ -1,0 +1,54 @@
+{
+  "heading": "Arkadaşını Davet Et",
+  "description": "Capsule Note'u arkadaşlarınla paylaş ve birlikte e-posta kredisi kazan",
+  "shareLink": {
+    "label": "Davet Linkini",
+    "copyButton": "Kopyala",
+    "copied": "Kopyalandı!"
+  },
+  "stats": {
+    "clicks": "Link Tıklamaları",
+    "signups": "Kayıtlar",
+    "conversions": "Dönüşümler",
+    "creditsEarned": "Kazanılan Kredi"
+  },
+  "howItWorks": {
+    "heading": "Nasıl Çalışır",
+    "step1": "Benzersiz linkinizi arkadaşlarınızla paylaşın",
+    "step2": "Kaydolup abone olurlar",
+    "step3": "İkiniz de 1 e-posta kredisi kazanırsınız"
+  },
+  "status": {
+    "pending": "Beklemede",
+    "signed_up": "Kayıt Oldu",
+    "converted": "Dönüştürüldü",
+    "rewarded": "Ödüllendirildi",
+    "expired": "Süresi Doldu"
+  },
+  "referrals": {
+    "heading": "Davetleriniz",
+    "empty": "Henüz davet yok. Başlamak için linkinizi paylaşın!",
+    "invited": "Davet edildi",
+    "signedUp": "{date} tarihinde kayıt oldu",
+    "converted": "{date} tarihinde abone oldu",
+    "rewarded": "{date} tarihinde kredi kazanıldı"
+  },
+  "invite": {
+    "heading": "E-posta ile Davet Et",
+    "placeholder": "arkadas@ornek.com",
+    "button": "Davet Gönder",
+    "sending": "Gönderiliyor...",
+    "success": "Davet gönderildi!",
+    "errors": {
+      "rate_limited": "Çok fazla davet. Daha sonra tekrar deneyin.",
+      "same_domain": "Aynı kuruluştan kullanıcıları davet edemezsiniz",
+      "duplicate": "Bu e-posta zaten davet edilmiş",
+      "self_referral": "Kendinizi davet edemezsiniz",
+      "invalid_email": "Lütfen geçerli bir e-posta adresi girin"
+    }
+  },
+  "terms": {
+    "heading": "Koşullar",
+    "text": "Arkadaşınız abone olduğunda hem siz hem de arkadaşınız 1 e-posta kredisi kazanırsınız. Krediler başarılı ödemenin ardından verilir. Kendi kendini davet etme ve kurumsal kötüye kullanım yasaktır."
+  }
+}

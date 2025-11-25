@@ -20,6 +20,8 @@ import onboarding from "./onboarding.json"
 import privacy from "./privacy.json"
 import forms from "./forms.json"
 import components from "./components.json"
+import templates from "./templates.json"
+import preview from "./preview.json"
 
 const messages = {
   admin,
@@ -44,6 +46,8 @@ const messages = {
   welcome,
   onboarding,
   privacy,
+  templates,
+  preview,
 }
 
 export default messages

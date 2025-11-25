@@ -82,8 +82,18 @@
   "notifications": {
     "title": "Bildirimler",
     "description": "Güncellemeleri nasıl alacağını kontrol et",
-    "body": "Teslimat onayları, hatırlatmalar ve güncellemeler için e-posta bildirimleri.",
-    "badge": "Bildirim ayarları yakında"
+    "body": "Mektupların teslim edildiğinde bildirim al.",
+    "badge": "Bildirim ayarları yakında",
+    "push": {
+      "title": "Anlık Bildirimler",
+      "description": "Mektupların teslim edildiğinde tarayıcı bildirimi al",
+      "enable": "Bildirimleri Etkinleştir",
+      "disable": "Bildirimleri Devre Dışı Bırak",
+      "enabling": "Etkinleştiriliyor...",
+      "disabling": "Devre dışı bırakılıyor...",
+      "notSupported": "Bu tarayıcıda anlık bildirimler desteklenmiyor",
+      "permissionDenied": "Bildirim izni reddedildi. Lütfen tarayıcı ayarlarından bildirimleri etkinleştirin."
+    }
   },
   "timezone": {
     "title": "Saat dilimi ve yerelleştirme",
@@ -114,5 +124,13 @@
     "description": "Geri alınamaz işlemler",
     "body": "Hesabını ve tüm verilerini kalıcı olarak sil. Bu işlem geri alınamaz.",
     "badge": "Hesap silme yakında"
+  },
+  "referral": {
+    "title": "Arkadaşını Davet Et",
+    "description": "Arkadaşlarını davet ederek kredi kazan",
+    "body": "Benzersiz davet linkini arkadaşlarınla paylaş. Abone olduklarında ikiniz de 1 e-posta kredisi kazanırsınız.",
+    "viewFull": "Davet Panelini Gör",
+    "statsSignups": "Kayıtlar",
+    "statsCredits": "Kazanılan Kredi"
   }
 }

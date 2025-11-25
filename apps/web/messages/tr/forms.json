@@ -20,7 +20,8 @@
       "description": "Gelecekteki kendine mektubunu yaz. Durust ol, nazik ol, kendin ol.",
       "required": "Mektup icerigi gerekli",
       "words": "{count} kelime",
-      "chars": "{count} karakter"
+      "chars": "{count} karakter",
+      "templateHint": "veya sıfırdan başla"
     },
     "delivery": {
       "legend": "Teslimat Ayarlari",

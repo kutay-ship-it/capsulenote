@@ -82,8 +82,18 @@
   "notifications": {
     "title": "Notifications",
     "description": "Control how you receive updates",
-    "body": "Email notifications for delivery confirmations, reminders, and updates.",
-    "badge": "Notification settings coming soon"
+    "body": "Get notified when your letters are delivered.",
+    "badge": "Notification settings coming soon",
+    "push": {
+      "title": "Push Notifications",
+      "description": "Receive browser notifications when your letters are delivered",
+      "enable": "Enable Notifications",
+      "disable": "Disable Notifications",
+      "enabling": "Enabling...",
+      "disabling": "Disabling...",
+      "notSupported": "Push notifications not supported in this browser",
+      "permissionDenied": "Notification permission was denied. Please enable notifications in your browser settings."
+    }
   },
   "timezone": {
     "title": "Timezone & Localization",
@@ -114,5 +124,13 @@
     "description": "Irreversible actions",
     "body": "Permanently delete your account and all associated data. This action cannot be undone.",
     "badge": "Account deletion coming soon"
+  },
+  "referral": {
+    "title": "Refer a Friend",
+    "description": "Earn credits by inviting friends",
+    "body": "Share your unique referral link with friends. When they subscribe, you both earn 1 email credit.",
+    "viewFull": "View Referral Dashboard",
+    "statsSignups": "Signups",
+    "statsCredits": "Credits Earned"
   }
 }

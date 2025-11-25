@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/skeletons"
 import { ScheduleDeliveryForm } from "@/components/schedule-delivery-form"
 import { InlineScheduleSection } from "@/components/letters/inline-schedule-section"
+import { LetterTimeline } from "@/components/letters/letter-timeline"
 
 // Force dynamic rendering - letter detail must always show fresh data
 export const revalidate = 0
@@ -119,6 +120,20 @@ async function LetterContent({ id, userEmail }: { id: string; userEmail: string 
             className="prose prose-sm sm:prose lg:prose-lg max-w-none"
             dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
           />
+
+          {/* Letter Timeline Visualization */}
+          {letter.deliveries.length > 0 && (
+            <LetterTimeline
+              createdAt={letter.createdAt}
+              scheduledFor={letter.scheduledFor}
+              deliveries={letter.deliveries.map((d) => ({
+                status: d.status,
+                deliverAt: d.deliverAt,
+                createdAt: d.createdAt,
+              }))}
+              locale={locale}
+            />
+          )}
 
           {letter.deliveries.length > 0 && (
             <div className="border-t pt-6">

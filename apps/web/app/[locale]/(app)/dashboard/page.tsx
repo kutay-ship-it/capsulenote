@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DashboardLetterEditor } from "@/components/dashboard-letter-editor"
 import { DashboardWrapper } from "@/components/dashboard-wrapper"
 import { NextDeliveryWidget } from "@/components/dashboard/next-delivery-widget"
+import { TimelineMinimap } from "@/components/dashboard/timeline-minimap"
 import { TimezoneChangeWarning } from "@/components/timezone-change-warning"
 import { StatsCardSkeleton, LetterCardSkeleton, Skeleton } from "@/components/skeletons"
 import { requireUser } from "@/server/lib/auth"
@@ -259,10 +260,15 @@ export default async function DashboardPage() {
           <StatsCards userId={user.id} />
         </Suspense>
 
-        {/* Next Delivery Widget - Streams independently */}
-        <Suspense fallback={<StatsCardSkeleton />}>
-          <NextDeliveryWidget userId={user.id} />
-        </Suspense>
+        {/* Delivery Widgets Grid - Streams independently */}
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
+          <Suspense fallback={<StatsCardSkeleton />}>
+            <NextDeliveryWidget userId={user.id} />
+          </Suspense>
+          <Suspense fallback={<StatsCardSkeleton />}>
+            <TimelineMinimap userId={user.id} />
+          </Suspense>
+        </div>
 
         {/* Write New Letter Section - Instant (client component) */}
         <div className="space-y-6 sm:space-y-8">

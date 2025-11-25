@@ -1,0 +1,54 @@
+{
+  "heading": "Refer a Friend",
+  "description": "Share Capsule Note with friends and earn email credits together",
+  "shareLink": {
+    "label": "Your Referral Link",
+    "copyButton": "Copy",
+    "copied": "Copied!"
+  },
+  "stats": {
+    "clicks": "Link Clicks",
+    "signups": "Signups",
+    "conversions": "Conversions",
+    "creditsEarned": "Credits Earned"
+  },
+  "howItWorks": {
+    "heading": "How It Works",
+    "step1": "Share your unique link with friends",
+    "step2": "They sign up and subscribe",
+    "step3": "You both get 1 email credit"
+  },
+  "status": {
+    "pending": "Pending",
+    "signed_up": "Signed Up",
+    "converted": "Converted",
+    "rewarded": "Rewarded",
+    "expired": "Expired"
+  },
+  "referrals": {
+    "heading": "Your Referrals",
+    "empty": "No referrals yet. Share your link to get started!",
+    "invited": "Invited",
+    "signedUp": "Signed up {date}",
+    "converted": "Subscribed {date}",
+    "rewarded": "Credit earned {date}"
+  },
+  "invite": {
+    "heading": "Invite by Email",
+    "placeholder": "friend@example.com",
+    "button": "Send Invite",
+    "sending": "Sending...",
+    "success": "Invite sent!",
+    "errors": {
+      "rate_limited": "Too many invites. Try again later.",
+      "same_domain": "Cannot invite users from the same organization",
+      "duplicate": "This email has already been invited",
+      "self_referral": "You cannot refer yourself",
+      "invalid_email": "Please enter a valid email address"
+    }
+  },
+  "terms": {
+    "heading": "Terms",
+    "text": "Both you and your friend receive 1 email credit when they subscribe. Credits are awarded after successful payment. Self-referrals and organizational abuse are not permitted."
+  }
+}

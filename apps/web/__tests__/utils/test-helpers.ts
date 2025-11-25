@@ -73,6 +73,8 @@ export function createTestProfileData(userId: string, overrides: Partial<Profile
     marketingOptIn: false,
     onboardingCompleted: false,
     stripeCustomerId: null,
+    pushEnabled: false,
+    referredByCode: null,
     ...overrides,
   }
 }

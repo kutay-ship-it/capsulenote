@@ -1,0 +1,31 @@
+{
+  "heading": "Mektup Yolculuğu",
+  "steps": {
+    "created": "Oluşturuldu",
+    "scheduled": "Planlandı",
+    "processing": "İşleniyor",
+    "delivered": "Teslim Edildi",
+    "failed": "Başarısız"
+  },
+  "status": {
+    "completed": "Tamamlandı",
+    "current": "Devam Ediyor",
+    "upcoming": "Yaklaşan",
+    "error": "Hata"
+  },
+  "timestamps": {
+    "created": "{date} tarihinde oluşturuldu",
+    "scheduled": "{date} için planlandı",
+    "processing": "{date} tarihinden beri işleniyor",
+    "delivered": "{date} tarihinde teslim edildi",
+    "failed": "{date} tarihinde başarısız"
+  },
+  "minimap": {
+    "heading": "Sonraki Teslimat",
+    "noDeliveries": "Yaklaşan teslimat yok",
+    "viewLetter": "Mektubu Gör",
+    "daysUntil": "Teslimata {count, plural, one {# gün} other {# gün}} kaldı",
+    "today": "Bugün teslim ediliyor",
+    "overdue": "Teslimat gecikti"
+  }
+}

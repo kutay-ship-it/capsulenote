@@ -15,6 +15,7 @@ type FeatureFlag =
   | "enable-letter-templates"
   | "use-clicksend-mail"
   | "enable-client-encryption"
+  | "enable-push-notifications"
 
 // In-memory cache for flags (TTL: 60 seconds)
 const flagCache = new Map<string, { value: boolean; expiresAt: number }>()
@@ -106,6 +107,7 @@ function getDefaultFlagValue(flagName: FeatureFlag): boolean {
     "enable-letter-templates": true, // GA feature
     "use-clicksend-mail": false, // Alternative provider
     "enable-client-encryption": false, // Future feature
+    "enable-push-notifications": false, // Disabled until VAPID configured
   }
 
   // Allow environment variable override
@@ -137,6 +139,7 @@ export async function getAllFlags(): Promise<Record<string, boolean>> {
     "enable-letter-templates",
     "use-clicksend-mail",
     "enable-client-encryption",
+    "enable-push-notifications",
   ]
 
   const results: Record<string, boolean> = {}

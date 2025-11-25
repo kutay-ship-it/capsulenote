@@ -211,6 +211,18 @@ export async function addMailCredits(userId: string, credits: number): Promise<v
   await invalidateEntitlementsCache(userId)
 }
 
+/**
+ * Add email credits (used by referral rewards)
+ */
+export async function addEmailCredits(userId: string, credits: number): Promise<void> {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { emailCredits: { increment: credits } },
+  })
+
+  await invalidateEntitlementsCache(userId)
+}
+
 // ============================================================================
 // INTERNAL HELPERS
 // ============================================================================

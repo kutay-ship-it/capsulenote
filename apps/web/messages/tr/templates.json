@@ -1,0 +1,13 @@
+{
+  "button": "Şablonlara Göz At",
+  "modalTitle": "Mektup Şablonları",
+  "modalDescription": "Mektubunuza başlamak için bir şablon seçin",
+  "categories": {
+    "reflection": "Yansıma",
+    "goals": "Hedefler",
+    "gratitude": "Minnettarlık",
+    "futureSelf": "Gelecekteki Ben"
+  },
+  "useTemplate": "Şablonu Kullan",
+  "noTemplates": "Bu kategoride şablon bulunmuyor"
+}

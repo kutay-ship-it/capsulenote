@@ -69,6 +69,10 @@ model User {
   payments          Payment[]
   auditEvents       AuditEvent[]
   addOnPurchases    AddOnPurchase[]
+  referralCode      ReferralCode?
+  referralsMade     Referral[]         @relation("ReferrerReferrals")
+  referralsReceived Referral[]         @relation("RefereeReferrals")
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -80,6 +84,8 @@ model Profile {
   marketingOptIn      Boolean  @default(false) @map("marketing_opt_in")
   onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
   stripeCustomerId    String?  @unique @map("stripe_customer_id")
+  pushEnabled         Boolean  @default(false) @map("push_enabled") // Push notifications preference
+  referredByCode      String?  @map("referred_by_code") // Referral code used at signup
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -569,4 +575,79 @@ model AddOnPurchase {
 
   @@index([userId])
   @@map("addon_purchases")
+}
+
+// ============================================================================
+// REFERRAL SYSTEM
+// ============================================================================
+
+enum ReferralStatus {
+  pending    // Invite sent, not signed up
+  signed_up  // Signed up but not subscribed
+  converted  // Subscribed (paid)
+  rewarded   // Both parties credited
+  expired    // Never converted within window
+
+  @@map("referral_status")
+}
+
+model ReferralCode {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @unique @map("user_id") @db.Uuid
+  code         String    @unique @db.VarChar(12) // e.g., "JANE42XY"
+  clickCount   Int       @default(0) @map("click_count")
+  signupCount  Int       @default(0) @map("signup_count")
+  convertCount Int       @default(0) @map("convert_count")
+  isActive     Boolean   @default(true) @map("is_active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referrals Referral[]
+
+  @@index([code])
+  @@map("referral_codes")
+}
+
+model Referral {
+  id             String         @id @default(uuid()) @db.Uuid
+  referralCodeId String         @map("referral_code_id") @db.Uuid
+  referrerId     String         @map("referrer_id") @db.Uuid
+  refereeUserId  String?        @map("referee_user_id") @db.Uuid // Null until signup
+  refereeEmail   String?        @map("referee_email") @db.Citext // For tracking before signup
+  status         ReferralStatus @default(pending)
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  signedUpAt     DateTime?      @map("signed_up_at") @db.Timestamptz(3)
+  convertedAt    DateTime?      @map("converted_at") @db.Timestamptz(3)
+  rewardedAt     DateTime?      @map("rewarded_at") @db.Timestamptz(3)
+
+  referralCode ReferralCode @relation(fields: [referralCodeId], references: [id])
+  referrer     User         @relation("ReferrerReferrals", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee      User?        @relation("RefereeReferrals", fields: [refereeUserId], references: [id], onDelete: SetNull)
+
+  @@unique([referralCodeId, refereeEmail])
+  @@index([referrerId])
+  @@index([refereeUserId])
+  @@index([status])
+  @@map("referrals")
+}
+
+// ============================================================================
+// PUSH NOTIFICATIONS
+// ============================================================================
+
+model PushSubscription {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  endpoint   String    @unique @db.Text // Web Push endpoint URL
+  p256dh     String    @db.Text // Public key for encryption
+  auth       String    @db.Text // Auth secret
+  userAgent  String?   @map("user_agent")
+  isActive   Boolean   @default(true) @map("is_active")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastUsedAt DateTime? @map("last_used_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }

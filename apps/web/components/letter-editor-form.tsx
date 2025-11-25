@@ -14,9 +14,12 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { LetterEditor } from "@/components/letter-editor"
+import { TemplateSelector } from "@/components/letters/template-selector"
+import { EmailPreviewModal } from "@/components/letters/email-preview-modal"
 import { DatePicker } from "@/components/ui/date-picker"
+import type { LetterTemplate } from "@/server/actions/templates"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +43,8 @@ interface LetterEditorFormProps {
 export interface LetterFormData {
   title: string
   body: string
+  bodyRich?: Record<string, unknown>
+  bodyHtml?: string
   recipientEmail: string
   deliveryDate: string
   deliveryType: "email" | "physical"
@@ -58,7 +63,10 @@ export function LetterEditorForm({
   const t = useTranslations("forms.letterEditor")
 
   const [title, setTitle] = React.useState(initialData?.title || "")
-  const [body, setBody] = React.useState(initialData?.body || "")
+  const [bodyRich, setBodyRich] = React.useState<Record<string, unknown> | null>(
+    initialData?.bodyRich || null
+  )
+  const [bodyHtml, setBodyHtml] = React.useState(initialData?.bodyHtml || "")
   const [recipientEmail, setRecipientEmail] = React.useState(
     initialData?.recipientEmail || ""
   )
@@ -77,8 +85,10 @@ export function LetterEditorForm({
   const [showCustomDate, setShowCustomDate] = React.useState(false)
   const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
 
-  const characterCount = body.length
-  const wordCount = body.trim() ? body.trim().split(/\s+/).length : 0
+  // Calculate counts from HTML (strip tags for text counting)
+  const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
+  const characterCount = plainText.length
+  const wordCount = plainText ? plainText.split(/\s+/).length : 0
 
   const datePresets = [
     { label: t("datePresets.6months"), months: 6, key: "6months" },
@@ -92,7 +102,8 @@ export function LetterEditorForm({
   React.useEffect(() => {
     if (initialData) {
       setTitle(initialData.title ?? "")
-      setBody(initialData.body ?? "")
+      setBodyRich(initialData.bodyRich ?? null)
+      setBodyHtml(initialData.bodyHtml ?? initialData.body ?? "")
       setRecipientEmail(initialData.recipientEmail ?? "")
       setDeliveryDate(initialData.deliveryDate ? new Date(initialData.deliveryDate) : undefined)
       setDeliveryType(initialData.deliveryType ?? "email")
@@ -102,6 +113,8 @@ export function LetterEditorForm({
   }, [
     initialData?.title,
     initialData?.body,
+    initialData?.bodyRich,
+    initialData?.bodyHtml,
     initialData?.recipientEmail,
     initialData?.deliveryDate,
     initialData?.deliveryType,
@@ -137,13 +150,24 @@ export function LetterEditorForm({
 
   const handleClearForm = () => {
     setTitle("")
-    setBody("")
+    setBodyRich(null)
+    setBodyHtml("")
     setRecipientEmail("")
     setDeliveryDate(undefined)
     setSelectedPreset(null)
     setShowCustomDate(false)
     setErrors({})
     onClear?.()
+  }
+
+  const handleTemplateSelect = (template: LetterTemplate) => {
+    // Apply template content to the editor
+    setBodyHtml(template.promptText)
+    setBodyRich(null) // Clear rich content, editor will parse HTML
+    // Optionally set title based on template
+    if (!title.trim()) {
+      setTitle(template.title)
+    }
   }
 
   const accentColors = {
@@ -162,7 +186,7 @@ export function LetterEditorForm({
       newErrors.title = t("title.required")
     }
 
-    if (!body.trim()) {
+    if (!plainText) {
       newErrors.body = t("content.required")
     }
 
@@ -197,9 +221,11 @@ export function LetterEditorForm({
     if (validateForm() && deliveryDate) {
       onSubmit?.({
         title,
-        body,
+        body: plainText, // Keep body for backwards compatibility
+        bodyRich: bodyRich ?? undefined,
+        bodyHtml: bodyHtml || undefined,
         recipientEmail,
-        deliveryDate: deliveryDate.toISOString().split("T")[0],
+        deliveryDate: deliveryDate.toISOString().split("T")[0]!,
         deliveryType,
         recipientType,
         recipientName,
@@ -277,6 +303,14 @@ export function LetterEditorForm({
             )}
           </FieldSet>
 
+          {/* Template Selector */}
+          <div className="flex items-center gap-3">
+            <TemplateSelector onSelect={handleTemplateSelect} />
+            <span className="font-mono text-xs text-gray-secondary">
+              {t("content.templateHint")}
+            </span>
+          </div>
+
           {/* Letter Title */}
           <Field data-invalid={!!errors.title}>
             <FieldLabel htmlFor="letter-title">{t("title.label")}</FieldLabel>
@@ -306,16 +340,15 @@ export function LetterEditorForm({
                 <span className="whitespace-nowrap">{t("content.chars", { count: characterCount })}</span>
               </div>
             </div>
-            <Textarea
-              id="letter-body"
-              value={body}
-              onChange={(e) => {
-                setBody(e.target.value)
+            <LetterEditor
+              content={bodyRich || bodyHtml || initialData?.bodyHtml || initialData?.body}
+              onChange={(json, html) => {
+                setBodyRich(json)
+                setBodyHtml(html)
                 if (errors.body) setErrors({ ...errors, body: undefined })
               }}
               placeholder={t("content.placeholder")}
-              aria-invalid={!!errors.body}
-              className="min-h-[280px] sm:min-h-[350px] md:min-h-[400px]"
+              minHeight="280px"
             />
             <FieldDescription>
               {t("content.description")}
@@ -466,7 +499,7 @@ export function LetterEditorForm({
         </FieldGroup>
 
         {/* Submit Button */}
-        <div className="mt-6 flex gap-3 sm:mt-8 sm:gap-4">
+        <div className="mt-6 flex flex-wrap gap-3 sm:mt-8 sm:gap-4">
           <Button
             type="submit"
             className="flex-1 h-12 text-base sm:h-auto"
@@ -475,6 +508,13 @@ export function LetterEditorForm({
             <Mail className="mr-2 h-4 w-4" strokeWidth={2} />
             {isSubmitting ? t("submit.creating") : t("submit.schedule")}
           </Button>
+
+          <EmailPreviewModal
+            letterTitle={title}
+            letterContent={bodyHtml}
+            deliveryDate={deliveryDate}
+            disabled={!bodyHtml}
+          />
 
           <AlertDialog>
             <AlertDialogTrigger asChild>

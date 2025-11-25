@@ -657,6 +657,57 @@ export const deliverEmail = inngest.createFunction(
       }
     })
 
+    // Send push notification (non-blocking, best-effort)
+    await step.run("send-push-notification", async () => {
+      try {
+        // Check if user has push notifications enabled
+        const profile = await prisma.profile.findUnique({
+          where: { userId: delivery.userId },
+          select: { pushEnabled: true },
+        })
+
+        if (!profile?.pushEnabled) {
+          logger.info("Push notifications disabled for user, skipping", {
+            deliveryId,
+            userId: delivery.userId,
+          })
+          return { skipped: true, reason: "disabled" }
+        }
+
+        // Import push provider dynamically
+        const { sendDeliveryCompletedNotification } = await import(
+          "../../../apps/web/server/providers/push"
+        )
+
+        const result = await sendDeliveryCompletedNotification(
+          delivery.userId,
+          {
+            deliveryId,
+            letterId: delivery.letterId,
+            letterTitle: delivery.letter.title,
+            channel: "email",
+            recipientEmail: delivery.emailDelivery!.toEmail,
+          }
+        )
+
+        logger.info("Push notification sent", {
+          deliveryId,
+          userId: delivery.userId,
+          sent: result.sent,
+          failed: result.failed,
+        })
+
+        return result
+      } catch (error) {
+        // Push notification failures should not fail the delivery
+        logger.warn("Failed to send push notification", {
+          deliveryId,
+          error: error instanceof Error ? error.message : String(error),
+        })
+        return { skipped: true, reason: "error" }
+      }
+    })
+
     logger.info("Email delivery completed successfully", {
       deliveryId,
       messageId: sendResult.id,

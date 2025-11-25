@@ -1,0 +1,13 @@
+{
+  "button": "Browse Templates",
+  "modalTitle": "Letter Templates",
+  "modalDescription": "Choose a template to get started with your letter",
+  "categories": {
+    "reflection": "Reflection",
+    "goals": "Goals",
+    "gratitude": "Gratitude",
+    "futureSelf": "Future Self"
+  },
+  "useTemplate": "Use Template",
+  "noTemplates": "No templates available in this category"
+}

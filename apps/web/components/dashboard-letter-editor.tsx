@@ -71,32 +71,12 @@ export function DashboardLetterEditor() {
 
     startTransition(async () => {
       try {
-        // Convert plain text body to TipTap JSON and HTML
-        // TipTap expects a document structure with paragraphs
-        const paragraphs = data.body.split('\n').filter(p => p.trim()).map(p => ({
-          type: 'paragraph',
-          content: [{ type: 'text', text: p }]
-        }))
-
-        const bodyRich = {
-          type: 'doc',
-          content: paragraphs.length > 0 ? paragraphs : [
-            { type: 'paragraph', content: [{ type: 'text', text: data.body }] }
-          ]
-        }
-
-        // Convert to HTML (simple implementation)
-        const bodyHtml = data.body
-          .split('\n')
-          .filter(p => p.trim())
-          .map(p => `<p>${escapeHtml(p)}</p>`)
-          .join('')
-
-        // Call server action to create letter
+        // Use TipTap output directly from the form
+        // bodyRich and bodyHtml are now provided by the LetterEditor component
         const result = await createLetter({
           title: data.title,
-          bodyRich,
-          bodyHtml,
+          bodyRich: data.bodyRich ?? { type: 'doc', content: [] },
+          bodyHtml: data.bodyHtml ?? '',
           tags: [],
           visibility: 'private' as const,
         })
@@ -209,18 +189,4 @@ export function DashboardLetterEditor() {
       />
     </div>
   )
-}
-
-/**
- * Escape HTML special characters to prevent XSS
- */
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  }
-  return text.replace(/[&<>"']/g, (char) => map[char])
 }

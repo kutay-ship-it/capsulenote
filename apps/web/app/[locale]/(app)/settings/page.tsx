@@ -4,14 +4,16 @@ import { redirect } from "@/i18n/routing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { User, Bell, Globe, AlertTriangle } from "lucide-react"
+import { User, Globe, AlertTriangle } from "lucide-react"
 import { getEntitlements } from "@/server/lib/entitlements"
 import { getTranslations } from "next-intl/server"
 import { Skeleton } from "@/components/skeletons"
 import { ProfileFields } from "@/components/settings/profile-fields"
 import { CollapsibleSection } from "@/components/settings/collapsible-section"
 import { BillingSummary } from "@/components/settings/billing-summary"
+import { NotificationsSettings } from "@/components/settings/notifications-settings"
 import { PrivacySummary } from "@/components/settings/privacy-summary"
+import { ReferralSummary } from "@/components/settings/referral-summary"
 
 // Force dynamic rendering - settings must always show fresh user data
 export const revalidate = 0
@@ -179,25 +181,24 @@ export default async function SettingsPage() {
       {/* Collapsible Settings Sections */}
 
       {/* Notification Preferences */}
-      <CollapsibleSection
-        icon={<Bell className="h-5 w-5 text-charcoal" strokeWidth={2} />}
-        title={t("notifications.title")}
-        description={t("notifications.description")}
-        bgClass="bg-bg-yellow-pale"
-        expandLabel={t("expand")}
-      >
-        <div className="space-y-4">
-          <p className="font-mono text-sm text-gray-secondary">
-            {t("notifications.body")}
-          </p>
-          <Badge
-            className="border-2 border-charcoal bg-mustard font-mono text-xs uppercase"
-            style={{ borderRadius: "2px" }}
-          >
-            {t("notifications.badge")}
-          </Badge>
-        </div>
-      </CollapsibleSection>
+      <NotificationsSettings
+        translations={{
+          title: t("notifications.title"),
+          description: t("notifications.description"),
+          body: t("notifications.body"),
+          expand: t("expand"),
+          push: {
+            title: t("notifications.push.title"),
+            description: t("notifications.push.description"),
+            enable: t("notifications.push.enable"),
+            disable: t("notifications.push.disable"),
+            enabling: t("notifications.push.enabling"),
+            disabling: t("notifications.push.disabling"),
+            notSupported: t("notifications.push.notSupported"),
+            permissionDenied: t("notifications.push.permissionDenied"),
+          },
+        }}
+      />
 
       {/* Timezone & Localization */}
       <CollapsibleSection
@@ -242,6 +243,19 @@ export default async function SettingsPage() {
           viewFull: t("privacy.viewFull"),
           exportData: t("privacy.exportData"),
           deleteAccount: t("privacy.deleteAccount"),
+        }}
+      />
+
+      {/* Referral Program */}
+      <ReferralSummary
+        translations={{
+          title: t("referral.title"),
+          description: t("referral.description"),
+          body: t("referral.body"),
+          expand: t("expand"),
+          viewFull: t("referral.viewFull"),
+          statsSignups: t("referral.statsSignups"),
+          statsCredits: t("referral.statsCredits"),
         }}
       />
 
