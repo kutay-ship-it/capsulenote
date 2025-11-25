@@ -7,6 +7,18 @@
     "scheduled": { "title": "Scheduled", "description": "Waiting to be delivered" },
     "delivered": { "title": "Delivered", "description": "Successfully sent" }
   },
+  "nextDelivery": {
+    "title": "Next Letter Arrives",
+    "days": "days",
+    "hours": "hours",
+    "minutes": "min",
+    "viewLetter": "View Letter",
+    "empty": {
+      "title": "No Upcoming Deliveries",
+      "description": "Write a letter to your future self and schedule it for delivery!",
+      "cta": "Write a Letter"
+    }
+  },
   "quick": {
     "badge": "Quick write",
     "title": "Write a New Letter",

@@ -35,9 +35,13 @@
     },
     "badges": {
       "premium": "Premium",
-      "trial": "Trial",
-      "editProfile": "Edit profile coming soon"
-    }
+      "trial": "Trial"
+    },
+    "displayNamePlaceholder": "Enter your display name",
+    "displayNameSuccess": "Display name updated",
+    "displayNameError": "Failed to update display name",
+    "timezoneSuccess": "Timezone updated",
+    "timezoneError": "Failed to update timezone"
   },
   "dataPrivacy": {
     "title": "Data & Privacy",
@@ -87,17 +91,23 @@
     "body": "All deliveries are scheduled in your local timezone. DST awareness ensures accurate delivery times.",
     "badge": "Timezone selector coming soon"
   },
+  "expand": "Expand",
   "billing": {
     "title": "Billing & Subscription",
     "description": "Manage your subscription, usage, and payments",
     "body": "View your subscription status, track usage, manage payment methods, and access invoices.",
-    "badge": "View Billing Settings →"
+    "badge": "View Billing Settings →",
+    "viewFull": "View Billing Settings",
+    "manageSubscription": "Manage Subscription"
   },
   "privacy": {
     "title": "Privacy & Data",
     "description": "Control your data and privacy settings",
     "body": "All letters are encrypted at rest (AES-256-GCM). Export your data or delete your account at any time.",
-    "badge": "Privacy controls coming soon"
+    "badge": "Privacy controls coming soon",
+    "viewFull": "View Privacy Settings",
+    "exportData": "Export Data",
+    "deleteAccount": "Delete Account"
   },
   "danger": {
     "title": "Danger Zone",

@@ -22,6 +22,17 @@ export interface RecentLetter {
 }
 
 /**
+ * Next scheduled delivery info
+ */
+export interface NextDelivery {
+  id: string
+  letterId: string
+  deliverAt: Date
+  letterTitle: string
+  channel: "email" | "mail"
+}
+
+/**
  * Get dashboard statistics for a user
  *
  * Optimized queries with proper indexing:
@@ -125,5 +136,49 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
       deliveredCount: 0,
       recentLetters: [],
     }
+  }
+}
+
+/**
+ * Get the next scheduled delivery for a user
+ *
+ * Used for the "Next letter arrives in X days" widget
+ */
+export async function getNextDelivery(userId: string): Promise<NextDelivery | null> {
+  try {
+    const delivery = await prisma.delivery.findFirst({
+      where: {
+        userId,
+        status: "scheduled",
+        deliverAt: {
+          gt: new Date(),
+        },
+      },
+      orderBy: {
+        deliverAt: "asc",
+      },
+      include: {
+        letter: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
+
+    if (!delivery) {
+      return null
+    }
+
+    return {
+      id: delivery.id,
+      letterId: delivery.letterId,
+      deliverAt: delivery.deliverAt,
+      letterTitle: delivery.letter.title,
+      channel: delivery.channel,
+    }
+  } catch (error) {
+    console.error("[Stats] Failed to fetch next delivery:", error)
+    return null
   }
 }

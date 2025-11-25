@@ -3,6 +3,42 @@
 **Date:** November 24, 2025
 **Auditor Perspective:** World-Class Entrepreneur & Product Designer
 **Scope:** Full Dashboard Experience (UI/UX)
+**Last Updated:** November 25, 2025
+
+---
+
+## Implementation Progress
+
+**Month 1 Status: COMPLETED**
+
+| Task | Status | Implementation Details |
+|------|--------|------------------------|
+| Mobile hamburger navigation | Done | Sheet component with auto-close on navigation |
+| Merge delivery scheduling | Done | DashboardLetterEditor on /letters/new page |
+| Settings editing | Done | Inline editable fields for displayName & timezone |
+| "Next letter arrives" widget | Done | Countdown timer with days/hours/minutes |
+| Remove Deliveries from nav | Done | 3-tab navigation (Dashboard, Letters, Settings) |
+| Inline scheduling on letter detail | Done | InlineScheduleSection shows when no active deliveries |
+| Collapsible settings sections | Done | Expandable cards for Billing, Privacy, Notifications |
+
+**Files Modified:**
+- `apps/web/app/[locale]/(app)/layout.tsx` - Mobile nav + removed Deliveries link
+- `apps/web/components/mobile-navigation.tsx` - New mobile nav drawer
+- `apps/web/app/[locale]/(app)/letters/new/page.tsx` - Single-page create+schedule
+- `apps/web/components/dashboard/countdown-timer.tsx` - Client countdown component
+- `apps/web/components/dashboard/next-delivery-widget.tsx` - Server widget wrapper
+- `apps/web/app/[locale]/(app)/dashboard/page.tsx` - Added NextDeliveryWidget
+- `apps/web/components/settings/editable-field.tsx` - Inline text editing
+- `apps/web/components/settings/timezone-select.tsx` - Grouped timezone picker
+- `apps/web/components/settings/profile-fields.tsx` - Client wrapper component
+- `apps/web/components/settings/collapsible-section.tsx` - Reusable collapsible card component
+- `apps/web/components/settings/billing-summary.tsx` - Collapsible billing section
+- `apps/web/components/settings/privacy-summary.tsx` - Collapsible privacy section
+- `apps/web/server/actions/profile.ts` - Server action for profile updates
+- `apps/web/app/[locale]/(app)/settings/page.tsx` - Integrated ProfileFields + collapsible sections
+- `apps/web/components/letters/inline-schedule-section.tsx` - Inline scheduling on letter detail
+- `apps/web/app/[locale]/(app)/letters/[id]/page.tsx` - Added InlineScheduleSection
+- Translation files (en/tr): app.json, letters.json, dashboard.json, settings.json
 
 ---
 
@@ -147,16 +183,18 @@ Dashboard (/)
    - Letter list has basic filter tabs but no search
    - Will become problematic as users accumulate letters
 
-#### Recommended Structure
+#### Recommended Structure (NOW IMPLEMENTED)
 
 ```
 Dashboard (/)
 ├── Letters (/letters)
-│   ├── [id] (includes delivery status inline)
-│   └── new (single-page create + schedule)
+│   ├── [id] (includes delivery status inline) ✅ InlineScheduleSection added
+│   └── new (single-page create + schedule) ✅ DashboardLetterEditor
 └── Settings (/settings)
-    └── (single page with expandable sections)
+    └── (single page with expandable sections) ✅ CollapsibleSection components
 ```
+
+**Note:** Legacy routes (`/deliveries`, `/letters/[id]/schedule`, `/settings/billing`, `/settings/privacy`) are preserved for backwards compatibility but the recommended flow now works through the simplified structure above.
 
 ---
 
@@ -413,18 +451,18 @@ Visit Landing Page → Sign Up → Complete Onboarding → Write First Letter �
 
 ## 90-Day Roadmap
 
-### Month 1: Foundation Fixes
+### Month 1: Foundation Fixes (COMPLETED)
 
-- [ ] Implement mobile hamburger navigation
-- [ ] Merge delivery scheduling into dashboard editor
-- [ ] Enable settings editing functionality
-- [ ] Add "Next letter arrives in X days" widget
+- [x] Implement mobile hamburger navigation
+- [x] Merge delivery scheduling into dashboard editor (single-page flow at /letters/new)
+- [x] Enable settings editing functionality (displayName + timezone with inline editing)
+- [x] Add "Next letter arrives in X days" widget (countdown timer on dashboard)
+- [x] Remove Deliveries from navigation (3-tab nav: Dashboard, Letters, Settings)
 
 ### Month 2: Core Experience Enhancement
 
 - [ ] Integrate TipTap rich text editor
 - [ ] Build letter templates library
-- [ ] Remove standalone Deliveries page
 - [ ] Add email preview functionality
 - [ ] Implement skeleton loaders
 

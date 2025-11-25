@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardLetterEditor } from "@/components/dashboard-letter-editor"
 import { DashboardWrapper } from "@/components/dashboard-wrapper"
+import { NextDeliveryWidget } from "@/components/dashboard/next-delivery-widget"
 import { TimezoneChangeWarning } from "@/components/timezone-change-warning"
 import { StatsCardSkeleton, LetterCardSkeleton, Skeleton } from "@/components/skeletons"
 import { requireUser } from "@/server/lib/auth"
@@ -256,6 +257,11 @@ export default async function DashboardPage() {
         {/* Stats Cards - Streams independently */}
         <Suspense fallback={<StatsGridSkeleton />}>
           <StatsCards userId={user.id} />
+        </Suspense>
+
+        {/* Next Delivery Widget - Streams independently */}
+        <Suspense fallback={<StatsCardSkeleton />}>
+          <NextDeliveryWidget userId={user.id} />
         </Suspense>
 
         {/* Write New Letter Section - Instant (client component) */}

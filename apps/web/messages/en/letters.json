@@ -1,7 +1,12 @@
 {
   "heading": "My Letters",
   "subtitle": "All your letters to your future self",
-  "new": "Write New Letter",
+  "newButton": "Write New Letter",
+  "new": {
+    "badge": "Create & Schedule",
+    "title": "Write Your Letter",
+    "description": "Write your message and choose when it will be delivered - all in one place."
+  },
   "delete": "Delete letter",
   "filters": {
     "all": "All Letters",
@@ -69,7 +74,12 @@
       "mail": "Physical Mail"
     },
     "locked": "Locked {date}",
-    "attemptsHeading": "Delivery Attempts"
+    "attemptsHeading": "Delivery Attempts",
+    "inlineSchedule": {
+      "title": "Schedule Delivery",
+      "description": "Choose when and how to receive this letter",
+      "expand": "Schedule"
+    }
   },
   "schedule": {
     "badge": "Step 2: Schedule",

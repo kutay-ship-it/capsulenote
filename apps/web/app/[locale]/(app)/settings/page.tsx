@@ -1,13 +1,17 @@
 import { Suspense } from "react"
 import { getCurrentUser } from "@/server/lib/auth"
-import { redirect, Link } from "@/i18n/routing"
+import { redirect } from "@/i18n/routing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { User, Bell, Globe, Lock, CreditCard, AlertTriangle } from "lucide-react"
+import { User, Bell, Globe, AlertTriangle } from "lucide-react"
 import { getEntitlements } from "@/server/lib/entitlements"
 import { getTranslations } from "next-intl/server"
 import { Skeleton } from "@/components/skeletons"
+import { ProfileFields } from "@/components/settings/profile-fields"
+import { CollapsibleSection } from "@/components/settings/collapsible-section"
+import { BillingSummary } from "@/components/settings/billing-summary"
+import { PrivacySummary } from "@/components/settings/privacy-summary"
 
 // Force dynamic rendering - settings must always show fresh user data
 export const revalidate = 0
@@ -81,22 +85,20 @@ async function AccountSection() {
           </Label>
           <p className="font-mono text-sm text-gray-secondary sm:text-base">{user.email}</p>
         </div>
-        <div className="space-y-2">
-          <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-            {t("account.displayName")}
-          </Label>
-          <p className="font-mono text-sm text-gray-secondary sm:text-base">
-            {user.profile?.displayName || t("account.notSet")}
-          </p>
-        </div>
-        <div className="space-y-2">
-          <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-            {t("account.timezone")}
-          </Label>
-          <p className="font-mono text-sm text-gray-secondary sm:text-base">
-            {user.profile?.timezone || t("account.notSet")}
-          </p>
-        </div>
+        <ProfileFields
+          displayName={user.profile?.displayName ?? null}
+          timezone={user.profile?.timezone ?? null}
+          translations={{
+            displayNameLabel: t("account.displayName"),
+            timezoneLabel: t("account.timezone"),
+            notSet: t("account.notSet"),
+            displayNamePlaceholder: t("account.displayNamePlaceholder"),
+            displayNameSuccess: t("account.displayNameSuccess"),
+            displayNameError: t("account.displayNameError"),
+            timezoneSuccess: t("account.timezoneSuccess"),
+            timezoneError: t("account.timezoneError"),
+          }}
+        />
         <div className="space-y-2">
           <Label className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
             {t("account.status")}
@@ -149,14 +151,6 @@ async function AccountSection() {
             )}
           </div>
         </div>
-        <div className="pt-2">
-          <Badge
-            className="border-2 border-charcoal bg-duck-yellow font-mono text-xs uppercase"
-            style={{ borderRadius: "2px" }}
-          >
-            {t("account.badges.editProfile")}
-          </Badge>
-        </div>
       </CardContent>
     </Card>
   )
@@ -182,32 +176,17 @@ export default async function SettingsPage() {
         <AccountSection />
       </Suspense>
 
-      {/* Static Settings Cards - Instant (no data dependencies) */}
+      {/* Collapsible Settings Sections */}
 
       {/* Notification Preferences */}
-      <Card
-        className="border-2 border-charcoal shadow-sm bg-bg-yellow-pale"
-        style={{ borderRadius: "2px" }}
+      <CollapsibleSection
+        icon={<Bell className="h-5 w-5 text-charcoal" strokeWidth={2} />}
+        title={t("notifications.title")}
+        description={t("notifications.description")}
+        bgClass="bg-bg-yellow-pale"
+        expandLabel={t("expand")}
       >
-        <CardHeader className="space-y-3 p-5 sm:p-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white"
-              style={{ borderRadius: "2px" }}
-            >
-              <Bell className="h-5 w-5 text-charcoal" strokeWidth={2} />
-            </div>
-            <div>
-              <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl">
-                {t("notifications.title")}
-              </CardTitle>
-              <CardDescription className="font-mono text-xs text-gray-secondary sm:text-sm">
-                {t("notifications.description")}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
+        <div className="space-y-4">
           <p className="font-mono text-sm text-gray-secondary">
             {t("notifications.body")}
           </p>
@@ -217,33 +196,18 @@ export default async function SettingsPage() {
           >
             {t("notifications.badge")}
           </Badge>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
       {/* Timezone & Localization */}
-      <Card
-        className="border-2 border-charcoal shadow-sm bg-bg-green-light"
-        style={{ borderRadius: "2px" }}
+      <CollapsibleSection
+        icon={<Globe className="h-5 w-5 text-charcoal" strokeWidth={2} />}
+        title={t("timezone.title")}
+        description={t("timezone.description")}
+        bgClass="bg-bg-green-light"
+        expandLabel={t("expand")}
       >
-        <CardHeader className="space-y-3 p-5 sm:p-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white"
-              style={{ borderRadius: "2px" }}
-            >
-              <Globe className="h-5 w-5 text-charcoal" strokeWidth={2} />
-            </div>
-            <div>
-              <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl">
-                {t("timezone.title")}
-              </CardTitle>
-              <CardDescription className="font-mono text-xs text-gray-secondary sm:text-sm">
-                {t("timezone.description")}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
+        <div className="space-y-4">
           <p className="font-mono text-sm text-gray-secondary">
             {t("timezone.body")}
           </p>
@@ -253,82 +217,33 @@ export default async function SettingsPage() {
           >
             {t("timezone.badge")}
           </Badge>
-        </CardContent>
-      </Card>
+        </div>
+      </CollapsibleSection>
 
-      {/* Subscription */}
-      <Link href="/settings/billing">
-        <Card
-          className="border-2 border-charcoal shadow-sm bg-bg-purple-light hover:shadow-md transition-shadow cursor-pointer"
-          style={{ borderRadius: "2px" }}
-        >
-          <CardHeader className="space-y-3 p-5 sm:p-6">
-            <div className="flex items-center gap-3">
-              <div
-                className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white"
-                style={{ borderRadius: "2px" }}
-              >
-                <CreditCard className="h-5 w-5 text-charcoal" strokeWidth={2} />
-              </div>
-              <div>
-                <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl">
-                  {t("billing.title")}
-                </CardTitle>
-                <CardDescription className="font-mono text-xs text-gray-secondary sm:text-sm">
-                  {t("billing.description")}
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
-            <p className="font-mono text-sm text-gray-secondary">
-              {t("billing.body")}
-            </p>
-            <Badge
-              className="border-2 border-charcoal bg-lavender font-mono text-xs uppercase"
-              style={{ borderRadius: "2px" }}
-            >
-              {t("billing.badge")}
-            </Badge>
-          </CardContent>
-        </Card>
-      </Link>
+      {/* Billing & Subscription */}
+      <BillingSummary
+        translations={{
+          title: t("billing.title"),
+          description: t("billing.description"),
+          body: t("billing.body"),
+          expand: t("expand"),
+          viewFull: t("billing.viewFull"),
+          manageSubscription: t("billing.manageSubscription"),
+        }}
+      />
 
       {/* Privacy & Data */}
-      <Card
-        className="border-2 border-charcoal shadow-sm"
-        style={{ borderRadius: "2px" }}
-      >
-        <CardHeader className="space-y-3 p-5 sm:p-6">
-          <div className="flex items-center gap-3">
-            <div
-              className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white"
-              style={{ borderRadius: "2px" }}
-            >
-              <Lock className="h-5 w-5 text-charcoal" strokeWidth={2} />
-            </div>
-            <div>
-              <CardTitle className="font-mono text-xl font-normal uppercase tracking-wide sm:text-2xl">
-                {t("privacy.title")}
-              </CardTitle>
-              <CardDescription className="font-mono text-xs text-gray-secondary sm:text-sm">
-                {t("privacy.description")}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4 p-5 pt-0 sm:p-6 sm:pt-0">
-          <p className="font-mono text-sm text-gray-secondary">
-            {t("privacy.body")}
-          </p>
-          <Badge
-            className="border-2 border-charcoal bg-sky-blue font-mono text-xs uppercase"
-            style={{ borderRadius: "2px" }}
-          >
-            {t("privacy.badge")}
-          </Badge>
-        </CardContent>
-      </Card>
+      <PrivacySummary
+        translations={{
+          title: t("privacy.title"),
+          description: t("privacy.description"),
+          body: t("privacy.body"),
+          expand: t("expand"),
+          viewFull: t("privacy.viewFull"),
+          exportData: t("privacy.exportData"),
+          deleteAccount: t("privacy.deleteAccount"),
+        }}
+      />
 
       {/* Danger Zone */}
       <Card

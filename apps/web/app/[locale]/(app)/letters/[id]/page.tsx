@@ -1,10 +1,12 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
-import { Mail, Calendar, ArrowLeft } from "lucide-react"
+import { Mail, Calendar, ArrowLeft, ChevronDown } from "lucide-react"
 import { getLocale, getTranslations } from "next-intl/server"
 
 import { Link } from "@/i18n/routing"
 import { getLetter } from "@/server/actions/letters"
+import { requireUser } from "@/server/lib/auth"
+import { decryptLetter } from "@/server/lib/encryption"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TimezoneTooltip } from "@/components/timezone-tooltip"
@@ -12,6 +14,8 @@ import { DownloadCalendarButton } from "@/components/download-calendar-button"
 import { DeliveryErrorCard } from "@/components/delivery-error-card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/skeletons"
+import { ScheduleDeliveryForm } from "@/components/schedule-delivery-form"
+import { InlineScheduleSection } from "@/components/letters/inline-schedule-section"
 
 // Force dynamic rendering - letter detail must always show fresh data
 export const revalidate = 0
@@ -52,7 +56,7 @@ function LetterDetailSkeleton() {
 }
 
 // Async component for letter content
-async function LetterContent({ id }: { id: string }) {
+async function LetterContent({ id, userEmail }: { id: string; userEmail: string }) {
   const locale = await getLocale()
   const t = await getTranslations("letters")
 
@@ -62,6 +66,11 @@ async function LetterContent({ id }: { id: string }) {
   } catch {
     notFound()
   }
+
+  // Check if letter has any active scheduled deliveries
+  const hasScheduledDeliveries = letter.deliveries.some(
+    (d) => d.status === "scheduled" || d.status === "processing"
+  )
 
   const formatDate = (date: Date | string, withTime = false, withTz = false) => {
     const dateObj = typeof date === "string" ? new Date(date) : date
@@ -84,7 +93,8 @@ async function LetterContent({ id }: { id: string }) {
   const channelLabel = (channel: string) => (channel === "email" ? t("detail.channel.email") : t("detail.channel.mail"))
 
   return (
-    <Card>
+    <>
+      <Card>
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>
@@ -204,12 +214,31 @@ async function LetterContent({ id }: { id: string }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Inline Schedule Section - Show when no active deliveries */}
+      {!hasScheduledDeliveries && (
+        <InlineScheduleSection
+          letterId={id}
+          letterTitle={letter.title}
+          letterPreview={letter.bodyHtml}
+          userEmail={userEmail}
+          translations={{
+            scheduleTitle: t("detail.inlineSchedule.title"),
+            scheduleDescription: t("detail.inlineSchedule.description"),
+            expandLabel: t("detail.inlineSchedule.expand"),
+          }}
+        />
+      )}
+    </>
   )
 }
 
 export default async function LetterDetailPage({ params }: PageProps) {
   const { id } = await params
   const t = await getTranslations("letters")
+
+  // Get user for email
+  const user = await requireUser()
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -225,7 +254,7 @@ export default async function LetterDetailPage({ params }: PageProps) {
 
       {/* Letter Content - Streams independently */}
       <Suspense fallback={<LetterDetailSkeleton />}>
-        <LetterContent id={id} />
+        <LetterContent id={id} userEmail={user.email} />
       </Suspense>
     </div>
   )

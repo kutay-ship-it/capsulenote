@@ -35,9 +35,13 @@
     },
     "badges": {
       "premium": "Premium",
-      "trial": "Deneme",
-      "editProfile": "Profil düzenleme yakında"
-    }
+      "trial": "Deneme"
+    },
+    "displayNamePlaceholder": "Görünen adını gir",
+    "displayNameSuccess": "Görünen ad güncellendi",
+    "displayNameError": "Görünen ad güncellenemedi",
+    "timezoneSuccess": "Saat dilimi güncellendi",
+    "timezoneError": "Saat dilimi güncellenemedi"
   },
   "dataPrivacy": {
     "title": "Veri ve Gizlilik",
@@ -87,17 +91,23 @@
     "body": "Tüm teslimatlar yerel saat dilimine göre planlanır. Yaz saati farkındalığı doğru zamanı sağlar.",
     "badge": "Saat dilimi seçimi yakında"
   },
+  "expand": "Genişlet",
   "billing": {
     "title": "Faturalandırma ve abonelik",
     "description": "Abonelik, kullanım ve ödemelerini yönet",
     "body": "Abonelik durumunu gör, kullanımı takip et, ödeme yöntemlerini yönet ve faturalarına eriş.",
-    "badge": "Faturalandırma ayarlarını gör →"
+    "badge": "Faturalandırma ayarlarını gör →",
+    "viewFull": "Faturalandırma Ayarlarını Gör",
+    "manageSubscription": "Aboneliği Yönet"
   },
   "privacy": {
     "title": "Gizlilik ve veriler",
     "description": "Veri ve gizlilik ayarlarını kontrol et",
     "body": "Tüm mektuplar beklerken şifrelenir (AES-256-GCM). Verini dışa aktarabilir veya hesabını istediğin zaman silebilirsin.",
-    "badge": "Gizlilik kontrolleri yakında"
+    "badge": "Gizlilik kontrolleri yakında",
+    "viewFull": "Gizlilik Ayarlarını Gör",
+    "exportData": "Verileri Dışa Aktar",
+    "deleteAccount": "Hesabı Sil"
   },
   "danger": {
     "title": "Tehlike bölgesi",

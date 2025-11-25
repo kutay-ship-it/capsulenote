@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server"
 
 import { EmailLockGuard } from "@/components/auth/email-lock-guard"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { MobileNavigation } from "@/components/mobile-navigation"
 import { Link } from "@/i18n/routing"
 import type { Locale } from "@/i18n/routing"
 
@@ -39,7 +40,8 @@ export default async function AppLayout({
                   {t("nav.brand")}
                 </span>
               </Link>
-              <nav className="flex items-center space-x-8 font-mono text-base font-normal uppercase tracking-wide">
+              {/* Desktop Navigation - Hidden on mobile */}
+              <nav className="hidden md:flex items-center space-x-8 font-mono text-base font-normal uppercase tracking-wide">
                 <Link href="/dashboard" className="flex items-center gap-2 text-charcoal transition-opacity hover:opacity-70">
                   <Home className="h-5 w-5" />
                   {t("nav.dashboard")}
@@ -51,10 +53,6 @@ export default async function AppLayout({
                   <FileText className="h-5 w-5" />
                   {t("nav.letters")}
                 </Link>
-                <Link href="/deliveries" className="flex items-center gap-2 text-charcoal transition-opacity hover:opacity-70">
-                  <Mail className="h-5 w-5" />
-                  {t("nav.deliveries")}
-                </Link>
                 <Link href="/settings" className="flex items-center gap-2 text-charcoal transition-opacity hover:opacity-70">
                   <Settings className="h-5 w-5" />
                   {t("nav.settings")}
@@ -64,6 +62,16 @@ export default async function AppLayout({
             <div className="ml-auto flex items-center space-x-4">
               <LanguageSwitcher className="hidden sm:flex" />
               <UserButton afterSignOutUrl="/" />
+              {/* Mobile Navigation */}
+              <MobileNavigation
+                translations={{
+                  brand: t("nav.brand"),
+                  dashboard: t("nav.dashboard"),
+                  letters: t("nav.letters"),
+                  settings: t("nav.settings"),
+                  openMenu: t("nav.openMenu"),
+                }}
+              />
             </div>
           </div>
         </header>

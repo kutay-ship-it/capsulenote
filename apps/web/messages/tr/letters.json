@@ -1,7 +1,12 @@
 {
   "heading": "Mektuplarım",
   "subtitle": "Gelecekteki kendine yazdığın tüm mektuplar",
-  "new": "Yeni Mektup Yaz",
+  "newButton": "Yeni Mektup Yaz",
+  "new": {
+    "badge": "Oluştur ve Planla",
+    "title": "Mektubunu Yaz",
+    "description": "Mesajını yaz ve ne zaman teslim edileceğini seç - hepsi tek sayfada."
+  },
   "delete": "Mektubu sil",
   "filters": {
     "all": "Tüm Mektuplar",
@@ -69,7 +74,12 @@
       "mail": "Fiziksel posta"
     },
     "locked": "Kilitlendi {date}",
-    "attemptsHeading": "Teslimat denemeleri"
+    "attemptsHeading": "Teslimat denemeleri",
+    "inlineSchedule": {
+      "title": "Teslimatı Planla",
+      "description": "Bu mektubu ne zaman ve nasıl alacağını seç",
+      "expand": "Planla"
+    }
   },
   "schedule": {
     "badge": "Adım 2: Planla",

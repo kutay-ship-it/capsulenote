@@ -7,6 +7,18 @@
     "scheduled": { "title": "Planlandı", "description": "Teslim edilmeyi bekliyor" },
     "delivered": { "title": "Teslim edildi", "description": "Başarıyla gönderildi" }
   },
+  "nextDelivery": {
+    "title": "Sonraki Mektup Geliyor",
+    "days": "gün",
+    "hours": "saat",
+    "minutes": "dk",
+    "viewLetter": "Mektubu Gör",
+    "empty": {
+      "title": "Yaklaşan Teslimat Yok",
+      "description": "Gelecekteki kendine bir mektup yaz ve teslim için planla!",
+      "cta": "Mektup Yaz"
+    }
+  },
   "quick": {
     "badge": "Hızlı yaz",
     "title": "Yeni mektup yaz",
