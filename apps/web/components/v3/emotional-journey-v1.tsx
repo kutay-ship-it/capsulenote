@@ -7,12 +7,17 @@ import { ArrowRight, Mail, Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { DeliveryTimelineItem } from "@/server/actions/redesign-dashboard"
 
-interface EmotionalJourneyV2Props {
+interface EmotionalJourneyV1Props {
   deliveries: DeliveryTimelineItem[]
 }
 
-// V2: Smooth S-curves with gradient stroke
-export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
+/**
+ * V1 - Original version with simple dashed path
+ * - Simple stroke without gradient
+ * - Same cubic Bezier curves for smooth S-curves
+ * - No gradient fading at edges
+ */
+export function EmotionalJourneyV1({ deliveries }: EmotionalJourneyV1Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
@@ -145,7 +150,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
       <section className="w-full border-y-2 border-charcoal bg-duck-cream">
         <div className="container py-16 text-center">
           <h3 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal mb-4">
-            Your Emotional Journey (V2 - Smooth Curves)
+            Your Emotional Journey (V1)
           </h3>
           <p className="font-mono text-sm text-charcoal/60">
             Write your first letter to start building your timeline
@@ -171,7 +176,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
           <div className="container py-6">
             <div className="flex items-center justify-between">
               <h3 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
-                V2: Smooth S-Curves + Gradient
+                Your Emotional Journey (V1 - Original)
               </h3>
               <div className="flex gap-6 text-xs font-mono text-charcoal/60">
                 <div className="flex items-center gap-2">
@@ -196,9 +201,8 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
             className="relative h-full"
             style={{ width: `${totalWidth}px`, x }}
           >
-            {/* Central Path Line - V2: Split into two lines for depth effect */}
-            <div className="absolute top-1/2 left-0 w-full h-[3px] bg-charcoal/10 -translate-y-1/2" />
-            <div className="absolute top-1/2 left-0 w-full h-px bg-charcoal/20 -translate-y-1/2" />
+            {/* Central Path Line */}
+            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-charcoal/30 -translate-y-1/2" />
 
             {/* Year Markers (Background) - Hidden near NOW for visual clarity */}
             {yearMarkers.map(({ year, x: markerX }) => {
@@ -219,87 +223,64 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
               )
             })}
 
-            {/* NOW Indicator - V2: Full height with enhanced visual effects */}
+            {/* NOW Indicator - Compact, only around the center line */}
             <motion.div
-              className="absolute top-0 bottom-0 flex flex-col items-center z-30 pointer-events-none"
-              style={{ left: nowX, transform: 'translateX(-50%)' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              className="absolute flex flex-col items-center z-30 pointer-events-none"
+              style={{
+                left: nowX,
+                top: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
             >
-              {/* Subtle vertical guide line - full height */}
-              <div className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-teal-primary/20 to-transparent" />
-
-              {/* NOW Badge - Above center with improved styling */}
+              {/* NOW Badge - Above the line */}
               <motion.div
-                className="absolute flex flex-col items-center"
-                style={{ top: '50%', transform: 'translateY(-80px)' }}
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-16 flex flex-col items-center"
+                animate={{ y: [0, -3, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
-                <span
-                  className="font-mono text-xs font-bold uppercase text-white bg-teal-primary px-5 py-2 border-2 border-teal-primary shadow-[4px_4px_0_theme(colors.charcoal)]"
-                  style={{ borderRadius: "2px", letterSpacing: "0.2em" }}
+                <span className="font-mono text-xs font-bold uppercase tracking-widest text-white bg-teal-primary px-4 py-1.5 border-2 border-teal-primary shadow-[3px_3px_0_theme(colors.charcoal)]"
+                  style={{ borderRadius: "2px" }}
                 >
                   Now
                 </span>
-                <div className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-teal-primary" />
+                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-teal-primary" />
               </motion.div>
 
-              {/* Center dot with double pulse effect */}
-              <div className="absolute top-1/2 -translate-y-1/2">
-                {/* Outer pulse ring */}
+              {/* Center dot with pulse */}
+              <div className="relative">
                 <motion.div
-                  className="absolute w-10 h-10 rounded-full border-2 border-teal-primary/40 -translate-x-1/2 -translate-y-1/2"
-                  animate={{ scale: [1, 1.8, 1], opacity: [0.6, 0, 0.6] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+                  className="absolute inset-0 w-6 h-6 rounded-full bg-teal-primary/30 -translate-x-1/2 -translate-y-1/2"
+                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 2, repeat: Infinity }}
                   style={{ left: '50%', top: '50%' }}
                 />
-                {/* Inner glow pulse */}
-                <motion.div
-                  className="absolute w-6 h-6 rounded-full bg-teal-primary/30 -translate-x-1/2 -translate-y-1/2"
-                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.1, 0.5] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-                  style={{ left: '50%', top: '50%' }}
-                />
-                {/* Solid center dot */}
-                <div className="w-6 h-6 rounded-full bg-teal-primary border-2 border-white shadow-lg" />
+                <div className="w-5 h-5 rounded-full bg-teal-primary border-2 border-white shadow-md" />
               </div>
 
-              {/* Date label - Below center with upward triangle */}
-              <div
-                className="absolute flex flex-col items-center"
-                style={{ top: '50%', transform: 'translateY(50px)' }}
-              >
-                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-b-[6px] border-l-transparent border-r-transparent border-b-teal-primary/30" />
-                <span className="font-mono text-[11px] font-bold text-teal-primary bg-duck-cream px-3 py-1 border border-teal-primary/30 rounded-sm shadow-sm">
+              {/* Date label - Below the line */}
+              <div className="absolute top-12 flex flex-col items-center">
+                <span className="font-mono text-[11px] font-bold text-teal-primary bg-duck-cream px-2 py-0.5 border border-teal-primary/30 rounded">
                   {format(new Date(), "MMM d, yyyy")}
                 </span>
               </div>
             </motion.div>
 
-            {/* Journey Path SVG - V2: Smooth S-curves with gradient */}
+            {/* Journey Path SVG - V1: Original style from JourneyPath component */}
+            {/* Starts from left edge at center, uses cubic Bezier curves */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
-              {/* Gradient definition for fading edges */}
-              <defs>
-                <linearGradient id="journeyPathGradientV2" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.05" />
-                  <stop offset="10%" stopColor="currentColor" stopOpacity="0.18" />
-                  <stop offset="50%" stopColor="currentColor" stopOpacity="0.2" />
-                  <stop offset="90%" stopColor="currentColor" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="currentColor" stopOpacity="0.05" />
-                </linearGradient>
-              </defs>
               {items.length > 0 && (
                 <path
                   d={(() => {
                     const centerY = timelineAreaHeight / 2
-                    const dotOffset = 132 // Adjusted for larger w-6 h-6 dots
+                    const dotOffset = 130
 
-                    // Start from left edge at center line (same as V1)
+                    // Start from left edge at center line (original style: M 0,centerY)
                     let path = `M 0,${centerY}`
 
-                    // Draw cubic Bezier curves for smooth S-curve transitions
+                    // Draw cubic Bezier curves to each dot (original JourneyPath logic)
                     for (let i = 0; i < items.length; i++) {
                       const currItem = items[i]
                       const currY = currItem.isTop ? centerY - dotOffset : centerY + dotOffset
@@ -308,8 +289,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                       const prevX = i === 0 ? 0 : items[i - 1].x
                       const prevY = i === 0 ? centerY : (items[i - 1].isTop ? centerY - dotOffset : centerY + dotOffset)
 
-                      // Control points at horizontal midpoint
-                      // cp1 at prevY ensures horizontal exit, cp2 at currY ensures horizontal entry
+                      // Control points at horizontal midpoint (same logic as original)
                       const cp1x = prevX + (currItem.x - prevX) / 2
                       const cp1y = prevY
                       const cp2x = prevX + (currItem.x - prevX) / 2
@@ -321,12 +301,10 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                     return path
                   })()}
                   fill="none"
-                  stroke="url(#journeyPathGradientV2)"
-                  className="text-charcoal"
+                  stroke="currentColor"
+                  className="text-charcoal/20"
                   strokeWidth="2"
-                  strokeDasharray="6 6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                  strokeDasharray="4 4"
                 />
               )}
             </svg>
@@ -431,22 +409,17 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                     </div>
                   </div>
 
-                  {/* Dot on the timeline - V2: Larger with better hover effects */}
+                  {/* Dot on the timeline */}
                   <div
                     className={cn(
-                      "absolute w-6 h-6 rounded-full border-2 bg-duck-cream z-20 flex items-center justify-center",
-                      "transition-all duration-300 ease-out",
-                      "group-hover:scale-125 group-hover:shadow-[0_0_12px_rgba(0,0,0,0.15)]",
-                      item.isTop ? "-bottom-[60px]" : "-top-[60px]",
-                      isSent
-                        ? "border-teal-primary group-hover:shadow-[0_0_12px_rgba(45,212,191,0.4)]"
-                        : "border-charcoal"
+                      "absolute w-5 h-5 rounded-full border-2 bg-duck-cream z-20 flex items-center justify-center transition-transform group-hover:scale-125",
+                      item.isTop ? "-bottom-[58px]" : "-top-[58px]",
+                      isSent ? "border-teal-primary" : "border-charcoal"
                     )}
                   >
                     <div
                       className={cn(
-                        "w-2 h-2 rounded-full transition-all duration-300 ease-out",
-                        "group-hover:w-3 group-hover:h-3",
+                        "w-2 h-2 rounded-full",
                         isSent ? "bg-teal-primary" : "bg-charcoal"
                       )}
                     />

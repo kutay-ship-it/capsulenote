@@ -189,7 +189,7 @@ export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
           {letter.title || "Untitled Letter"}
         </h3>
 
-        {/* Preview text - always reserve 2 lines height for consistent card sizing */}
+        {/* Preview text - 2 lines with truncation, fixed height for alignment */}
         <p className="mb-4 line-clamp-2 min-h-[2.5rem] font-mono text-xs text-charcoal/60 leading-relaxed">
           {letter.bodyPreview || "No content yet..."}
         </p>
