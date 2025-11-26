@@ -87,9 +87,9 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
           </div>
 
           {/* CTA */}
-          <Link href={{ pathname: "/letters-v3/[id]", params: { id: delivery.letter.id } }}>
+          <Link href={{ pathname: "/unlock-v3/[id]", params: { id: delivery.letter.id } }}>
             <Button className="gap-2">
-              Open Letter
+              Open Time Capsule
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>

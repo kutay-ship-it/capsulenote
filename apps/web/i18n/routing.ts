@@ -55,6 +55,7 @@ export const routing = defineRouting({
     "/letters-v3/[id]": "/letters-v3/[id]",
     "/letters-v3/[id]/edit": "/letters-v3/[id]/edit",
     "/letters-v3/[id]/schedule": "/letters-v3/[id]/schedule",
+    "/unlock-v3/[id]": "/unlock-v3/[id]",
     "/settings-v3": "/settings-v3",
   },
 })

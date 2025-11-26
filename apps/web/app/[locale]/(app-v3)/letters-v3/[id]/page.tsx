@@ -13,6 +13,8 @@ import {
   Lock,
   CheckCircle2,
   ArrowRight,
+  Stamp,
+  MailOpen,
 } from "lucide-react"
 
 import { Link } from "@/i18n/routing"
@@ -158,7 +160,17 @@ async function LetterDetailContent({ id }: { id: string }) {
   const statusConfig = getStatusConfig(hasDelivery, latestDelivery?.status, daysUntil)
   const formattedDate = format(new Date(letter.createdAt), "MMMM d, yyyy")
   const isSent = latestDelivery?.status === "sent"
+  const isScheduled = latestDelivery?.status === "scheduled" || latestDelivery?.status === "processing"
   const isLocked = hasDelivery && !isSent
+  const hasBeenOpened = !!letter.firstOpenedAt
+  const formattedOpenedDate = letter.firstOpenedAt
+    ? format(new Date(letter.firstOpenedAt), "MMMM d, yyyy 'at' h:mm a")
+    : null
+
+  // For scheduled letters, get preview (first 100 chars of plain text)
+  const contentPreview = letter.bodyHtml
+    ? letter.bodyHtml.replace(/<[^>]*>/g, "").slice(0, 100) + "..."
+    : ""
 
   return (
     <div className="space-y-6">
@@ -184,10 +196,15 @@ async function LetterDetailContent({ id }: { id: string }) {
           <span>{statusConfig.badgeText}</span>
         </div>
 
-        {/* Lock indicator */}
+        {/* Lock/Opened indicator */}
         {isLocked && (
           <div className="absolute top-4 right-6">
             <Lock className="h-5 w-5 text-charcoal/30" strokeWidth={2} />
+          </div>
+        )}
+        {isSent && hasBeenOpened && (
+          <div className="absolute top-4 right-6">
+            <MailOpen className="h-5 w-5 text-teal-primary" strokeWidth={2} />
           </div>
         )}
 
@@ -204,11 +221,125 @@ async function LetterDetailContent({ id }: { id: string }) {
         {/* Dashed separator */}
         <div className="w-full border-t-2 border-dashed border-charcoal/10 mb-6" />
 
-        {/* Content */}
-        <div
-          className="prose prose-sm sm:prose max-w-none prose-p:font-mono prose-p:text-charcoal/80 prose-p:leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
-        />
+        {/* Content - Different states */}
+        {/* State 1: Draft - show full content */}
+        {!hasDelivery && (
+          <div
+            className="prose prose-sm sm:prose max-w-none prose-p:font-mono prose-p:text-charcoal/80 prose-p:leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
+          />
+        )}
+
+        {/* State 2: Scheduled - show sealed/locked state */}
+        {isScheduled && (
+          <div className="flex flex-col items-center justify-center text-center py-8 space-y-6">
+            {/* Wax Seal Icon */}
+            <div
+              className="flex h-20 w-20 items-center justify-center border-4 border-charcoal bg-coral shadow-[4px_4px_0_theme(colors.charcoal)]"
+              style={{ borderRadius: "50%" }}
+            >
+              <Stamp className="h-10 w-10 text-white" strokeWidth={1.5} />
+            </div>
+
+            {/* Message */}
+            <div className="space-y-2 max-w-md">
+              <h2 className="font-mono text-lg font-bold uppercase tracking-wide text-charcoal">
+                This letter is sealed
+              </h2>
+              <p className="font-mono text-sm text-charcoal/70">
+                Your time capsule will be unlocked on{" "}
+                <span className="font-bold text-charcoal">
+                  {format(new Date(latestDelivery!.deliverAt), "MMMM d, yyyy")}
+                </span>
+              </p>
+            </div>
+
+            {/* Content Preview */}
+            <div
+              className="max-w-md p-4 border-2 border-dashed border-charcoal/20 bg-duck-cream/50"
+              style={{ borderRadius: "2px" }}
+            >
+              <p className="font-mono text-xs text-charcoal/40 italic blur-sm select-none">
+                {contentPreview}
+              </p>
+            </div>
+
+            {/* Countdown info */}
+            <div className="flex items-center gap-2 text-charcoal/60">
+              <Clock className="h-4 w-4" strokeWidth={2} />
+              <span className="font-mono text-xs uppercase tracking-wider">
+                {daysUntil === undefined || daysUntil <= 0
+                  ? "Arriving today"
+                  : daysUntil === 1
+                    ? "Arriving tomorrow"
+                    : `${daysUntil} days to go`}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* State 3: Sent - show unlock CTA or opened status */}
+        {isSent && (
+          <div className="flex flex-col items-center justify-center text-center py-8 space-y-6">
+            {/* Icon */}
+            <div
+              className={cn(
+                "flex h-20 w-20 items-center justify-center border-4 border-charcoal shadow-[4px_4px_0_theme(colors.charcoal)]",
+                hasBeenOpened ? "bg-teal-primary" : "bg-coral"
+              )}
+              style={{ borderRadius: "50%" }}
+            >
+              {hasBeenOpened ? (
+                <MailOpen className="h-10 w-10 text-white" strokeWidth={1.5} />
+              ) : (
+                <Stamp className="h-10 w-10 text-white" strokeWidth={1.5} />
+              )}
+            </div>
+
+            {/* Message */}
+            <div className="space-y-2 max-w-md">
+              <h2 className="font-mono text-lg font-bold uppercase tracking-wide text-charcoal">
+                {hasBeenOpened ? "Letter Opened" : "Your Time Capsule Has Arrived!"}
+              </h2>
+              {hasBeenOpened ? (
+                <p className="font-mono text-sm text-charcoal/70">
+                  First opened on{" "}
+                  <span className="font-bold text-charcoal">{formattedOpenedDate}</span>
+                </p>
+              ) : (
+                <p className="font-mono text-sm text-charcoal/70">
+                  A message from your past is waiting to be revealed.
+                </p>
+              )}
+            </div>
+
+            {/* CTA */}
+            <Link href={{ pathname: "/unlock-v3/[id]", params: { id } }}>
+              <Button
+                size="lg"
+                className={cn(
+                  "gap-3 h-14 font-mono text-sm uppercase tracking-wider border-4 border-charcoal shadow-[6px_6px_0_theme(colors.charcoal)] hover:shadow-[8px_8px_0_theme(colors.charcoal)] hover:-translate-y-1 transition-all",
+                  hasBeenOpened
+                    ? "bg-teal-primary hover:bg-teal-primary/90 text-white"
+                    : "bg-coral hover:bg-coral/90 text-white"
+                )}
+                style={{ borderRadius: "2px" }}
+              >
+                {hasBeenOpened ? (
+                  <>
+                    <MailOpen className="h-5 w-5" strokeWidth={2} />
+                    View Full Letter
+                  </>
+                ) : (
+                  <>
+                    <Stamp className="h-5 w-5" strokeWidth={2} />
+                    Open Time Capsule
+                  </>
+                )}
+              </Button>
+            </Link>
+          </div>
+        )}
 
         {/* Dashed separator */}
         <div className="w-full border-t-2 border-dashed border-charcoal/10 mt-8 mb-4" />

@@ -18,10 +18,12 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { DeliveryChannel } from "@/components/v3/delivery-type-v3"
+import type { DeliveryEligibility } from "@/server/actions/entitlements"
 
 interface SealConfirmationV3Props {
   open: boolean
@@ -34,6 +36,7 @@ interface SealConfirmationV3Props {
   recipientEmail: string
   deliveryChannels: DeliveryChannel[]
   deliveryDate: Date
+  eligibility: DeliveryEligibility
 }
 
 export function SealConfirmationV3({
@@ -47,6 +50,7 @@ export function SealConfirmationV3({
   recipientEmail,
   deliveryChannels,
   deliveryDate,
+  eligibility,
 }: SealConfirmationV3Props) {
   const hasEmail = deliveryChannels.includes("email")
   const hasPhysical = deliveryChannels.includes("physical")
@@ -55,6 +59,12 @@ export function SealConfirmationV3({
   const recipientDisplay = recipientType === "myself" ? "Future You" : recipientName || recipientEmail
   const formattedDate = format(deliveryDate, "EEEE, MMMM d, yyyy")
   const daysFromNow = Math.ceil((deliveryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+
+  // Calculate credit cost (clamped to prevent negative display)
+  const emailCreditCost = hasEmail ? 1 : 0
+  const physicalCreditCost = hasPhysical ? 1 : 0
+  const emailCreditsAfter = Math.max(0, eligibility.emailCredits - emailCreditCost)
+  const physicalCreditsAfter = Math.max(0, eligibility.physicalCredits - physicalCreditCost)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,6 +75,7 @@ export function SealConfirmationV3({
           boxShadow: "8px 8px 0px 0px rgb(56, 56, 56)",
         }}
       >
+        <DialogTitle className="sr-only">Seal your letter confirmation</DialogTitle>
         {/* Header with Wax Seal */}
         <div className="relative border-b-2 border-charcoal bg-duck-yellow p-6 pt-8 text-center">
           {/* Floating Badge */}
@@ -196,6 +207,40 @@ export function SealConfirmationV3({
                   {daysFromNow === 1 ? "Tomorrow" : `${daysFromNow} days from now`}
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Credit Cost Display */}
+          <div
+            className="border-2 border-duck-yellow bg-duck-yellow/10 p-3 space-y-2"
+            style={{ borderRadius: "2px" }}
+          >
+            <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70">
+              Credit Usage
+            </p>
+            <div className="space-y-1.5">
+              {hasEmail && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5 text-charcoal/60" strokeWidth={2} />
+                    <span className="font-mono text-xs text-charcoal">Email delivery</span>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-charcoal">
+                    1 credit ({eligibility.emailCredits} → {emailCreditsAfter})
+                  </span>
+                </div>
+              )}
+              {hasPhysical && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-3.5 w-3.5 text-charcoal/60" strokeWidth={2} />
+                    <span className="font-mono text-xs text-charcoal">Physical mail</span>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-charcoal">
+                    1 credit ({eligibility.physicalCredits} → {physicalCreditsAfter})
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

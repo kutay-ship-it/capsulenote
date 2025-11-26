@@ -23,10 +23,14 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
 
     const now = new Date()
 
-    // Sort deliveries by date first
-    const sortedDeliveries = [...deliveries].sort(
-      (a, b) => new Date(a.deliverAt).getTime() - new Date(b.deliverAt).getTime()
-    )
+    // Filter out failed deliveries and sort by date
+    const sortedDeliveries = [...deliveries]
+      .filter(d => d.status !== "failed")
+      .sort((a, b) => new Date(a.deliverAt).getTime() - new Date(b.deliverAt).getTime())
+
+    // If all deliveries were failed, show empty state
+    if (sortedDeliveries.length === 0)
+      return { items: [], totalWidth: 0, yearMarkers: [], nowX: 0 }
 
     const firstDate = new Date(sortedDeliveries[0]!.deliverAt)
     const startDate = startOfYear(firstDate)
@@ -137,15 +141,58 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
       years.add(currentYear)
     }
 
-    // Show markers for ALL years with deliveries (including future years like 2026, 2030, etc.)
+    // Helper function to get elastic X position for any date
+    // This interpolates between anchor points (cards + NOW) to account for elastic stretching
+    const getElasticX = (targetDate: Date): number => {
+      const targetTime = targetDate.getTime()
+
+      // Build anchor points: all cards + NOW position, sorted by time
+      const anchors = [
+        ...calculatedItems.map(item => ({
+          time: item.date.getTime(),
+          x: item.x
+        })),
+        { time: now.getTime(), x: calculatedNowX }
+      ].sort((a, b) => a.time - b.time)
+
+      if (anchors.length === 0) {
+        // Fallback to linear positioning
+        return 200 + differenceInDays(targetDate, startDate) * pxPerDay
+      }
+
+      // Before first anchor - extrapolate backward using linear time
+      if (targetTime <= anchors[0].time) {
+        const daysBefore = differenceInDays(new Date(anchors[0].time), targetDate)
+        return Math.max(50, anchors[0].x - daysBefore * pxPerDay)
+      }
+
+      // After last anchor - extrapolate forward using linear time
+      if (targetTime >= anchors[anchors.length - 1].time) {
+        const daysAfter = differenceInDays(targetDate, new Date(anchors[anchors.length - 1].time))
+        return anchors[anchors.length - 1].x + daysAfter * pxPerDay
+      }
+
+      // Between anchors - interpolate based on time proportion
+      for (let i = 0; i < anchors.length - 1; i++) {
+        if (anchors[i].time <= targetTime && anchors[i + 1].time >= targetTime) {
+          const lower = anchors[i]
+          const upper = anchors[i + 1]
+          const fraction = (targetTime - lower.time) / (upper.time - lower.time)
+          return lower.x + fraction * (upper.x - lower.x)
+        }
+      }
+
+      // Fallback (shouldn't reach here)
+      return 200 + differenceInDays(targetDate, startDate) * pxPerDay
+    }
+
+    // Generate year markers with elastic positioning (aligned with stretched timeline)
     const markers = Array.from(years)
       .sort()
-      .map((year) => {
-        const date = new Date(year, 0, 1)
-        const days = differenceInDays(date, startDate)
-        const x = 200 + days * pxPerDay
-        return { year, x }
-      })
+      .map((year) => ({
+        year,
+        x: getElasticX(new Date(year, 0, 1))
+      }))
 
     return {
       items: calculatedItems,
@@ -167,6 +214,9 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
 
   // Transform: as we scroll through the container vertically, move content horizontally
   const x = useTransform(scrollYProgress, [0, 1], [0, -scrollDistance])
+
+  // Parallax transform for decorative background shapes
+  const xVerySlow = useTransform(scrollYProgress, [0, 1], [0, -scrollDistance * 0.3])
 
   // The container height needs to be: visible height + scroll distance
   const stickyHeight = 600
@@ -204,7 +254,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
           <div className="container py-6">
             <div className="flex items-center justify-between">
               <h3 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
-                V2: Smooth S-Curves + Gradient
+                Your Journey
               </h3>
               <div className="flex gap-6 text-xs font-mono text-charcoal/60">
                 <div className="flex items-center gap-2">
@@ -222,20 +272,39 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
 
         {/* Timeline Container */}
         <div
-          className="relative w-full bg-duck-cream"
+          className="relative w-full bg-duck-cream overflow-hidden"
           style={{ height: timelineAreaHeight }}
         >
+          {/* LAYER 1: Deepest parallax - Decorative shapes (0.3x speed) */}
           <motion.div
-            className="relative h-full"
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{ width: `${totalWidth * 1.5}px`, x: xVerySlow }}
+          >
+            <div
+              className="absolute w-[500px] h-[500px] rounded-full bg-teal-primary/[0.08] blur-3xl"
+              style={{ top: '0%', left: '5%' }}
+            />
+            <div
+              className="absolute w-[400px] h-[400px] rounded-full bg-charcoal/[0.05] blur-2xl"
+              style={{ top: '40%', left: '35%' }}
+            />
+            <div
+              className="absolute w-[550px] h-[550px] rounded-full bg-teal-primary/[0.07] blur-3xl"
+              style={{ top: '10%', left: '60%' }}
+            />
+            <div
+              className="absolute w-[450px] h-[450px] rounded-full bg-charcoal/[0.04] blur-3xl"
+              style={{ top: '30%', left: '80%' }}
+            />
+          </motion.div>
+
+          {/* LAYER 2: Foreground - Main content (1x speed) */}
+          <motion.div
+            className="relative h-full z-[2]"
             style={{ width: `${totalWidth}px`, x }}
           >
-            {/* Central Path Line - V2: Split into two lines for depth effect */}
-            <div className="absolute top-1/2 left-0 w-full h-[3px] bg-charcoal/10 -translate-y-1/2" />
-            <div className="absolute top-1/2 left-0 w-full h-px bg-charcoal/20 -translate-y-1/2" />
-
             {/* Year Markers (Background) - Hidden near NOW for visual clarity */}
             {yearMarkers.map(({ year, x: markerX }) => {
-              // Skip markers within 150px of NOW to keep that area clean
               const distanceFromNow = Math.abs(markerX - nowX)
               if (distanceFromNow < 150) return null
 
@@ -245,12 +314,16 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                   className="absolute top-0 bottom-0 border-l border-dashed border-charcoal/10"
                   style={{ left: markerX }}
                 >
-                  <span className="absolute top-8 ml-4 font-mono text-8xl font-black text-charcoal/[0.08] pointer-events-none select-none">
+                  <span className="absolute top-8 ml-4 font-mono text-8xl font-black text-charcoal/[0.04] pointer-events-none select-none">
                     {year}
                   </span>
                 </div>
               )
             })}
+
+            {/* Central Path Line - V2: Split into two lines for depth effect */}
+            <div className="absolute top-1/2 left-0 w-full h-[3px] bg-charcoal/10 -translate-y-1/2" />
+            <div className="absolute top-1/2 left-0 w-full h-px bg-charcoal/20 -translate-y-1/2" />
 
             {/* NOW Indicator - V2: Unified "Living Presence" Animation System */}
             <motion.div
@@ -335,8 +408,25 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
               </div>
             </motion.div>
 
-            {/* Journey Path SVG - V2: Smooth S-curves with gradient */}
+            {/* Journey Path SVG - V2: Smooth S-curves with gradient + marching ants */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+              {/* Animations: marching ants + glow pulse + wiggle */}
+              <style>
+                {`
+                  @keyframes march {
+                    to { stroke-dashoffset: -12; }
+                  }
+                  @keyframes glow {
+                    0%, 100% { box-shadow: 4px 4px 0px 0px rgba(29,29,29,1), 0 0 15px rgba(45,212,191,0.25); }
+                    50% { box-shadow: 4px 4px 0px 0px rgba(29,29,29,1), 0 0 25px rgba(45,212,191,0.5); }
+                  }
+                  @keyframes wiggle {
+                    0%, 100% { transform: rotate(0deg); }
+                    25% { transform: rotate(-8deg); }
+                    75% { transform: rotate(8deg); }
+                  }
+                `}
+              </style>
               {/* Gradient definition for fading edges */}
               <defs>
                 <linearGradient id="journeyPathGradientV2" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -384,6 +474,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                   strokeDasharray="6 6"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  style={{ animation: 'march 0.8s linear infinite' }}
                 />
               )}
             </svg>
@@ -392,6 +483,8 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
             {items.map((item, index) => {
               const isHovered = hoveredId === item.id
               const isSent = item.status === "sent"
+              const daysUntilDelivery = differenceInDays(item.date, new Date())
+              const isImminent = !isSent && daysUntilDelivery > 0 && daysUntilDelivery <= 7
 
               return (
                 <motion.div
@@ -430,9 +523,15 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                   <div
                     className={cn(
                       "relative w-72 bg-white border-2 transition-all duration-300 cursor-pointer group-hover:-translate-y-1 group-hover:shadow-[6px_6px_0px_0px_rgba(29,29,29,1)] shadow-[4px_4px_0px_0px_rgba(29,29,29,1)]",
-                      isSent ? "border-teal-primary" : "border-charcoal"
+                      isSent ? "border-teal-primary" : "border-charcoal",
+                      isImminent && "animate-[glow_2s_ease-in-out_infinite]"
                     )}
-                    style={{ borderRadius: "2px" }}
+                    style={{
+                      borderRadius: "2px",
+                      ...(isImminent && {
+                        boxShadow: '4px 4px 0px 0px rgba(29,29,29,1), 0 0 20px rgba(45,212,191,0.3)',
+                      }),
+                    }}
                   >
                     {/* Date Badge (Floating on border) */}
                     <div
@@ -447,12 +546,19 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                       {format(item.date, "MMM d, yyyy")}
                     </div>
 
+                    {/* Opening Soon Badge (for imminent deliveries) */}
+                    {isImminent && (
+                      <div className="absolute -top-3 right-4 px-2 py-0.5 bg-teal-primary border-2 border-teal-primary text-[9px] font-mono font-bold uppercase tracking-wider text-white rounded-[2px] shadow-sm">
+                        {daysUntilDelivery === 1 ? 'Tomorrow!' : `${daysUntilDelivery}d`}
+                      </div>
+                    )}
+
                     {/* Status Icon (Top Right) */}
                     <div className="absolute top-3 right-3">
                       {isSent ? (
-                        <Mail className="w-4 h-4 text-teal-primary" strokeWidth={2} />
+                        <Mail className="w-4 h-4 text-teal-primary transition-transform duration-300 group-hover:rotate-12" strokeWidth={2} />
                       ) : (
-                        <Lock className="w-4 h-4 text-charcoal/40" strokeWidth={2} />
+                        <Lock className="w-4 h-4 text-charcoal/40 transition-transform duration-300 origin-center group-hover:animate-[wiggle_0.3s_ease-in-out]" strokeWidth={2} />
                       )}
                     </div>
 

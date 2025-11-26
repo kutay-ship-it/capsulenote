@@ -1,13 +1,15 @@
 import type { ReactNode } from "react"
-import { Mail, PenLine } from "lucide-react"
+import { Mail } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 
 import { EmailLockGuard } from "@/components/auth/email-lock-guard"
-import { Button } from "@/components/ui/button"
 import { SettingsDropdown } from "@/components/v3/settings-dropdown"
+import { CreditsBarV3 } from "@/components/v3/nav/credit-indicator-v3"
+import { WriteButtonV3 } from "@/components/v3/nav/write-button-v3"
 import { Link } from "@/i18n/routing"
 import type { Locale } from "@/i18n/routing"
 import { getCurrentUser } from "@/server/lib/auth"
+import { getEntitlements } from "@/server/lib/entitlements"
 
 export default async function AppV3Layout({
   children,
@@ -24,6 +26,12 @@ export default async function AppV3Layout({
   const user = await getCurrentUser()
   const userName = user?.profile?.displayName || null
   const userEmail = user?.email || null
+  const userPlanType = user?.planType || null
+
+  // Get entitlements for credit indicators
+  const entitlements = user ? await getEntitlements(user.id) : null
+  const emailCredits = entitlements?.features.emailDeliveriesIncluded ?? 0
+  const mailCredits = entitlements?.usage.mailCreditsRemaining ?? 0
 
   return (
     <EmailLockGuard>
@@ -66,18 +74,21 @@ export default async function AppV3Layout({
               </Link>
             </nav>
 
-            {/* Right: Write CTA + Settings Dropdown */}
+            {/* Right: Credits + Write CTA + Settings Dropdown */}
             <div className="flex items-center gap-3">
-              {/* Write Button - always visible */}
-              <Link href="/letters-v3/new">
-                <Button size="sm" className="gap-2">
-                  <PenLine className="h-4 w-4" />
-                  <span className="hidden sm:inline">{tLetters("drafts.writeNew")}</span>
-                </Button>
-              </Link>
+              {/* Credit Indicators */}
+              {user && (
+                <CreditsBarV3
+                  emailCredits={emailCredits}
+                  mailCredits={mailCredits}
+                />
+              )}
+
+              {/* Write Button - hidden on new letter page */}
+              <WriteButtonV3 label={tLetters("drafts.writeNew")} />
 
               {/* Settings Dropdown */}
-              <SettingsDropdown userName={userName} userEmail={userEmail} />
+              <SettingsDropdown userName={userName} userEmail={userEmail} planType={userPlanType} />
             </div>
           </div>
         </header>

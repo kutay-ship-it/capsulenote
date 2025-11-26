@@ -1,10 +1,14 @@
-import { ArrowLeft, PenLine } from "lucide-react"
+import { Suspense } from "react"
+import { ArrowLeft } from "lucide-react"
 
 import { Link } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
-import { LetterEditorV3 } from "@/components/v3/letter-editor-v3"
+import { LetterEditorWrapper } from "@/components/v3/letter-editor-wrapper"
+import { getDeliveryEligibility } from "@/server/actions/entitlements"
 
-export default function NewLetterV3Page() {
+export default async function NewLetterV3Page() {
+  // Fetch user's delivery eligibility (credits, subscription status)
+  const eligibility = await getDeliveryEligibility()
   return (
     <div className="container">
       {/* Header - matches letters-v3 page pattern */}
@@ -31,7 +35,9 @@ export default function NewLetterV3Page() {
 
       {/* Editor Section */}
       <section className="pb-12">
-        <LetterEditorV3 />
+        <Suspense fallback={<div className="h-96 animate-pulse bg-charcoal/5 rounded" />}>
+          <LetterEditorWrapper initialEligibility={eligibility} />
+        </Suspense>
       </section>
     </div>
   )

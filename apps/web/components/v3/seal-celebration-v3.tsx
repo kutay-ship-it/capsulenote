@@ -7,6 +7,7 @@ import { Stamp, Sparkles, Mail, Calendar, Check } from "lucide-react"
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
@@ -120,6 +121,7 @@ export function SealCelebrationV3({
           boxShadow: "8px 8px 0px 0px rgb(56, 56, 56)",
         }}
       >
+        <DialogTitle className="sr-only">Sealing your letter</DialogTitle>
         {/* Confetti */}
         <AnimatePresence>
           {showConfetti && <BrutalistConfetti />}

@@ -3,7 +3,7 @@
 import { useClerk, useUser } from "@clerk/nextjs"
 import { useLocale, useTranslations } from "next-intl"
 import { usePathname as useNextPathname } from "next/navigation"
-import { Settings, User, Globe, LogOut, ChevronRight, Check } from "lucide-react"
+import { Settings, User, Globe, LogOut, ChevronRight, Check, Sparkles } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -20,12 +20,20 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Link, routing } from "@/i18n/routing"
 
+type PlanType = "DIGITAL_CAPSULE" | "PAPER_PIXELS" | null
+
 interface SettingsDropdownProps {
   userName?: string | null
   userEmail?: string | null
+  planType?: PlanType
 }
 
-export function SettingsDropdown({ userName, userEmail }: SettingsDropdownProps) {
+const PLAN_LABELS: Record<string, string> = {
+  DIGITAL_CAPSULE: "Digital Capsule",
+  PAPER_PIXELS: "Paper & Pixels",
+}
+
+export function SettingsDropdown({ userName, userEmail, planType }: SettingsDropdownProps) {
   const { signOut, openUserProfile } = useClerk()
   const { user } = useUser()
   const currentLocale = useLocale()
@@ -35,6 +43,7 @@ export function SettingsDropdown({ userName, userEmail }: SettingsDropdownProps)
   // Display name priority: prop > Clerk user > email prefix
   const displayName = userName || user?.firstName || userEmail?.split("@")[0] || "User"
   const displayEmail = userEmail || user?.primaryEmailAddress?.emailAddress || ""
+  const planLabel = planType ? PLAN_LABELS[planType] : "Free"
 
   // Get pathname without locale prefix for language switching
   const getPathnameWithoutLocale = (path: string): string => {
@@ -85,10 +94,19 @@ export function SettingsDropdown({ userName, userEmail }: SettingsDropdownProps)
       >
         {/* User Info Header */}
         <DropdownMenuLabel className="px-3 py-3 border-b-2 border-charcoal bg-duck-cream">
-          <div className="flex flex-col gap-1">
-            <span className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal truncate">
-              {displayName}
-            </span>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal truncate">
+                {displayName}
+              </span>
+              <span
+                className="flex items-center gap-1 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider bg-teal-primary text-white shrink-0"
+                style={{ borderRadius: "2px" }}
+              >
+                <Sparkles className="h-2.5 w-2.5" strokeWidth={2.5} />
+                {planLabel}
+              </span>
+            </div>
             {displayEmail && (
               <span className="font-mono text-xs text-charcoal/60 truncate">
                 {displayEmail}

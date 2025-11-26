@@ -55,16 +55,30 @@
 }
 
 /* Editor wrapper fills flex container */
+.editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .editor-wrapper .tiptap {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
 }
 
 .editor-wrapper .tiptap > div {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;
+}
+
+.editor-wrapper .ProseMirror {
+  flex: 1;
+  min-height: 300px;
 }
 
 .ProseMirror:focus {

@@ -154,6 +154,7 @@ model Letter {
   timezone        String           @default("UTC")
   lockedAt        DateTime?        @map("locked_at") @db.Timestamptz(3)
   shareLinkToken  String           @unique @default(uuid()) @map("share_link_token")
+  firstOpenedAt   DateTime?        @map("first_opened_at") @db.Timestamptz(3) // When user first opened the delivered letter (for unlock ceremony)
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt       DateTime?        @map("deleted_at") @db.Timestamptz(3)

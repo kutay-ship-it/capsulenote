@@ -518,3 +518,271 @@ export async function getLetterById(letterId: string) {
     bodyHtml: decrypted.bodyHtml,
   }
 }
+
+// ============================================================================
+// UNLOCK CEREMONY ACTIONS (V3)
+// ============================================================================
+
+/**
+ * Mark a letter as opened for the first time (idempotent)
+ * Used for the unlock ceremony to track when user first opens their time capsule
+ */
+export async function markLetterAsOpened(
+  letterId: string
+): Promise<ActionResult<{ firstOpenedAt: Date }>> {
+  try {
+    const user = await requireUser()
+
+    // Find letter with ownership check
+    const letter = await prisma.letter.findFirst({
+      where: {
+        id: letterId,
+        userId: user.id,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        firstOpenedAt: true,
+      },
+    })
+
+    if (!letter) {
+      await logger.warn('Letter not found for marking as opened', {
+        userId: user.id,
+        letterId,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.NOT_FOUND,
+          message: 'Letter not found or you do not have permission to access it.',
+        },
+      }
+    }
+
+    // If already opened, return existing timestamp (idempotent)
+    if (letter.firstOpenedAt) {
+      await logger.info('Letter already opened, returning existing timestamp', {
+        userId: user.id,
+        letterId,
+        firstOpenedAt: letter.firstOpenedAt,
+      })
+
+      return {
+        success: true,
+        data: { firstOpenedAt: letter.firstOpenedAt },
+      }
+    }
+
+    // Set firstOpenedAt
+    const now = new Date()
+    try {
+      await prisma.letter.update({
+        where: { id: letterId },
+        data: { firstOpenedAt: now },
+      })
+    } catch (error) {
+      await logger.error('Failed to mark letter as opened', error, {
+        userId: user.id,
+        letterId,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.UPDATE_FAILED,
+          message: 'Failed to record letter opening. Please try again.',
+          details: error,
+        },
+      }
+    }
+
+    // Create audit event
+    await createAuditEvent({
+      userId: user.id,
+      type: 'letter.first_opened',
+      data: { letterId, openedAt: now.toISOString() },
+    })
+
+    await logger.info('Letter marked as first opened', {
+      userId: user.id,
+      letterId,
+      firstOpenedAt: now,
+    })
+
+    // Revalidate pages
+    revalidatePath(`/letters-v3/${letterId}`)
+    revalidatePath(`/unlock-v3/${letterId}`)
+
+    return {
+      success: true,
+      data: { firstOpenedAt: now },
+    }
+  } catch (error) {
+    await logger.error('Unexpected error in markLetterAsOpened', error)
+
+    return {
+      success: false,
+      error: {
+        code: ErrorCodes.INTERNAL_ERROR,
+        message: 'An unexpected error occurred. Please try again.',
+        details: error,
+      },
+    }
+  }
+}
+
+/**
+ * Get letter for unlock page
+ * Validates: ownership, has sent delivery, delivery time has passed
+ * Returns decrypted content for the unlock ceremony
+ */
+export async function getLetterForUnlock(letterId: string): Promise<
+  ActionResult<{
+    id: string
+    title: string
+    bodyHtml: string
+    bodyRich: unknown
+    createdAt: Date
+    firstOpenedAt: Date | null
+    delivery: {
+      id: string
+      deliverAt: Date
+      channel: string
+    }
+  }>
+> {
+  try {
+    const user = await requireUser()
+
+    // Find letter with sent delivery
+    const letter = await prisma.letter.findFirst({
+      where: {
+        id: letterId,
+        userId: user.id,
+        deletedAt: null,
+      },
+      include: {
+        deliveries: {
+          where: {
+            status: 'sent',
+          },
+          orderBy: {
+            deliverAt: 'desc',
+          },
+          take: 1,
+        },
+      },
+    })
+
+    if (!letter) {
+      await logger.warn('Letter not found for unlock', {
+        userId: user.id,
+        letterId,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.NOT_FOUND,
+          message: 'Letter not found or you do not have permission to access it.',
+        },
+      }
+    }
+
+    // Check if letter has a sent delivery
+    const sentDelivery = letter.deliveries[0]
+    if (!sentDelivery) {
+      await logger.warn('Letter has no sent delivery for unlock', {
+        userId: user.id,
+        letterId,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.NOT_FOUND,
+          message: 'This letter has not been delivered yet.',
+        },
+      }
+    }
+
+    // Check if delivery time has passed
+    const now = new Date()
+    if (sentDelivery.deliverAt > now) {
+      await logger.warn('Attempted to unlock letter before delivery time', {
+        userId: user.id,
+        letterId,
+        deliverAt: sentDelivery.deliverAt,
+        now,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.VALIDATION_FAILED,
+          message: 'This letter cannot be opened yet. Please wait until the delivery time.',
+        },
+      }
+    }
+
+    // Decrypt content
+    let decrypted
+    try {
+      decrypted = await decryptLetter(
+        letter.bodyCiphertext,
+        letter.bodyNonce,
+        letter.keyVersion
+      )
+    } catch (error) {
+      await logger.error('Failed to decrypt letter for unlock', error, {
+        userId: user.id,
+        letterId,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.ENCRYPTION_FAILED,
+          message: 'Failed to decrypt letter content. Please try again.',
+          details: error,
+        },
+      }
+    }
+
+    await logger.info('Letter retrieved for unlock ceremony', {
+      userId: user.id,
+      letterId,
+      hasFirstOpened: !!letter.firstOpenedAt,
+    })
+
+    return {
+      success: true,
+      data: {
+        id: letter.id,
+        title: letter.title,
+        bodyHtml: decrypted.bodyHtml,
+        bodyRich: decrypted.bodyRich,
+        createdAt: letter.createdAt,
+        firstOpenedAt: letter.firstOpenedAt,
+        delivery: {
+          id: sentDelivery.id,
+          deliverAt: sentDelivery.deliverAt,
+          channel: sentDelivery.channel,
+        },
+      },
+    }
+  } catch (error) {
+    await logger.error('Unexpected error in getLetterForUnlock', error)
+
+    return {
+      success: false,
+      error: {
+        code: ErrorCodes.INTERNAL_ERROR,
+        message: 'An unexpected error occurred. Please try again.',
+        details: error,
+      },
+    }
+  }
+}

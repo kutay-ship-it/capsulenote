@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useTransition } from "react"
 import {
   Mail,
@@ -44,7 +44,9 @@ import { TemplateSelectorV3 } from "@/components/v3/template-selector-v3"
 import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-type-v3"
 import { SealConfirmationV3 } from "@/components/v3/seal-confirmation-v3"
 import { SealCelebrationV3 } from "@/components/v3/seal-celebration-v3"
+import { CreditWarningBanner } from "@/components/v3/credit-warning-banner"
 import type { LetterTemplate } from "@/server/actions/templates"
+import type { DeliveryEligibility } from "@/server/actions/entitlements"
 
 type RecipientType = "myself" | "someone-else"
 
@@ -66,10 +68,17 @@ const DATE_PRESETS = [
   { label: "10 Years", months: 120, key: "10yr" },
 ]
 
-export function LetterEditorV3() {
+interface LetterEditorV3Props {
+  eligibility: DeliveryEligibility
+  onRefreshEligibility?: () => Promise<void>
+}
+
+export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEditorV3Props) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
   const timezone = getUserTimezone()
+  const [currentEligibility, setCurrentEligibility] = React.useState(eligibility)
 
   // Form state
   const [title, setTitle] = React.useState("")
@@ -87,10 +96,83 @@ export function LetterEditorV3() {
   const [sealedLetterId, setSealedLetterId] = React.useState<string | null>(null)
   const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
 
-  // Word/char count
+  // Word/char count (moved up for dependency ordering)
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
   const wordCount = plainText ? plainText.split(/\s+/).length : 0
   const characterCount = plainText.length
+
+  // Track if form has unsaved changes (for navigate-away warning)
+  const hasUnsavedChanges = React.useMemo(() => {
+    return title.trim() !== "" || plainText !== ""
+  }, [title, plainText])
+
+  // Navigate-away warning for unsaved content
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges && !showCelebration) {
+        e.preventDefault()
+        // Modern browsers ignore custom messages, but we still need to set returnValue
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?"
+        return e.returnValue
+      }
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload)
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload)
+  }, [hasUnsavedChanges, showCelebration])
+
+  // Handle credits_added query param after Stripe return
+  React.useEffect(() => {
+    const creditsAdded = searchParams.get("credits_added")
+    if (creditsAdded === "true" && onRefreshEligibility) {
+      // Clear the query param from URL without navigation
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete("credits_added")
+      window.history.replaceState({}, "", newUrl.toString())
+
+      // Refresh eligibility data
+      onRefreshEligibility()
+        .then(() => {
+          toast.success("Credits added!", {
+            description: "Your credits have been refreshed. You can now schedule your letter.",
+          })
+        })
+        .catch(() => {
+          toast.error("Failed to refresh credits", {
+            description: "Please refresh the page manually.",
+          })
+        })
+    }
+  }, [searchParams, onRefreshEligibility])
+
+  // Update currentEligibility when prop changes (after refresh)
+  React.useEffect(() => {
+    setCurrentEligibility(eligibility)
+  }, [eligibility])
+
+  // Credit eligibility checks
+  const canScheduleSelectedChannels = React.useMemo(() => {
+    const needsEmail = deliveryChannels.includes("email")
+    const needsPhysical = deliveryChannels.includes("physical")
+
+    // Check if all selected channels can be scheduled
+    if (needsEmail && !currentEligibility.canScheduleEmail) return false
+    if (needsPhysical && !currentEligibility.canSchedulePhysical) return false
+
+    // Must have at least one channel selected
+    return deliveryChannels.length > 0
+  }, [deliveryChannels, currentEligibility])
+
+  // Compute if there are any credit shortages for selected channels
+  const hasInsufficientCredits = React.useMemo(() => {
+    const needsEmail = deliveryChannels.includes("email")
+    const needsPhysical = deliveryChannels.includes("physical")
+
+    return (
+      (needsEmail && currentEligibility.emailCredits <= 0) ||
+      (needsPhysical && currentEligibility.physicalCredits <= 0)
+    )
+  }, [deliveryChannels, currentEligibility])
 
   const handlePresetDate = (months: number, key: string) => {
     const today = new Date()
@@ -352,7 +434,7 @@ export function LetterEditorV3() {
             <div className="w-full border-t-2 border-dashed border-charcoal/10 my-6" />
 
             {/* Content Field - Fills remaining space */}
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2 flex-shrink-0">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
                   Your Message
@@ -362,7 +444,7 @@ export function LetterEditorV3() {
                   <span>{characterCount} chars</span>
                 </div>
               </div>
-              <div className="flex-1 min-h-0" style={{ height: "100%" }}>
+              <div className="flex-1 flex flex-col min-h-0">
                 <LetterEditor
                   content={bodyRich || bodyHtml}
                   onChange={(json, html) => {
@@ -371,8 +453,7 @@ export function LetterEditorV3() {
                     if (errors.bodyHtml) setErrors({ ...errors, bodyHtml: undefined })
                   }}
                   placeholder="Dear future me..."
-                  minHeight="100%"
-                  className="h-full"
+                  className="flex-1 flex flex-col min-h-0"
                 />
               </div>
               {errors.bodyHtml && (
@@ -511,6 +592,7 @@ export function LetterEditorV3() {
                 <DeliveryTypeV3
                   value={deliveryChannels}
                   onChange={setDeliveryChannels}
+                  eligibility={currentEligibility}
                 />
               </div>
 
@@ -628,15 +710,35 @@ export function LetterEditorV3() {
             style={{ borderRadius: "2px" }}
           >
             <div className="space-y-3">
-              {/* Submit Button - Full width */}
+              {/* Credit Warning Banner - shown when insufficient credits */}
+              {hasInsufficientCredits && (
+                <CreditWarningBanner
+                  eligibility={currentEligibility}
+                  selectedChannels={deliveryChannels}
+                />
+              )}
+
+              {/* Submit Button - Full width, disabled when no credits */}
               <Button
                 type="submit"
-                disabled={isPending}
-                className="w-full gap-2 h-12"
+                disabled={isPending || !canScheduleSelectedChannels}
+                className={cn(
+                  "w-full gap-2 h-12",
+                  !canScheduleSelectedChannels && "opacity-50 cursor-not-allowed"
+                )}
               >
                 <Stamp className="h-4 w-4" strokeWidth={2} />
                 {isPending ? "Sealing..." : "Seal & Schedule Letter"}
               </Button>
+
+              {/* Helpful message when button is disabled */}
+              {!canScheduleSelectedChannels && !hasInsufficientCredits && (
+                <p className="font-mono text-[10px] text-center text-charcoal/50 uppercase tracking-wider">
+                  {!currentEligibility.hasActiveSubscription
+                    ? "Subscribe to schedule letters"
+                    : "Select a delivery channel to continue"}
+                </p>
+              )}
 
               {/* Secondary actions row */}
               <div className="flex gap-2">
@@ -715,6 +817,7 @@ export function LetterEditorV3() {
           recipientEmail={recipientEmail}
           deliveryChannels={deliveryChannels}
           deliveryDate={deliveryDate}
+          eligibility={currentEligibility}
         />
       )}
 

@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon, Clock, ArrowRight, Check, Mail, User, Users }
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -129,6 +129,7 @@ export function SchedulingWizard({
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-md p-0 overflow-hidden bg-[#FDFBF7] border-0 shadow-2xl">
+                <DialogTitle className="sr-only">Schedule your letter delivery</DialogTitle>
                 <div className="p-6 space-y-6">
                     <div className="text-center space-y-2">
                         <h2 className="font-serif text-2xl text-charcoal">
