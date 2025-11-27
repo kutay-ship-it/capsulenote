@@ -45,15 +45,15 @@ pnpm dotenv -e apps/web/.env.local -- tsx scripts/test-lob-api.ts
 # Physical Mail - Lob
 # ============================================
 # Live Environment
-LOB_LIVE_API_KEY=live_0c1c3ddaa5ea7f83ee08a11c050bbcf617d
-LOB_LIVE_PUB_KEY=live_pub_c7bdb91e3f70f0683c8516d7788ff28
+LOB_LIVE_API_KEY=live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+LOB_LIVE_PUB_KEY=live_pub_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Test Environment
-LOB_TEST_API_KEY=test_REDACTED_xxx
-LOB_TEST_PUB_KEY=test_pub_REDACTED_xxx
+LOB_TEST_API_KEY=test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
+LOB_TEST_PUB_KEY=test_pub_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Active API Key (use test for development)
-LOB_API_KEY=test_REDACTED_xxx
+LOB_API_KEY=test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Key Types

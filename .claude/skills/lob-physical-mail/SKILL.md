@@ -21,10 +21,10 @@ This skill covers Lob API integration for sending physical letters through USPS.
 ### API Keys (in `.env.local`)
 ```bash
 # Test Environment (no actual mail sent)
-LOB_API_KEY=test_REDACTED_xxx
+LOB_API_KEY=test_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # Live Environment (actual mail delivery)
-# LOB_API_KEY=live_0c1c3ddaa5ea7f83ee08a11c050bbcf617d
+# LOB_API_KEY=live_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 ### Key Files
