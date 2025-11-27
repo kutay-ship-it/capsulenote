@@ -4,7 +4,6 @@ import { getTranslations, getLocale } from "next-intl/server"
 import {
   User,
   Bell,
-  Globe,
   CreditCard,
   BarChart3,
   Receipt,
@@ -13,7 +12,6 @@ import {
   AlertTriangle,
   Shield,
   Gift,
-  Copy,
   Users,
   CheckCircle2,
   Clock,
@@ -29,9 +27,9 @@ import { cn } from "@/lib/utils"
 import { SettingsHeaderV3 } from "@/components/v3/settings/settings-header-v3"
 import { SettingsCardV3 } from "@/components/v3/settings/settings-card-v3"
 import { SettingsTabsV3, SettingsTabsV3Skeleton, type SettingsTab } from "@/components/v3/settings/settings-tabs-v3"
+import { ProfileFieldsV3 } from "@/components/v3/settings/profile-fields-v3"
 
 // Reuse existing client components
-import { ProfileFields } from "@/components/settings/profile-fields"
 import { ExportDataButton } from "@/app/[locale]/(app)/settings/privacy/_components/export-data-button"
 import { DeleteDataButton } from "@/app/[locale]/(app)/settings/privacy/_components/delete-data-button"
 import { ManageSubscriptionButton } from "@/app/[locale]/(app)/settings/billing/_components/manage-subscription-button"
@@ -105,8 +103,8 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
           <p className="font-mono text-sm text-charcoal">{user.email}</p>
         </div>
 
-        {/* Profile Fields */}
-        <ProfileFields
+        {/* Profile Fields V3 with Enhanced Timezone Picker */}
+        <ProfileFieldsV3
           displayName={user.profile?.displayName ?? null}
           timezone={user.profile?.timezone ?? null}
           translations={{
@@ -147,7 +145,13 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
               className="inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider bg-duck-blue text-charcoal"
               style={{ borderRadius: "2px" }}
             >
-              <span>{entitlements.plan === "PAPER_PIXELS" ? "Paper & Pixels" : "Free"}</span>
+              <span>
+                {entitlements.plan === "DIGITAL_CAPSULE"
+                  ? "Digital Capsule"
+                  : entitlements.plan === "PAPER_PIXELS"
+                    ? "Paper & Pixels"
+                    : "Free"}
+              </span>
             </div>
           </div>
         </div>
@@ -169,25 +173,6 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
         >
           <Clock className="h-3.5 w-3.5" strokeWidth={2} />
           <span>Coming Soon</span>
-        </div>
-      </SettingsCardV3>
-
-      {/* Timezone */}
-      <SettingsCardV3
-        icon={<Globe className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Timezone"
-        badgeBg="bg-duck-blue"
-        badgeText="text-charcoal"
-      >
-        <p className="font-mono text-xs text-charcoal/60">
-          Your timezone is used to schedule deliveries accurately.
-        </p>
-        <div
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider bg-teal-primary text-white"
-          style={{ borderRadius: "2px" }}
-        >
-          <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-          <span>Auto-detected from profile</span>
         </div>
       </SettingsCardV3>
     </>
@@ -228,7 +213,11 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
             <div className="flex items-center justify-between">
               <span className="font-mono text-xs text-charcoal/60">Plan</span>
               <span className="font-mono text-sm font-bold text-charcoal">
-                {subscription.plan === "PAPER_PIXELS" ? "Paper & Pixels" : "Digital Only"}
+                {subscription.plan === "DIGITAL_CAPSULE"
+                  ? "Digital Capsule"
+                  : subscription.plan === "PAPER_PIXELS"
+                    ? "Paper & Pixels"
+                    : "Unknown"}
               </span>
             </div>
             <div className="flex items-center justify-between">

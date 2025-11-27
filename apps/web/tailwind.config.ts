@@ -35,6 +35,7 @@ const config = {
         "duck-blue": "rgb(111, 194, 255)",
         charcoal: "rgb(56, 56, 56)",
         cream: "rgb(244, 239, 234)",
+        "duck-cream": "rgb(244, 239, 234)", // alias for cream
 
         // Accent Colors
         "teal-primary": "rgb(56, 193, 176)",

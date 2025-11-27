@@ -79,6 +79,25 @@ function getStatusBadge(status: Subscription["status"] | "none", t: Awaited<Retu
 
 function getPlanBadge(plan: string, t: Awaited<ReturnType<typeof getTranslations>>) {
   switch (plan) {
+    case "DIGITAL_CAPSULE":
+      return (
+        <Badge
+          className="border-2 border-charcoal bg-lavender font-mono text-sm uppercase"
+          style={{ borderRadius: "2px" }}
+        >
+          {t("subscription.plan.DIGITAL_CAPSULE")}
+        </Badge>
+      )
+    case "PAPER_PIXELS":
+      return (
+        <Badge
+          className="border-2 border-charcoal bg-sky-blue font-mono text-sm uppercase"
+          style={{ borderRadius: "2px" }}
+        >
+          {t("subscription.plan.PAPER_PIXELS")}
+        </Badge>
+      )
+    // Legacy plan names (kept for backwards compatibility)
     case "pro":
       return (
         <Badge
