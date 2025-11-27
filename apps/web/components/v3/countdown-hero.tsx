@@ -87,7 +87,7 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
           </div>
 
           {/* CTA */}
-          <Link href={{ pathname: "/unlock-v3/[id]", params: { id: delivery.letter.id } }}>
+          <Link href={{ pathname: "/unlock/[id]", params: { id: delivery.letter.id } }}>
             <Button className="gap-2">
               Open Time Capsule
               <ArrowRight className="h-4 w-4" />
@@ -145,12 +145,12 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
 
       {/* Bottom: Action buttons */}
       <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <Link href={{ pathname: "/letters-v3/[id]", params: { id: delivery.letter.id } }}>
+        <Link href={{ pathname: "/letters/[id]", params: { id: delivery.letter.id } }}>
           <Button variant="outline" size="sm">
             Preview Letter
           </Button>
         </Link>
-        <Link href={{ pathname: "/letters-v3/[id]/schedule", params: { id: delivery.letter.id } }}>
+        <Link href={{ pathname: "/letters/[id]/schedule", params: { id: delivery.letter.id } }}>
           <Button variant="ghost" size="sm">
             Reschedule
           </Button>
@@ -260,7 +260,7 @@ export function EmptyStateHeroV3() {
         </div>
 
         {/* CTA */}
-        <Link href="/letters-v3/new">
+        <Link href="/letters/new">
           <Button className="gap-2">
             Write Your First Letter
             <ArrowRight className="h-4 w-4" />
@@ -299,7 +299,7 @@ export function WritePromptBannerV3() {
           &ldquo;{prompts[promptIndex]}&rdquo;
         </p>
 
-        <Link href="/letters-v3/new">
+        <Link href="/letters/new">
           <Button
             variant="outline"
             className="border-white bg-white text-charcoal hover:bg-off-white gap-2"

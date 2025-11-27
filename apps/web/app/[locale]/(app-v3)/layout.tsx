@@ -44,7 +44,7 @@ export default async function AppV3Layout({
           <div className="container flex h-full items-center justify-between">
             {/* Left: Logo + Brand */}
             <Link
-              href="/journey-v3"
+              href="/journey"
               className="flex items-center gap-2 transition-transform hover:-translate-y-0.5"
             >
               <div
@@ -61,13 +61,13 @@ export default async function AppV3Layout({
             {/* Center: Navigation - hidden on mobile */}
             <nav className="hidden md:flex items-center gap-8">
               <Link
-                href="/journey-v3"
+                href="/journey"
                 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal hover:opacity-70 transition-opacity"
               >
                 Journey
               </Link>
               <Link
-                href="/letters-v3"
+                href="/letters"
                 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal hover:opacity-70 transition-opacity"
               >
                 {t("nav.letters")}

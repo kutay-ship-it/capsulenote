@@ -25,7 +25,7 @@ export default async function UnlockV3Page({
 
     // If letter not delivered yet, redirect to letter detail with message
     if (result.error?.code === "VALIDATION_FAILED") {
-      redirect(`/letters-v3/${id}`)
+      redirect(`/letters/${id}`)
     }
 
     // For other errors, show not found

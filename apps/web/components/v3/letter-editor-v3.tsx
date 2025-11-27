@@ -517,7 +517,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             toast.error("Letter saved but delivery scheduling failed", {
               description: `${errorMessage}. You can schedule delivery from the letter page.`,
             })
-            router.push(`/letters-v3/${letterId}`)
+            router.push(`/letters/${letterId}`)
           }
         } else {
           setShowSealConfirmation(false)
@@ -548,7 +548,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const handleCelebrationComplete = React.useCallback(() => {
     setShowCelebration(false)
     if (sealedLetterId) {
-      router.push(`/letters-v3/${sealedLetterId}`)
+      router.push(`/letters/${sealedLetterId}`)
     }
   }, [sealedLetterId, router])
 

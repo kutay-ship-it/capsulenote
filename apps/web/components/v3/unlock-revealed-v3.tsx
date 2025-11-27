@@ -142,7 +142,7 @@ export function UnlockRevealedV3({
           Replay Opening
         </Button>
 
-        <Link href="/letters-v3">
+        <Link href="/letters">
           <Button
             variant="outline"
             className="gap-2 border-2 border-charcoal bg-white hover:bg-duck-cream font-mono text-xs uppercase tracking-wider shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
@@ -153,7 +153,7 @@ export function UnlockRevealedV3({
           </Button>
         </Link>
 
-        <Link href="/letters-v3/new">
+        <Link href="/letters/new">
           <Button
             className="gap-2 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs uppercase tracking-wider border-2 border-charcoal shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
             style={{ borderRadius: "2px" }}

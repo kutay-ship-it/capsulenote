@@ -62,7 +62,7 @@ function EmptyStateHeroV3() {
         </div>
 
         {/* CTA */}
-        <Link href="/letters-v3/new">
+        <Link href="/letters/new">
           <Button className="gap-2">
             Write Your First Letter
             <ArrowRight className="h-4 w-4" />
@@ -117,7 +117,7 @@ export default async function LettersV3Page({
 
   return (
     <div className="space-y-0">
-      {/* Page Header - Inside container (same pattern as journey-v3) */}
+      {/* Page Header - Inside container (same pattern as journey) */}
       <div className="container">
         <header className="flex flex-col gap-4 py-12 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
@@ -130,7 +130,7 @@ export default async function LettersV3Page({
           </div>
 
           {/* Write CTA - Desktop only (mobile has header button) */}
-          <Link href="/letters-v3/new" className="hidden sm:block">
+          <Link href="/letters/new" className="hidden sm:block">
             <Button size="sm" className="gap-2">
               <PenLine className="h-4 w-4" />
               Write New Letter

@@ -314,7 +314,7 @@ async function LetterDetailContent({ id }: { id: string }) {
             </div>
 
             {/* CTA */}
-            <Link href={{ pathname: "/unlock-v3/[id]", params: { id } }}>
+            <Link href={{ pathname: "/unlock/[id]", params: { id } }}>
               <Button
                 size="lg"
                 className={cn(
@@ -349,7 +349,7 @@ async function LetterDetailContent({ id }: { id: string }) {
           {/* Left: Edit action */}
           <div>
             {!isLocked && (
-              <Link href={`/letters-v3/${id}/edit`}>
+              <Link href={`/letters/${id}/edit`}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -365,7 +365,7 @@ async function LetterDetailContent({ id }: { id: string }) {
           {/* Right: Schedule/View delivery */}
           <div>
             {!hasDelivery ? (
-              <Link href={`/letters-v3/${id}/schedule`}>
+              <Link href={`/letters/${id}/schedule`}>
                 <Button size="sm" className="gap-2">
                   <Calendar className="h-4 w-4" />
                   Schedule Delivery
@@ -468,7 +468,7 @@ async function LetterDetailContent({ id }: { id: string }) {
 
                   {/* Actions */}
                   {isScheduled && (
-                    <Link href={`/letters-v3/${id}/schedule`}>
+                    <Link href={`/letters/${id}/schedule`}>
                       <Button variant="outline" size="sm" className="font-mono text-xs uppercase tracking-wider">
                         Reschedule
                       </Button>
@@ -507,7 +507,7 @@ async function LetterDetailContent({ id }: { id: string }) {
             </div>
 
             {/* CTA */}
-            <Link href={`/letters-v3/${id}/schedule`}>
+            <Link href={`/letters/${id}/schedule`}>
               <Button className="gap-2">
                 Schedule Delivery
                 <ArrowRight className="h-4 w-4" />
@@ -555,10 +555,10 @@ export default async function LetterDetailV3Page({ params }: PageProps) {
 
   return (
     <div className="container">
-      {/* Header - matches letters-v3 page pattern */}
+      {/* Header - matches letters page pattern */}
       <header className="flex flex-col gap-4 py-12 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <Link href="/letters-v3">
+          <Link href="/letters">
             <Button
               variant="ghost"
               size="sm"

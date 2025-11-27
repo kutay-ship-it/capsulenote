@@ -5,7 +5,7 @@ interface SettingsHeaderV3Props {
 
 /**
  * V3 Settings Page Header
- * Matches the header pattern from journey-v3 and letters-v3
+ * Matches the header pattern from journey and letters
  */
 export function SettingsHeaderV3({ title, description }: SettingsHeaderV3Props) {
   return (

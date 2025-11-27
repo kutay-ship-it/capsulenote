@@ -162,7 +162,7 @@ export function SettingsDropdown({ userName, userEmail, planType }: SettingsDrop
           className="px-3 py-2.5 font-mono text-sm uppercase tracking-wide text-charcoal cursor-pointer hover:bg-off-white focus:bg-off-white"
           style={{ borderRadius: "0" }}
         >
-          <Link href="/settings-v3" className="flex items-center">
+          <Link href="/settings" className="flex items-center">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
           </Link>

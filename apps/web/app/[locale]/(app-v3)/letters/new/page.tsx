@@ -11,10 +11,10 @@ export default async function NewLetterV3Page() {
   const eligibility = await getDeliveryEligibility()
   return (
     <div className="container">
-      {/* Header - matches letters-v3 page pattern */}
+      {/* Header - matches letters page pattern */}
       <header className="flex flex-col gap-4 py-12 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <Link href="/letters-v3">
+          <Link href="/letters">
             <Button
               variant="ghost"
               size="sm"

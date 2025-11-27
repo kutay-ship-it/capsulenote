@@ -65,10 +65,10 @@ export default function CreditsSuccessPage() {
           ) : (
             <>
               <Button asChild className="w-full bg-teal-600 hover:bg-teal-700">
-                <Link href="/letters-v3/new">Continue Writing</Link>
+                <Link href="/letters/new">Continue Writing</Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
-                <Link href="/journey-v3">Go to Dashboard</Link>
+                <Link href="/journey">Go to Dashboard</Link>
               </Button>
             </>
           )}

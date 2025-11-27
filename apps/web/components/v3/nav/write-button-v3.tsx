@@ -12,15 +12,15 @@ interface WriteButtonV3Props {
 export function WriteButtonV3({ label }: WriteButtonV3Props) {
   const pathname = usePathname()
 
-  // Hide button on letters-v3 pages (list and new letter)
-  const isLettersV3Page = pathname?.includes("/letters-v3")
+  // Hide button on letters pages (list and new letter)
+  const isLettersPage = pathname?.includes("/letters")
 
-  if (isLettersV3Page) {
+  if (isLettersPage) {
     return null
   }
 
   return (
-    <Link href="/letters-v3/new">
+    <Link href="/letters/new">
       <Button size="sm" className="gap-2">
         <PenLine className="h-4 w-4" />
         <span className="hidden sm:inline">{label}</span>

@@ -1,7 +1,7 @@
 import { SettingsTabsV3Skeleton } from "@/components/v3/settings/settings-tabs-v3"
 
 /**
- * Loading skeleton for settings-v3 page
+ * Loading skeleton for settings page
  */
 export default function SettingsV3Loading() {
   return (
