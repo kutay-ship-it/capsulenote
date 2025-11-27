@@ -1,14 +1,14 @@
 import { Metadata } from "next"
 import { auth } from "@clerk/nextjs/server"
 
-import { NavbarV3 } from "../../_components/navbar-v3"
-import { Footer } from "../../_components/footer"
-import { PricingHeroV3 } from "../../pricing/_components/pricing-hero-v3"
-import { PricingTiersV3 } from "../../pricing/_components/pricing-tiers-v3"
-import { FeatureMatrixV3 } from "../../pricing/_components/feature-matrix-v3"
-import { PricingFAQV3 } from "../../pricing/_components/pricing-faq-v3"
-import { PricingCTAV3 } from "../../pricing/_components/pricing-cta-v3"
-import { TrustSignalsV3 } from "../../pricing/_components/trust-signals-v3"
+import { NavbarV3 } from "../_components/navbar-v3"
+import { Footer } from "../_components/footer"
+import { PricingHeroV3 } from "./_components/pricing-hero-v3"
+import { PricingTiersV3 } from "./_components/pricing-tiers-v3"
+import { FeatureMatrixV3 } from "./_components/feature-matrix-v3"
+import { PricingFAQV3 } from "./_components/pricing-faq-v3"
+import { PricingCTAV3 } from "./_components/pricing-cta-v3"
+import { TrustSignalsV3 } from "./_components/trust-signals-v3"
 
 export const metadata: Metadata = {
   title: "Pricing | Capsule Note",
@@ -154,7 +154,7 @@ const faqItems = [
   },
 ]
 
-export default async function PricingPageV3() {
+export default async function PricingPage() {
   const { userId } = await auth()
 
   return (
