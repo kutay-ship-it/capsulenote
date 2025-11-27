@@ -61,6 +61,16 @@ export async function createAddOnCheckoutSession(input: {
         addon_type: input.type,
         quantity: (input.quantity ?? 1).toString(),
       },
+      // CRITICAL: Pass metadata to payment intent for webhook processing
+      // Checkout session metadata is NOT automatically copied to payment intents
+      payment_intent_data: {
+        metadata: {
+          userId: user.id,
+          addon_type: input.type,
+          quantity: (input.quantity ?? 1).toString(),
+          type: "credit_addon",
+        },
+      },
     })
 
     if (!session.url) {

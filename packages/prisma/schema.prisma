@@ -311,6 +311,7 @@ model ShippingAddress {
 enum PaymentType {
   subscription
   shipping_addon
+  credit_addon
 
   @@map("payment_type")
 }
