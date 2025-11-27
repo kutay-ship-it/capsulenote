@@ -380,6 +380,19 @@ export async function deductCreditsForRefund(
     const deductAmount = Math.min(credits, currentCredits)
     const deductAddon = Math.min(credits, currentAddon)
 
+    // Log warning if refund amount was clamped or skipped
+    if (deductAmount < credits) {
+      console.warn("[Entitlements] Refund amount clamped or skipped", {
+        userId,
+        creditType,
+        requestedCredits: credits,
+        availableCredits: currentCredits,
+        deductingCredits: deductAmount,
+        source,
+        reason: deductAmount === 0 ? "no_credits_to_deduct" : "partial_deduction",
+      })
+    }
+
     if (deductAmount > 0) {
       await recordCreditTransaction({
         userId,

@@ -43,6 +43,7 @@ enum CreditTransactionType {
   grant_subscription  // Plan credits on new/renewal
   grant_addon         // Purchased add-on credits
   grant_referral      // Referral bonus
+  grant_refund        // Credits restored on delivery rollback
   deduct_delivery     // Used for delivery
   deduct_refund       // Refunded purchase
   deduct_cancel       // Credits removed on subscription cancel

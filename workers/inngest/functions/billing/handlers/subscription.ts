@@ -282,9 +282,67 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
   if (sub) {
     // Invalidate entitlements cache
     await invalidateEntitlementsCache(sub.userId)
-    await prisma.user.updateMany({
-      where: { id: sub.userId },
-      data: { planType: null, emailCredits: 0, physicalCredits: 0, creditExpiresAt: null },
+
+    // Clear credits with transaction and audit trail
+    await prisma.$transaction(async (tx) => {
+      // Get current balances for audit
+      const currentUser = await tx.user.findUnique({
+        where: { id: sub.userId },
+        select: { emailCredits: true, physicalCredits: true },
+      })
+
+      if (currentUser) {
+        // Record email credit removal if any credits existed
+        if (currentUser.emailCredits > 0) {
+          await tx.creditTransaction.create({
+            data: {
+              userId: sub.userId,
+              creditType: "email",
+              transactionType: "deduct_cancel",
+              amount: -currentUser.emailCredits,
+              balanceBefore: currentUser.emailCredits,
+              balanceAfter: 0,
+              source: subscription.id,
+              metadata: {
+                reason: "subscription_canceled",
+                subscriptionId: subscription.id,
+              },
+            },
+          })
+        }
+
+        // Record physical credit removal if any credits existed
+        if (currentUser.physicalCredits > 0) {
+          await tx.creditTransaction.create({
+            data: {
+              userId: sub.userId,
+              creditType: "physical",
+              transactionType: "deduct_cancel",
+              amount: -currentUser.physicalCredits,
+              balanceBefore: currentUser.physicalCredits,
+              balanceAfter: 0,
+              source: subscription.id,
+              metadata: {
+                reason: "subscription_canceled",
+                subscriptionId: subscription.id,
+              },
+            },
+          })
+        }
+      }
+
+      // Clear all credits and plan
+      await tx.user.update({
+        where: { id: sub.userId },
+        data: {
+          planType: null,
+          emailCredits: 0,
+          physicalCredits: 0,
+          emailAddonCredits: 0,
+          physicalAddonCredits: 0,
+          creditExpiresAt: null,
+        },
+      })
     })
 
     // Send cancellation email

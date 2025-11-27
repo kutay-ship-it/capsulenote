@@ -15,8 +15,6 @@ import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 import {
   getEntitlements,
-  trackEmailDelivery,
-  deductMailCredit,
   QuotaExceededError,
   invalidateEntitlementsCache,
 } from "@/server/lib/entitlements"
@@ -245,61 +243,74 @@ export async function scheduleDelivery(
       }
     }
 
-    let reservedChannel: "email" | "mail" | null = null
-    const refundReservedCredit = async () => {
-      try {
-        if (reservedChannel === "email") {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { emailCredits: { increment: 1 } },
-          })
-        } else if (reservedChannel === "mail") {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { physicalCredits: { increment: 1 } },
-          })
-        }
-      } catch (error) {
-        await logger.error("Failed to refund reserved credit", error, { userId: user.id })
-      }
-    }
-
-    // Reserve credits before creating delivery
-    try {
-      if (data.channel === "email") {
-        await trackEmailDelivery(user.id)
-        reservedChannel = "email"
-      } else if (data.channel === "mail") {
-        await deductMailCredit(user.id)
-        reservedChannel = "mail"
-      }
-    } catch (error) {
-      if (error instanceof QuotaExceededError) {
-        return {
-          success: false,
-          error: {
-            code: ErrorCodes.INSUFFICIENT_CREDITS,
-            message: "Not enough credits to schedule this delivery",
-          },
-        }
-      }
-
-      return {
-        success: false,
-        error: {
-          code: ErrorCodes.INTERNAL_ERROR,
-          message: "Failed to reserve credits for this delivery",
-        },
-      }
-    }
-
-    // Create delivery and channel-specific record in transaction
+    // Create delivery, deduct credits, and create channel-specific record atomically
     let delivery
     try {
       delivery = await prisma.$transaction(async (tx) => {
+        // 1. Check and deduct credits atomically within transaction
+        if (data.channel === "email") {
+          const userCredits = await tx.user.findUnique({
+            where: { id: user.id },
+            select: { emailCredits: true },
+          })
+
+          if (!userCredits || userCredits.emailCredits <= 0) {
+            throw new QuotaExceededError("email_credits", 0, 0)
+          }
+
+          // Deduct credit
+          await tx.user.update({
+            where: { id: user.id },
+            data: { emailCredits: { decrement: 1 } },
+          })
+
+          // Record audit trail
+          await tx.creditTransaction.create({
+            data: {
+              userId: user.id,
+              creditType: "email",
+              transactionType: "deduct_delivery",
+              amount: -1,
+              balanceBefore: userCredits.emailCredits,
+              balanceAfter: userCredits.emailCredits - 1,
+              source: null, // Will be updated after delivery creation
+              metadata: { letterId: data.letterId, channel: data.channel },
+            },
+          })
+        } else if (data.channel === "mail") {
+          const userCredits = await tx.user.findUnique({
+            where: { id: user.id },
+            select: { physicalCredits: true },
+          })
+
+          if (!userCredits || userCredits.physicalCredits <= 0) {
+            throw new QuotaExceededError("physical_credits", 0, 0)
+          }
+
+          // Deduct credit
+          await tx.user.update({
+            where: { id: user.id },
+            data: { physicalCredits: { decrement: 1 } },
+          })
+
+          // Record audit trail
+          await tx.creditTransaction.create({
+            data: {
+              userId: user.id,
+              creditType: "physical",
+              transactionType: "deduct_delivery",
+              amount: -1,
+              balanceBefore: userCredits.physicalCredits,
+              balanceAfter: userCredits.physicalCredits - 1,
+              source: null, // Will be updated after delivery creation
+              metadata: { letterId: data.letterId, channel: data.channel },
+            },
+          })
+        }
+
         const isLocked = data.deliverAt.getTime() - Date.now() <= LOCK_WINDOW_MS
 
-        // Create delivery
+        // 2. Create delivery
         const newDelivery = await tx.delivery.create({
           data: {
             userId: user.id,
@@ -311,7 +322,22 @@ export async function scheduleDelivery(
           },
         })
 
-        // Create channel-specific delivery record (atomic with delivery)
+        // 3. Update credit transaction with delivery ID as source
+        await tx.creditTransaction.updateMany({
+          where: {
+            userId: user.id,
+            source: null,
+            metadata: {
+              path: ["letterId"],
+              equals: data.letterId,
+            },
+          },
+          data: {
+            source: newDelivery.id,
+          },
+        })
+
+        // 4. Create channel-specific delivery record (atomic with delivery)
         if (data.channel === "email") {
           await tx.emailDelivery.create({
             data: {
@@ -330,7 +356,7 @@ export async function scheduleDelivery(
           })
         }
 
-        // Update letter scheduling metadata
+        // 5. Update letter scheduling metadata
         await tx.letter.update({
           where: { id: data.letterId },
           data: {
@@ -344,10 +370,21 @@ export async function scheduleDelivery(
 
         return newDelivery
       })
+
+      // Invalidate entitlements cache after successful transaction
+      await invalidateEntitlementsCache(user.id)
     } catch (error) {
-      if (reservedChannel) {
-        await refundReservedCredit()
+      // Transaction rolled back automatically - no manual refund needed
+      if (error instanceof QuotaExceededError) {
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.INSUFFICIENT_CREDITS,
+            message: "Not enough credits to schedule this delivery",
+          },
+        }
       }
+
       await logger.error('Delivery creation error', error, {
         userId: user.id,
         letterId: data.letterId,
@@ -385,16 +422,65 @@ export async function scheduleDelivery(
         event: 'delivery.scheduled',
       })
     } catch (inngestError) {
-      // CRITICAL: If Inngest fails, rollback the delivery
+      // CRITICAL: If Inngest fails, rollback delivery and refund credit atomically
       await logger.error('Failed to schedule Inngest job - rolling back delivery', {
         deliveryId: delivery.id,
         error: inngestError,
       })
 
-      // Delete the delivery we just created
-      await prisma.delivery.delete({ where: { id: delivery.id } })
-      if (reservedChannel) {
-        await refundReservedCredit()
+      // Rollback: delete delivery and refund credit in single transaction
+      try {
+        await prisma.$transaction(async (tx) => {
+          // Get current credit balance for audit
+          const currentUser = await tx.user.findUnique({
+            where: { id: user.id },
+            select: { emailCredits: true, physicalCredits: true },
+          })
+
+          if (currentUser) {
+            const creditType = data.channel === "email" ? "email" : "physical"
+            const currentBalance = data.channel === "email"
+              ? currentUser.emailCredits
+              : currentUser.physicalCredits
+
+            // Refund credit
+            await tx.user.update({
+              where: { id: user.id },
+              data: data.channel === "email"
+                ? { emailCredits: { increment: 1 } }
+                : { physicalCredits: { increment: 1 } },
+            })
+
+            // Record refund in audit trail
+            await tx.creditTransaction.create({
+              data: {
+                userId: user.id,
+                creditType,
+                transactionType: "grant_refund",
+                amount: 1,
+                balanceBefore: currentBalance,
+                balanceAfter: currentBalance + 1,
+                source: delivery.id,
+                metadata: {
+                  reason: "inngest_failure_rollback",
+                  letterId: data.letterId,
+                },
+              },
+            })
+          }
+
+          // Delete the delivery
+          await tx.delivery.delete({ where: { id: delivery.id } })
+        })
+
+        await invalidateEntitlementsCache(user.id)
+      } catch (rollbackError) {
+        // Critical: rollback failed - log for manual intervention
+        await logger.error('CRITICAL: Failed to rollback delivery after Inngest failure', rollbackError, {
+          deliveryId: delivery.id,
+          userId: user.id,
+          channel: data.channel,
+        })
       }
 
       // Return error to user - delivery was NOT created

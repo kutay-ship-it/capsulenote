@@ -86,10 +86,10 @@ export async function handlePaymentIntentSucceeded(
 
     // 2. Apply add-on credits if applicable
     if (addonType) {
-      // Get current balance for audit
+      // Verify user exists
       const user = await tx.user.findUnique({
         where: { id: userId },
-        select: { emailCredits: true, physicalCredits: true },
+        select: { id: true },
       })
 
       if (!user) {
@@ -98,23 +98,19 @@ export async function handlePaymentIntentSucceeded(
 
       const creditField = addonType === "email" ? "emailCredits" : "physicalCredits"
       const addonField = addonType === "email" ? "emailAddonCredits" : "physicalAddonCredits"
-      const currentBalance = addonType === "email" ? user.emailCredits : user.physicalCredits
 
-      // Record audit trail
-      await tx.creditTransaction.create({
-        data: {
-          userId,
-          creditType: addonType,
-          transactionType: "grant_addon",
-          amount: creditAmount,
-          balanceBefore: currentBalance,
-          balanceAfter: currentBalance + creditAmount,
-          source: paymentIntent.id,
-          metadata: {
-            paymentIntentId: paymentIntent.id,
-            quantity: creditAmount,
-          },
+      // Record audit trail using helper (fetches balance internally)
+      await recordCreditTransaction({
+        userId,
+        creditType: addonType,
+        transactionType: "grant_addon",
+        amount: creditAmount,
+        source: paymentIntent.id,
+        metadata: {
+          paymentIntentId: paymentIntent.id,
+          quantity: creditAmount,
         },
+        tx,
       })
 
       // Update credits (both total and addon tracking)
