@@ -621,12 +621,12 @@ export async function updateDelivery(
       const isRescheduling = data.deliverAt && data.deliverAt.getTime() !== existing.deliverAt.getTime()
 
       if (isRescheduling) {
-        // Update delivery with new time and clear run ID
+        // Update delivery time first (keep existing inngestRunId to avoid race condition)
+        // The inngestRunId will be updated atomically after Inngest event succeeds
         await prisma.delivery.update({
           where: { id: deliveryId },
           data: {
             deliverAt: data.deliverAt,
-            inngestRunId: null,
             ...(data.timezone && { timezoneAtCreation: data.timezone }),
           },
         })
@@ -917,9 +917,19 @@ export async function retryDelivery(
 
     // Re-trigger Inngest workflow
     try {
-      await triggerInngestEvent("delivery.scheduled", { deliveryId })
+      const eventId = await triggerInngestEvent("delivery.scheduled", { deliveryId })
+
+      // Store event ID for correlation between DB records and Inngest jobs
+      if (eventId) {
+        await prisma.delivery.update({
+          where: { id: deliveryId },
+          data: { inngestRunId: eventId },
+        })
+      }
+
       await logger.info('Inngest retry event sent successfully', {
         deliveryId,
+        eventId,
         event: 'delivery.scheduled',
         attemptCount: existing.attemptCount + 1,
       })
