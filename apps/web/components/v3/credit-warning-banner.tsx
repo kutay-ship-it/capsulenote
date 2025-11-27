@@ -18,6 +18,8 @@ interface CreditWarningBannerProps {
   eligibility: DeliveryEligibility
   selectedChannels: DeliveryChannel[]
   className?: string
+  /** Called before opening checkout to save draft */
+  onBeforeCheckout?: () => void
 }
 
 // ============================================================================
@@ -32,6 +34,7 @@ export function CreditWarningBanner({
   eligibility,
   selectedChannels,
   className,
+  onBeforeCheckout,
 }: CreditWarningBannerProps) {
   const [isPendingEmail, startTransitionEmail] = useTransition()
   const [isPendingPhysical, startTransitionPhysical] = useTransition()
@@ -52,14 +55,17 @@ export function CreditWarningBanner({
     const transition = type === "email" ? startTransitionEmail : startTransitionPhysical
 
     transition(async () => {
-      // Get current URL to return after checkout
-      const returnUrl = typeof window !== "undefined"
-        ? `${window.location.origin}${window.location.pathname}?credits_added=true`
+      // Save draft before opening checkout (safety net)
+      onBeforeCheckout?.()
+
+      // Return to dedicated success page that broadcasts to other tabs
+      const successUrl = typeof window !== "undefined"
+        ? `${window.location.origin}/credits/success`
         : undefined
 
       const result = await createAddOnCheckoutSession({
         type: type === "email" ? "email" : "physical",
-        successUrl: returnUrl,
+        successUrl,
         cancelUrl: typeof window !== "undefined" ? window.location.href : undefined,
       })
 

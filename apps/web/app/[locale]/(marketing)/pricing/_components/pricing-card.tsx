@@ -32,6 +32,7 @@ export function PricingCard({
   name,
   price,
   interval,
+  intervalLabel,
   description,
   features,
   cta,

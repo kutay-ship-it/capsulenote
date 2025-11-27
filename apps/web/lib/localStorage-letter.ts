@@ -162,3 +162,110 @@ export function formatLastSaved(isoTimestamp: string): string {
   const diffDays = Math.floor(diffHours / 24)
   return `${diffDays}d ago`
 }
+
+// ============================================================================
+// Authenticated User Letter Auto-Save
+// ============================================================================
+
+const AUTOSAVE_STORAGE_KEY = "capsule-letter-autosave"
+const AUTOSAVE_EXPIRY_HOURS = 24 // Auto-delete after 24 hours
+
+/**
+ * Auto-save draft for authenticated users in the v3 letter editor.
+ * Preserves letter state across page reloads and browser sessions.
+ */
+export interface LetterAutosave {
+  title: string
+  bodyRich: unknown | null // Tiptap JSONContent
+  bodyHtml: string
+  recipientType: "self" | "other"
+  recipientName: string
+  recipientEmail: string
+  deliveryChannels: ("email" | "physical")[]
+  deliveryDate: string | null
+  selectedPreset: string | null
+  selectedAddressId: string | null
+  printOptions: {
+    color: boolean
+    doubleSided: boolean
+  } | null
+  lastSaved: string // ISO 8601 timestamp
+  createdAt: string // ISO 8601 timestamp
+}
+
+/**
+ * Save letter draft to localStorage for authenticated users
+ */
+export function saveLetterAutosave(
+  draft: Omit<LetterAutosave, "lastSaved" | "createdAt">
+): void {
+  try {
+    if (typeof window === "undefined") return
+
+    const now = new Date().toISOString()
+    const existing = getLetterAutosave()
+
+    const autosave: LetterAutosave = {
+      ...draft,
+      lastSaved: now,
+      createdAt: existing?.createdAt || now,
+    }
+
+    localStorage.setItem(AUTOSAVE_STORAGE_KEY, JSON.stringify(autosave))
+  } catch (error) {
+    // Silently fail if localStorage unavailable (private browsing, quota exceeded)
+    console.warn("Failed to save letter autosave:", error)
+  }
+}
+
+/**
+ * Get letter autosave from localStorage
+ * Returns null if expired or not found
+ */
+export function getLetterAutosave(): LetterAutosave | null {
+  try {
+    if (typeof window === "undefined") return null
+
+    const stored = localStorage.getItem(AUTOSAVE_STORAGE_KEY)
+    if (!stored) return null
+
+    const draft = JSON.parse(stored) as LetterAutosave
+
+    // Check expiry (24 hours)
+    const lastSaved = new Date(draft.lastSaved)
+    const expiryDate = new Date(
+      lastSaved.getTime() + AUTOSAVE_EXPIRY_HOURS * 60 * 60 * 1000
+    )
+
+    if (new Date() > expiryDate) {
+      clearLetterAutosave()
+      return null
+    }
+
+    return draft
+  } catch (error) {
+    console.warn("Failed to load letter autosave:", error)
+    return null
+  }
+}
+
+/**
+ * Clear letter autosave from localStorage
+ */
+export function clearLetterAutosave(): void {
+  try {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(AUTOSAVE_STORAGE_KEY)
+    }
+  } catch (error) {
+    console.warn("Failed to clear letter autosave:", error)
+  }
+}
+
+/**
+ * Check if a letter autosave exists with content
+ */
+export function hasLetterAutosave(): boolean {
+  const draft = getLetterAutosave()
+  return draft !== null && (draft.title.length > 0 || draft.bodyHtml.length > 0)
+}

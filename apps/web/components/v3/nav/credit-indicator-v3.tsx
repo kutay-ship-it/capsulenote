@@ -1,8 +1,10 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Mail, FileText, Plus, Loader2, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
 import {
   Popover,
   PopoverContent,
@@ -118,9 +120,23 @@ export function CreditIndicatorV3({
   const handleAddCredits = () => {
     startTransition(async () => {
       const addonType = type === "email" ? "email" : "physical"
-      const result = await createAddOnCheckoutSession({ type: addonType })
+      // Return to dedicated success page that broadcasts to other tabs
+      const successUrl = typeof window !== "undefined"
+        ? `${window.location.origin}/credits/success`
+        : undefined
+
+      const result = await createAddOnCheckoutSession({
+        type: addonType,
+        successUrl,
+      })
+
       if (result.success) {
-        window.location.href = result.data.url
+        // Open in new tab so user doesn't lose their current work
+        window.open(result.data.url, "_blank")
+        toast.info("Checkout opened in new tab", {
+          description: "Complete your purchase to add credits.",
+        })
+        setOpen(false)
       } else {
         toast.error("Failed to start checkout", {
           description: result.error.message || "Please try again",
@@ -210,7 +226,7 @@ export function CreditIndicatorV3({
             {isPending ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-                <span>Redirecting...</span>
+                <span>Opening...</span>
               </>
             ) : (
               <>
@@ -260,8 +276,16 @@ interface CreditsBarV3Props {
 /**
  * Combined credits bar showing both email and mail credits
  * Designed for navbar placement
+ * Listens for credit updates from other tabs (after Stripe checkout)
  */
 export function CreditsBarV3({ emailCredits, mailCredits, className }: CreditsBarV3Props) {
+  const router = useRouter()
+
+  // Listen for credit updates from other tabs and refresh the page data
+  useCreditsUpdateListener(() => {
+    router.refresh()
+  })
+
   return (
     <div className={cn("flex items-center gap-1", className)}>
       <EmailCreditIndicatorV3 count={emailCredits} />

@@ -24,6 +24,13 @@ import { toast } from "sonner"
 import { fromZonedTime } from "date-fns-tz"
 
 import { cn } from "@/lib/utils"
+import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
+import {
+  saveLetterAutosave,
+  getLetterAutosave,
+  clearLetterAutosave,
+  formatLastSaved,
+} from "@/lib/localStorage-letter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LetterEditor } from "@/components/letter-editor"
@@ -104,6 +111,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const [showCelebration, setShowCelebration] = React.useState(false)
   const [sealedLetterId, setSealedLetterId] = React.useState<string | null>(null)
   const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
+  const [restoredFromDraft, setRestoredFromDraft] = React.useState(false)
 
   // Word/char count (moved up for dependency ordering)
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
@@ -158,6 +166,140 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   React.useEffect(() => {
     setCurrentEligibility(eligibility)
   }, [eligibility])
+
+  // Listen for credit updates from other tabs (e.g., after Stripe checkout in new tab)
+  useCreditsUpdateListener(
+    React.useCallback(() => {
+      onRefreshEligibility?.()
+        .then(() => {
+          toast.success("Credits updated!", {
+            description: "Your purchase was successful. You can now schedule your letter.",
+          })
+        })
+        .catch(() => {
+          // Silent fail - user can manually refresh if needed
+        })
+    }, [onRefreshEligibility])
+  )
+
+  // Load autosaved draft on mount (only for new letters)
+  React.useEffect(() => {
+    const savedDraft = getLetterAutosave()
+    if (savedDraft) {
+      // Restore all fields from the saved draft
+      setTitle(savedDraft.title)
+      setBodyRich(savedDraft.bodyRich as Record<string, unknown> | null)
+      setBodyHtml(savedDraft.bodyHtml)
+      setRecipientType(savedDraft.recipientType === "self" ? "myself" : "someone-else")
+      setRecipientName(savedDraft.recipientName)
+      setRecipientEmail(savedDraft.recipientEmail)
+      setDeliveryChannels(savedDraft.deliveryChannels)
+      if (savedDraft.deliveryDate) {
+        setDeliveryDate(new Date(savedDraft.deliveryDate))
+      }
+      setSelectedPreset(savedDraft.selectedPreset)
+      setSelectedAddressId(savedDraft.selectedAddressId)
+      if (savedDraft.printOptions) {
+        setPrintOptions(savedDraft.printOptions)
+      }
+      setRestoredFromDraft(true)
+
+      // Show toast with last saved time
+      toast.info("Draft restored", {
+        description: `Last saved ${formatLastSaved(savedDraft.lastSaved)}`,
+        action: {
+          label: "Clear",
+          onClick: () => {
+            clearLetterAutosave()
+            // Clear the form
+            setTitle("")
+            setBodyRich(null)
+            setBodyHtml("")
+            setRecipientType("myself")
+            setRecipientName("")
+            setRecipientEmail("")
+            setDeliveryChannels(["email"])
+            setDeliveryDate(undefined)
+            setSelectedPreset(null)
+            setSelectedAddressId(null)
+            setPrintOptions({ color: false, doubleSided: false })
+            setRestoredFromDraft(false)
+            toast.success("Draft cleared")
+          },
+        },
+      })
+    }
+  }, []) // Run once on mount
+
+  // Auto-save draft every 30 seconds when there are unsaved changes
+  React.useEffect(() => {
+    if (!hasUnsavedChanges || showCelebration) return
+
+    const saveToLocalStorage = () => {
+      saveLetterAutosave({
+        title,
+        bodyRich,
+        bodyHtml,
+        recipientType: recipientType === "myself" ? "self" : "other",
+        recipientName,
+        recipientEmail,
+        deliveryChannels,
+        deliveryDate: deliveryDate?.toISOString() ?? null,
+        selectedPreset,
+        selectedAddressId,
+        printOptions,
+      })
+    }
+
+    // Save immediately on first change, then every 30 seconds
+    saveToLocalStorage()
+
+    const interval = setInterval(saveToLocalStorage, 30000)
+    return () => clearInterval(interval)
+  }, [
+    hasUnsavedChanges,
+    showCelebration,
+    title,
+    bodyRich,
+    bodyHtml,
+    recipientType,
+    recipientName,
+    recipientEmail,
+    deliveryChannels,
+    deliveryDate,
+    selectedPreset,
+    selectedAddressId,
+    printOptions,
+  ])
+
+  // Save current draft immediately (used before checkout)
+  const saveCurrentDraft = React.useCallback(() => {
+    saveLetterAutosave({
+      title,
+      bodyRich,
+      bodyHtml,
+      recipientType: recipientType === "myself" ? "self" : "other",
+      recipientName,
+      recipientEmail,
+      deliveryChannels,
+      deliveryDate: deliveryDate?.toISOString() ?? null,
+      selectedPreset,
+      selectedAddressId,
+      printOptions,
+    })
+  }, [
+    title,
+    bodyRich,
+    bodyHtml,
+    recipientType,
+    recipientName,
+    recipientEmail,
+    deliveryChannels,
+    deliveryDate,
+    selectedPreset,
+    selectedAddressId,
+    printOptions,
+  ])
 
   // Track if physical delivery is selected
   const hasPhysicalSelected = deliveryChannels.includes("physical")
@@ -348,11 +490,13 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           setShowSealConfirmation(false)
 
           if (failures.length === 0) {
-            // All deliveries scheduled successfully
+            // All deliveries scheduled successfully - clear autosaved draft
+            clearLetterAutosave()
             setSealedLetterId(letterId)
             setShowCelebration(true)
           } else if (successes.length > 0) {
-            // Partial success - some deliveries failed
+            // Partial success - some deliveries failed but letter was saved
+            clearLetterAutosave()
             const failedDetails = failures.map(({ channel, result }) => {
               const channelLabel = channel === "physical" ? "Physical mail" : "Email"
               const errorMsg = !result.success ? result.error.message : "Unknown error"
@@ -364,7 +508,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             setSealedLetterId(letterId)
             setShowCelebration(true)
           } else {
-            // All deliveries failed
+            // All deliveries failed but letter was saved
+            clearLetterAutosave()
             const firstError = failures[0]
             const errorMessage = !firstError.result.success
               ? firstError.result.error.message
@@ -792,6 +937,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 <CreditWarningBanner
                   eligibility={currentEligibility}
                   selectedChannels={deliveryChannels}
+                  onBeforeCheckout={saveCurrentDraft}
                 />
               )}
 
