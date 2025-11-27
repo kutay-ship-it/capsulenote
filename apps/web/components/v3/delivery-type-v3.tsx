@@ -12,6 +12,7 @@ interface DeliveryTypeV3Props {
   onChange: (channels: DeliveryChannel[]) => void
   disabled?: boolean
   eligibility?: DeliveryEligibility
+  isRefreshing?: boolean
 }
 
 export function DeliveryTypeV3({
@@ -19,6 +20,7 @@ export function DeliveryTypeV3({
   onChange,
   disabled = false,
   eligibility,
+  isRefreshing = false,
 }: DeliveryTypeV3Props) {
   const isEmailSelected = value.includes("email")
   const isPhysicalSelected = value.includes("physical")
@@ -92,13 +94,19 @@ export function DeliveryTypeV3({
               )}
               style={{ borderRadius: "2px" }}
             >
-              {emailExhausted && (
-                <AlertTriangle className="h-2.5 w-2.5" strokeWidth={2} />
+              {isRefreshing ? (
+                <div className="h-3 w-12 animate-pulse bg-charcoal/20 rounded-sm" />
+              ) : (
+                <>
+                  {emailExhausted && (
+                    <AlertTriangle className="h-2.5 w-2.5" strokeWidth={2} />
+                  )}
+                  <span className="text-[9px] font-bold tabular-nums">
+                    {emailCredits}
+                  </span>
+                  <span className="text-[8px] uppercase">credits</span>
+                </>
               )}
-              <span className="text-[9px] font-bold tabular-nums">
-                {emailCredits}
-              </span>
-              <span className="text-[8px] uppercase">credits</span>
             </div>
           )}
 
@@ -162,13 +170,24 @@ export function DeliveryTypeV3({
               )}
               style={{ borderRadius: "2px" }}
             >
-              {physicalExhausted && (
-                <AlertTriangle className="h-2.5 w-2.5" strokeWidth={2} />
+              {isRefreshing ? (
+                <div
+                  className={cn(
+                    "h-3 w-12 animate-pulse rounded-sm",
+                    isPhysicalSelected ? "bg-white/30" : "bg-charcoal/20"
+                  )}
+                />
+              ) : (
+                <>
+                  {physicalExhausted && (
+                    <AlertTriangle className="h-2.5 w-2.5" strokeWidth={2} />
+                  )}
+                  <span className="text-[9px] font-bold tabular-nums">
+                    {physicalCredits}
+                  </span>
+                  <span className="text-[8px] uppercase">credits</span>
+                </>
               )}
-              <span className="text-[9px] font-bold tabular-nums">
-                {physicalCredits}
-              </span>
-              <span className="text-[8px] uppercase">credits</span>
             </div>
           )}
 

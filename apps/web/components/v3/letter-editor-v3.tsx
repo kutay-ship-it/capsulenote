@@ -17,6 +17,8 @@ import {
   Sparkles,
   Truck,
   Stamp,
+  MapPin,
+  Printer,
 } from "lucide-react"
 import { toast } from "sonner"
 import { fromZonedTime } from "date-fns-tz"
@@ -45,8 +47,11 @@ import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-t
 import { SealConfirmationV3 } from "@/components/v3/seal-confirmation-v3"
 import { SealCelebrationV3 } from "@/components/v3/seal-celebration-v3"
 import { CreditWarningBanner } from "@/components/v3/credit-warning-banner"
+import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
+import { PrintOptionsV3, type PrintOptions } from "@/components/v3/print-options-v3"
 import type { LetterTemplate } from "@/server/actions/templates"
 import type { DeliveryEligibility } from "@/server/actions/entitlements"
+import type { ShippingAddress } from "@/server/actions/addresses"
 
 type RecipientType = "myself" | "someone-else"
 
@@ -90,6 +95,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const [deliveryChannels, setDeliveryChannels] = React.useState<DeliveryChannel[]>(["email"])
   const [deliveryDate, setDeliveryDate] = React.useState<Date | undefined>(undefined)
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
+  // Physical mail state
+  const [selectedAddressId, setSelectedAddressId] = React.useState<string | null>(null)
+  const [selectedAddress, setSelectedAddress] = React.useState<ShippingAddress | null>(null)
+  const [printOptions, setPrintOptions] = React.useState<PrintOptions>({ color: false, doubleSided: false })
   const [showCustomDate, setShowCustomDate] = React.useState(false)
   const [showSealConfirmation, setShowSealConfirmation] = React.useState(false)
   const [showCelebration, setShowCelebration] = React.useState(false)
@@ -150,6 +159,9 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     setCurrentEligibility(eligibility)
   }, [eligibility])
 
+  // Track if physical delivery is selected
+  const hasPhysicalSelected = deliveryChannels.includes("physical")
+
   // Credit eligibility checks
   const canScheduleSelectedChannels = React.useMemo(() => {
     const needsEmail = deliveryChannels.includes("email")
@@ -159,9 +171,12 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     if (needsEmail && !currentEligibility.canScheduleEmail) return false
     if (needsPhysical && !currentEligibility.canSchedulePhysical) return false
 
+    // Physical mail requires an address to be selected
+    if (needsPhysical && !selectedAddressId) return false
+
     // Must have at least one channel selected
     return deliveryChannels.length > 0
-  }, [deliveryChannels, currentEligibility])
+  }, [deliveryChannels, currentEligibility, selectedAddressId])
 
   // Compute if there are any credit shortages for selected channels
   const hasInsufficientCredits = React.useMemo(() => {
@@ -214,7 +229,16 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     setDeliveryDate(undefined)
     setSelectedPreset(null)
     setShowCustomDate(false)
+    // Reset physical mail state
+    setSelectedAddressId(null)
+    setSelectedAddress(null)
+    setPrintOptions({ color: false, doubleSided: false })
     setErrors({})
+  }
+
+  const handleAddressChange = (addressId: string | null, address?: ShippingAddress) => {
+    setSelectedAddressId(addressId)
+    setSelectedAddress(address || null)
   }
 
   const handleTemplateSelect = (template: LetterTemplate) => {
@@ -301,43 +325,49 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           const day = String(deliveryDate.getDate()).padStart(2, "0")
           const deliverAt = fromZonedTime(`${year}-${month}-${day}T09:00:00`, timezone)
 
-          // Schedule deliveries for each selected channel
-          const deliveryPromises = deliveryChannels.map((channel) =>
-            scheduleDelivery({
-              letterId,
-              channel: channel === "physical" ? "mail" : "email",
-              deliverAt,
-              timezone,
-              toEmail: recipientEmail,
+          // Schedule deliveries for each selected channel with proper ActionResult handling
+          const deliveryResults = await Promise.all(
+            deliveryChannels.map(async (channel) => {
+              const result = await scheduleDelivery({
+                letterId,
+                channel: channel === "physical" ? "mail" : "email",
+                deliverAt,
+                timezone,
+                toEmail: channel === "email" ? recipientEmail : undefined,
+                shippingAddressId: channel === "physical" ? selectedAddressId ?? undefined : undefined,
+                printOptions: channel === "physical" ? printOptions : undefined,
+              })
+              return { channel, result }
             })
           )
 
-          const deliveryResults = await Promise.allSettled(deliveryPromises)
-          const failedCount = deliveryResults.filter(r => r.status === "rejected").length
-          const successCount = deliveryResults.filter(r => r.status === "fulfilled").length
+          // Now properly detect failures from ActionResult
+          const failures = deliveryResults.filter(({ result }) => !result.success)
+          const successes = deliveryResults.filter(({ result }) => result.success)
 
           setShowSealConfirmation(false)
 
-          if (failedCount === 0) {
+          if (failures.length === 0) {
             // All deliveries scheduled successfully
             setSealedLetterId(letterId)
             setShowCelebration(true)
-          } else if (successCount > 0) {
+          } else if (successes.length > 0) {
             // Partial success - some deliveries failed
-            const failedChannels = deliveryResults
-              .map((r, i) => r.status === "rejected" ? deliveryChannels[i] : null)
-              .filter(Boolean)
-              .join(", ")
+            const failedDetails = failures.map(({ channel, result }) => {
+              const channelLabel = channel === "physical" ? "Physical mail" : "Email"
+              const errorMsg = !result.success ? result.error.message : "Unknown error"
+              return `${channelLabel}: ${errorMsg}`
+            })
             toast.warning("Letter saved with partial delivery", {
-              description: `Some delivery channels failed (${failedChannels}). You can retry from the letter page.`,
+              description: failedDetails.join(". ") + ". You can retry from the letter page.",
             })
             setSealedLetterId(letterId)
             setShowCelebration(true)
           } else {
             // All deliveries failed
-            const firstRejected = deliveryResults.find(r => r.status === "rejected") as PromiseRejectedResult | undefined
-            const errorMessage = firstRejected?.reason instanceof Error
-              ? firstRejected.reason.message
+            const firstError = failures[0]
+            const errorMessage = !firstError.result.success
+              ? firstError.result.error.message
               : "Unknown error"
             toast.error("Letter saved but delivery scheduling failed", {
               description: `${errorMessage}. You can schedule delivery from the letter page.`,
@@ -596,6 +626,53 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 />
               </div>
 
+              {/* Physical Mail Address Section - shown when physical delivery selected */}
+              {hasPhysicalSelected && (
+                <>
+                  {/* Dashed separator */}
+                  <div className="w-full border-t-2 border-dashed border-charcoal/10" />
+
+                  {/* Shipping Address */}
+                  <div className="space-y-3">
+                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
+                      <MapPin className="h-3.5 w-3.5" strokeWidth={2} />
+                      Shipping Address
+                    </label>
+                    <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider -mt-1">
+                      Where should we mail your letter?
+                    </p>
+                    <AddressSelectorV3
+                      value={selectedAddressId}
+                      onChange={handleAddressChange}
+                      disabled={isPending}
+                    />
+                  </div>
+
+                  {/* Print Options - only show when address is selected */}
+                  {selectedAddressId && (
+                    <>
+                      {/* Dashed separator */}
+                      <div className="w-full border-t-2 border-dashed border-charcoal/10" />
+
+                      <div className="space-y-3">
+                        <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
+                          <Printer className="h-3.5 w-3.5" strokeWidth={2} />
+                          Print Options
+                        </label>
+                        <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider -mt-1">
+                          Customize how your letter is printed
+                        </p>
+                        <PrintOptionsV3
+                          value={printOptions}
+                          onChange={setPrintOptions}
+                          disabled={isPending}
+                        />
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+
               {/* Dashed separator */}
               <div className="w-full border-t-2 border-dashed border-charcoal/10" />
 
@@ -818,6 +895,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           deliveryChannels={deliveryChannels}
           deliveryDate={deliveryDate}
           eligibility={currentEligibility}
+          shippingAddress={selectedAddress}
+          printOptions={hasPhysicalSelected ? printOptions : undefined}
         />
       )}
 

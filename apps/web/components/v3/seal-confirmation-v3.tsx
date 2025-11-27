@@ -13,7 +13,9 @@ import {
   Clock,
   ArrowLeft,
   Sparkles,
-  CheckCircle2,
+  MapPin,
+  Palette,
+  BookOpen,
 } from "lucide-react"
 import {
   Dialog,
@@ -24,6 +26,8 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { DeliveryChannel } from "@/components/v3/delivery-type-v3"
 import type { DeliveryEligibility } from "@/server/actions/entitlements"
+import type { ShippingAddress } from "@/server/actions/addresses"
+import type { PrintOptions } from "@/components/v3/print-options-v3"
 
 interface SealConfirmationV3Props {
   open: boolean
@@ -37,6 +41,8 @@ interface SealConfirmationV3Props {
   deliveryChannels: DeliveryChannel[]
   deliveryDate: Date
   eligibility: DeliveryEligibility
+  shippingAddress?: ShippingAddress | null
+  printOptions?: PrintOptions
 }
 
 export function SealConfirmationV3({
@@ -51,6 +57,8 @@ export function SealConfirmationV3({
   deliveryChannels,
   deliveryDate,
   eligibility,
+  shippingAddress,
+  printOptions,
 }: SealConfirmationV3Props) {
   const hasEmail = deliveryChannels.includes("email")
   const hasPhysical = deliveryChannels.includes("physical")
@@ -208,6 +216,52 @@ export function SealConfirmationV3({
                 </p>
               </div>
             </div>
+
+            {/* Shipping Address - shown for physical mail */}
+            {hasPhysical && shippingAddress && (
+              <div
+                className="flex items-start gap-3 border-2 border-teal-primary bg-teal-primary/5 p-3"
+                style={{ borderRadius: "2px" }}
+              >
+                <div
+                  className="flex h-9 w-9 flex-shrink-0 items-center justify-center border-2 border-charcoal bg-teal-primary"
+                  style={{ borderRadius: "2px" }}
+                >
+                  <MapPin className="h-4 w-4 text-white" strokeWidth={2} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
+                    Shipping To
+                  </p>
+                  <p className="font-mono text-xs font-bold text-charcoal">
+                    {shippingAddress.name}
+                  </p>
+                  <p className="font-mono text-[10px] text-charcoal/70 leading-relaxed">
+                    {shippingAddress.line1}
+                    {shippingAddress.line2 && <>, {shippingAddress.line2}</>}
+                    <br />
+                    {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
+                  </p>
+                  {/* Print Options Summary */}
+                  {printOptions && (printOptions.color || printOptions.doubleSided) && (
+                    <div className="flex items-center gap-2 mt-1.5">
+                      {printOptions.color && (
+                        <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
+                          <Palette className="h-3 w-3" strokeWidth={2} />
+                          Color
+                        </span>
+                      )}
+                      {printOptions.doubleSided && (
+                        <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
+                          <BookOpen className="h-3 w-3" strokeWidth={2} />
+                          Double-sided
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Credit Cost Display */}
