@@ -121,7 +121,7 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
 
         {/* Status & Plan */}
         <div className="flex flex-wrap items-center gap-4">
-          <div className="space-y-1">
+          <div className="flex items-center gap-2">
             <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
               Status
             </label>
@@ -137,7 +137,7 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
               <span>{entitlements.status}</span>
             </div>
           </div>
-          <div className="space-y-1">
+          <div className="flex items-center gap-2">
             <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
               Plan
             </label>
