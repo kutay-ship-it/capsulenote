@@ -81,6 +81,11 @@ export const AuditEventType = {
 
   // System events
   SYSTEM_RECONCILER_HIGH_VOLUME: "system.reconciler_high_volume",
+
+  // Credit events
+  CREDITS_ADDED: "credits.added",
+  CREDITS_DEDUCTED: "credits.deducted",
+  ENTITLEMENTS_UPDATED: "entitlements.updated",
 } as const
 
 export type AuditEventTypeValue =

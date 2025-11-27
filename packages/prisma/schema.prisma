@@ -31,6 +31,27 @@ enum LetterType {
   @@map("letter_type")
 }
 
+// Credit tracking for audit trail
+enum CreditType {
+  email
+  physical
+
+  @@map("credit_type")
+}
+
+enum CreditTransactionType {
+  grant_subscription  // Plan credits on new/renewal
+  grant_addon         // Purchased add-on credits
+  grant_referral      // Referral bonus
+  deduct_delivery     // Used for delivery
+  deduct_refund       // Refunded purchase
+  deduct_cancel       // Credits removed on subscription cancel
+  expire              // Credits expired
+  adjust_manual       // Admin adjustment
+
+  @@map("credit_transaction_type")
+}
+
 enum LetterStatus {
   DRAFT
   SCHEDULED
@@ -52,27 +73,32 @@ model User {
   clerkUserId     String?  @unique @map("clerk_user_id")
   email           String   @unique @db.Citext
   planType        PlanType? @map("plan_type")
+  // Total available credits (plan + addon combined for consumption)
   emailCredits    Int      @default(0) @map("email_credits")
   physicalCredits Int      @default(0) @map("physical_credits")
+  // Track addon credits separately (preserved on subscription renewal)
+  emailAddonCredits    Int @default(0) @map("email_addon_credits")
+  physicalAddonCredits Int @default(0) @map("physical_addon_credits")
   creditExpiresAt DateTime? @map("credit_expires_at") @db.Timestamptz(3)
   /// @deprecated Use Profile.timezone instead. This field is kept for backward compatibility.
   timezone        String?  @default("UTC")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  profile           Profile?
-  letters           Letter[]
-  deliveries        Delivery[]
-  subscriptions     Subscription[]
-  subscriptionUsage SubscriptionUsage[]
-  shippingAddresses ShippingAddress[]
-  payments          Payment[]
-  auditEvents       AuditEvent[]
-  addOnPurchases    AddOnPurchase[]
-  referralCode      ReferralCode?
-  referralsMade     Referral[]         @relation("ReferrerReferrals")
-  referralsReceived Referral[]         @relation("RefereeReferrals")
-  pushSubscriptions PushSubscription[]
+  profile            Profile?
+  letters            Letter[]
+  deliveries         Delivery[]
+  subscriptions      Subscription[]
+  subscriptionUsage  SubscriptionUsage[]
+  shippingAddresses  ShippingAddress[]
+  payments           Payment[]
+  auditEvents        AuditEvent[]
+  addOnPurchases     AddOnPurchase[]
+  referralCode       ReferralCode?
+  referralsMade      Referral[]           @relation("ReferrerReferrals")
+  referralsReceived  Referral[]           @relation("RefereeReferrals")
+  pushSubscriptions  PushSubscription[]
+  creditTransactions CreditTransaction[]
 
   @@map("users")
 }
@@ -331,7 +357,7 @@ model Payment {
   type                   PaymentType
   amountCents            Int           @map("amount_cents")
   currency               String        @default("usd") @db.Char(3)
-  stripePaymentIntentId  String?       @map("stripe_payment_intent_id")
+  stripePaymentIntentId  String?       @unique @map("stripe_payment_intent_id") // Unique for idempotency
   status                 PaymentStatus @default(pending)
   metadata               Json          @default("{}")
   createdAt              DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -340,7 +366,6 @@ model Payment {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([stripePaymentIntentId])
   @@map("payments")
 }
 
@@ -652,4 +677,28 @@ model PushSubscription {
 
   @@index([userId])
   @@map("push_subscriptions")
+}
+
+// ============================================================================
+// CREDIT TRANSACTIONS - Audit Trail
+// ============================================================================
+
+model CreditTransaction {
+  id              String                 @id @default(uuid()) @db.Uuid
+  userId          String                 @map("user_id") @db.Uuid
+  creditType      CreditType             @map("credit_type")
+  transactionType CreditTransactionType  @map("transaction_type")
+  amount          Int                    // Positive for grants, negative for deductions
+  balanceBefore   Int                    @map("balance_before")
+  balanceAfter    Int                    @map("balance_after")
+  source          String?                // stripePaymentIntentId, subscriptionId, deliveryId, etc.
+  metadata        Json                   @default("{}")
+  createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([source])
+  @@index([transactionType])
+  @@map("credit_transactions")
 }

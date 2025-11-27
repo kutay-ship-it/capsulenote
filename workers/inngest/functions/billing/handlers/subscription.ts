@@ -158,17 +158,86 @@ export async function handleSubscriptionCreatedOrUpdated(
   // Invalidate entitlements cache
   await invalidateEntitlementsCache(user.id)
 
-  // Create usage record for new active subscription
+  // Create usage record and grant credits for new/renewed active subscription
   if (subscription.status === "active" || subscription.status === "trialing") {
     await createUsageRecord(user.id, safePeriodStart, PLAN_CREDITS[plan]?.physical ?? 0)
+
+    // Get current addon credits to preserve them
+    const currentUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { emailAddonCredits: true, physicalAddonCredits: true, emailCredits: true, physicalCredits: true },
+    })
+
+    const planEmailCredits = PLAN_CREDITS[plan]?.email ?? 0
+    const planPhysicalCredits = PLAN_CREDITS[plan]?.physical ?? 0
+    const addonEmail = currentUser?.emailAddonCredits ?? 0
+    const addonPhysical = currentUser?.physicalAddonCredits ?? 0
+
+    // New total = plan credits + preserved addon credits
+    const newEmailTotal = planEmailCredits + addonEmail
+    const newPhysicalTotal = planPhysicalCredits + addonPhysical
+
+    // Record audit trail for plan credit grant
+    if (planEmailCredits > 0) {
+      await prisma.creditTransaction.create({
+        data: {
+          userId: user.id,
+          creditType: "email",
+          transactionType: "grant_subscription",
+          amount: planEmailCredits,
+          balanceBefore: currentUser?.emailCredits ?? 0,
+          balanceAfter: newEmailTotal,
+          source: subscription.id,
+          metadata: {
+            plan,
+            subscriptionId: subscription.id,
+            periodStart: safePeriodStart.toISOString(),
+            periodEnd: safePeriodEnd.toISOString(),
+          },
+        },
+      })
+    }
+
+    if (planPhysicalCredits > 0) {
+      await prisma.creditTransaction.create({
+        data: {
+          userId: user.id,
+          creditType: "physical",
+          transactionType: "grant_subscription",
+          amount: planPhysicalCredits,
+          balanceBefore: currentUser?.physicalCredits ?? 0,
+          balanceAfter: newPhysicalTotal,
+          source: subscription.id,
+          metadata: {
+            plan,
+            subscriptionId: subscription.id,
+            periodStart: safePeriodStart.toISOString(),
+            periodEnd: safePeriodEnd.toISOString(),
+          },
+        },
+      })
+    }
+
+    // Update user with new credit totals (plan + addon preserved)
     await prisma.user.update({
       where: { id: user.id },
       data: {
         planType: plan,
-        emailCredits: PLAN_CREDITS[plan]?.email ?? 0,
-        physicalCredits: PLAN_CREDITS[plan]?.physical ?? 0,
+        emailCredits: newEmailTotal,
+        physicalCredits: newPhysicalTotal,
         creditExpiresAt: safePeriodEnd,
       },
+    })
+
+    console.log("[Subscription Handler] Credits granted", {
+      subscriptionId: subscription.id,
+      userId: user.id,
+      planEmailCredits,
+      planPhysicalCredits,
+      addonEmailPreserved: addonEmail,
+      addonPhysicalPreserved: addonPhysical,
+      newEmailTotal,
+      newPhysicalTotal,
     })
   }
 

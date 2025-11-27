@@ -8,10 +8,12 @@
  * Notes:
  * - No free tier. Users without an active subscription have plan = 'none' and cannot schedule.
  * - Credits are stored on the User record and decremented on scheduling.
+ * - Addon credits are tracked separately and preserved on subscription renewal.
+ * - All credit changes are logged to CreditTransaction for audit trail.
  * - Cache in Redis for 5 minutes to keep API fast.
  */
 
-import type { PlanType, SubscriptionStatus } from "@prisma/client"
+import type { PlanType, SubscriptionStatus, CreditType, CreditTransactionType, Prisma } from "@prisma/client"
 import { prisma } from "./db"
 import { redis } from "./redis"
 
@@ -72,6 +74,62 @@ const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
   PAPER_PIXELS: { email: 24, physical: 3 },
 }
 const ACTIVE_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = ["active", "trialing"]
+
+// ============================================================================
+// CREDIT TRANSACTION HELPER
+// ============================================================================
+
+interface RecordCreditTransactionParams {
+  userId: string
+  creditType: CreditType
+  transactionType: CreditTransactionType
+  amount: number
+  source?: string
+  metadata?: Record<string, unknown>
+  tx?: Prisma.TransactionClient
+}
+
+/**
+ * Record a credit transaction for audit trail
+ * Can be called within a transaction or standalone
+ */
+export async function recordCreditTransaction({
+  userId,
+  creditType,
+  transactionType,
+  amount,
+  source,
+  metadata,
+  tx,
+}: RecordCreditTransactionParams): Promise<void> {
+  const client = tx ?? prisma
+
+  // Get current balance
+  const user = await client.user.findUnique({
+    where: { id: userId },
+    select: { emailCredits: true, physicalCredits: true },
+  })
+
+  if (!user) {
+    throw new Error(`User not found: ${userId}`)
+  }
+
+  const balanceBefore = creditType === "email" ? user.emailCredits : user.physicalCredits
+  const balanceAfter = balanceBefore + amount
+
+  await client.creditTransaction.create({
+    data: {
+      userId,
+      creditType,
+      transactionType,
+      amount,
+      balanceBefore,
+      balanceAfter,
+      source,
+      metadata: metadata ?? {},
+    },
+  })
+}
 
 // ============================================================================
 // PUBLIC API
@@ -151,24 +209,36 @@ export async function trackLetterCreation(userId: string): Promise<void> {
 
 /**
  * Deduct one email credit (throws if none remain)
+ * Uses transaction for atomicity and records audit trail
  */
-export async function trackEmailDelivery(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { emailCredits: true },
-  })
+export async function trackEmailDelivery(userId: string, deliveryId?: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { emailCredits: true },
+    })
 
-  if (!user) {
-    throw new Error("User not found")
-  }
+    if (!user) {
+      throw new Error("User not found")
+    }
 
-  if (user.emailCredits <= 0) {
-    throw new QuotaExceededError("email_credits", 0, 0)
-  }
+    if (user.emailCredits <= 0) {
+      throw new QuotaExceededError("email_credits", 0, 0)
+    }
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { emailCredits: { decrement: 1 } },
+    await tx.user.update({
+      where: { id: userId },
+      data: { emailCredits: { decrement: 1 } },
+    })
+
+    await recordCreditTransaction({
+      userId,
+      creditType: "email",
+      transactionType: "deduct_delivery",
+      amount: -1,
+      source: deliveryId,
+      tx,
+    })
   })
 
   await invalidateEntitlementsCache(userId)
@@ -176,24 +246,36 @@ export async function trackEmailDelivery(userId: string): Promise<void> {
 
 /**
  * Deduct one physical mail credit (throws if none remain)
+ * Uses transaction for atomicity and records audit trail
  */
-export async function deductMailCredit(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { physicalCredits: true },
-  })
+export async function deductMailCredit(userId: string, deliveryId?: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { physicalCredits: true },
+    })
 
-  if (!user) {
-    throw new Error("User not found")
-  }
+    if (!user) {
+      throw new Error("User not found")
+    }
 
-  if (user.physicalCredits <= 0) {
-    throw new QuotaExceededError("physical_credits", 0, 0)
-  }
+    if (user.physicalCredits <= 0) {
+      throw new QuotaExceededError("physical_credits", 0, 0)
+    }
 
-  await prisma.user.update({
-    where: { id: userId },
-    data: { physicalCredits: { decrement: 1 } },
+    await tx.user.update({
+      where: { id: userId },
+      data: { physicalCredits: { decrement: 1 } },
+    })
+
+    await recordCreditTransaction({
+      userId,
+      creditType: "physical",
+      transactionType: "deduct_delivery",
+      amount: -1,
+      source: deliveryId,
+      tx,
+    })
   })
 
   await invalidateEntitlementsCache(userId)
@@ -201,23 +283,124 @@ export async function deductMailCredit(userId: string): Promise<void> {
 
 /**
  * Add physical mail credits (used by add-ons)
+ * Uses transaction for atomicity and records audit trail
+ * Also tracks in physicalAddonCredits for renewal preservation
  */
-export async function addMailCredits(userId: string, credits: number): Promise<void> {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { physicalCredits: { increment: credits } },
+export async function addMailCredits(
+  userId: string,
+  credits: number,
+  options?: { source?: string; transactionType?: CreditTransactionType; isAddon?: boolean }
+): Promise<void> {
+  const { source, transactionType = "grant_addon", isAddon = true } = options ?? {}
+
+  await prisma.$transaction(async (tx) => {
+    // Record audit before update (recordCreditTransaction reads current balance)
+    await recordCreditTransaction({
+      userId,
+      creditType: "physical",
+      transactionType,
+      amount: credits,
+      source,
+      tx,
+    })
+
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        physicalCredits: { increment: credits },
+        // Track addon credits separately for renewal preservation
+        ...(isAddon && { physicalAddonCredits: { increment: credits } }),
+      },
+    })
   })
 
   await invalidateEntitlementsCache(userId)
 }
 
 /**
- * Add email credits (used by referral rewards)
+ * Add email credits (used by referral rewards and add-ons)
+ * Uses transaction for atomicity and records audit trail
+ * Also tracks in emailAddonCredits for renewal preservation
  */
-export async function addEmailCredits(userId: string, credits: number): Promise<void> {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { emailCredits: { increment: credits } },
+export async function addEmailCredits(
+  userId: string,
+  credits: number,
+  options?: { source?: string; transactionType?: CreditTransactionType; isAddon?: boolean }
+): Promise<void> {
+  const { source, transactionType = "grant_addon", isAddon = true } = options ?? {}
+
+  await prisma.$transaction(async (tx) => {
+    // Record audit before update (recordCreditTransaction reads current balance)
+    await recordCreditTransaction({
+      userId,
+      creditType: "email",
+      transactionType,
+      amount: credits,
+      source,
+      tx,
+    })
+
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        emailCredits: { increment: credits },
+        // Track addon credits separately for renewal preservation
+        ...(isAddon && { emailAddonCredits: { increment: credits } }),
+      },
+    })
+  })
+
+  await invalidateEntitlementsCache(userId)
+}
+
+/**
+ * Deduct credits on refund (for add-on purchases)
+ * Deducts from both total credits and addon tracking
+ */
+export async function deductCreditsForRefund(
+  userId: string,
+  creditType: CreditType,
+  credits: number,
+  source?: string
+): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { emailCredits: true, physicalCredits: true, emailAddonCredits: true, physicalAddonCredits: true },
+    })
+
+    if (!user) {
+      throw new Error("User not found")
+    }
+
+    const currentCredits = creditType === "email" ? user.emailCredits : user.physicalCredits
+    const currentAddon = creditType === "email" ? user.emailAddonCredits : user.physicalAddonCredits
+
+    // Don't deduct more than available
+    const deductAmount = Math.min(credits, currentCredits)
+    const deductAddon = Math.min(credits, currentAddon)
+
+    if (deductAmount > 0) {
+      await recordCreditTransaction({
+        userId,
+        creditType,
+        transactionType: "deduct_refund",
+        amount: -deductAmount,
+        source,
+        tx,
+      })
+
+      const creditField = creditType === "email" ? "emailCredits" : "physicalCredits"
+      const addonField = creditType === "email" ? "emailAddonCredits" : "physicalAddonCredits"
+
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          [creditField]: { decrement: deductAmount },
+          [addonField]: { decrement: deductAddon },
+        },
+      })
+    }
   })
 
   await invalidateEntitlementsCache(userId)
