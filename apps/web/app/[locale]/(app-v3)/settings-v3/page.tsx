@@ -28,6 +28,7 @@ import { SettingsHeaderV3 } from "@/components/v3/settings/settings-header-v3"
 import { SettingsCardV3 } from "@/components/v3/settings/settings-card-v3"
 import { SettingsTabsV3, SettingsTabsV3Skeleton, type SettingsTab } from "@/components/v3/settings/settings-tabs-v3"
 import { ProfileFieldsV3 } from "@/components/v3/settings/profile-fields-v3"
+import { AddressesSettingsV3 } from "@/components/v3/settings/addresses-settings-v3"
 
 // Reuse existing client components
 import { ExportDataButton } from "@/app/[locale]/(app)/settings/privacy/_components/export-data-button"
@@ -594,7 +595,7 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
   }
 
   // Parallel fetch ALL tab data for instant tab switching
-  const [entitlements, subscription, payments, referralCode, referralStats, referralLink] =
+  const [entitlements, subscription, payments, addresses, referralCode, referralStats, referralLink] =
     await Promise.all([
       getEntitlements(user.id),
       prisma.subscription.findFirst({
@@ -616,6 +617,10 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
           createdAt: true,
           metadata: true,
         },
+      }),
+      prisma.shippingAddress.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
       }),
       getOrCreateReferralCode(),
       getReferralStats(),
@@ -657,6 +662,23 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
                 entitlements={entitlements}
                 payments={payments}
                 locale={locale}
+              />
+            }
+            addressesContent={
+              <AddressesSettingsV3
+                initialAddresses={addresses.map((addr) => ({
+                  id: addr.id,
+                  name: addr.name,
+                  line1: addr.line1,
+                  line2: addr.line2,
+                  city: addr.city,
+                  state: addr.state,
+                  postalCode: addr.postalCode,
+                  country: addr.country,
+                  metadata: addr.metadata as Record<string, unknown>,
+                  createdAt: addr.createdAt,
+                  updatedAt: addr.updatedAt,
+                }))}
               />
             }
             privacyContent={<PrivacyContent />}

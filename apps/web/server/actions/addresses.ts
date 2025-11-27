@@ -8,13 +8,15 @@ import { logger } from "@/server/lib/logger"
 import { verifyAddress as lobVerifyAddress, type AddressVerificationResult } from "@/server/providers/lob"
 
 // Validation schemas
+// State field is flexible: some countries require it, others don't
+// Length varies: US uses 2-char codes, AU uses 2-3, others use full names
 const shippingAddressInputSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   line1: z.string().min(1, "Address line 1 is required").max(200),
   line2: z.string().max(200).optional(),
   city: z.string().min(1, "City is required").max(100),
-  state: z.string().min(2, "State is required").max(2),
-  postalCode: z.string().min(5, "Postal code is required").max(10),
+  state: z.string().max(100).optional().default(""), // Flexible: can be empty for countries without states
+  postalCode: z.string().min(1, "Postal code is required").max(20), // Flexible for various formats
   country: z.string().length(2, "Country must be 2-letter ISO code").default("US"),
 })
 

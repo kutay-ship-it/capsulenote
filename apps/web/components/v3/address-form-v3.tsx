@@ -3,6 +3,7 @@
 import * as React from "react"
 import { CheckCircle2, AlertTriangle, Loader2, MapPin } from "lucide-react"
 import { toast } from "sonner"
+import { postcodeValidator } from "postcode-validator"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -19,61 +20,13 @@ import {
   type AddressVerificationResponse,
   type ShippingAddressInput,
 } from "@/server/actions/addresses"
-
-// US states for dropdown
-const US_STATES = [
-  { value: "AL", label: "Alabama" },
-  { value: "AK", label: "Alaska" },
-  { value: "AZ", label: "Arizona" },
-  { value: "AR", label: "Arkansas" },
-  { value: "CA", label: "California" },
-  { value: "CO", label: "Colorado" },
-  { value: "CT", label: "Connecticut" },
-  { value: "DE", label: "Delaware" },
-  { value: "FL", label: "Florida" },
-  { value: "GA", label: "Georgia" },
-  { value: "HI", label: "Hawaii" },
-  { value: "ID", label: "Idaho" },
-  { value: "IL", label: "Illinois" },
-  { value: "IN", label: "Indiana" },
-  { value: "IA", label: "Iowa" },
-  { value: "KS", label: "Kansas" },
-  { value: "KY", label: "Kentucky" },
-  { value: "LA", label: "Louisiana" },
-  { value: "ME", label: "Maine" },
-  { value: "MD", label: "Maryland" },
-  { value: "MA", label: "Massachusetts" },
-  { value: "MI", label: "Michigan" },
-  { value: "MN", label: "Minnesota" },
-  { value: "MS", label: "Mississippi" },
-  { value: "MO", label: "Missouri" },
-  { value: "MT", label: "Montana" },
-  { value: "NE", label: "Nebraska" },
-  { value: "NV", label: "Nevada" },
-  { value: "NH", label: "New Hampshire" },
-  { value: "NJ", label: "New Jersey" },
-  { value: "NM", label: "New Mexico" },
-  { value: "NY", label: "New York" },
-  { value: "NC", label: "North Carolina" },
-  { value: "ND", label: "North Dakota" },
-  { value: "OH", label: "Ohio" },
-  { value: "OK", label: "Oklahoma" },
-  { value: "OR", label: "Oregon" },
-  { value: "PA", label: "Pennsylvania" },
-  { value: "RI", label: "Rhode Island" },
-  { value: "SC", label: "South Carolina" },
-  { value: "SD", label: "South Dakota" },
-  { value: "TN", label: "Tennessee" },
-  { value: "TX", label: "Texas" },
-  { value: "UT", label: "Utah" },
-  { value: "VT", label: "Vermont" },
-  { value: "VA", label: "Virginia" },
-  { value: "WA", label: "Washington" },
-  { value: "WV", label: "West Virginia" },
-  { value: "WI", label: "Wisconsin" },
-  { value: "WY", label: "Wyoming" },
-  { value: "DC", label: "Washington DC" },
-]
+import {
+  getCountryConfig,
+  hasStateDropdown,
+  getStatesForCountry,
+  DEFAULT_COUNTRY,
+} from "@/components/v3/country-data"
+import { CountrySelectorV3 } from "@/components/v3/country-selector-v3"
 
 interface AddressFormV3Props {
   initialData?: Partial<ShippingAddressInput>
@@ -94,12 +47,18 @@ export function AddressFormV3({
 }: AddressFormV3Props) {
   // Form state
   const [name, setName] = React.useState(initialData?.name || "")
+  const [country, setCountry] = React.useState(initialData?.country || DEFAULT_COUNTRY)
   const [line1, setLine1] = React.useState(initialData?.line1 || "")
   const [line2, setLine2] = React.useState(initialData?.line2 || "")
   const [city, setCity] = React.useState(initialData?.city || "")
   const [state, setState] = React.useState(initialData?.state || "")
   const [postalCode, setPostalCode] = React.useState(initialData?.postalCode || "")
-  const country = "US" // Currently only supporting US addresses
+
+  // Get current country config
+  const countryConfig = React.useMemo(() => getCountryConfig(country), [country])
+  const stateOptions = React.useMemo(() => getStatesForCountry(country), [country])
+  const showStateDropdown = hasStateDropdown(country)
+  const showStateField = countryConfig?.stateLabel !== null
 
   // Verification state
   const [isVerifying, setIsVerifying] = React.useState(false)
@@ -109,8 +68,21 @@ export function AddressFormV3({
   // Validation errors
   const [errors, setErrors] = React.useState<Partial<Record<keyof ShippingAddressInput, string>>>({})
 
+  // Reset state when country changes
+  const handleCountryChange = (newCountry: string) => {
+    setCountry(newCountry)
+    setState("") // Reset state when country changes
+    setVerification(null)
+    setShowSuggestion(false)
+    // Clear any state-related errors
+    if (errors.state) {
+      setErrors({ ...errors, state: undefined })
+    }
+  }
+
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {}
+    const config = getCountryConfig(country)
 
     if (showNameField && !name.trim()) {
       newErrors.name = "Name is required"
@@ -121,13 +93,25 @@ export function AddressFormV3({
     if (!city.trim()) {
       newErrors.city = "City is required"
     }
-    if (!state) {
-      newErrors.state = "State is required"
+
+    // State validation - only if required for this country
+    if (config?.requiresState && !state.trim()) {
+      newErrors.state = `${config.stateLabel || "State"} is required`
     }
+
+    // Postal code validation using postcode-validator
     if (!postalCode.trim()) {
-      newErrors.postalCode = "ZIP code is required"
-    } else if (!/^\d{5}(-\d{4})?$/.test(postalCode)) {
-      newErrors.postalCode = "Invalid ZIP code format"
+      newErrors.postalCode = `${config?.postalLabel || "Postal code"} is required`
+    } else {
+      try {
+        const isValidPostal = postcodeValidator(postalCode, country)
+        if (!isValidPostal) {
+          newErrors.postalCode = `Invalid ${config?.postalLabel || "postal code"} format`
+        }
+      } catch {
+        // If postcode-validator doesn't support the country, accept any format
+        // This is a fallback for countries not in the library
+      }
     }
 
     setErrors(newErrors)
@@ -146,7 +130,7 @@ export function AddressFormV3({
         line1,
         line2: line2 || undefined,
         city,
-        state,
+        state: state || undefined,
         postalCode,
         country,
       })
@@ -161,7 +145,7 @@ export function AddressFormV3({
             const hasDifference =
               suggested.line1.toUpperCase() !== line1.toUpperCase() ||
               suggested.city.toUpperCase() !== city.toUpperCase() ||
-              suggested.state.toUpperCase() !== state.toUpperCase() ||
+              (suggested.state && suggested.state.toUpperCase() !== state.toUpperCase()) ||
               suggested.postalCode !== postalCode
 
             if (hasDifference) {
@@ -197,15 +181,14 @@ export function AddressFormV3({
       setLine1(suggested.line1)
       setLine2(suggested.line2 || "")
       setCity(suggested.city)
-      setState(suggested.state)
+      if (suggested.state) setState(suggested.state)
       setPostalCode(suggested.postalCode)
       setShowSuggestion(false)
       toast.success("Address updated with suggestion")
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = () => {
     if (!validateForm() || isSubmitting) return
 
     const addressData: ShippingAddressInput = {
@@ -213,7 +196,7 @@ export function AddressFormV3({
       line1,
       line2: line2 || undefined,
       city,
-      state,
+      state: state || "",
       postalCode,
       country,
     }
@@ -233,7 +216,22 @@ export function AddressFormV3({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
+      {/* Country Selector - TOP, prominent, searchable */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="address-country"
+          className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
+        >
+          Country
+        </label>
+        <CountrySelectorV3
+          value={country}
+          onChange={handleCountryChange}
+          disabled={isSubmitting}
+        />
+      </div>
+
       {/* Name Field */}
       {showNameField && (
         <div className="space-y-1.5">
@@ -311,7 +309,7 @@ export function AddressFormV3({
       </div>
 
       {/* City and State Row */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className={cn("grid gap-3", showStateField ? "grid-cols-2" : "grid-cols-1")}>
         <div className="space-y-1.5">
           <label
             htmlFor="address-city"
@@ -337,67 +335,108 @@ export function AddressFormV3({
           )}
         </div>
 
-        <div className="space-y-1.5">
-          <label
-            htmlFor="address-state"
-            className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
-          >
-            State
-          </label>
-          <Select
-            value={state}
-            onValueChange={(value) => {
-              setState(value)
-              clearField("state")
-            }}
-            disabled={isSubmitting}
-          >
-            <SelectTrigger
-              id="address-state"
-              className={cn(
-                "border-2 border-charcoal font-mono text-sm",
-                errors.state && "border-coral"
-              )}
-              style={{ borderRadius: "2px" }}
+        {/* State/Province Field - Conditional based on country */}
+        {showStateField && (
+          <div className="space-y-1.5">
+            <label
+              htmlFor="address-state"
+              className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
             >
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              {US_STATES.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.state && (
-            <p className="font-mono text-xs text-coral">{errors.state}</p>
-          )}
-        </div>
+              {countryConfig?.stateLabel || "State"}
+              {!countryConfig?.requiresState && (
+                <span className="text-charcoal/40 ml-1">(Optional)</span>
+              )}
+            </label>
+
+            {showStateDropdown ? (
+              // Dropdown for countries with predefined states
+              <Select
+                value={state}
+                onValueChange={(value) => {
+                  setState(value)
+                  clearField("state")
+                }}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger
+                  id="address-state"
+                  className={cn(
+                    "h-[54px] border-2 border-charcoal bg-white px-6 font-mono text-sm",
+                    errors.state && "border-coral"
+                  )}
+                  style={{ borderRadius: "2px" }}
+                >
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent
+                  className="border-2 border-charcoal bg-white font-mono max-h-[240px]"
+                  style={{ borderRadius: "2px" }}
+                >
+                  {stateOptions.map((s) => (
+                    <SelectItem key={s.value} value={s.value} className="font-mono text-sm">
+                      {s.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              // Free text input for other countries
+              <Input
+                id="address-state"
+                value={state}
+                onChange={(e) => {
+                  setState(e.target.value)
+                  clearField("state")
+                }}
+                placeholder={countryConfig?.stateLabel || "State/Province"}
+                className={cn(
+                  "border-2 border-charcoal font-mono text-sm",
+                  errors.state && "border-coral"
+                )}
+                style={{ borderRadius: "2px" }}
+                aria-invalid={!!errors.state}
+                disabled={isSubmitting}
+              />
+            )}
+            {errors.state && (
+              <p className="font-mono text-xs text-coral">{errors.state}</p>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* ZIP Code */}
+      {/* Postal Code */}
       <div className="space-y-1.5">
         <label
-          htmlFor="address-zip"
+          htmlFor="address-postal"
           className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
         >
-          ZIP Code
+          {countryConfig?.postalLabel || "Postal Code"}
         </label>
-        <Input
-          id="address-zip"
-          value={postalCode}
-          onChange={(e) => {
-            setPostalCode(e.target.value)
-            clearField("postalCode")
-          }}
-          placeholder="94102"
-          className="border-2 border-charcoal font-mono text-sm w-32"
-          style={{ borderRadius: "2px" }}
-          aria-invalid={!!errors.postalCode}
-          disabled={isSubmitting}
-          maxLength={10}
-        />
+        <div className="flex items-center gap-3">
+          <Input
+            id="address-postal"
+            value={postalCode}
+            onChange={(e) => {
+              setPostalCode(e.target.value)
+              clearField("postalCode")
+            }}
+            placeholder={countryConfig?.postalPlaceholder || "12345"}
+            className={cn(
+              "border-2 border-charcoal font-mono text-sm w-40",
+              errors.postalCode && "border-coral"
+            )}
+            style={{ borderRadius: "2px" }}
+            aria-invalid={!!errors.postalCode}
+            disabled={isSubmitting}
+          />
+          {/* Format hint */}
+          {countryConfig?.postalPlaceholder && (
+            <span className="font-mono text-[10px] text-charcoal/40">
+              e.g., {countryConfig.postalPlaceholder}
+            </span>
+          )}
+        </div>
         {errors.postalCode && (
           <p className="font-mono text-xs text-coral">{errors.postalCode}</p>
         )}
@@ -450,7 +489,10 @@ export function AddressFormV3({
                   <>, {verification.suggestedAddress.line2}</>
                 )}
                 <br />
-                {verification.suggestedAddress.city}, {verification.suggestedAddress.state}{" "}
+                {verification.suggestedAddress.city}
+                {verification.suggestedAddress.state && (
+                  <>, {verification.suggestedAddress.state}</>
+                )}{" "}
                 {verification.suggestedAddress.postalCode}
               </p>
             </div>
@@ -503,7 +545,8 @@ export function AddressFormV3({
         </Button>
 
         <Button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           disabled={isSubmitting}
           className="flex-1 h-10 gap-2 font-mono text-[10px] uppercase tracking-wider"
           style={{ borderRadius: "2px" }}
@@ -530,6 +573,6 @@ export function AddressFormV3({
           </Button>
         )}
       </div>
-    </form>
+    </div>
   )
 }

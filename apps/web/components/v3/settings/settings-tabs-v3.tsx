@@ -1,12 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { User, CreditCard, Shield, Gift } from "lucide-react"
+import { User, CreditCard, Shield, Gift, MapPin } from "lucide-react"
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 
-export type SettingsTab = "account" | "billing" | "privacy" | "referrals"
+export type SettingsTab = "account" | "billing" | "addresses" | "privacy" | "referrals"
 
 /**
  * Tab configuration with icons and labels
@@ -27,6 +27,11 @@ const TAB_CONFIG: {
     icon: <CreditCard className="h-4 w-4" strokeWidth={2} />,
   },
   {
+    value: "addresses",
+    label: "Addresses",
+    icon: <MapPin className="h-4 w-4" strokeWidth={2} />,
+  },
+  {
     value: "privacy",
     label: "Privacy",
     icon: <Shield className="h-4 w-4" strokeWidth={2} />,
@@ -43,6 +48,7 @@ export interface SettingsTabsV3Props {
   initialTab: SettingsTab
   accountContent: React.ReactNode
   billingContent: React.ReactNode
+  addressesContent: React.ReactNode
   privacyContent: React.ReactNode
   referralsContent: React.ReactNode
 }
@@ -55,6 +61,7 @@ export function SettingsTabsV3({
   initialTab,
   accountContent,
   billingContent,
+  addressesContent,
   privacyContent,
   referralsContent,
 }: SettingsTabsV3Props) {
@@ -112,6 +119,10 @@ export function SettingsTabsV3({
         <div className="space-y-6">{billingContent}</div>
       </TabsContent>
 
+      <TabsContent value="addresses" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
+        <div className="space-y-6">{addressesContent}</div>
+      </TabsContent>
+
       <TabsContent value="privacy" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
         <div className="space-y-6">{privacyContent}</div>
       </TabsContent>
@@ -134,7 +145,7 @@ export function SettingsTabsV3Skeleton() {
         className="flex h-12 w-full border-2 border-charcoal bg-white"
         style={{ borderRadius: "2px" }}
       >
-        {[...Array(4)].map((_, i) => (
+        {[...Array(5)].map((_, i) => (
           <div
             key={i}
             className={cn(
