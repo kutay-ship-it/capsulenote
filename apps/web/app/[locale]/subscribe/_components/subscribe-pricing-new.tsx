@@ -92,39 +92,41 @@ export function SubscribePricingNew({
     {
       id: "digital",
       name: "Digital Capsule",
-      tagline: "Begin your reflection practice",
+      tagline: "For personal reflection",
       price: 9,
       interval: "year",
       icon: Mail,
       color: "duck-blue",
       priceId: digitalPriceId,
-      lettersPerMonth: "Unlimited",
+      lettersPerMonth: "6",
       features: [
-        "Unlimited email letters",
-        "Schedule up to 10 years ahead",
+        "6 digital letter deliveries per year",
+        "Send to yourself or friends & family",
+        "Schedule up to 100 years ahead",
         "Timezone-aware delivery",
         "End-to-end encryption",
-        "Rich text editor",
+        "Extra digital letters purchaseable",
       ],
     },
     {
       id: "paper",
       name: "Paper & Pixels",
-      tagline: "Create tangible memories",
+      tagline: "For meaningful keepsakes",
       price: 29,
       interval: "year",
       icon: Send,
       color: "teal-primary",
       popular: true,
       priceId: paperPriceId,
-      lettersPerMonth: "Unlimited",
+      lettersPerMonth: "24",
       savingsText: "Most Popular",
       features: [
-        "Everything in Digital",
-        "Physical letter delivery",
-        "Address management",
+        "24 digital letter deliveries per year",
+        "3 physical letters per year",
+        "Send to yourself or friends & family",
+        "Address confirmation reminders",
         "Priority mail routing",
-        "Arrive-by scheduling",
+        "Extra digital & physical letters purchaseable",
       ],
     },
   ]
@@ -220,22 +222,46 @@ export function SubscribePricingNew({
                 </div>
 
                 {/* Letters Visual Indicator */}
-                <div
-                  className="mb-6 flex items-center gap-2 border-2 border-charcoal/20 bg-white/50 px-3 py-2"
-                  style={{ borderRadius: "2px" }}
-                >
-                  <div className="flex -space-x-1">
-                    {[...Array(5)].map((_, j) => (
-                      <div
-                        key={j}
-                        className="h-6 w-4 border border-charcoal bg-duck-yellow"
-                        style={{ borderRadius: "1px" }}
-                      />
-                    ))}
+                <div className="mb-6 space-y-2">
+                  {/* Digital Letters */}
+                  <div
+                    className="flex items-center gap-2 border-2 border-charcoal/20 bg-white/50 px-3 py-2"
+                    style={{ borderRadius: "2px" }}
+                  >
+                    <div className="flex -space-x-1">
+                      {[...Array(plan.id === "digital" ? 3 : 5)].map((_, j) => (
+                        <div
+                          key={j}
+                          className="h-6 w-4 border border-charcoal bg-duck-yellow"
+                          style={{ borderRadius: "1px" }}
+                        />
+                      ))}
+                    </div>
+                    <span className="font-mono text-xs font-bold text-charcoal">
+                      {plan.lettersPerMonth} digital/year
+                    </span>
                   </div>
-                  <span className="font-mono text-xs font-bold text-charcoal">
-                    {plan.lettersPerMonth} letters/month
-                  </span>
+
+                  {/* Physical Letters (Paper & Pixels only) */}
+                  {plan.id === "paper" && (
+                    <div
+                      className="flex items-center gap-2 border-2 border-charcoal/20 bg-white/50 px-3 py-2"
+                      style={{ borderRadius: "2px" }}
+                    >
+                      <div className="flex -space-x-1">
+                        {[...Array(3)].map((_, j) => (
+                          <div
+                            key={j}
+                            className="h-6 w-4 border border-charcoal bg-coral"
+                            style={{ borderRadius: "1px" }}
+                          />
+                        ))}
+                      </div>
+                      <span className="font-mono text-xs font-bold text-charcoal">
+                        3 physical/year
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Features */}
