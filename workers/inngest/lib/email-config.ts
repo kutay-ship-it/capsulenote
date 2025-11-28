@@ -87,7 +87,7 @@ function parseEmailAddress(input: string): {
   // Match pattern: "Name" <email> or Name <email>
   const match = input.match(/^"?([^"<]+)"?\s*<([^>]+)>$/)
 
-  if (match) {
+  if (match && match[1] && match[2]) {
     return {
       displayName: match[1].trim(),
       email: match[2].trim(),

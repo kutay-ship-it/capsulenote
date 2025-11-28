@@ -7,7 +7,7 @@
  */
 
 import Stripe from "stripe"
-import type { PlanType, SubscriptionStatus } from "@prisma/client"
+import { prisma, type PlanType, type SubscriptionStatus } from "@dearme/prisma"
 import {
   createUsageRecord,
   getUserByStripeCustomer,
@@ -15,7 +15,6 @@ import {
   recordBillingAudit,
 } from "../../../../../apps/web/server/lib/stripe-helpers"
 import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
-import { prisma } from "../../../../../apps/web/server/lib/db"
 import { linkPendingSubscription } from "../../../../../apps/web/app/[locale]/subscribe/actions"
 import { sendPaymentConfirmationEmail } from "../../../../../apps/web/server/lib/emails/payment-confirmation"
 import { env } from "../../../../../apps/web/env.mjs"

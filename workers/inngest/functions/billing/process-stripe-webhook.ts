@@ -138,7 +138,8 @@ export const processStripeWebhook = inngest.createFunction(
     name: "Process Stripe Webhook",
     retries: 3, // Retry up to 3 times on failure
     onFailure: async ({ event, error }) => {
-      const stripeEvent = event.data.event as Stripe.Event
+      // Cast through unknown as the event payload shape differs from Stripe.Event
+      const stripeEvent = (event.data as unknown as { event: Stripe.Event }).event
 
       console.error("[Webhook Processor] Processing failed after 3 retries", {
         eventId: stripeEvent.id,

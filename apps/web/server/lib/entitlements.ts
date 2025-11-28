@@ -126,7 +126,7 @@ export async function recordCreditTransaction({
       balanceBefore,
       balanceAfter,
       source,
-      metadata: metadata ?? {},
+      metadata: (metadata ?? {}) as Prisma.InputJsonValue,
     },
   })
 }
@@ -521,16 +521,11 @@ async function shouldRefreshEntitlements(
   const latestStatus = latest.status
   const latestPlan = latest.plan
 
+  // If cached plan differs from DB plan, refresh
+  // Note: cachedPlan can be "none" | PlanType, latestPlan is PlanType
+  // If cachedPlan is "none", this comparison will return true (refresh needed)
   if (cached.plan !== latestPlan) return true
   if (cached.status !== latestStatus) return true
-
-  // If cache says no subscription but DB has active/trialing, refresh
-  if (
-    cached.plan === "none" &&
-    (latestStatus === "active" || latestStatus === "trialing")
-  ) {
-    return true
-  }
 
   return false
 }

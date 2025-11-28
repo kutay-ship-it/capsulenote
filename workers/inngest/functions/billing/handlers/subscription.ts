@@ -11,8 +11,7 @@
  */
 
 import Stripe from "stripe"
-import { prisma } from "@dearme/prisma"
-import type { PlanType, SubscriptionStatus } from "@prisma/client"
+import { prisma, type PlanType, type SubscriptionStatus } from "@dearme/prisma"
 import {
   getUserByStripeCustomer,
   invalidateEntitlementsCache,
@@ -78,7 +77,6 @@ export async function handleSubscriptionCreatedOrUpdated(
           { stripeSubscriptionId: subscription.id },
           { stripeCustomerId: customerId },
         ],
-        email: { not: null },
       },
       orderBy: { createdAt: "desc" },
     })

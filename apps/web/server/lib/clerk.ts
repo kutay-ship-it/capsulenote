@@ -1,5 +1,4 @@
 import { createClerkClient } from "@clerk/nextjs/server"
-import type { ClerkClient } from "@clerk/backend"
 
 /**
  * Pre-initialized Clerk client for backend operations.
@@ -9,14 +8,17 @@ import type { ClerkClient } from "@clerk/backend"
  * server-side API operations like users.getUser(), avoiding the undefined
  * errors that occur with the deprecated factory pattern.
  */
-const clerkClientInstance: ClerkClient = createClerkClient({
+const clerkClientInstance = createClerkClient({
   secretKey: process.env.CLERK_SECRET_KEY,
 })
+
+/** Type for the Clerk client instance */
+export type ClerkClientInstance = ReturnType<typeof createClerkClient>
 
 /**
  * Returns the configured Clerk client instance for backend operations.
  * This client is used for manual database operations like getUser, etc.
  */
-export function getClerkClient(): ClerkClient {
+export function getClerkClient(): ClerkClientInstance {
   return clerkClientInstance
 }

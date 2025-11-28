@@ -17,7 +17,8 @@
 import type { PlanType } from "@prisma/client"
 import { stripe } from "@/server/providers/stripe/client"
 import { prisma } from "@/server/lib/db"
-import { createAuditEvent } from "@/server/lib/audit"
+import { createAuditEvent, AuditEventType } from "@/server/lib/audit"
+import type { Prisma } from "@prisma/client"
 import { env } from "@/env.mjs"
 import { invalidateEntitlementsCache, createUsageRecord } from "@/server/lib/stripe-helpers"
 import { isValidPriceId } from "@/server/providers/stripe/client"
@@ -34,7 +35,32 @@ import {
   getSubscriptionPeriodDates,
 } from "@/server/lib/billing-constants"
 
+/**
+ * Acquire PostgreSQL advisory lock with timeout
+ * @param userId - User ID to lock on
+ * @param timeoutMs - Maximum time to wait for lock (milliseconds)
+ * @returns true if lock acquired, false if timeout
+ */
+async function acquireAdvisoryLock(userId: string, timeoutMs: number): Promise<boolean> {
+  const startTime = Date.now()
+  const retryInterval = 100 // Check every 100ms
 
+  while (Date.now() - startTime < timeoutMs) {
+    // Try to acquire lock (non-blocking)
+    const result = await prisma.$queryRaw<[{ pg_try_advisory_lock: boolean }]>`
+      SELECT pg_try_advisory_lock(hashtext(${userId}))
+    `
+
+    if (result[0]?.pg_try_advisory_lock) {
+      return true // Lock acquired
+    }
+
+    // Wait before retrying
+    await new Promise((resolve) => setTimeout(resolve, retryInterval))
+  }
+
+  return false // Timeout
+}
 
 /**
  * Create anonymous checkout session
@@ -171,7 +197,7 @@ export async function createAnonymousCheckout(
         amountCents: price.unit_amount || 0,
         currency: price.currency,
         status: "awaiting_payment",
-        metadata: validated.metadata || {},
+        metadata: (validated.metadata || {}) as Prisma.InputJsonValue,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
       },
     })
@@ -179,7 +205,7 @@ export async function createAnonymousCheckout(
     // 9. Create audit event
     await createAuditEvent({
       userId: null, // No user yet
-      type: "subscription.checkout_created",
+      type: AuditEventType.SUBSCRIPTION_CHECKOUT_CREATED,
       data: {
         email: validated.email,
         sessionId: session.id,
@@ -227,8 +253,15 @@ export async function linkPendingSubscription(
   // Acquire advisory lock to serialize linking for same user
   // This prevents concurrent webhook + auth.ts + manual linking
   try {
-    // Acquire lock (Postgres-specific)
-    await prisma.$executeRaw`SELECT pg_advisory_lock(hashtext(${userId}))`
+    // Acquire lock with timeout (Postgres-specific)
+    // Try to acquire lock for up to 5 seconds to prevent indefinite blocking
+    const lockAcquired = await acquireAdvisoryLock(userId, 5000)
+    if (!lockAcquired) {
+      console.error("[linkPendingSubscription] Failed to acquire lock within timeout", {
+        userId,
+      })
+      return { success: false, error: "lock_timeout" }
+    }
 
     // 1. Get user with email
     const user = await prisma.user.findUnique({
@@ -427,7 +460,7 @@ export async function linkPendingSubscription(
     // 8. Audit event
     await createAuditEvent({
       userId: user.id,
-      type: "subscription.linked",
+      type: AuditEventType.SUBSCRIPTION_LINKED,
       data: {
         subscriptionId: subscription.id,
         pendingSubscriptionId: pending.id,

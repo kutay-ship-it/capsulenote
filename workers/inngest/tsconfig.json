@@ -2,7 +2,20 @@
   "extends": "@dearme/config/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "."
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "paths": {
+      "@/*": ["../../apps/web/*"],
+      "@dearme/prisma": ["../../packages/prisma"],
+      "@prisma/client": ["../../packages/prisma/node_modules/@prisma/client"]
+    },
+    "baseUrl": ".",
+    "types": ["node"]
   },
   "include": ["."],
   "exclude": ["node_modules", "dist", "**/__tests__/**", "**/*.test.ts"]

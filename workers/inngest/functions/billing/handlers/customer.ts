@@ -59,6 +59,7 @@ export async function handleCustomerUpdated(customer: Stripe.Customer): Promise<
 
   const profile = await prisma.profile.findUnique({
     where: { stripeCustomerId: customer.id },
+    include: { user: true },
   })
 
   if (!profile) {
@@ -69,7 +70,7 @@ export async function handleCustomerUpdated(customer: Stripe.Customer): Promise<
   }
 
   // Sync email if changed (Clerk is source of truth but keep in sync)
-  if (customer.email && customer.email !== profile.user.email) {
+  if (customer.email && profile.user && customer.email !== profile.user.email) {
     console.log("[Customer Handler] Customer email changed in Stripe", {
       customerId: customer.id,
       oldEmail: profile.user.email,

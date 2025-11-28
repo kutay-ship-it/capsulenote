@@ -81,7 +81,7 @@ export async function generateLetterCreatedEmail({
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   ${m.steps
                     .map(
-                      (step) => `
+                      (step: string) => `
                   <tr>
                     <td style="padding: 8px 0;">
                       <div style="font-size: 15px; color: #374151; line-height: 1.6;">${step}</div>

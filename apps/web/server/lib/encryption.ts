@@ -91,10 +91,10 @@ export async function encrypt(plaintext: string, _keyVersion?: number): Promise<
     const masterKey = getMasterKey(currentVersion)
     const nonce = generateNonce()
 
-    // Import master key
+    // Import master key - cast to ArrayBuffer to satisfy BufferSource type
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
-      masterKey,
+      masterKey.buffer.slice(masterKey.byteOffset, masterKey.byteOffset + masterKey.byteLength) as ArrayBuffer,
       { name: "AES-GCM", length: 256 },
       false,
       ["encrypt"]
@@ -102,8 +102,9 @@ export async function encrypt(plaintext: string, _keyVersion?: number): Promise<
 
     // Encrypt
     const plaintextBuffer = new TextEncoder().encode(plaintext)
+    const nonceView = new Uint8Array(nonce.buffer.slice(nonce.byteOffset, nonce.byteOffset + nonce.byteLength))
     const ciphertextBuffer = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: nonce },
+      { name: "AES-GCM", iv: nonceView as unknown as BufferSource },
       cryptoKey,
       plaintextBuffer
     )
@@ -145,20 +146,22 @@ export async function decrypt(
     // Get the specific key version used to encrypt this data
     const masterKey = getMasterKey(keyVersion)
 
-    // Import master key
+    // Import master key - cast to ArrayBuffer to satisfy BufferSource type
     const cryptoKey = await crypto.subtle.importKey(
       "raw",
-      masterKey,
+      masterKey.buffer.slice(masterKey.byteOffset, masterKey.byteOffset + masterKey.byteLength) as ArrayBuffer,
       { name: "AES-GCM", length: 256 },
       false,
       ["decrypt"]
     )
 
-    // Decrypt
+    // Decrypt - ensure proper ArrayBuffer types for nonce and ciphertext
+    const nonceView = new Uint8Array(nonce.buffer.slice(nonce.byteOffset, nonce.byteOffset + nonce.byteLength))
+    const ciphertextView = new Uint8Array(ciphertext.buffer.slice(ciphertext.byteOffset, ciphertext.byteOffset + ciphertext.byteLength))
     const plaintextBuffer = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: nonce },
+      { name: "AES-GCM", iv: nonceView as unknown as BufferSource },
       cryptoKey,
-      ciphertext
+      ciphertextView as unknown as BufferSource
     )
 
     return new TextDecoder().decode(plaintextBuffer)

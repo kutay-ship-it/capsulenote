@@ -8,6 +8,16 @@
 
 import Stripe from "stripe"
 import { prisma } from "@dearme/prisma"
+
+/**
+ * Extended Invoice type to handle properties that exist at runtime
+ * but may be missing from newer Stripe type definitions
+ */
+interface InvoiceWithExpandedFields extends Stripe.Invoice {
+  payment_intent?: string | Stripe.PaymentIntent | null
+  subscription?: string | Stripe.Subscription | null
+}
+
 import {
   getUserByStripeCustomer,
   sendBillingEmail,
@@ -23,7 +33,7 @@ import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
  *
  * @param invoice - Stripe Invoice object
  */
-export async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
+export async function handleInvoicePaymentSucceeded(invoice: InvoiceWithExpandedFields): Promise<void> {
   const customerId = invoice.customer as string
 
   console.log("[Invoice Handler] Payment succeeded", {
@@ -42,18 +52,26 @@ export async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Pr
   }
 
   // Record payment
+  // Note: payment_intent can be string | PaymentIntent | null depending on expansion
+  const paymentIntentId = typeof invoice.payment_intent === "string"
+    ? invoice.payment_intent
+    : invoice.payment_intent?.id ?? null
+  const subscriptionId = typeof invoice.subscription === "string"
+    ? invoice.subscription
+    : invoice.subscription?.id ?? null
+
   await prisma.payment.create({
     data: {
       userId: user.id,
       type: "subscription",
       amountCents: invoice.amount_paid,
       currency: invoice.currency,
-      stripePaymentIntentId: invoice.payment_intent as string,
+      stripePaymentIntentId: paymentIntentId,
       status: "succeeded",
       metadata: {
         invoiceId: invoice.id,
         invoiceNumber: invoice.number,
-        subscriptionId: invoice.subscription,
+        subscriptionId: subscriptionId,
       },
     },
   })
@@ -88,7 +106,7 @@ export async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Pr
  *
  * @param invoice - Stripe Invoice object
  */
-export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+export async function handleInvoicePaymentFailed(invoice: InvoiceWithExpandedFields): Promise<void> {
   const customerId = invoice.customer as string
 
   console.log("[Invoice Handler] Payment failed", {
@@ -108,13 +126,18 @@ export async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promi
   }
 
   // Record failed payment
+  // Note: payment_intent can be string | PaymentIntent | null depending on expansion
+  const failedPaymentIntentId = typeof invoice.payment_intent === "string"
+    ? invoice.payment_intent
+    : invoice.payment_intent?.id ?? null
+
   await prisma.payment.create({
     data: {
       userId: user.id,
       type: "subscription",
       amountCents: invoice.amount_due,
       currency: invoice.currency,
-      stripePaymentIntentId: invoice.payment_intent as string,
+      stripePaymentIntentId: failedPaymentIntentId,
       status: "failed",
       metadata: {
         invoiceId: invoice.id,

@@ -34,6 +34,8 @@ export const AuditEventType = {
   SUBSCRIPTION_RESUMED: "subscription.resumed",
   SUBSCRIPTION_PAUSED: "subscription.paused",
   SUBSCRIPTION_TRIAL_ENDING: "subscription.trial_ending",
+  SUBSCRIPTION_LINKED: "subscription.linked",
+  SUBSCRIPTION_CHECKOUT_CREATED: "subscription.checkout_created",
 
   // Billing portal events
   BILLING_PORTAL_ACCESSED: "billing_portal.accessed",
