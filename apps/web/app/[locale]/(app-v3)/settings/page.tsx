@@ -30,11 +30,11 @@ import { SettingsTabsV3, SettingsTabsV3Skeleton, type SettingsTab } from "@/comp
 import { ProfileFieldsV3 } from "@/components/v3/settings/profile-fields-v3"
 import { AddressesSettingsV3 } from "@/components/v3/settings/addresses-settings-v3"
 
-// Reuse existing client components
-import { ExportDataButton } from "@/app/[locale]/(app)/settings/privacy/_components/export-data-button"
-import { DeleteDataButton } from "@/app/[locale]/(app)/settings/privacy/_components/delete-data-button"
-import { ManageSubscriptionButton } from "@/app/[locale]/(app)/settings/billing/_components/manage-subscription-button"
-import { AddOnPurchase } from "@/app/[locale]/(app)/settings/billing/_components/addon-purchase"
+// Reuse existing client components from legacy
+import { ExportDataButton } from "@/app/[locale]/(legacy)/(app)/settings-legacy/privacy/_components/export-data-button"
+import { DeleteDataButton } from "@/app/[locale]/(legacy)/(app)/settings-legacy/privacy/_components/delete-data-button"
+import { ManageSubscriptionButton } from "@/app/[locale]/(legacy)/(app)/settings-legacy/billing/_components/manage-subscription-button"
+import { AddOnPurchase } from "@/app/[locale]/(legacy)/(app)/settings-legacy/billing/_components/addon-purchase"
 import { ReferralShareV3 } from "@/components/v3/settings/referral-share-v3"
 
 // Force dynamic rendering
