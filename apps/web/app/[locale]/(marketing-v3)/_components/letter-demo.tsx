@@ -152,7 +152,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                 style={{ borderRadius: "2px" }}
               >
                 <PenLine className="h-3.5 w-3.5" strokeWidth={2} />
-                <span>Demo Letter</span>
+                <span>Your First Letter</span>
               </div>
 
               {/* Mail stamp */}
