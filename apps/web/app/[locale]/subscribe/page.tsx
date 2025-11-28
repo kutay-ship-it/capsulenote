@@ -18,12 +18,11 @@ import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { AlertCircle, Info } from "lucide-react"
 
 import { EmailCaptureForm } from "./_components/email-capture-form"
-import { SubscribePricingCard } from "./_components/subscribe-pricing-card"
+import { SubscribePricingWrapper } from "./_components/subscribe-pricing-wrapper"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("subscribe")
@@ -45,13 +44,14 @@ interface SubscribePageProps {
     timezone?: string
     recipientName?: string
     recipientType?: string
+    view?: "new" | "old"  // Toggle between pricing views
   }>
 }
 
 export default async function SubscribePage({ searchParams }: SubscribePageProps) {
   const t = await getTranslations("subscribe")
   const params = await searchParams
-  const { email, letterId, deliveryDate, deliveryType, timezone, recipientName, recipientType } = params
+  const { email, letterId, deliveryDate, deliveryType, timezone, recipientName, recipientType, view } = params
 
   // If email already belongs to active subscriber, prompt sign-in instead of paywall
   if (email) {
@@ -101,21 +101,6 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
   return (
     <div className="container px-4 py-12 sm:px-6 sm:py-16 md:py-20">
       <div className="mx-auto max-w-6xl space-y-12">
-        {/* Hero Section */}
-        <div className="space-y-6 text-center">
-          <Badge variant="outline" className="text-xs uppercase tracking-wide">
-            {t("hero.badge")}
-          </Badge>
-
-          <h1 className="font-mono text-4xl font-normal uppercase tracking-wide text-charcoal sm:text-5xl md:text-6xl">
-            {t("hero.title")}
-          </h1>
-
-          <p className="mx-auto max-w-2xl font-mono text-base leading-relaxed text-gray-secondary sm:text-lg">
-            {t("hero.description")}
-          </p>
-        </div>
-
         {/* Payment Status Banners */}
         {pendingSubscription && (
           <Alert
@@ -163,87 +148,45 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
         ) : (
           // Pricing Cards with Locked Email
           <>
-            {/* Email Locked Notice */}
-            <Alert>
-              <Info className="h-4 w-4" />
-              <AlertTitle>{t("emailLocked.title")}</AlertTitle>
-              <AlertDescription>
-                {t("emailLocked.description", { email })}{" "}
-                <a
-                  href={`/subscribe${letterId ? `?letterId=${letterId}` : ""}`}
-                  className="underline hover:opacity-70"
-                >
-                  {t("emailLocked.changeEmail")}
-                </a>
-              </AlertDescription>
-            </Alert>
+            {/* Pricing Cards - Switchable View */}
+            <SubscribePricingWrapper
+              email={email}
+              letterId={letterId}
+              metadata={checkoutMetadata}
+              digitalPriceId={digitalPriceId}
+              paperPriceId={paperPriceId}
+              useNewView={view !== "old"}
+            />
 
-            {/* Pricing Cards */}
-            <div className="grid gap-8 lg:grid-cols-2 lg:gap-6">
-              <SubscribePricingCard
-                email={email}
-                name={t("plans.digital.name")}
-                price={9}
-                interval="year"
-                description={t("plans.digital.description")}
-                features={[
-                  t("plans.digital.features.emailDeliveries"),
-                  t("plans.digital.features.scheduleYears"),
-                  t("plans.digital.features.timezoneReminders"),
-                  t("plans.digital.features.encryptedStorage"),
-                ]}
-                priceId={digitalPriceId}
-                letterId={letterId}
-                metadata={checkoutMetadata}
-              />
-
-              <SubscribePricingCard
-                email={email}
-                name={t("plans.paper.name")}
-                price={29}
-                interval="year"
-                description={t("plans.paper.description")}
-                features={[
-                  t("plans.paper.features.emailDeliveries"),
-                  t("plans.paper.features.physicalLetters"),
-                  t("plans.paper.features.addressReminders"),
-                  t("plans.paper.features.priorityRouting"),
-                ]}
-                priceId={paperPriceId}
-                letterId={letterId}
-                metadata={checkoutMetadata}
-                highlighted
-                popular
-              />
-            </div>
-
-            {/* Trust Signals */}
-            <div className="border-2 border-charcoal bg-off-white p-6 rounded-lg">
-              <div className="grid gap-4 sm:grid-cols-3 text-center">
-                <div>
-                  <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                    🔒 {t("trustSignals.security.title")}
-                  </p>
-                  <p className="font-mono text-xs text-gray-secondary mt-1">
-                    {t("trustSignals.security.description")}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                    💳 {t("trustSignals.payments.title")}
-                  </p>
-                  <p className="font-mono text-xs text-gray-secondary mt-1">{t("trustSignals.payments.description")}</p>
-                </div>
-                <div>
-                  <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                    ❌ {t("trustSignals.cancel.title")}
-                  </p>
-                  <p className="font-mono text-xs text-gray-secondary mt-1">
-                    {t("trustSignals.cancel.description")}
-                  </p>
+            {/* Trust Signals - Only show for old view (new view has its own) */}
+            {view === "old" && (
+              <div className="border-2 border-charcoal bg-off-white p-6 rounded-lg">
+                <div className="grid gap-4 sm:grid-cols-3 text-center">
+                  <div>
+                    <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+                      🔒 {t("trustSignals.security.title")}
+                    </p>
+                    <p className="font-mono text-xs text-gray-secondary mt-1">
+                      {t("trustSignals.security.description")}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+                      💳 {t("trustSignals.payments.title")}
+                    </p>
+                    <p className="font-mono text-xs text-gray-secondary mt-1">{t("trustSignals.payments.description")}</p>
+                  </div>
+                  <div>
+                    <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+                      ❌ {t("trustSignals.cancel.title")}
+                    </p>
+                    <p className="font-mono text-xs text-gray-secondary mt-1">
+                      {t("trustSignals.cancel.description")}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>
