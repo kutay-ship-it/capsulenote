@@ -21,8 +21,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LetterEditor } from "@/components/letter-editor"
 import { DatePicker } from "@/components/ui/date-picker"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
-type RecipientType = "myself" | "someone-else"
+type RecipientType = "myself"
 
 const DATE_PRESETS = [
   { label: "6 Months", months: 6, key: "6mo" },
@@ -40,12 +46,11 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
 
-  // Form state - simplified
+  // Form state - simplified (recipient is always "myself" for demo)
   const [title, setTitle] = React.useState("")
   const [bodyRich, setBodyRich] = React.useState<Record<string, unknown> | null>(null)
   const [bodyHtml, setBodyHtml] = React.useState("")
-  const [recipientType, setRecipientType] = React.useState<RecipientType>("myself")
-  const [recipientName, setRecipientName] = React.useState("")
+  const recipientType: RecipientType = "myself"
   const [recipientEmail, setRecipientEmail] = React.useState("")
   const [deliveryDate, setDeliveryDate] = React.useState<Date | undefined>(undefined)
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
@@ -72,14 +77,6 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
     setSelectedPreset(null)
   }
 
-  const handleRecipientTypeChange = (type: RecipientType) => {
-    setRecipientType(type)
-    if (type === "myself") {
-      setRecipientName("")
-    }
-    setRecipientEmail("")
-  }
-
   // Save draft to localStorage and redirect to sign-up
   const handleTryProduct = () => {
     // Save the draft so users can continue after sign-up
@@ -88,8 +85,8 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
         title,
         bodyRich,
         bodyHtml,
-        recipientType: recipientType === "myself" ? "self" : "other",
-        recipientName,
+        recipientType: "self",
+        recipientName: "",
         recipientEmail,
         deliveryChannels: ["email"],
         deliveryDate: deliveryDate?.toISOString() ?? null,
@@ -241,59 +238,38 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     </label>
 
                     {/* Recipient Type Buttons */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleRecipientTypeChange("myself")}
-                        className={cn(
-                          "flex items-center justify-center gap-2 border-2 border-charcoal px-3 py-2.5 font-mono text-[10px] uppercase tracking-wider transition-all duration-150",
-                          "hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]",
-                          recipientType === "myself"
-                            ? "bg-duck-yellow text-charcoal shadow-[3px_3px_0_theme(colors.charcoal)]"
-                            : "bg-white text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] hover:bg-duck-yellow"
-                        )}
-                        style={{ borderRadius: "2px" }}
-                      >
-                        <User className="h-3.5 w-3.5" strokeWidth={2} />
-                        Myself
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRecipientTypeChange("someone-else")}
-                        className={cn(
-                          "flex items-center justify-center gap-2 border-2 border-charcoal px-3 py-2.5 font-mono text-[10px] uppercase tracking-wider transition-all duration-150",
-                          "hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]",
-                          recipientType === "someone-else"
-                            ? "bg-teal-primary text-white shadow-[3px_3px_0_theme(colors.charcoal)]"
-                            : "bg-white text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] hover:bg-teal-primary/20"
-                        )}
-                        style={{ borderRadius: "2px" }}
-                      >
-                        <Users className="h-3.5 w-3.5" strokeWidth={2} />
-                        Someone Else
-                      </button>
-                    </div>
-
-                    {/* Recipient Name - Only for "Someone Else" */}
-                    {recipientType === "someone-else" && (
-                      <div className="space-y-2 pt-2">
-                        <label
-                          htmlFor="demo-recipientName"
-                          className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
-                        >
-                          Their Name
-                        </label>
-                        <Input
-                          id="demo-recipientName"
-                          type="text"
-                          value={recipientName}
-                          onChange={(e) => setRecipientName(e.target.value)}
-                          placeholder="John Doe"
-                          className="border-2 border-charcoal font-mono text-sm"
+                    <TooltipProvider>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          className="flex items-center justify-center gap-2 border-2 border-charcoal px-3 py-2.5 font-mono text-[10px] uppercase tracking-wider bg-duck-yellow text-charcoal shadow-[3px_3px_0_theme(colors.charcoal)]"
                           style={{ borderRadius: "2px" }}
-                        />
+                        >
+                          <User className="h-3.5 w-3.5" strokeWidth={2} />
+                          Myself
+                        </button>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              disabled
+                              className="flex items-center justify-center gap-2 border-2 border-charcoal/40 px-3 py-2.5 font-mono text-[10px] uppercase tracking-wider bg-white/50 text-charcoal/40 cursor-not-allowed"
+                              style={{ borderRadius: "2px" }}
+                            >
+                              <Users className="h-3.5 w-3.5" strokeWidth={2} />
+                              Someone Else
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            className="max-w-[200px] border-2 border-charcoal bg-duck-cream font-mono text-xs text-charcoal"
+                            style={{ borderRadius: "2px" }}
+                          >
+                            <p>Your first letter should be to yourself — future you deserves it first! ✨</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
-                    )}
+                    </TooltipProvider>
 
                     {/* Recipient Email */}
                     <div className="space-y-2 pt-1">
@@ -302,14 +278,14 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                         className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70 flex items-center gap-1.5"
                       >
                         <AtSign className="h-3 w-3" strokeWidth={2} />
-                        {recipientType === "myself" ? "Your Email" : "Their Email"}
+                        Your Email
                       </label>
                       <Input
                         id="demo-email"
                         type="email"
                         value={recipientEmail}
                         onChange={(e) => setRecipientEmail(e.target.value)}
-                        placeholder={recipientType === "myself" ? "your@email.com" : "their@email.com"}
+                        placeholder="your@email.com"
                         className="border-2 border-charcoal font-mono text-sm"
                         style={{ borderRadius: "2px" }}
                       />
@@ -418,7 +394,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     className="w-full gap-2 h-12 group"
                   >
                     <Stamp className="h-4 w-4" strokeWidth={2} />
-                    {isSignedIn ? "Continue Writing" : "Seal & Sign Up Free"}
+                    {isSignedIn ? "Continue Writing" : "Seal & Schedule"}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
 
@@ -426,7 +402,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                   <p className="font-mono text-[10px] text-center text-charcoal/60 uppercase tracking-wider">
                     {isSignedIn
                       ? "Continue in the full editor"
-                      : "Your draft will be saved after sign-up"}
+                      : "Sign up free to schedule delivery"}
                   </p>
 
                   {/* Features list */}
