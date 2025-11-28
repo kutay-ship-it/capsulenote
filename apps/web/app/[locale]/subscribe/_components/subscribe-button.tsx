@@ -35,6 +35,10 @@ interface SubscribeButtonProps {
   size?: "default" | "sm" | "lg" | "icon"
   /** Additional CSS classes */
   className?: string
+  /** Inline styles */
+  style?: React.CSSProperties
+  /** Custom children (overrides default button text) */
+  children?: React.ReactNode
 }
 
 export function SubscribeButton({
@@ -46,6 +50,8 @@ export function SubscribeButton({
   variant = "secondary",
   size = "lg",
   className,
+  style,
+  children,
 }: SubscribeButtonProps) {
   const [isPending, startTransition] = useTransition()
   const t = useTranslations("subscribe")
@@ -100,12 +106,15 @@ export function SubscribeButton({
       variant={variant}
       size={size}
       className={className}
+      style={style}
     >
       {isPending ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           {t("button.loading")}
         </>
+      ) : children ? (
+        children
       ) : (
         t("button.subscribe", { planName })
       )}
