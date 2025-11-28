@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server"
 import { HeroSection } from "./_components/hero-section"
 import { FeaturesSection } from "./_components/features-section"
 import { HowItWorksSection } from "./_components/how-it-works-section"
+import { LetterDemo } from "./_components/letter-demo"
 import { TestimonialsSection } from "./_components/testimonials-section"
 import { CTASection } from "./_components/cta-section"
 import { NavbarV3 } from "./_components/navbar-v3"
@@ -34,6 +35,7 @@ export default async function MarketingPage({
         <div id="how-it-works">
           <HowItWorksSection />
         </div>
+        <LetterDemo isSignedIn={isSignedIn} />
         <TestimonialsSection />
         <CTASection isSignedIn={isSignedIn} />
       </main>
