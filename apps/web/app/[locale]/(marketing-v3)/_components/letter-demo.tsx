@@ -398,28 +398,6 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
 
-                  {/* Helper text */}
-                  <p className="font-mono text-[10px] text-center text-charcoal/60 uppercase tracking-wider">
-                    {isSignedIn
-                      ? "Continue in the full editor"
-                      : "Sign up free to schedule delivery"}
-                  </p>
-
-                  {/* Features list */}
-                  <div className="pt-2 space-y-2">
-                    {[
-                      "End-to-end encryption",
-                      "Email & physical mail delivery",
-                      "Schedule years in advance",
-                    ].map((feature) => (
-                      <div key={feature} className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 bg-teal-primary" style={{ borderRadius: "2px" }} />
-                        <span className="font-mono text-[10px] text-charcoal/70 uppercase tracking-wider">
-                          {feature}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </div>
