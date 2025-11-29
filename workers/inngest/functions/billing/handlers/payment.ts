@@ -51,18 +51,28 @@ export async function handlePaymentIntentSucceeded(
 
   const userId = paymentIntent.metadata.userId
 
-  // IDEMPOTENCY CHECK: Skip if already processed
-  // The unique constraint on stripePaymentIntentId also prevents duplicates at DB level
+  // IDEMPOTENCY CHECK: Skip only if already processed as succeeded
+  // If a previous attempt failed, we should update it to succeeded and grant credits
   const existingPayment = await prisma.payment.findUnique({
     where: { stripePaymentIntentId: paymentIntent.id },
   })
 
   if (existingPayment) {
-    console.log("[Payment Handler] Payment already processed, skipping (idempotent)", {
+    if (existingPayment.status === "succeeded") {
+      console.log("[Payment Handler] Payment already processed as succeeded, skipping (idempotent)", {
+        paymentIntentId: paymentIntent.id,
+        existingPaymentId: existingPayment.id,
+      })
+      return
+    }
+
+    // Payment exists but was failed - this is a retry that succeeded
+    // We'll update the existing record instead of creating a new one
+    console.log("[Payment Handler] Previous failed payment now succeeded, updating", {
       paymentIntentId: paymentIntent.id,
       existingPaymentId: existingPayment.id,
+      previousStatus: existingPayment.status,
     })
-    return
   }
 
   // ATOMIC TRANSACTION: All operations succeed or none do
@@ -71,18 +81,35 @@ export async function handlePaymentIntentSucceeded(
   const creditAmount = isNaN(quantity) ? 1 : quantity
 
   await prisma.$transaction(async (tx) => {
-    // 1. Record payment
-    await tx.payment.create({
-      data: {
-        userId,
-        type: (paymentIntent.metadata.type as any) || "shipping_addon",
-        amountCents: paymentIntent.amount,
-        currency: paymentIntent.currency,
-        stripePaymentIntentId: paymentIntent.id,
-        status: "succeeded",
-        metadata: paymentIntent.metadata,
-      },
-    })
+    // 1. Record or update payment
+    if (existingPayment) {
+      // Update existing failed payment to succeeded
+      await tx.payment.update({
+        where: { id: existingPayment.id },
+        data: {
+          status: "succeeded",
+          metadata: {
+            ...(existingPayment.metadata as object || {}),
+            ...paymentIntent.metadata,
+            retriedFromStatus: existingPayment.status,
+            retriedAt: new Date().toISOString(),
+          },
+        },
+      })
+    } else {
+      // Create new payment record
+      await tx.payment.create({
+        data: {
+          userId,
+          type: (paymentIntent.metadata.type as any) || "shipping_addon",
+          amountCents: paymentIntent.amount,
+          currency: paymentIntent.currency,
+          stripePaymentIntentId: paymentIntent.id,
+          status: "succeeded",
+          metadata: paymentIntent.metadata,
+        },
+      })
+    }
 
     // 2. Apply add-on credits if applicable
     if (addonType) {
@@ -171,6 +198,29 @@ export async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentInt
   }
 
   const userId = paymentIntent.metadata.userId
+
+  // Check if payment already exists (could be already succeeded due to race condition)
+  const existingPayment = await prisma.payment.findUnique({
+    where: { stripePaymentIntentId: paymentIntent.id },
+  })
+
+  if (existingPayment) {
+    // If already succeeded, don't overwrite with failed status
+    if (existingPayment.status === "succeeded") {
+      console.log("[Payment Handler] Payment already succeeded, ignoring failed event (race condition)", {
+        paymentIntentId: paymentIntent.id,
+        existingPaymentId: existingPayment.id,
+      })
+      return
+    }
+
+    // Already recorded as failed, skip duplicate
+    console.log("[Payment Handler] Failed payment already recorded, skipping (idempotent)", {
+      paymentIntentId: paymentIntent.id,
+      existingPaymentId: existingPayment.id,
+    })
+    return
+  }
 
   // Record failed payment
   await prisma.payment.create({
