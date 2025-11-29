@@ -9,7 +9,6 @@ import {
   Clock,
   AtSign,
   Trash2,
-  Eye,
   PenLine,
   Settings,
   User,
@@ -202,6 +201,9 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       )
       if (anonymousDraft.deliveryDate) {
         setDeliveryDate(new Date(anonymousDraft.deliveryDate))
+      }
+      if (anonymousDraft.selectedPreset) {
+        setSelectedPreset(anonymousDraft.selectedPreset)
       }
       setRestoredFromDraft(true)
 
@@ -1018,18 +1020,6 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
 
               {/* Secondary actions row */}
               <div className="flex gap-2">
-                {/* Preview Button */}
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!bodyHtml}
-                  className="flex-1 gap-2 h-10 border-2 border-charcoal bg-white hover:bg-off-white"
-                  style={{ borderRadius: "2px" }}
-                >
-                  <Eye className="h-4 w-4" strokeWidth={2} />
-                  Preview
-                </Button>
-
                 {/* Clear Button */}
                 <AlertDialog>
                   <AlertDialogTrigger asChild>

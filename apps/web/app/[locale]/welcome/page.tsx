@@ -8,15 +8,14 @@
  */
 
 import { useEffect, useState } from "react"
-import { useRouter } from "@/i18n/routing"
+import { Link } from "@/i18n/routing"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Loader2, Check, Sparkles } from "lucide-react"
+import { Loader2, Sparkles } from "lucide-react"
 import { getAnonymousDraft } from "@/lib/localStorage-letter"
 import { useTranslations } from "next-intl"
 
 export default function WelcomePage() {
-  const router = useRouter()
   const t = useTranslations("welcome")
   const [status, setStatus] = useState<'checking' | 'ready'>('checking')
   const [hasDraft, setHasDraft] = useState(false)
@@ -65,11 +64,13 @@ export default function WelcomePage() {
 
               <div className="border-t-2 border-charcoal pt-6 space-y-4">
                 <Button
-                  onClick={() => router.push('/letters/new')}
+                  asChild
                   className="w-full border-2 border-charcoal bg-charcoal font-mono text-sm font-bold uppercase text-white hover:bg-gray-800"
                   style={{ borderRadius: "2px" }}
                 >
-                  {hasDraft ? "Continue My Letter" : "Write My First Letter"}
+                  <Link href="/letters/new">
+                    {hasDraft ? "Continue My Letter" : "Write My First Letter"}
+                  </Link>
                 </Button>
                 <p className="font-mono text-xs text-charcoal/60">
                   {hasDraft

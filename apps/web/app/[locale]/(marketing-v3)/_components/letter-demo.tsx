@@ -197,7 +197,8 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
             "email",
             timezone,
             "self",
-            ""
+            "",
+            selectedPreset
           )
 
           if (!saved) {
