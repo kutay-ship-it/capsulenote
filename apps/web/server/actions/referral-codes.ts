@@ -4,6 +4,7 @@ import { prisma } from "@/server/lib/db"
 import { requireUser } from "@/server/lib/auth"
 import { revalidatePath } from "next/cache"
 import { nanoid } from "nanoid"
+import { Prisma } from "@prisma/client"
 
 /**
  * Generate a unique referral code
@@ -20,71 +21,92 @@ function generateCode(): string {
   return code
 }
 
-/**
- * Get or create a referral code for the current user
- */
-export async function getOrCreateReferralCode(): Promise<{
+const REFERRAL_CODE_SELECT = {
+  code: true,
+  clickCount: true,
+  signupCount: true,
+  convertCount: true,
+  isActive: true,
+  createdAt: true,
+} as const
+
+type ReferralCodeResult = {
   code: string
   clickCount: number
   signupCount: number
   convertCount: number
   isActive: boolean
   createdAt: Date
-}> {
+}
+
+/**
+ * Get or create a referral code for the current user
+ *
+ * Uses a create-or-fetch-on-P2002 pattern to handle concurrent calls safely.
+ * This prevents race conditions when multiple parallel requests try to create
+ * a referral code for the same user (e.g., settings page loading multiple tabs).
+ */
+export async function getOrCreateReferralCode(): Promise<ReferralCodeResult> {
   const user = await requireUser()
 
-  // Check if user already has a referral code
-  let referralCode = await prisma.referralCode.findUnique({
+  // First, try to get existing code (fast path)
+  const existingCode = await prisma.referralCode.findUnique({
     where: { userId: user.id },
-    select: {
-      code: true,
-      clickCount: true,
-      signupCount: true,
-      convertCount: true,
-      isActive: true,
-      createdAt: true,
-    },
+    select: REFERRAL_CODE_SELECT,
   })
 
-  if (referralCode) {
-    return referralCode
+  if (existingCode) {
+    return existingCode
   }
 
-  // Generate a unique code
-  let code: string
-  let attempts = 0
-  const maxAttempts = 10
+  // No existing code, attempt to create one
+  // Use retry loop to handle both code collision and userId race condition
+  const maxAttempts = 5
 
-  do {
-    code = generateCode()
-    const existing = await prisma.referralCode.findUnique({
-      where: { code },
-    })
-    if (!existing) break
-    attempts++
-  } while (attempts < maxAttempts)
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const code = generateCode()
 
-  if (attempts >= maxAttempts) {
-    throw new Error("Failed to generate unique referral code")
+    try {
+      const referralCode = await prisma.referralCode.create({
+        data: {
+          userId: user.id,
+          code,
+        },
+        select: REFERRAL_CODE_SELECT,
+      })
+
+      return referralCode
+    } catch (error) {
+      // Handle P2002 unique constraint violations
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const target = error.meta?.target as string[] | undefined
+
+        // If userId constraint failed, another request created it - just fetch
+        if (target?.includes("user_id")) {
+          const existingByRace = await prisma.referralCode.findUnique({
+            where: { userId: user.id },
+            select: REFERRAL_CODE_SELECT,
+          })
+
+          if (existingByRace) {
+            return existingByRace
+          }
+          // If still not found (weird edge case), continue to retry
+        }
+
+        // If code constraint failed, code collision - retry with new code
+        if (target?.includes("code")) {
+          console.log(`[Referral] Code collision on attempt ${attempt + 1}, retrying...`)
+          continue
+        }
+      }
+
+      // Unknown error, rethrow
+      throw error
+    }
   }
 
-  // Create the referral code
-  referralCode = await prisma.referralCode.create({
-    data: {
-      userId: user.id,
-      code,
-    },
-    select: {
-      code: true,
-      clickCount: true,
-      signupCount: true,
-      convertCount: true,
-      isActive: true,
-      createdAt: true,
-    },
-  })
-
-  return referralCode
+  throw new Error("Failed to generate unique referral code after maximum attempts")
 }
 
 /**
@@ -185,4 +207,75 @@ export async function validateReferralCode(code: string): Promise<{
     valid: true,
     referrerUserId: referralCode.userId,
   }
+}
+
+/**
+ * Create a referral code for a user (server-side, no session required)
+ *
+ * This is called during user creation webhook to pre-generate the referral code.
+ * Uses the same P2002 handling pattern as getOrCreateReferralCode.
+ *
+ * @param userId - The user's database ID
+ * @returns The created referral code, or null if creation failed
+ */
+export async function createReferralCodeForUser(userId: string): Promise<string | null> {
+  // First, check if user already has a referral code
+  const existingCode = await prisma.referralCode.findUnique({
+    where: { userId },
+    select: { code: true },
+  })
+
+  if (existingCode) {
+    return existingCode.code
+  }
+
+  // Attempt to create a new code
+  const maxAttempts = 5
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const code = generateCode()
+
+    try {
+      const referralCode = await prisma.referralCode.create({
+        data: {
+          userId,
+          code,
+        },
+        select: { code: true },
+      })
+
+      console.log(`[Referral] Created referral code for user ${userId}: ${referralCode.code}`)
+      return referralCode.code
+    } catch (error) {
+      // Handle P2002 unique constraint violations
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const target = error.meta?.target as string[] | undefined
+
+        // If userId constraint failed, another process created it - just fetch
+        if (target?.includes("user_id")) {
+          const existingByRace = await prisma.referralCode.findUnique({
+            where: { userId },
+            select: { code: true },
+          })
+
+          if (existingByRace) {
+            return existingByRace.code
+          }
+        }
+
+        // If code constraint failed, code collision - retry with new code
+        if (target?.includes("code")) {
+          console.log(`[Referral] Code collision on attempt ${attempt + 1} for user ${userId}, retrying...`)
+          continue
+        }
+      }
+
+      // Log but don't throw - this is a background operation
+      console.error(`[Referral] Failed to create referral code for user ${userId}:`, error)
+      return null
+    }
+  }
+
+  console.error(`[Referral] Failed to generate unique referral code for user ${userId} after ${maxAttempts} attempts`)
+  return null
 }

@@ -213,9 +213,19 @@ export async function processReferralConversion(
 
 /**
  * Get referral link for current user
+ *
+ * @param code - Optional pre-fetched referral code to avoid duplicate getOrCreateReferralCode calls
  */
-export async function getReferralLink(): Promise<string> {
-  const referralCode = await getOrCreateReferralCode()
+export async function getReferralLink(code?: string): Promise<string> {
+  const referralCode = code ?? (await getOrCreateReferralCode()).code
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
-  return `${baseUrl}?ref=${referralCode.code}`
+  return `${baseUrl}?ref=${referralCode}`
+}
+
+/**
+ * Build referral link from code (no DB call)
+ */
+export async function buildReferralLink(code: string): Promise<string> {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+  return `${baseUrl}?ref=${code}`
 }

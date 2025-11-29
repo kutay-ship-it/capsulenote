@@ -7,6 +7,7 @@ import { linkPendingSubscription } from "@/app/[locale]/subscribe/actions"
 import { getClerkClient } from "@/server/lib/clerk"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 import { getDetectedTimezoneFromMetadata, isValidTimezone } from "@dearme/types"
+import { createReferralCodeForUser } from "@/server/actions/referral-codes"
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET
@@ -186,6 +187,18 @@ export async function POST(req: Request) {
             })
           }
         }
+
+        // Pre-generate referral code asynchronously (fire-and-forget)
+        // This ensures the code exists when user visits settings page
+        // Uses .then() to not block webhook response
+        createReferralCodeForUser(user.id).then((code) => {
+          if (code) {
+            console.log(`[Clerk Webhook] Pre-generated referral code for user ${user.id}`)
+          }
+        }).catch((error) => {
+          // Non-fatal: user can still generate code on-demand
+          console.warn(`[Clerk Webhook] Failed to pre-generate referral code:`, error)
+        })
 
         break
       }

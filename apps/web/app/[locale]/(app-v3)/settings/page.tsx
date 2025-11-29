@@ -21,7 +21,7 @@ import { getCurrentUser } from "@/server/lib/auth"
 import { getEntitlements } from "@/server/lib/entitlements"
 import { prisma } from "@/server/lib/db"
 import { getOrCreateReferralCode, getReferralStats } from "@/server/actions/referral-codes"
-import { getReferralLink } from "@/server/actions/referrals"
+import { buildReferralLink } from "@/server/actions/referrals"
 import { cn } from "@/lib/utils"
 
 import { SettingsHeaderV3 } from "@/components/v3/settings/settings-header-v3"
@@ -595,7 +595,9 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
   }
 
   // Parallel fetch ALL tab data for instant tab switching
-  const [entitlements, subscription, payments, addresses, referralCode, referralStats, referralLink] =
+  // Note: We call getOrCreateReferralCode once and build referralLink from the result
+  // to avoid race conditions from parallel calls to the same function
+  const [entitlements, subscription, payments, addresses, referralCode, referralStats] =
     await Promise.all([
       getEntitlements(user.id),
       prisma.subscription.findFirst({
@@ -624,8 +626,10 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
       }),
       getOrCreateReferralCode(),
       getReferralStats(),
-      getReferralLink(),
     ])
+
+  // Build referral link from the code (no DB call needed)
+  const referralLink = await buildReferralLink(referralCode.code)
 
   // Build translations object
   const translations = {
