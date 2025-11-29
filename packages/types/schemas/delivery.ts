@@ -8,6 +8,8 @@ export const deliveryStatusSchema = z.enum([
   "failed",
   "canceled",
 ])
+export const mailDeliveryModeSchema = z.enum(["send_on", "arrive_by"])
+export const mailTypeSchema = z.enum(["usps_first_class", "usps_standard"])
 
 export const scheduleDeliverySchema = z.object({
   letterId: z.string().uuid(),
@@ -22,6 +24,9 @@ export const scheduleDeliverySchema = z.object({
       doubleSided: z.boolean().default(false),
     })
     .optional(),
+  // Arrive-by mode fields (only for mail channel)
+  deliveryMode: mailDeliveryModeSchema.optional(), // Defaults to "send_on"
+  mailType: mailTypeSchema.optional(), // Defaults to "usps_first_class"
 })
 
 export const updateDeliverySchema = z.object({
@@ -36,6 +41,8 @@ export const cancelDeliverySchema = z.object({
 
 export type DeliveryChannel = z.infer<typeof deliveryChannelSchema>
 export type DeliveryStatus = z.infer<typeof deliveryStatusSchema>
+export type MailDeliveryMode = z.infer<typeof mailDeliveryModeSchema>
+export type MailType = z.infer<typeof mailTypeSchema>
 export type ScheduleDeliveryInput = z.infer<typeof scheduleDeliverySchema>
 export type UpdateDeliveryInput = z.infer<typeof updateDeliverySchema>
 export type CancelDeliveryInput = z.infer<typeof cancelDeliverySchema>

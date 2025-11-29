@@ -3,6 +3,7 @@ export * from "./client"
 
 // Letter delivery functions
 export * from "./functions/deliver-email"
+export * from "./functions/deliver-mail"
 export * from "./functions/send-letter-created-email"
 export * from "./functions/send-delivery-scheduled-email"
 export * from "./functions/lock-letter"

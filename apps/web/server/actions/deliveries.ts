@@ -20,6 +20,11 @@ import {
 } from "@/server/lib/entitlements"
 import { env } from "@/env.mjs"
 import { linkPendingSubscription } from "@/app/[locale]/subscribe/actions"
+import {
+  calculateJobScheduleDate,
+  validateArrivalDate,
+  type MailType,
+} from "@/server/lib/mail-delivery-calculator"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
 const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
@@ -182,7 +187,13 @@ export async function scheduleDelivery(
       }
     }
 
-    // For physical mail, check credits
+    // For physical mail, check credits and handle arrive-by mode
+    let mailDeliveryMode: "send_on" | "arrive_by" = "send_on"
+    let actualDeliverAt = data.deliverAt
+    let mailTransitDays: number | null = null
+    let mailTargetDate: Date | null = null
+    let mailSendDate: Date | null = null
+
     if (data.channel === 'mail') {
       if (!entitlements.features.canSchedulePhysicalMail) {
         await logger.warn('User attempted to schedule physical mail without Paper & Pixels', {
@@ -216,6 +227,52 @@ export async function scheduleDelivery(
             }
           }
         }
+      }
+
+      // Handle arrive-by mode for physical mail
+      mailDeliveryMode = data.deliveryMode ?? "send_on"
+      const mailType: MailType = data.mailType ?? "usps_first_class"
+
+      if (mailDeliveryMode === "arrive_by") {
+        // Validate that the arrival date is achievable
+        const validation = validateArrivalDate(data.deliverAt, mailType)
+
+        if (!validation.isAchievable) {
+          await logger.warn('Arrive-by date not achievable', {
+            userId: user.id,
+            targetDate: data.deliverAt,
+            earliestPossible: validation.calculation.earliestPossibleArrival,
+            mailType,
+          })
+
+          return {
+            success: false,
+            error: {
+              code: ErrorCodes.VALIDATION_FAILED,
+              message: validation.suggestion || "The requested arrival date is not achievable. Please select a later date.",
+              details: {
+                earliestPossibleArrival: validation.calculation.earliestPossibleArrival?.toISOString(),
+                transitDays: validation.calculation.transitDays,
+                bufferDays: validation.calculation.bufferDays,
+              }
+            }
+          }
+        }
+
+        // Calculate when to actually send the mail
+        const schedule = calculateJobScheduleDate(mailDeliveryMode, data.deliverAt, mailType)
+        actualDeliverAt = schedule.scheduleDate
+        mailTransitDays = schedule.transitDays
+        mailTargetDate = data.deliverAt
+        mailSendDate = schedule.scheduleDate
+
+        await logger.info('Calculated arrive-by schedule', {
+          userId: user.id,
+          targetDate: data.deliverAt,
+          sendDate: actualDeliverAt,
+          transitDays: mailTransitDays,
+          mailType,
+        })
       }
     }
 
@@ -308,15 +365,15 @@ export async function scheduleDelivery(
           })
         }
 
-        const isLocked = data.deliverAt.getTime() - Date.now() <= LOCK_WINDOW_MS
+        const isLocked = actualDeliverAt.getTime() - Date.now() <= LOCK_WINDOW_MS
 
-        // 2. Create delivery
+        // 2. Create delivery (use actualDeliverAt for arrive-by mode)
         const newDelivery = await tx.delivery.create({
           data: {
             userId: user.id,
             letterId: data.letterId,
             channel: data.channel,
-            deliverAt: data.deliverAt,
+            deliverAt: actualDeliverAt,
             timezoneAtCreation: data.timezone,
             status: "scheduled",
           },
@@ -351,6 +408,10 @@ export async function scheduleDelivery(
             data: {
               deliveryId: newDelivery.id,
               shippingAddressId: data.shippingAddressId,
+              deliveryMode: mailDeliveryMode,
+              targetDate: mailTargetDate,
+              sendDate: mailSendDate,
+              transitDays: mailTransitDays,
               printOptions: data.printOptions ?? { color: false, doubleSided: false },
             },
           })
@@ -362,9 +423,9 @@ export async function scheduleDelivery(
           data: {
             type: data.channel === "email" ? "email" : "physical",
             status: isLocked ? "LOCKED" : "SCHEDULED",
-            scheduledFor: data.deliverAt,
+            scheduledFor: actualDeliverAt,
             timezone: data.timezone,
-            lockedAt: isLocked ? new Date() : new Date(data.deliverAt.getTime() - LOCK_WINDOW_MS),
+            lockedAt: isLocked ? new Date() : new Date(actualDeliverAt.getTime() - LOCK_WINDOW_MS),
           },
         })
 
@@ -402,9 +463,14 @@ export async function scheduleDelivery(
     }
 
     // Trigger Inngest workflow - CRITICAL: must succeed
+    // Use different events for email vs mail delivery
+    const inngestEventName = data.channel === "mail"
+      ? "mail.delivery.scheduled"
+      : "delivery.scheduled"
+
     let eventId: string | null = null
     try {
-      eventId = await triggerInngestEvent("delivery.scheduled", { deliveryId: delivery.id })
+      eventId = await triggerInngestEvent(inngestEventName, { deliveryId: delivery.id })
 
       if (!eventId) {
         throw new Error("Inngest did not return an event ID")
@@ -419,7 +485,7 @@ export async function scheduleDelivery(
       await logger.info('Inngest event sent successfully', {
         deliveryId: delivery.id,
         eventId,
-        event: 'delivery.scheduled',
+        event: inngestEventName,
       })
     } catch (inngestError) {
       // CRITICAL: If Inngest fails, rollback delivery and refund credit atomically
@@ -504,7 +570,13 @@ export async function scheduleDelivery(
         deliveryId: delivery.id,
         letterId: data.letterId,
         channel: data.channel,
-        deliverAt: data.deliverAt.toISOString(),
+        deliverAt: actualDeliverAt.toISOString(),
+        ...(mailDeliveryMode === "arrive_by" && {
+          deliveryMode: mailDeliveryMode,
+          targetArrivalDate: mailTargetDate?.toISOString(),
+          sendDate: mailSendDate?.toISOString(),
+          transitDays: mailTransitDays,
+        }),
       },
     })
 
