@@ -67,8 +67,13 @@ describe('Authentication Integration Tests', () => {
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: 'DIGITAL_CAPSULE',
+        emailCredits: 6,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -78,10 +83,12 @@ describe('Authentication Integration Tests', () => {
           marketingOptIn: false,
           onboardingCompleted: true,
           stripeCustomerId: 'cus_123',
+          pushEnabled: false,
+          referredByCode: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      })
+      } as any)
 
       const { getCurrentUser } = await import('@/server/lib/auth')
       const user = await getCurrentUser()
@@ -128,8 +135,13 @@ describe('Authentication Integration Tests', () => {
         id: 'user_new_123',
         clerkUserId: 'clerk_user_new',
         email: 'newuser@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -139,10 +151,12 @@ describe('Authentication Integration Tests', () => {
           marketingOptIn: false,
           onboardingCompleted: false,
           stripeCustomerId: null,
+          pushEnabled: false,
+          referredByCode: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      })
+      } as any)
 
       // Mock no pending subscription
       vi.mocked(prisma.pendingSubscription.findFirst).mockResolvedValueOnce(null)
@@ -226,8 +240,13 @@ describe('Authentication Integration Tests', () => {
         id: 'user_race_123',
         clerkUserId: 'clerk_user_race',
         email: 'race@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -237,10 +256,12 @@ describe('Authentication Integration Tests', () => {
           marketingOptIn: false,
           onboardingCompleted: false,
           stripeCustomerId: null,
+          pushEnabled: false,
+          referredByCode: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      })
+      } as any)
 
       // Mock no pending subscription
       vi.mocked(prisma.pendingSubscription.findFirst).mockResolvedValueOnce(null)
@@ -281,8 +302,13 @@ describe('Authentication Integration Tests', () => {
         id: 'user_pending_123',
         clerkUserId: 'clerk_user_pending',
         email: 'pending@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -292,10 +318,12 @@ describe('Authentication Integration Tests', () => {
           marketingOptIn: false,
           onboardingCompleted: false,
           stripeCustomerId: null, // No Stripe customer yet
+          pushEnabled: false,
+          referredByCode: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      })
+      } as any)
 
       // Mock pending subscription found
       vi.mocked(prisma.pendingSubscription.findFirst).mockResolvedValueOnce({
@@ -303,20 +331,25 @@ describe('Authentication Integration Tests', () => {
         email: 'pending@example.com',
         status: 'payment_complete',
         stripeSessionId: 'cs_test_123',
-        plan: 'pro',
+        plan: 'DIGITAL_CAPSULE',
         linkedAt: null,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       // Mock refreshed user after linking
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({
         id: 'user_pending_123',
         clerkUserId: 'clerk_user_pending',
         email: 'pending@example.com',
-        stripeCustomerId: 'cus_new_123',
-        deletedAt: null,
+        planType: 'DIGITAL_CAPSULE',
+        emailCredits: 6,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -326,10 +359,12 @@ describe('Authentication Integration Tests', () => {
           marketingOptIn: false,
           onboardingCompleted: false,
           stripeCustomerId: 'cus_new_123',
+          pushEnabled: false,
+          referredByCode: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      })
+      } as any)
 
       const { getCurrentUser } = await import('@/server/lib/auth')
       const user = await getCurrentUser()
@@ -374,8 +409,13 @@ describe('Authentication Integration Tests', () => {
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: 'DIGITAL_CAPSULE',
+        emailCredits: 6,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -385,10 +425,12 @@ describe('Authentication Integration Tests', () => {
           marketingOptIn: false,
           onboardingCompleted: true,
           stripeCustomerId: null,
+          pushEnabled: false,
+          referredByCode: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      })
+      } as any)
 
       const { requireUser } = await import('@/server/lib/auth')
       const user = await requireUser()
@@ -445,8 +487,13 @@ describe('Authentication Integration Tests', () => {
         id: 'user_session_123',
         clerkUserId: 'clerk_valid_session',
         email: 'session@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
         profile: {
@@ -456,10 +503,12 @@ describe('Authentication Integration Tests', () => {
           marketingOptIn: false,
           onboardingCompleted: false,
           stripeCustomerId: null,
+          pushEnabled: false,
+          referredByCode: null,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-      })
+      } as any)
 
       const { getCurrentUser } = await import('@/server/lib/auth')
       const user = await getCurrentUser()

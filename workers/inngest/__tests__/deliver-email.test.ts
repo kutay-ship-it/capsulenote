@@ -666,14 +666,14 @@ describe("Deliver Email Worker", () => {
       expect(emailHtml).toContain("My Future Letter")
     })
 
-    it("should include view URL in email", () => {
+    it("should include unlock URL in email", () => {
       const delivery = createMockDeliveryWithRelations({
-        letter: { shareLinkToken: "share_abc123" },
+        letter: { id: "letter_abc123" },
       })
 
-      const viewUrl = `http://localhost:3000/view/${delivery.letter.shareLinkToken}`
+      const unlockUrl = `http://localhost:3000/unlock/${delivery.letter.id}`
 
-      expect(viewUrl).toBe("http://localhost:3000/view/share_abc123")
+      expect(unlockUrl).toBe("http://localhost:3000/unlock/letter_abc123")
     })
 
     it("should include delivery date in email", () => {

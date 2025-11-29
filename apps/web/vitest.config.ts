@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [react()],
+  // Cast to any to handle Vite version mismatch between @vitejs/plugin-react and vitest
+  plugins: [react() as any],
   test: {
     environment: 'jsdom',
     globals: true,

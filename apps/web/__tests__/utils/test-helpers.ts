@@ -56,8 +56,13 @@ export function createTestUserData(overrides: Partial<User> = {}): Omit<User, 'i
   return {
     clerkUserId: `clerk_test_${Math.random().toString(36).substring(7)}`,
     email: `test-${Math.random().toString(36).substring(7)}@example.com`,
-    stripeCustomerId: null,
-    deletedAt: null,
+    planType: null,
+    emailCredits: 0,
+    physicalCredits: 0,
+    emailAddonCredits: 0,
+    physicalAddonCredits: 0,
+    creditExpiresAt: null,
+    timezone: 'UTC',
     ...overrides,
   }
 }
@@ -96,9 +101,16 @@ export function createTestLetterData(userId: string, overrides: Partial<Letter> 
     keyVersion: 1,
     visibility: 'private',
     tags: [],
+    type: 'email',
+    status: 'DRAFT',
+    scheduledFor: null,
+    timezone: 'UTC',
+    lockedAt: null,
+    shareLinkToken: `share_${Math.random().toString(36).substring(7)}`,
+    firstOpenedAt: null,
     deletedAt: null,
     ...overrides,
-  }
+  } as Omit<Letter, 'id' | 'createdAt' | 'updatedAt'>
 }
 
 /**
@@ -118,18 +130,12 @@ export function createTestDeliveryData(
     channel: 'email',
     status: 'scheduled',
     deliverAt: futureDate,
-    timezone: 'America/New_York',
-    toEmail: 'test@example.com',
-    toAddress: null,
+    timezoneAtCreation: 'America/New_York',
     attemptCount: 0,
-    lastAttemptAt: null,
     inngestRunId: null,
-    providerMessageId: null,
-    canceledAt: null,
-    failureReason: null,
-    failureCode: null,
+    lastError: null,
     ...overrides,
-  }
+  } as Omit<Delivery, 'id' | 'createdAt' | 'updatedAt'>
 }
 
 // ============================================================================

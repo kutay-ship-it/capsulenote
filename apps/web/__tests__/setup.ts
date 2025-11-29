@@ -15,7 +15,7 @@ import "@testing-library/jest-dom/vitest"
 // ============================================================================
 
 // Mock environment variables BEFORE any imports
-process.env.NODE_ENV = "test"
+;(process.env as any).NODE_ENV = "test"
 process.env.SKIP_ENV_VALIDATION = "true"
 process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000"
 process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_mock"

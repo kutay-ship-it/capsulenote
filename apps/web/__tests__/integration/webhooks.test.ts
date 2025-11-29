@@ -296,11 +296,16 @@ describe('Webhook Integration Tests', () => {
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: "UTC",
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       vi.mocked(prisma.pendingSubscription.findFirst).mockResolvedValueOnce(null)
 
@@ -352,11 +357,16 @@ describe('Webhook Integration Tests', () => {
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: "UTC",
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       // Mock pending subscription found
       vi.mocked(prisma.pendingSubscription.findFirst).mockResolvedValueOnce({
@@ -364,11 +374,11 @@ describe('Webhook Integration Tests', () => {
         email: 'test@example.com',
         status: 'payment_complete',
         stripeSessionId: 'cs_test_123',
-        plan: 'pro',
+        plan: 'DIGITAL_CAPSULE',
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       const request = new Request('http://localhost:3000/api/webhooks/clerk', {
         method: 'POST',
@@ -414,11 +424,16 @@ describe('Webhook Integration Tests', () => {
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: "UTC",
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       vi.mocked(prisma.pendingSubscription.findFirst).mockResolvedValueOnce(null)
 
@@ -470,11 +485,16 @@ describe('Webhook Integration Tests', () => {
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'newemail@example.com',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: "UTC",
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       const request = new Request('http://localhost:3000/api/webhooks/clerk', {
         method: 'POST',
@@ -640,15 +660,14 @@ describe('Webhook Integration Tests', () => {
       vi.mocked(prisma.emailDelivery.findFirst).mockResolvedValueOnce({
         deliveryId: 'delivery_123',
         resendMessageId: 'msg_resend_123',
-        sentAt: new Date(),
+        toEmail: 'recipient@example.com',
+        subject: 'Your Capsule Letter',
         opens: 0,
         clicks: 0,
         bounces: 0,
-        complaints: 0,
         lastOpenedAt: null,
         createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      } as any)
 
       vi.mocked(prisma.delivery.update).mockResolvedValueOnce({} as any)
       vi.mocked(prisma.emailDelivery.update).mockResolvedValueOnce({} as any)
@@ -696,15 +715,14 @@ describe('Webhook Integration Tests', () => {
       vi.mocked(prisma.emailDelivery.findFirst).mockResolvedValueOnce({
         deliveryId: 'delivery_123',
         resendMessageId: 'msg_resend_123',
-        sentAt: new Date(),
+        toEmail: 'recipient@example.com',
+        subject: 'Your Capsule Letter',
         opens: 0,
         clicks: 0,
         bounces: 0,
-        complaints: 0,
         lastOpenedAt: null,
         createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      } as any)
 
       vi.mocked(prisma.emailDelivery.update).mockResolvedValueOnce({} as any)
 
@@ -745,15 +763,14 @@ describe('Webhook Integration Tests', () => {
       vi.mocked(prisma.emailDelivery.findFirst).mockResolvedValueOnce({
         deliveryId: 'delivery_123',
         resendMessageId: 'msg_resend_123',
-        sentAt: new Date(),
+        toEmail: 'recipient@example.com',
+        subject: 'Your Capsule Letter',
         opens: 1,
         clicks: 0,
         bounces: 0,
-        complaints: 0,
         lastOpenedAt: new Date(),
         createdAt: new Date(),
-        updatedAt: new Date(),
-      })
+      } as any)
 
       vi.mocked(prisma.emailDelivery.update).mockResolvedValueOnce({} as any)
 

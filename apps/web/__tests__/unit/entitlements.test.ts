@@ -19,7 +19,7 @@ import {
 } from "../../server/lib/entitlements"
 
 const { mockPrisma, mockRedis } = vi.hoisted(() => {
-  const prismaMock = {
+  const prismaMock: any = {
     user: {
       findUnique: vi.fn(),
       update: vi.fn(),
@@ -35,7 +35,7 @@ const { mockPrisma, mockRedis } = vi.hoisted(() => {
     },
     $transaction: vi.fn(async (callback: (tx: any) => Promise<any>) => {
       // Execute the callback with a mock transaction client
-      const txClient = {
+      const txClient: any = {
         user: {
           findUnique: prismaMock.user.findUnique,
           update: prismaMock.user.update,
@@ -49,7 +49,7 @@ const { mockPrisma, mockRedis } = vi.hoisted(() => {
   }
 
   const redisMock = {
-    get: vi.fn(() => Promise.resolve(null)),
+    get: vi.fn((): Promise<string | null> => Promise.resolve(null)),
     setex: vi.fn(() => Promise.resolve("OK")),
     del: vi.fn(() => Promise.resolve(1)),
   }

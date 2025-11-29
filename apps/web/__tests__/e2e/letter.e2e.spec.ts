@@ -276,12 +276,12 @@ test.describe("Letter Creation & Management", () => {
         pastDate.setDate(pastDate.getDate() - 1)
         const pastDateStr = pastDate.toISOString().split("T")[0]
 
-        await dateInput.fill(pastDateStr)
+        await dateInput.fill(pastDateStr!)
 
         // Should show validation error or prevent selection
         const hasError = await page.locator('text="future"').isVisible()
-          .or(page.locator('[data-error]').isVisible())
-          .catch(() => false)
+          || await page.locator('[data-error]').isVisible()
+            .catch(() => false)
 
         // Date validation should occur
         expect(true).toBe(true)
@@ -438,8 +438,8 @@ test.describe("Letter Creation & Management", () => {
 
       // Page should handle gracefully
       const is404 = await page.locator('text="not found"').isVisible()
-        .or(page.locator('text="Not Found"').isVisible())
-        .catch(() => false)
+        || await page.locator('text="Not Found"').isVisible()
+          .catch(() => false)
 
       const isError = await page.locator('[data-testid="error"]').isVisible()
         .catch(() => false)

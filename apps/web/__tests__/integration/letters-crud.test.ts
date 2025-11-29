@@ -41,16 +41,16 @@ vi.mock("../../server/lib/entitlements", () => ({
 }))
 
 const { mockPrisma } = vi.hoisted(() => {
-  return {
-    mockPrisma: {
-      letter: {
-        create: vi.fn(),
-        findFirst: vi.fn(),
-        findUnique: vi.fn(),
-        update: vi.fn(),
-      },
+  const prismaClient: any = {
+    letter: {
+      create: vi.fn(),
+      findFirst: vi.fn(),
+      findUnique: vi.fn(),
+      update: vi.fn(),
     },
+    $transaction: vi.fn(),
   }
+  return { mockPrisma: prismaClient }
 })
 
 vi.mock("../../server/lib/db", () => ({

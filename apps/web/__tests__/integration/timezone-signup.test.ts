@@ -218,7 +218,7 @@ describe("Server Timezone Getter", () => {
         profile: {
           timezone: "Europe/Istanbul",
         },
-      }
+      } as any
 
       const timezone = getUserTimezone(user)
 
@@ -234,7 +234,7 @@ describe("Server Timezone Getter", () => {
         profile: {
           timezone: null,
         },
-      }
+      } as any
 
       const timezone = getUserTimezone(user)
 
@@ -253,7 +253,7 @@ describe("Server Timezone Getter", () => {
         id: "user_123",
         timezone: null,
         profile: null,
-      }
+      } as any
 
       const timezone = getUserTimezone(user)
 
@@ -274,7 +274,7 @@ describe("Server Timezone Getter", () => {
         profile: {
           timezone: "Asia/Tokyo",
         },
-      }
+      } as any
 
       const timezone = getUserTimezoneOrDefault(user)
 
@@ -286,7 +286,7 @@ describe("Server Timezone Getter", () => {
         id: "user_123",
         timezone: null,
         profile: null,
-      }
+      } as any
 
       const timezone = getUserTimezoneOrDefault(user, "Europe/London")
 
@@ -308,7 +308,7 @@ describe("Server Timezone Getter", () => {
         profile: {
           timezone: "Europe/Paris",
         },
-      }
+      } as any
 
       expect(hasTimezone(user)).toBe(true)
     })
@@ -318,7 +318,7 @@ describe("Server Timezone Getter", () => {
         id: "user_123",
         timezone: "UTC",
         profile: null,
-      }
+      } as any
 
       expect(hasTimezone(user)).toBe(false)
     })
@@ -330,7 +330,7 @@ describe("Server Timezone Getter", () => {
         profile: {
           timezone: "",
         },
-      }
+      } as any
 
       expect(hasTimezone(user)).toBe(false)
     })

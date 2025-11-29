@@ -4,7 +4,8 @@
  * Note: Full race-condition coverage exists elsewhere; this prevents empty-suite regressions in CI.
  */
 
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
+
 vi.mock("@prisma/client", () => ({
   PrismaClient: vi.fn(),
 }))

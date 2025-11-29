@@ -175,12 +175,13 @@ describe("createAnonymousCheckout", () => {
       })
 
       // Verify customer created BEFORE checkout session
+      // Note: source from input.metadata overrides the default "anonymous_checkout"
+      // since ...validated.metadata is spread last in the implementation
       expect(mockStripe.customers.create).toHaveBeenCalledWith({
         email: input.email,
         metadata: {
-          source: "anonymous_checkout",
+          source: "letter_form", // From input.metadata, overrides default
           letterId: input.letterId,
-          ...input.metadata,
         },
       })
 

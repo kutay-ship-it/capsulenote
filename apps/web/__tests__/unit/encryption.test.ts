@@ -141,7 +141,7 @@ describe('Encryption', () => {
 
       // Corrupt the ciphertext
       const corruptedCiphertext = Buffer.from(encrypted.bodyCiphertext)
-      corruptedCiphertext[0] = corruptedCiphertext[0] ^ 0xFF
+      corruptedCiphertext[0] = (corruptedCiphertext[0] ?? 0) ^ 0xFF
 
       await expect(
         decryptLetter(corruptedCiphertext, encrypted.bodyNonce, encrypted.keyVersion)
@@ -390,7 +390,7 @@ describe('Encryption', () => {
       // Tamper with ciphertext (flip one bit)
       const tamperedCiphertext = Buffer.from(encrypted.bodyCiphertext)
       const tamperedIndex = Math.floor(tamperedCiphertext.length / 2)
-      tamperedCiphertext[tamperedIndex] = tamperedCiphertext[tamperedIndex] ^ 0x01
+      tamperedCiphertext[tamperedIndex] = (tamperedCiphertext[tamperedIndex] ?? 0) ^ 0x01
 
       // AES-256-GCM should detect the tampering and reject
       await expect(

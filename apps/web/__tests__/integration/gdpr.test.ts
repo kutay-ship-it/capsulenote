@@ -145,7 +145,7 @@ describe('GDPR Integration Tests', () => {
           updatedAt: new Date(),
           deletedAt: null,
           deliveries: [],
-        },
+        } as any,
       ])
 
       vi.mocked(prisma.delivery.findMany).mockResolvedValueOnce([])
@@ -201,7 +201,7 @@ describe('GDPR Integration Tests', () => {
           updatedAt: new Date(),
           deletedAt: null,
           deliveries: [],
-        },
+        } as any,
         {
           id: 'letter_2',
           userId: 'user_test_123',
@@ -216,7 +216,7 @@ describe('GDPR Integration Tests', () => {
           updatedAt: new Date(),
           deletedAt: null,
           deliveries: [],
-        },
+        } as any,
       ])
 
       vi.mocked(prisma.delivery.findMany).mockResolvedValueOnce([])
@@ -326,11 +326,16 @@ describe('GDPR Integration Tests', () => {
         id: '00000000-0000-0000-0000-000000000000',
         email: 'deleted-user@system.internal',
         clerkUserId: 'system_deleted_user',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       // Mock payment anonymization
       vi.mocked(prisma.payment.updateMany).mockResolvedValueOnce({ count: 0 })
@@ -340,11 +345,16 @@ describe('GDPR Integration Tests', () => {
         id: 'user_test_123',
         email: 'test@example.com',
         clerkUserId: 'clerk_test_123',
-        stripeCustomerId: null,
-        deletedAt: null,
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+        timezone: 'UTC',
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       const result = await deleteUserAccount()
 
@@ -364,7 +374,7 @@ describe('GDPR Integration Tests', () => {
       vi.mocked(prisma.subscription.findFirst).mockResolvedValueOnce({
         id: 'sub_db_123',
         userId: 'user_test_123',
-        plan: 'pro',
+        plan: 'DIGITAL_CAPSULE',
         status: 'active',
         stripeCustomerId: 'cus_123',
         stripeSubscriptionId: 'sub_stripe_123',
@@ -375,7 +385,7 @@ describe('GDPR Integration Tests', () => {
         canceledAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-      })
+      } as any)
 
       // Mock sentinel user creation
       vi.mocked(prisma.user.upsert).mockResolvedValueOnce({} as any)

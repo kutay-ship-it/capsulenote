@@ -13,7 +13,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 
 // Mock dependencies
-const mockPrisma = {
+const mockPrisma: any = {
   pendingSubscription: {
     findUnique: vi.fn(),
     findFirst: vi.fn(),
@@ -29,7 +29,7 @@ const mockPrisma = {
     findUnique: vi.fn(),
     create: vi.fn(),
   },
-  $transaction: vi.fn(async (cb: any) =>
+  $transaction: vi.fn(async (cb: (tx: any) => Promise<any>) =>
     cb({
       pendingSubscription: {
         update: mockPrisma.pendingSubscription.update,

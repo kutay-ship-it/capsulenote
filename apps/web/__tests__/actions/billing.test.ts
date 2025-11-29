@@ -166,8 +166,8 @@ describe("Billing Server Actions", () => {
         expect(result.success).toBe(false)
         if (!result.success) {
           expect(result.error.code).toBe(ErrorCodes.ALREADY_SUBSCRIBED)
-          expect(result.error.details?.subscriptionId).toBe("sub_existing")
-          expect(result.error.details?.manageUrl).toBe("/settings/billing")
+          expect((result.error.details as any)?.subscriptionId).toBe("sub_existing")
+          expect((result.error.details as any)?.manageUrl).toBe("/settings/billing")
         }
       })
 
@@ -456,8 +456,8 @@ describe("Billing Server Actions", () => {
         if (!result.success) {
           expect(result.error.code).toBe(ErrorCodes.NO_CUSTOMER)
           expect(result.error.message).toContain("No billing account found")
-          expect(result.error.details?.action).toBe("subscribe")
-          expect(result.error.details?.url).toBe("/pricing")
+          expect((result.error.details as any)?.action).toBe("subscribe")
+          expect((result.error.details as any)?.url).toBe("/pricing")
         }
       })
 

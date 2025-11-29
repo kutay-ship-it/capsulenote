@@ -330,7 +330,7 @@ describe("Deliveries", () => {
     mockLinkPendingSubscription.mockResolvedValueOnce({
       success: false,
       error: "Email not verified",
-    })
+    } as any)
 
     const result = await scheduleDelivery({
       letterId: "11111111-1111-4111-8111-111111111111",
