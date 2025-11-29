@@ -120,6 +120,18 @@ vi.mock('@/app/[locale]/subscribe/actions', () => ({
   })),
 }))
 
+// Mock Clerk client - used by @/server/lib/clerk
+vi.mock('@clerk/nextjs/server', () => ({
+  createClerkClient: vi.fn(() => ({
+    users: {
+      getUser: vi.fn(),
+      updateUser: vi.fn(),
+      deleteUser: vi.fn(),
+    },
+  })),
+  WebhookEvent: {},
+}))
+
 describe('Webhook Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()

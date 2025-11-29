@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef } from "react"
+import { useMemo, useRef, useState, useEffect } from "react"
 import { format, differenceInDays } from "date-fns"
 import { motion, useScroll, useTransform, useSpring } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -28,7 +28,13 @@ interface JourneyRiverProps {
  */
 export function JourneyRiver({ letters }: JourneyRiverProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isMounted, setIsMounted] = useState(false)
   const now = new Date()
+
+  // Ensure component is mounted before using scroll animations
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Split and position letters along the river
   const { riverPath, letterNodes, nowPosition } = useMemo(() => {
@@ -99,8 +105,9 @@ export function JourneyRiver({ letters }: JourneyRiverProps) {
   }, [letters, now])
 
   // Scroll-based animations
+  // Only attach target ref after mount to prevent hydration errors
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isMounted ? containerRef : undefined,
     offset: ["start start", "end end"],
   })
 

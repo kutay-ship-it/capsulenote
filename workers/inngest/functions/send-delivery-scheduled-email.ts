@@ -73,7 +73,18 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
     name: "Send Delivery Scheduled Confirmation Email",
     retries: 3,
     onFailure: async ({ error, event }) => {
-      const { deliveryId, userId } = event.data.event.data
+      // Extract from original event - Inngest failure event structure
+      const originalEvent = event.data?.event
+      const deliveryId = originalEvent?.data?.deliveryId
+      const userId = originalEvent?.data?.userId
+
+      if (!deliveryId || !userId) {
+        logger.error("Delivery scheduled failure handler: missing context", {
+          error: error.message,
+          eventData: JSON.stringify(event.data),
+        })
+        return
+      }
 
       logger.error("Delivery confirmation email failed after all retries", {
         deliveryId,
@@ -81,6 +92,26 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
         error: error.message,
         stack: error.stack,
       })
+
+      // Audit trail for failed notifications
+      try {
+        await prisma.auditEvent.create({
+          data: {
+            userId,
+            type: "notification.delivery_scheduled.failed",
+            data: {
+              deliveryId,
+              error: error.message,
+            },
+          },
+        })
+      } catch (auditError) {
+        logger.error("Failed to create audit event for notification failure", {
+          deliveryId,
+          userId,
+          auditError: auditError instanceof Error ? auditError.message : String(auditError),
+        })
+      }
     },
   },
   { event: "notification.delivery.scheduled" },

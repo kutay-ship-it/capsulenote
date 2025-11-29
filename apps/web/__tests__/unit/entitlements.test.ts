@@ -30,6 +30,22 @@ const { mockPrisma, mockRedis } = vi.hoisted(() => {
     subscription: {
       findFirst: vi.fn(),
     },
+    creditTransaction: {
+      create: vi.fn(),
+    },
+    $transaction: vi.fn(async (callback: (tx: any) => Promise<any>) => {
+      // Execute the callback with a mock transaction client
+      const txClient = {
+        user: {
+          findUnique: prismaMock.user.findUnique,
+          update: prismaMock.user.update,
+        },
+        creditTransaction: {
+          create: vi.fn(),
+        },
+      }
+      return callback(txClient)
+    }),
   }
 
   const redisMock = {

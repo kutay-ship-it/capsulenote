@@ -11,7 +11,6 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { stripe } from "@/server/providers/stripe/client"
 
 // Mock dependencies
 const mockPrisma = {
@@ -41,10 +40,29 @@ const mockPrisma = {
 }
 
 vi.mock("@/server/lib/db", () => ({ prisma: mockPrisma }))
-vi.mock("@/server/providers/stripe")
 vi.mock("@/server/lib/audit")
 vi.mock("@/server/lib/stripe-helpers")
-vi.mock("@/app/[locale]/subscribe/actions")
+
+// Mock Stripe with mockable functions
+const mockStripeRetrieve = vi.fn()
+vi.mock("@/server/providers/stripe/client", () => ({
+  stripe: {
+    checkout: {
+      sessions: {
+        retrieve: mockStripeRetrieve,
+      },
+    },
+    subscriptions: {
+      retrieve: vi.fn(),
+    },
+  },
+}))
+
+// Mock linkPendingSubscription as a mockable function
+const mockLinkPendingSubscription = vi.fn()
+vi.mock("@/app/[locale]/subscribe/actions", () => ({
+  linkPendingSubscription: mockLinkPendingSubscription,
+}))
 
 const prisma = mockPrisma
 
@@ -126,9 +144,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       prisma.pendingSubscription.findFirst.mockResolvedValue(mockPending)
 
       // Mock linkPendingSubscription
-      const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
-      // @ts-ignore
-      linkPendingSubscription.mockResolvedValue({
+      mockLinkPendingSubscription.mockResolvedValue({
         success: true,
         subscriptionId: "subscription_123",
       })
@@ -138,7 +154,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
         where: { email, status: "payment_complete" },
       })
 
-      const linkResult = await linkPendingSubscription(userId)
+      const linkResult = await mockLinkPendingSubscription(userId)
 
       // Assert
       expect(pendingFound).toBeTruthy()
@@ -171,16 +187,14 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       // @ts-ignore
       prisma.pendingSubscription.findFirst.mockResolvedValue(null) // No payment_complete subscription found yet
 
-      const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
-      // @ts-ignore
-      linkPendingSubscription.mockResolvedValue({ success: true, subscriptionId: "sub_auto" }) // Auto-link may occur
+      mockLinkPendingSubscription.mockResolvedValue({ success: true, subscriptionId: "sub_auto" }) // Auto-link may occur
 
       // Act: Clerk webhook checks for pending subscription
       const pendingFound = await prisma.pendingSubscription.findFirst({
         where: { email, status: "payment_complete" },
       })
 
-      const linkResult = await linkPendingSubscription(userId)
+      const linkResult = await mockLinkPendingSubscription(userId)
 
       // Assert: Should succeed; auto-link may have occurred depending on timing
       expect(pendingFound).toBeFalsy()
@@ -218,9 +232,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       // @ts-ignore
       prisma.user.findFirst.mockResolvedValue(mockUser) // User exists now!
 
-      const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
-      // @ts-ignore
-      linkPendingSubscription.mockResolvedValue({
+      mockLinkPendingSubscription.mockResolvedValue({
         success: true,
         subscriptionId: "subscription_123",
       })
@@ -232,7 +244,7 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       })
 
       const userFound = await prisma.user.findFirst({ where: { email } })
-      const linkResult = await linkPendingSubscription(userFound!.id)
+      const linkResult = await mockLinkPendingSubscription(userFound!.id)
 
       // Assert: Should link subscription
       expect(userFound).toBeTruthy()
@@ -251,8 +263,8 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       const signature = "test_signature"
       const webhookSecret = "whsec_test"
 
-      // @ts-ignore
-      stripe.webhooks.constructEvent = vi.fn((p, s, secret) => {
+      // Mock constructEvent behavior
+      const mockConstructEvent = vi.fn((p: string, _s: string, secret: string) => {
         if (secret !== webhookSecret) {
           throw new Error("Invalid signature")
         }
@@ -261,12 +273,12 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
 
       // Act & Assert: Valid signature
       expect(() => {
-        stripe.webhooks.constructEvent(payload, signature, webhookSecret)
+        mockConstructEvent(payload, signature, webhookSecret)
       }).not.toThrow()
 
       // Act & Assert: Invalid signature
       expect(() => {
-        stripe.webhooks.constructEvent(payload, signature, "wrong_secret")
+        mockConstructEvent(payload, signature, "wrong_secret")
       }).toThrow("Invalid signature")
     })
 
@@ -358,14 +370,13 @@ describe("Webhook Integration: Dual-Path Account Linking", () => {
       // Arrange
       const sessionId = "cs_test123"
 
-      // @ts-ignore
-      stripe.checkout.sessions.retrieve.mockRejectedValue(
+      mockStripeRetrieve.mockRejectedValue(
         new Error("No such checkout session")
       )
 
       // Act & Assert
       await expect(
-        stripe.checkout.sessions.retrieve(sessionId)
+        mockStripeRetrieve(sessionId)
       ).rejects.toThrow("No such checkout session")
     })
 
@@ -418,9 +429,7 @@ describe("Webhook Integration: Edge Cases", () => {
     // @ts-ignore
     prisma.pendingSubscription.findFirst.mockResolvedValueOnce(null) // Query with expiry filter returns null
 
-    const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
-    // @ts-ignore
-    linkPendingSubscription.mockResolvedValue({ success: true }) // Should skip expired
+    mockLinkPendingSubscription.mockResolvedValue({ success: true }) // Should skip expired
 
     // Act
     const pendingFound = await prisma.pendingSubscription.findFirst({
@@ -477,9 +486,7 @@ describe("Webhook Integration: Edge Cases", () => {
     // @ts-ignore
     prisma.pendingSubscription.findFirst.mockResolvedValueOnce(null) // Query for payment_complete doesn't match 'linked' status
 
-    const { linkPendingSubscription } = await import("@/app/[locale]/subscribe/actions")
-    // @ts-ignore
-    linkPendingSubscription.mockResolvedValue({ success: true })
+    mockLinkPendingSubscription.mockResolvedValue({ success: true })
 
     // Act
     const pendingFound = await prisma.pendingSubscription.findFirst({

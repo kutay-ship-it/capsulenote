@@ -1,4 +1,58 @@
 {
+  "v3": {
+    "title": "Welcome to Capsule Note",
+    "description": "Let's get you started on your time capsule journey",
+    "skip": "Skip",
+    "navigation": {
+      "back": "Back",
+      "continue": "Continue",
+      "skip": "Skip for now"
+    },
+    "welcome": {
+      "title": "Your Time Capsule Awaits",
+      "description": "Write letters to your future self. Seal them in time. Receive them exactly when you need them most.",
+      "tagline": "Letters from your past, delivered to your future"
+    },
+    "howItWorks": {
+      "badge": "Simple as 1-2-3",
+      "write": "Write",
+      "writeDesc": "Pour your heart into a letter to your future self",
+      "seal": "Seal",
+      "sealDesc": "Choose when you want to receive it",
+      "receive": "Receive",
+      "receiveDesc": "We deliver it exactly when you need it",
+      "tagline": "Every letter is encrypted and delivered on time"
+    },
+    "security": {
+      "title": "Your Words Are Safe",
+      "description": "Your letters are protected with military-grade encryption. Only you can read them.",
+      "encrypted": {
+        "title": "End-to-End Encrypted",
+        "description": "AES-256-GCM encryption keeps your thoughts private"
+      },
+      "private": {
+        "title": "Your Eyes Only",
+        "description": "Not even we can read your letters"
+      },
+      "secure": {
+        "title": "Always Secure",
+        "description": "Bank-level security protects your data"
+      }
+    },
+    "ready": {
+      "title": "You're All Set!",
+      "description": "Your time capsule is ready. Start your first letter and send a message to your future self.",
+      "tagline": "Your journey begins now",
+      "explore": "Explore First",
+      "startWriting": "Start Writing"
+    },
+    "toast": {
+      "success": {
+        "title": "Welcome aboard!",
+        "description": "You're all set. Start writing your first letter to your future self!"
+      }
+    }
+  },
   "modal": {
     "close": "Close",
     "stepOf": "Step {current} of {total}",

@@ -62,6 +62,7 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
       findUnique: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
+      delete: vi.fn(),
     },
     emailDelivery: {
       create: vi.fn(),
@@ -71,9 +72,14 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
     },
     user: {
       update: vi.fn(),
+      findUnique: vi.fn(),
     },
     pendingSubscription: {
       findFirst: vi.fn(),
+    },
+    creditTransaction: {
+      create: vi.fn(),
+      updateMany: vi.fn(),
     },
   }
   prismaMock.$transaction = vi.fn(async (cb: any) =>
@@ -82,6 +88,8 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
       emailDelivery: prismaMock.emailDelivery,
       mailDelivery: prismaMock.mailDelivery,
       letter: prismaMock.letter,
+      user: prismaMock.user,
+      creditTransaction: prismaMock.creditTransaction,
     })
   )
 
@@ -134,6 +142,7 @@ describe("Deliveries", () => {
   })
 
   it("schedules email delivery successfully", async () => {
+    // Mock letter exists
     mockPrisma.letter.findFirst.mockResolvedValueOnce({
       id: "11111111-1111-4111-8111-111111111111",
       userId: mockUser.id,
@@ -141,11 +150,25 @@ describe("Deliveries", () => {
       deletedAt: null,
     })
 
+    // Mock user has credits (for transaction)
+    mockPrisma.user.findUnique.mockResolvedValueOnce({
+      id: mockUser.id,
+      emailCredits: 5,
+    })
+
+    // Mock transaction operations
+    mockPrisma.user.update.mockResolvedValueOnce({})
+    mockPrisma.creditTransaction.create.mockResolvedValueOnce({})
     mockPrisma.delivery.create.mockResolvedValueOnce({
       id: "delivery_123",
       channel: "email",
     })
+    mockPrisma.creditTransaction.updateMany.mockResolvedValueOnce({ count: 1 })
     mockPrisma.emailDelivery.create.mockResolvedValueOnce({})
+    mockPrisma.letter.update.mockResolvedValueOnce({})
+
+    // Mock delivery update for inngest event id
+    mockPrisma.delivery.update.mockResolvedValueOnce({})
 
     const result = await scheduleDelivery({
       letterId: "11111111-1111-4111-8111-111111111111",
@@ -156,7 +179,7 @@ describe("Deliveries", () => {
     })
 
     expect(result.success).toBe(true)
-    expect(mockEntitlementsModule.trackEmailDelivery).toHaveBeenCalled()
+    expect(mockPrisma.$transaction).toHaveBeenCalled()
   })
 
   it("blocks scheduling when subscription missing", async () => {
@@ -258,11 +281,26 @@ describe("Deliveries", () => {
       title: "Test",
       deletedAt: null,
     })
+
+    // Mock user has credits (for transaction)
+    mockPrisma.user.findUnique.mockResolvedValueOnce({
+      id: mockUser.id,
+      emailCredits: 5,
+    })
+
+    // Mock transaction operations
+    mockPrisma.user.update.mockResolvedValueOnce({})
+    mockPrisma.creditTransaction.create.mockResolvedValueOnce({})
     mockPrisma.delivery.create.mockResolvedValueOnce({
       id: "delivery_auto",
       channel: "email",
     })
+    mockPrisma.creditTransaction.updateMany.mockResolvedValueOnce({ count: 1 })
     mockPrisma.emailDelivery.create.mockResolvedValueOnce({})
+    mockPrisma.letter.update.mockResolvedValueOnce({})
+
+    // Mock delivery update for inngest event id
+    mockPrisma.delivery.update.mockResolvedValueOnce({})
 
     const result = await scheduleDelivery({
       letterId: "11111111-1111-4111-8111-111111111111",

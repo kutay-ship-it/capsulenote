@@ -1,4 +1,58 @@
 {
+  "v3": {
+    "title": "Capsule Note'a Hosgeldin",
+    "description": "Zaman kapsulu yolculuguna baslayalim",
+    "skip": "Gecis",
+    "navigation": {
+      "back": "Geri",
+      "continue": "Devam",
+      "skip": "Simdilik gecis"
+    },
+    "welcome": {
+      "title": "Zaman Kapsulun Seni Bekliyor",
+      "description": "Gelecekteki kendine mektuplar yaz. Zamana muhurle. Tam ihtiyacin oldugunda al.",
+      "tagline": "Gecmisinden mektuplar, gelecegine teslim"
+    },
+    "howItWorks": {
+      "badge": "1-2-3 kadar basit",
+      "write": "Yaz",
+      "writeDesc": "Gelecekteki kendine kalbini bir mektuba dok",
+      "seal": "Muhurle",
+      "sealDesc": "Ne zaman almak istedigini sec",
+      "receive": "Al",
+      "receiveDesc": "Tam ihtiyacin oldugunda teslim ederiz",
+      "tagline": "Her mektup sifrelenir ve zamaninda teslim edilir"
+    },
+    "security": {
+      "title": "Sozlerin Guvenle",
+      "description": "Mektuplarin askeri duzeyde sifreleme ile korunur. Sadece sen okuyabilirsin.",
+      "encrypted": {
+        "title": "Uctan Uca Sifreli",
+        "description": "AES-256-GCM sifreleme dusuncelerini gizli tutar"
+      },
+      "private": {
+        "title": "Sadece Senin Icin",
+        "description": "Biz bile mektuplarini okuyamayiz"
+      },
+      "secure": {
+        "title": "Her Zaman Guvenli",
+        "description": "Banka duzeyi guvenlik verilerini korur"
+      }
+    },
+    "ready": {
+      "title": "Hazirsin!",
+      "description": "Zaman kapsulun hazir. Ilk mektubunu baslatabilir ve gelecekteki kendine mesaj gonderebilirsin.",
+      "tagline": "Yolculugun simdi basliyor",
+      "explore": "Once Kesfet",
+      "startWriting": "Yazmaya Basla"
+    },
+    "toast": {
+      "success": {
+        "title": "Hosgeldin!",
+        "description": "Her sey hazir. Gelecekteki kendine ilk mektubunu yazmaya baslayabilirsin!"
+      }
+    }
+  },
   "modal": {
     "close": "Kapat",
     "stepOf": "Adim {current} / {total}",

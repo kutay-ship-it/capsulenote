@@ -46,6 +46,7 @@ export function SimplifiedLetterEditor({
       CharacterCount,
     ],
     content: initialData?.content || '',
+    immediatelyRender: false, // Prevent SSR hydration mismatch
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
       setContent(html)

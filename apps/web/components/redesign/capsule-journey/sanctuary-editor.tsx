@@ -37,6 +37,7 @@ export function SanctuaryEditor({
       }),
     ],
     content,
+    immediatelyRender: false, // Prevent SSR hydration mismatch
     editorProps: {
       attributes: {
         class: cn(

@@ -60,7 +60,7 @@ export default async function CheckoutCancelPage() {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Button asChild variant="outline" size="lg" className="flex-1">
-              <Link href="/dashboard">{t("cancel.buttons.dashboard")}</Link>
+              <Link href="/journey">{t("cancel.buttons.dashboard")}</Link>
             </Button>
             <Button asChild size="lg" className="flex-1">
               <Link href="/pricing">{t("cancel.buttons.pricing")}</Link>

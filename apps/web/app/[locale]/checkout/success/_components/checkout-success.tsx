@@ -124,7 +124,7 @@ export async function CheckoutSuccess({ subscription }: CheckoutSuccessProps) {
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button asChild size="lg" className="flex-1 sm:flex-initial">
-          <Link href="/dashboard">{t("success.buttons.dashboard")}</Link>
+          <Link href="/journey">{t("success.buttons.dashboard")}</Link>
         </Button>
         <Button asChild size="lg" variant="outline" className="flex-1 sm:flex-initial">
           <Link href="/letters/new">{t("success.buttons.writeLetter")}</Link>

@@ -45,6 +45,7 @@ export function LetterEditor({
       }),
     ],
     content,
+    immediatelyRender: false, // Prevent SSR hydration mismatch
     editorProps: {
       attributes: {
         class: "prose prose-sm sm:prose focus:outline-none max-w-none font-mono text-charcoal",

@@ -54,7 +54,18 @@ export const sendLetterCreatedEmail = inngest.createFunction(
     name: "Send Letter Created Confirmation Email",
     retries: 3, // Fewer retries than delivery emails (less critical)
     onFailure: async ({ error, event }) => {
-      const { letterId, userId } = event.data.event.data
+      // Extract from original event - Inngest failure event structure
+      const originalEvent = event.data?.event
+      const letterId = originalEvent?.data?.letterId
+      const userId = originalEvent?.data?.userId
+
+      if (!letterId || !userId) {
+        logger.error("Letter confirmation failure handler: missing context", {
+          error: error.message,
+          eventData: JSON.stringify(event.data),
+        })
+        return
+      }
 
       logger.error("Letter confirmation email failed after all retries", {
         letterId,
@@ -63,7 +74,25 @@ export const sendLetterCreatedEmail = inngest.createFunction(
         stack: error.stack,
       })
 
-      // Future: Store failed notification for retry queue or user notification center
+      // Audit trail for failed notifications
+      try {
+        await prisma.auditEvent.create({
+          data: {
+            userId,
+            type: "notification.letter_created.failed",
+            data: {
+              letterId,
+              error: error.message,
+            },
+          },
+        })
+      } catch (auditError) {
+        logger.error("Failed to create audit event for notification failure", {
+          letterId,
+          userId,
+          auditError: auditError instanceof Error ? auditError.message : String(auditError),
+        })
+      }
     },
   },
   { event: "notification.letter.created" },

@@ -43,6 +43,7 @@ export function EmotionalLetterEditor({
             }),
         ],
         content: initialData?.bodyHtml || initialData?.body || "",
+        immediatelyRender: false, // Prevent SSR hydration mismatch
         editorProps: {
             attributes: {
                 class: "prose prose-lg focus:outline-none max-w-none font-serif text-charcoal leading-relaxed min-h-[400px]",

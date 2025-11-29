@@ -2,7 +2,7 @@
 
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Mail, Clock, Sparkles } from "lucide-react"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
@@ -13,8 +13,16 @@ interface HeroSectionProps {
 
 export function HeroSection({ isSignedIn }: HeroSectionProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Ensure component is mounted before using scroll animations
+  // This prevents the "Target ref is defined but not hydrated" error
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isMounted ? containerRef : undefined,
     offset: ["start start", "end start"],
   })
 

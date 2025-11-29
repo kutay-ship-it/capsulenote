@@ -14,7 +14,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest"
 import { createAnonymousCheckout, linkPendingSubscription } from "@/app/[locale]/subscribe/actions"
 import { prisma } from "@/server/lib/db"
-import { stripe } from "@/server/providers/stripe/client"
 import { isValidPriceId } from "@/server/providers/stripe/client"
 
 // Mock external dependencies
@@ -36,10 +35,15 @@ const { mockPrisma, mockClerk, mockClerkFactory } = vi.hoisted(() => {
     profile: {
       update: vi.fn(),
     },
+    creditTransaction: {
+      create: vi.fn(),
+    },
   }
 
   prismaMock.$transaction = vi.fn(async (cb: any) => cb(prismaMock))
   prismaMock.$executeRaw = vi.fn(async () => undefined)
+  // Mock advisory lock - always returns true (lock acquired)
+  prismaMock.$queryRaw = vi.fn(async () => [{ pg_try_advisory_lock: true }])
 
   const clerk = {
     users: {
@@ -55,15 +59,61 @@ const { mockPrisma, mockClerk, mockClerkFactory } = vi.hoisted(() => {
   }
 })
 
+const { mockStripe } = vi.hoisted(() => {
+  const stripeMock: any = {
+    customers: {
+      create: vi.fn(),
+      retrieve: vi.fn(),
+    },
+    checkout: {
+      sessions: {
+        create: vi.fn(),
+        retrieve: vi.fn(),
+      },
+    },
+    prices: {
+      retrieve: vi.fn(),
+    },
+    products: {
+      retrieve: vi.fn(),
+    },
+    subscriptions: {
+      retrieve: vi.fn(),
+    },
+  }
+  return { mockStripe: stripeMock }
+})
+
 vi.mock("@/server/lib/db", () => ({ prisma: mockPrisma }))
-vi.mock("@/server/providers/stripe")
+vi.mock("@/server/providers/stripe/client", () => ({
+  stripe: mockStripe,
+  isValidPriceId: vi.fn(() => true),
+}))
 vi.mock("@clerk/nextjs/server", () => ({
   clerkClient: mockClerkFactory,
+  createClerkClient: vi.fn(() => mockClerk),
+}))
+vi.mock("@/server/lib/clerk", () => ({
+  getClerkClient: vi.fn(() => mockClerk),
 }))
 vi.mock("@/server/lib/audit")
-vi.mock("@/server/lib/stripe-helpers")
-vi.mock("@/server/providers/stripe/client", () => ({
-  isValidPriceId: vi.fn(() => true),
+vi.mock("@/server/lib/stripe-helpers", () => ({
+  invalidateEntitlementsCache: vi.fn(),
+  createUsageRecord: vi.fn(),
+  getSubscriptionPeriodDates: vi.fn(() => ({
+    periodStart: new Date(),
+    periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  })),
+}))
+vi.mock("@/server/lib/billing-constants", () => ({
+  PLAN_CREDITS: {
+    DIGITAL_CAPSULE: { email: 6, physical: 0 },
+    PAPER_PIXELS: { email: 24, physical: 3 },
+  },
+  getSubscriptionPeriodDates: vi.fn(() => ({
+    periodStart: new Date(),
+    periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  })),
 }))
 
 describe("createAnonymousCheckout", () => {
@@ -108,14 +158,11 @@ describe("createAnonymousCheckout", () => {
       // @ts-ignore
       prisma.pendingSubscription.create.mockResolvedValue({})
 
-      // @ts-ignore - Mock Stripe
-      stripe.customers.create.mockResolvedValue(mockCustomer)
-      // @ts-ignore
-      stripe.prices.retrieve.mockResolvedValue(mockPrice)
-      // @ts-ignore
-      stripe.products.retrieve.mockResolvedValue(mockProduct)
-      // @ts-ignore
-      stripe.checkout.sessions.create.mockResolvedValue(mockSession)
+      // Mock Stripe
+      mockStripe.customers.create.mockResolvedValue(mockCustomer)
+      mockStripe.prices.retrieve.mockResolvedValue(mockPrice)
+      mockStripe.products.retrieve.mockResolvedValue(mockProduct)
+      mockStripe.checkout.sessions.create.mockResolvedValue(mockSession)
 
       // Act
       const result = await createAnonymousCheckout(input)
@@ -128,7 +175,7 @@ describe("createAnonymousCheckout", () => {
       })
 
       // Verify customer created BEFORE checkout session
-      expect(stripe.customers.create).toHaveBeenCalledWith({
+      expect(mockStripe.customers.create).toHaveBeenCalledWith({
         email: input.email,
         metadata: {
           source: "anonymous_checkout",
@@ -138,7 +185,7 @@ describe("createAnonymousCheckout", () => {
       })
 
       // Verify checkout session uses customer ID (locks email)
-      expect(stripe.checkout.sessions.create).toHaveBeenCalledWith(
+      expect(mockStripe.checkout.sessions.create).toHaveBeenCalledWith(
         expect.objectContaining({
           customer: mockCustomer.id,
           mode: "subscription",
@@ -184,8 +231,7 @@ describe("createAnonymousCheckout", () => {
 
       // @ts-ignore
       prisma.pendingSubscription.findFirst.mockResolvedValue(existingPending)
-      // @ts-ignore
-      stripe.checkout.sessions.retrieve.mockResolvedValue(mockSession)
+      mockStripe.checkout.sessions.retrieve.mockResolvedValue(mockSession)
 
       // Act
       const result = await createAnonymousCheckout(input)
@@ -198,8 +244,8 @@ describe("createAnonymousCheckout", () => {
       })
 
       // Should NOT create new customer or session
-      expect(stripe.customers.create).not.toHaveBeenCalled()
-      expect(stripe.checkout.sessions.create).not.toHaveBeenCalled()
+      expect(mockStripe.customers.create).not.toHaveBeenCalled()
+      expect(mockStripe.checkout.sessions.create).not.toHaveBeenCalled()
     })
 
     it("should create new checkout if existing session expired", async () => {
@@ -220,8 +266,8 @@ describe("createAnonymousCheckout", () => {
 
       // @ts-ignore
       prisma.pendingSubscription.findFirst.mockResolvedValue(existingPending)
-      // @ts-ignore - Simulate expired session
-      stripe.checkout.sessions.retrieve.mockRejectedValue(
+      // Simulate expired session
+      mockStripe.checkout.sessions.retrieve.mockRejectedValue(
         new Error("No such checkout session: cs_expired")
       )
 
@@ -231,14 +277,10 @@ describe("createAnonymousCheckout", () => {
       const mockProduct = { id: "prod_test", name: "Pro" }
       const mockSession = { id: "cs_new", url: "https://checkout.stripe.com/new", status: "open" }
 
-      // @ts-ignore
-      stripe.customers.create.mockResolvedValue(mockCustomer)
-      // @ts-ignore
-      stripe.prices.retrieve.mockResolvedValue(mockPrice)
-      // @ts-ignore
-      stripe.products.retrieve.mockResolvedValue(mockProduct)
-      // @ts-ignore
-      stripe.checkout.sessions.create.mockResolvedValue(mockSession)
+      mockStripe.customers.create.mockResolvedValue(mockCustomer)
+      mockStripe.prices.retrieve.mockResolvedValue(mockPrice)
+      mockStripe.products.retrieve.mockResolvedValue(mockProduct)
+      mockStripe.checkout.sessions.create.mockResolvedValue(mockSession)
       // @ts-ignore
       prisma.pendingSubscription.create.mockResolvedValue({})
 
@@ -247,8 +289,8 @@ describe("createAnonymousCheckout", () => {
 
       // Assert
       expect(result.sessionId).toBe("cs_new")
-      expect(stripe.customers.create).toHaveBeenCalled()
-      expect(stripe.checkout.sessions.create).toHaveBeenCalled()
+      expect(mockStripe.customers.create).toHaveBeenCalled()
+      expect(mockStripe.checkout.sessions.create).toHaveBeenCalled()
     })
   })
 
@@ -307,8 +349,7 @@ describe("createAnonymousCheckout", () => {
 
       // @ts-ignore
       prisma.pendingSubscription.findFirst.mockResolvedValue(null)
-      // @ts-ignore
-      stripe.customers.create.mockRejectedValue(new Error("Stripe API error"))
+      mockStripe.customers.create.mockRejectedValue(new Error("Stripe API error"))
 
       // Act & Assert
       await expect(createAnonymousCheckout(input)).rejects.toThrow("Stripe API error")
@@ -380,8 +421,7 @@ describe("linkPendingSubscription", () => {
       // @ts-ignore
       prisma.pendingSubscription.update.mockResolvedValue({})
 
-      // @ts-ignore
-      stripe.subscriptions.retrieve.mockResolvedValue(mockStripeSubscription)
+      mockStripe.subscriptions.retrieve.mockResolvedValue(mockStripeSubscription)
 
       // @ts-ignore
       mockClerk.users.getUser.mockResolvedValue(mockClerkUser)
@@ -617,16 +657,14 @@ describe("linkPendingSubscription", () => {
       prisma.pendingSubscription.update.mockResolvedValue({})
 
       // Ensure retrieve is mocked for expectation
-      // @ts-ignore
-      stripe.subscriptions.retrieve.mockResolvedValue({})
+      mockStripe.subscriptions.retrieve.mockResolvedValue({})
 
       const result = await linkPendingSubscription(userId)
 
       expect(result.success).toBe(true)
       expect(result.subscriptionId).toBe(existingSubscription.id)
       expect(prisma.subscription.create).not.toHaveBeenCalled()
-      // @ts-ignore
-      expect(stripe.subscriptions.retrieve).not.toHaveBeenCalled()
+      expect(mockStripe.subscriptions.retrieve).not.toHaveBeenCalled()
     })
   })
 })

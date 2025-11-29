@@ -8,7 +8,10 @@
     "safeToNavigate": "You can safely navigate away - we'll send you an email confirmation once your subscription is active.",
     "checkStatus": "You can check your subscription status in settings",
     "goToDashboard": "Go to Dashboard",
-    "viewBilling": "View Billing Settings"
+    "viewBilling": "View Billing Settings",
+    "verificationFailed": "Verification Taking Longer Than Expected",
+    "verificationFailedDescription": "Your payment was successful, but we're still setting up your account. Your subscription will be active shortly.",
+    "contactSupport": "If you don't see your subscription within a few minutes, please contact support."
   },
   "success": {
     "title": "Welcome to Capsule Note Pro!",

@@ -22,6 +22,13 @@ vi.mock('@clerk/nextjs/server', () => ({
       getUser: mockGetUser,
     },
   })),
+  createClerkClient: vi.fn(() => ({
+    users: {
+      getUser: mockGetUser,
+      updateUser: vi.fn(),
+      deleteUser: vi.fn(),
+    },
+  })),
 }))
 
 vi.mock('@/server/lib/db', () => ({

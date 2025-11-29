@@ -4,7 +4,7 @@
  * Handles post-payment flow:
  * 1. Verify Stripe checkout session
  * 2. Check if user is authenticated
- * 3. If authenticated → Show success + redirect to dashboard
+ * 3. If authenticated → Show success + redirect to journey
  * 4. If not authenticated → Show Clerk SignUp with locked email
  *
  * Server Component - verifies session server-side
@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle, AlertCircle } from "lucide-react"
 
 import { CustomSignUpForm } from "@/components/auth/custom-sign-up"
+import { RedirectCountdown } from "../_components/redirect-countdown"
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("subscribe.success")
@@ -121,7 +122,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       console.error("[Success Page] Failed to sync user post-checkout", error)
     }
 
-    // User is authenticated - show success and redirect to dashboard
+    // User is authenticated - show success and redirect to journey
     // The webhook or dashboard mount will link the subscription
     return (
       <div className="container px-4 py-12 sm:px-6">
@@ -150,23 +151,11 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
                 </p>
               </div>
 
-              <Button asChild size="lg" variant="secondary" className="w-full sm:w-auto">
-                <a href="/dashboard">{t("goToDashboard")}</a>
-              </Button>
-
-              <p className="font-mono text-xs text-gray-secondary">
-                {t("redirecting")}
-              </p>
+              {/* Countdown with skip button - replaces hardcoded 5s script */}
+              <RedirectCountdown duration={3} targetUrl="/journey" />
             </CardContent>
           </Card>
         </div>
-
-        {/* Auto-redirect after 5 seconds */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `setTimeout(() => { window.location.href = '/dashboard'; }, 5000);`,
-          }}
-        />
       </div>
     )
   }

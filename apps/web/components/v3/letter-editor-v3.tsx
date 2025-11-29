@@ -30,6 +30,8 @@ import {
   getLetterAutosave,
   clearLetterAutosave,
   formatLastSaved,
+  getAnonymousDraft,
+  clearAnonymousDraft,
 } from "@/lib/localStorage-letter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -183,7 +185,58 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   )
 
   // Load autosaved draft on mount (only for new letters)
+  // Priority: Anonymous draft (from homepage before signup) > Authenticated draft
   React.useEffect(() => {
+    // First, check for anonymous draft from homepage (pre-signup flow)
+    const anonymousDraft = getAnonymousDraft()
+    if (anonymousDraft) {
+      // Restore fields from anonymous draft (simpler structure)
+      setTitle(anonymousDraft.title || "")
+      setBodyHtml(anonymousDraft.body || "")
+      setBodyRich(null) // Anonymous drafts don't have rich content
+      setRecipientType(anonymousDraft.recipientType === "other" ? "someone-else" : "myself")
+      setRecipientName(anonymousDraft.recipientName || "")
+      setRecipientEmail(anonymousDraft.recipientEmail || "")
+      setDeliveryChannels(
+        anonymousDraft.deliveryType === "physical" ? ["physical"] : ["email"]
+      )
+      if (anonymousDraft.deliveryDate) {
+        setDeliveryDate(new Date(anonymousDraft.deliveryDate))
+      }
+      setRestoredFromDraft(true)
+
+      // Show toast for anonymous draft recovery
+      toast.success("Welcome! Your letter draft has been restored", {
+        description: `Continue writing from where you left off (${anonymousDraft.wordCount} words)`,
+        action: {
+          label: "Clear",
+          onClick: () => {
+            clearAnonymousDraft()
+            // Clear the form
+            setTitle("")
+            setBodyRich(null)
+            setBodyHtml("")
+            setRecipientType("myself")
+            setRecipientName("")
+            setRecipientEmail("")
+            setDeliveryChannels(["email"])
+            setDeliveryDate(undefined)
+            setSelectedPreset(null)
+            setSelectedAddressId(null)
+            setPrintOptions({ color: false, doubleSided: false })
+            setRestoredFromDraft(false)
+            toast.success("Draft cleared")
+          },
+        },
+      })
+
+      // Clear anonymous draft after loading (migrate to authenticated flow)
+      // The autosave will now save as authenticated user format
+      clearAnonymousDraft()
+      return
+    }
+
+    // Fall back to authenticated user draft
     const savedDraft = getLetterAutosave()
     if (savedDraft) {
       // Restore all fields from the saved draft

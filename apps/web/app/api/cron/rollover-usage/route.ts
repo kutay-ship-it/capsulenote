@@ -61,10 +61,12 @@ export async function GET(request: NextRequest) {
     // Calculate next period start (beginning of next month)
     const nextPeriod = getStartOfNextMonth(now)
 
-    // Mail credits per month by plan
+    // Mail credits per month by plan - MUST match PlanType enum values
+    // DIGITAL_CAPSULE = email-only plan (no mail credits)
+    // PAPER_PIXELS = physical mail plan (2 credits/month)
     const mailCreditsMap: Record<string, number> = {
-      pro: 2,
-      enterprise: 10 // Future: adjust as needed
+      DIGITAL_CAPSULE: 0,
+      PAPER_PIXELS: 2,
     }
 
     const results = []

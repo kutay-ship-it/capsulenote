@@ -36,7 +36,7 @@ export default async function CheckoutSuccessPage({
 
   // Require session_id parameter
   if (!searchParams.session_id) {
-    redirect("/dashboard")
+    redirect("/journey")
   }
 
   // Poll for subscription (webhook may still be processing)

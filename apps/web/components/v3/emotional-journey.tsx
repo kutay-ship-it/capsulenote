@@ -142,8 +142,9 @@ export function EmotionalJourney({ deliveries }: EmotionalJourneyProps) {
   }, [deliveries])
 
   // Track scroll progress within the tall container
+  // Only attach target ref after mount to prevent hydration errors
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: mounted ? containerRef : undefined,
     offset: ["start start", "end end"],
   })
 

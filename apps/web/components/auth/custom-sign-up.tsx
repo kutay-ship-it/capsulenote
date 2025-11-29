@@ -79,7 +79,7 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId })
-        router.push("/dashboard")
+        router.push("/welcome")
       } else {
         setError(t("errors.verificationIncomplete"))
       }

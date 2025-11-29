@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { format, differenceInDays, startOfYear } from "date-fns"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Mail, Lock } from "lucide-react"
@@ -15,6 +15,13 @@ interface EmotionalJourneyV2Props {
 export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Ensure component is mounted before using scroll animations
+  // This prevents the "Target ref is defined but not hydrated" error
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Calculate layout with "Elastic Time"
   const { items, totalWidth, yearMarkers, nowX } = useMemo(() => {
@@ -203,13 +210,23 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
   }, [deliveries])
 
   // Track scroll progress within the tall container
+  // Only attach target ref after mount AND when deliveries exist (otherwise early return means ref is never attached)
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isMounted && deliveries.length > 0 ? containerRef : undefined,
     offset: ["start start", "end end"],
   })
 
   // Calculate how much horizontal scroll distance we need
-  const viewportWidth = typeof window !== "undefined" ? window.innerWidth : 1200
+  // Use state for viewport width to handle SSR properly
+  const [viewportWidth, setViewportWidth] = useState(1200)
+
+  useEffect(() => {
+    const updateWidth = () => setViewportWidth(window.innerWidth)
+    updateWidth()
+    window.addEventListener("resize", updateWidth)
+    return () => window.removeEventListener("resize", updateWidth)
+  }, [])
+
   const scrollDistance = Math.max(0, totalWidth - viewportWidth)
 
   // Transform: as we scroll through the container vertically, move content horizontally

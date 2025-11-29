@@ -4,6 +4,7 @@ import {
   deliverEmail,
   sendLetterCreatedEmail,
   sendDeliveryScheduledEmail,
+  lockLetterBeforeSend,
   processStripeWebhook,
   sendBillingNotification,
   handleDunning,
@@ -17,10 +18,14 @@ export const { GET, POST, PUT } = serve({
     deliverEmail,
     sendLetterCreatedEmail,
     sendDeliveryScheduledEmail,
+    lockLetterBeforeSend,
 
     // Billing & payments
     processStripeWebhook,
     sendBillingNotification,
     handleDunning,
+
+    // User lifecycle
+    cleanupDeletedUser,
   ],
 })

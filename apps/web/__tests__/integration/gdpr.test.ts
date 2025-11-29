@@ -90,7 +90,7 @@ vi.mock('../../server/lib/audit', () => ({
 const mockDeleteUser = vi.fn(() => Promise.resolve({ deleted: true, id: 'clerk_test_123' }))
 
 vi.mock('../../server/lib/clerk', () => ({
-  getClerkClient: vi.fn(() => Promise.resolve({
+  getClerkClient: vi.fn(() => ({
     users: {
       deleteUser: mockDeleteUser,
     },

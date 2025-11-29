@@ -123,8 +123,19 @@ export const deliverEmail = inngest.createFunction(
     name: "Deliver Email",
     retries: 5,
     // Exponential backoff: 1s, 2s, 4s, 8s, 16s
-    onFailure: async ({ error, event, step }) => {
-      const { deliveryId } = event.data.event.data
+    onFailure: async ({ error, event }) => {
+      // Extract deliveryId from original event - Inngest failure event structure:
+      // event.data.event contains the original triggering event
+      const originalEvent = event.data?.event
+      const deliveryId = originalEvent?.data?.deliveryId
+
+      if (!deliveryId) {
+        logger.error("Delivery failure handler: missing deliveryId", {
+          error: error.message,
+          eventData: JSON.stringify(event.data),
+        })
+        return
+      }
 
       logger.error("Delivery function failed after all retries", {
         deliveryId,
@@ -132,7 +143,7 @@ export const deliverEmail = inngest.createFunction(
         stack: error.stack,
       })
 
-      // Fetch delivery to mark as failed
+      // Fetch delivery to mark as failed + create DLQ entry
       try {
         const delivery = await prisma.delivery.findUnique({
           where: { id: deliveryId },

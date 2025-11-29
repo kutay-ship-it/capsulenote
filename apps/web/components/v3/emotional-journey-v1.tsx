@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState, useEffect } from "react"
 import { format, differenceInDays, startOfYear } from "date-fns"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Mail, Lock } from "lucide-react"
@@ -20,6 +20,12 @@ interface EmotionalJourneyV1Props {
 export function EmotionalJourneyV1({ deliveries }: EmotionalJourneyV1Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Ensure component is mounted before using scroll animations
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Calculate layout with "Elastic Time"
   const { items, totalWidth, yearMarkers, nowX } = useMemo(() => {
@@ -128,8 +134,9 @@ export function EmotionalJourneyV1({ deliveries }: EmotionalJourneyV1Props) {
   }, [deliveries])
 
   // Track scroll progress within the tall container
+  // Only attach target ref after mount to prevent hydration errors
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isMounted ? containerRef : undefined,
     offset: ["start start", "end end"],
   })
 

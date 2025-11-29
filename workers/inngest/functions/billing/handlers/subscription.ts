@@ -116,7 +116,15 @@ export async function handleSubscriptionCreatedOrUpdated(
   }
 
   if (!user) {
-    throw new Error(`User not found for customer: ${customerId}`)
+    // For anonymous checkout flow: customer.subscription.created fires BEFORE checkout.session.completed
+    // At this point, the user may not exist yet or stripeCustomerId isn't linked.
+    // Defer processing to checkout.session.completed which handles subscription sync.
+    console.log("[Subscription Handler] User not found, deferring to checkout handler", {
+      customerId,
+      subscriptionId: subscription.id,
+      status: subscription.status,
+    })
+    return
   }
 
   const plan =

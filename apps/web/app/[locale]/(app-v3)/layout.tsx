@@ -6,6 +6,7 @@ import { EmailLockGuard } from "@/components/auth/email-lock-guard"
 import { SettingsDropdown } from "@/components/v3/settings-dropdown"
 import { CreditsBarV3 } from "@/components/v3/nav/credit-indicator-v3"
 import { WriteButtonV3 } from "@/components/v3/nav/write-button-v3"
+import { OnboardingProvider } from "@/components/v3/onboarding"
 import { Link } from "@/i18n/routing"
 import type { Locale } from "@/i18n/routing"
 import { getCurrentUser } from "@/server/lib/auth"
@@ -33,9 +34,13 @@ export default async function AppV3Layout({
   const emailCredits = entitlements?.features.emailDeliveriesIncluded ?? 0
   const mailCredits = entitlements?.usage.mailCreditsRemaining ?? 0
 
+  // Check if user needs onboarding
+  const shouldShowOnboarding = user ? !user.profile?.onboardingCompleted : false
+
   return (
     <EmailLockGuard>
-      <div className="flex min-h-screen flex-col bg-off-white">
+      <OnboardingProvider shouldShowOnboarding={shouldShowOnboarding}>
+        <div className="flex min-h-screen flex-col bg-off-white">
         {/* Header - Simplified per spec: [Logo] Your Letters [+ Write] [Settings] */}
         <header
           className="sticky top-0 z-50 w-full border-b-2 border-charcoal bg-white"
@@ -95,7 +100,8 @@ export default async function AppV3Layout({
 
         {/* Main Content - No container wrapper to allow full-width sections */}
         <main className="flex-1">{children}</main>
-      </div>
+        </div>
+      </OnboardingProvider>
     </EmailLockGuard>
   )
 }

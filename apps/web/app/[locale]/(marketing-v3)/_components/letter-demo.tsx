@@ -13,10 +13,14 @@ import {
   Settings,
   Stamp,
   ArrowRight,
+  Check,
+  Loader2,
+  AlertCircle,
 } from "lucide-react"
 import { motion, useInView } from "framer-motion"
 
-import { cn } from "@/lib/utils"
+import { cn, getUserTimezone } from "@/lib/utils"
+import { saveAnonymousDraft } from "@/lib/localStorage-letter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LetterEditor } from "@/components/letter-editor"
@@ -29,6 +33,13 @@ import {
 } from "@/components/ui/tooltip"
 
 type RecipientType = "myself"
+
+// Form validation error types
+interface DemoFormErrors {
+  recipientEmail?: string
+  deliveryDate?: string
+  bodyHtml?: string
+}
 
 const DATE_PRESETS = [
   { label: "6 Months", months: 6, key: "6mo" },
@@ -56,6 +67,14 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
   const [showCustomDate, setShowCustomDate] = React.useState(false)
 
+  // Seal animation state
+  const [sealStage, setSealStage] = React.useState<"idle" | "sealing" | "sealed">("idle")
+  const isSealing = sealStage !== "idle"
+
+  // Validation errors state
+  const [errors, setErrors] = React.useState<DemoFormErrors>({})
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false)
+
   // Word/char count
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
   const wordCount = plainText ? plainText.split(/\s+/).length : 0
@@ -64,46 +83,147 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   // Check if form has content
   const hasContent = title.trim() !== "" || plainText !== ""
 
+  // Validate form before submission
+  const validateForm = (): boolean => {
+    const newErrors: DemoFormErrors = {}
+    const trimmedEmail = recipientEmail.trim()
+
+    // Email validation (required)
+    if (!trimmedEmail) {
+      newErrors.recipientEmail = "Email is required"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      newErrors.recipientEmail = "Please enter a valid email"
+    }
+
+    // Delivery date validation (required)
+    if (!deliveryDate) {
+      newErrors.deliveryDate = "Pick when to deliver your letter"
+    }
+
+    // Message content validation (required)
+    if (!plainText) {
+      newErrors.bodyHtml = "Write a message to your future self"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handlePresetDate = (months: number, key: string) => {
     const today = new Date()
     const futureDate = new Date(today.setMonth(today.getMonth() + months))
     setDeliveryDate(futureDate)
     setSelectedPreset(key)
     setShowCustomDate(false)
+    // Clear date error on selection
+    if (errors.deliveryDate) {
+      setErrors((prev) => ({ ...prev, deliveryDate: undefined }))
+    }
   }
 
   const handleDateSelect = (date: Date | undefined) => {
     setDeliveryDate(date)
     setSelectedPreset(null)
+    // Clear date error on selection
+    if (errors.deliveryDate && date) {
+      setErrors((prev) => ({ ...prev, deliveryDate: undefined }))
+    }
   }
 
-  // Save draft to localStorage and redirect to sign-up
-  const handleTryProduct = () => {
-    // Save the draft so users can continue after sign-up
-    if (hasContent) {
-      const draftData = {
-        title,
-        bodyRich,
-        bodyHtml,
-        recipientType: "self",
-        recipientName: "",
-        recipientEmail,
-        deliveryChannels: ["email"],
-        deliveryDate: deliveryDate?.toISOString() ?? null,
-        selectedPreset,
-        selectedAddressId: null,
-        printOptions: { color: false, doubleSided: false },
-        lastSaved: new Date().toISOString(),
+  // Save draft to localStorage and redirect to subscribe/checkout flow
+  // Uses 2-stage animation: "Sealing..." (600ms) → "Sealed!" (400ms) → Navigate
+  const handleTryProduct = async () => {
+    // Prevent double-clicks
+    if (isSealing) return
+
+    // Mark that user has attempted to submit (for showing persistent errors)
+    setHasAttemptedSubmit(true)
+
+    // Validate form before proceeding
+    if (!validateForm()) {
+      // Scroll to first error (optional UX improvement)
+      const firstErrorField = document.querySelector('[aria-invalid="true"]')
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" })
       }
-      try {
-        localStorage.setItem("capsule_letter_autosave", JSON.stringify(draftData))
-      } catch (e) {
-        // Silently fail if localStorage is not available
-      }
+      return
     }
 
-    // Redirect to sign-up
-    router.push(isSignedIn ? "/letters/new" : "/sign-up")
+    const trimmedEmail = recipientEmail.trim()
+    const timezone = getUserTimezone()
+
+    // Stage 1: "Sealing..." animation
+    setSealStage("sealing")
+
+    // Perform localStorage operations during animation
+    const navigationUrl = await new Promise<string>((resolve) => {
+      setTimeout(() => {
+        // For signed-in users, go directly to new letter page
+        if (isSignedIn) {
+          // Save as authenticated user draft format
+          if (hasContent) {
+            const draftData = {
+              title,
+              bodyRich,
+              bodyHtml,
+              recipientType: "self",
+              recipientName: "",
+              recipientEmail: trimmedEmail,
+              deliveryChannels: ["email"],
+              deliveryDate: deliveryDate?.toISOString() ?? null,
+              selectedPreset,
+              selectedAddressId: null,
+              printOptions: { color: false, doubleSided: false },
+              lastSaved: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
+            }
+            try {
+              localStorage.setItem("capsule-letter-autosave", JSON.stringify(draftData))
+            } catch (e) {
+              // Silently fail if localStorage is not available
+            }
+          }
+          resolve("/letters/new")
+          return
+        }
+
+        // For anonymous users: save draft and redirect to subscribe (paywall)
+        if (hasContent || trimmedEmail) {
+          const saved = saveAnonymousDraft(
+            title,
+            bodyHtml,
+            trimmedEmail,
+            deliveryDate?.toISOString(),
+            "email",
+            timezone,
+            "self",
+            ""
+          )
+
+          if (!saved) {
+            console.warn("Draft could not be saved to localStorage")
+          }
+        }
+
+        // Build subscribe URL with email locked in
+        const params = new URLSearchParams()
+        if (trimmedEmail) {
+          params.set("email", trimmedEmail)
+        }
+        params.set("deliveryType", "email")
+        params.set("timezone", timezone)
+
+        resolve(`/subscribe?${params.toString()}`)
+      }, 600) // Stage 1 duration
+    })
+
+    // Stage 2: "Sealed!" confirmation
+    setSealStage("sealed")
+
+    // Navigate after brief success display
+    setTimeout(() => {
+      router.push(navigationUrl)
+    }, 400) // Stage 2 duration
   }
 
   return (
@@ -189,26 +309,48 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                 {/* Content Field */}
                 <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                   <div className="flex items-center justify-between mb-2 flex-shrink-0">
-                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
+                    <label
+                      className={cn(
+                        "font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1",
+                        errors.bodyHtml ? "text-coral" : "text-charcoal"
+                      )}
+                    >
                       Your Message
+                      <span className="text-coral">*</span>
                     </label>
                     <div className="flex gap-3 font-mono text-[10px] text-charcoal/50 uppercase tracking-wider">
                       <span>{wordCount} words</span>
                       <span>{characterCount} chars</span>
                     </div>
                   </div>
-                  <div className="flex-1 flex flex-col min-h-0">
+                  <div
+                    className={cn(
+                      "flex-1 flex flex-col min-h-0",
+                      errors.bodyHtml && "ring-2 ring-coral ring-offset-2"
+                    )}
+                    style={{ borderRadius: "2px" }}
+                  >
                     <LetterEditor
                       content={bodyRich || bodyHtml}
                       onChange={(json, html) => {
                         setBodyRich(json)
                         setBodyHtml(html)
+                        // Clear error when user starts typing
+                        if (errors.bodyHtml) {
+                          setErrors((prev) => ({ ...prev, bodyHtml: undefined }))
+                        }
                       }}
                       placeholder="Dear future me, I'm writing this to remind you..."
                       className="flex-1 flex flex-col min-h-0"
                       minHeight="200px"
                     />
                   </div>
+                  {errors.bodyHtml && (
+                    <p className="font-mono text-[10px] text-coral flex items-center gap-1 mt-2">
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.bodyHtml}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -275,20 +417,46 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     <div className="space-y-2 pt-1">
                       <label
                         htmlFor="demo-email"
-                        className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70 flex items-center gap-1.5"
+                        className={cn(
+                          "font-mono text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5",
+                          errors.recipientEmail ? "text-coral" : "text-charcoal/70"
+                        )}
                       >
                         <AtSign className="h-3 w-3" strokeWidth={2} />
                         Your Email
+                        <span className="text-coral">*</span>
                       </label>
                       <Input
                         id="demo-email"
                         type="email"
                         value={recipientEmail}
-                        onChange={(e) => setRecipientEmail(e.target.value)}
+                        onChange={(e) => {
+                          setRecipientEmail(e.target.value)
+                          // Clear error when user starts typing
+                          if (errors.recipientEmail) {
+                            setErrors((prev) => ({ ...prev, recipientEmail: undefined }))
+                          }
+                        }}
                         placeholder="your@email.com"
-                        className="border-2 border-charcoal font-mono text-sm"
+                        className={cn(
+                          "border-2 font-mono text-sm",
+                          errors.recipientEmail
+                            ? "border-coral focus-visible:ring-coral"
+                            : "border-charcoal"
+                        )}
                         style={{ borderRadius: "2px" }}
+                        aria-invalid={!!errors.recipientEmail}
+                        aria-describedby={errors.recipientEmail ? "demo-email-error" : undefined}
                       />
+                      {errors.recipientEmail && (
+                        <p
+                          id="demo-email-error"
+                          className="font-mono text-[10px] text-coral flex items-center gap-1"
+                        >
+                          <AlertCircle className="h-3 w-3" />
+                          {errors.recipientEmail}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -297,9 +465,15 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
 
                   {/* Delivery Date */}
                   <div className="space-y-3">
-                    <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
+                    <label
+                      className={cn(
+                        "font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2",
+                        errors.deliveryDate ? "text-coral" : "text-charcoal"
+                      )}
+                    >
                       <Calendar className="h-3.5 w-3.5" strokeWidth={2} />
                       When to Deliver
+                      <span className="text-coral">*</span>
                     </label>
 
                     {/* Date Preset Buttons */}
@@ -377,6 +551,14 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                         </div>
                       </div>
                     )}
+
+                    {/* Date Error */}
+                    {errors.deliveryDate && (
+                      <p className="font-mono text-[10px] text-coral flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {errors.deliveryDate}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -387,15 +569,35 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                 style={{ borderRadius: "2px" }}
               >
                 <div className="space-y-4">
-                  {/* CTA Button */}
+                  {/* CTA Button with 2-stage seal animation */}
                   <Button
                     type="button"
                     onClick={handleTryProduct}
-                    className="w-full gap-2 h-12 group"
+                    disabled={isSealing}
+                    className={cn(
+                      "w-full gap-2 h-12 group transition-all duration-200",
+                      sealStage === "sealed" && "bg-teal-primary border-teal-primary"
+                    )}
                   >
-                    <Stamp className="h-4 w-4" strokeWidth={2} />
-                    {isSignedIn ? "Continue Writing" : "Seal & Schedule"}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    {sealStage === "idle" && (
+                      <>
+                        <Stamp className="h-4 w-4" strokeWidth={2} />
+                        {isSignedIn ? "Continue Writing" : "Seal & Schedule"}
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                    {sealStage === "sealing" && (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
+                        Sealing...
+                      </>
+                    )}
+                    {sealStage === "sealed" && (
+                      <>
+                        <Check className="h-4 w-4" strokeWidth={2.5} />
+                        Sealed!
+                      </>
+                    )}
                   </Button>
 
                 </div>

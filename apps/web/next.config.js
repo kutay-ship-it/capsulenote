@@ -1,3 +1,4 @@
+const path = require("path")
 const createNextIntlPlugin = require("next-intl/plugin")
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
@@ -5,6 +6,8 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Set workspace root to monorepo root to avoid lockfile detection issues
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   eslint: {
     // Disable ESLint during build (can be enabled later with proper config)
     ignoreDuringBuilds: true,

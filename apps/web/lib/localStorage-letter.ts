@@ -27,6 +27,7 @@ const DRAFT_EXPIRY_DAYS = 7 // Auto-delete after 7 days
 
 /**
  * Save draft to localStorage with timestamp
+ * @returns true if save succeeded, false if failed (e.g., private browsing, quota exceeded)
  */
 export function saveAnonymousDraft(
   title: string,
@@ -37,7 +38,7 @@ export function saveAnonymousDraft(
   timezone?: string,
   recipientType?: "self" | "other",
   recipientName?: string
-): void {
+): boolean {
   try {
     const wordCount = countWords(body)
     const now = new Date().toISOString()
@@ -59,10 +60,13 @@ export function saveAnonymousDraft(
 
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
+      return true
     }
+    return false
   } catch (error) {
-    // Silently fail if localStorage unavailable (private browsing, quota exceeded)
+    // localStorage unavailable (private browsing, quota exceeded)
     console.warn('Failed to save anonymous draft:', error)
+    return false
   }
 }
 
@@ -195,12 +199,13 @@ export interface LetterAutosave {
 
 /**
  * Save letter draft to localStorage for authenticated users
+ * @returns true if save succeeded, false if failed (e.g., private browsing, quota exceeded)
  */
 export function saveLetterAutosave(
   draft: Omit<LetterAutosave, "lastSaved" | "createdAt">
-): void {
+): boolean {
   try {
-    if (typeof window === "undefined") return
+    if (typeof window === "undefined") return false
 
     const now = new Date().toISOString()
     const existing = getLetterAutosave()
@@ -212,9 +217,11 @@ export function saveLetterAutosave(
     }
 
     localStorage.setItem(AUTOSAVE_STORAGE_KEY, JSON.stringify(autosave))
+    return true
   } catch (error) {
-    // Silently fail if localStorage unavailable (private browsing, quota exceeded)
+    // localStorage unavailable (private browsing, quota exceeded)
     console.warn("Failed to save letter autosave:", error)
+    return false
   }
 }
 

@@ -758,8 +758,14 @@ Write something meaningful. Tell yourself about today. Share your hopes, fears, 
 
 function StoryDrivenPage() {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isMounted ? containerRef : undefined,
     offset: ["start start", "end end"],
   })
 

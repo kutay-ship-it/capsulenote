@@ -19,9 +19,16 @@ export function PricingHeroV3({
   socialProofText = "10,000+ letters delivered",
 }: PricingHeroV3Props) {
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const [isMounted, setIsMounted] = React.useState(false)
+
+  // Ensure component is mounted before using scroll animations
+  // This prevents the "Target ref is defined but not hydrated" error
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const { scrollYProgress } = useScroll({
-    target: containerRef,
+    target: isMounted ? containerRef : undefined,
     offset: ["start start", "end start"],
   })
 
