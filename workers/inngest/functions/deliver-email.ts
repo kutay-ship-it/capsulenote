@@ -443,7 +443,7 @@ export const deliverEmail = inngest.createFunction(
         attempt: delivery.attemptCount,
       })
 
-      const viewUrl = `${process.env.NEXT_PUBLIC_APP_URL}/view/${delivery.letter.shareLinkToken}`
+      const unlockUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unlock/${delivery.letter.id}`
       const emailHtml = `
         <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #1a1a1a;">A Letter from Your Past Self</h1>
@@ -454,7 +454,7 @@ export const deliverEmail = inngest.createFunction(
           </div>
           <p style="color: #999; font-size: 14px;">
             This letter was sent via Capsule Note.<br/>
-            <a href="${viewUrl}">Open this letter on Capsule Note</a>
+            <a href="${unlockUrl}">Open this letter on Capsule Note</a>
             <br/>
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">View your dashboard</a>
           </p>
