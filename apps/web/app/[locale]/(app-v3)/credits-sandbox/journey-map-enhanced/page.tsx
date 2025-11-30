@@ -831,19 +831,16 @@ function DepthJourney({
         <div className="relative h-64 mb-4">
           {/* Layer stack */}
           {layers.map((layer, i) => {
-            const isActive = currentLayer > i || stage === "complete"
+            // Layers are always visible with colors once animation starts
+            const isVisible = stage !== "starting"
+            // Checkmarks appear when layer is reached or complete
+            const isCompleted = currentLayer > i || stage === "complete"
             const Icon = layer.icon
             const bgColor = {
               "duck-yellow": "bg-duck-yellow",
               "teal-primary": "bg-teal-primary",
               "duck-blue": "bg-duck-blue",
               "coral": "bg-coral",
-            }[layer.color]
-            const borderColor = {
-              "duck-yellow": "border-duck-yellow",
-              "teal-primary": "border-teal-primary",
-              "duck-blue": "border-duck-blue",
-              "coral": "border-coral",
             }[layer.color]
             const textColor = layer.color === "duck-yellow" ? "text-charcoal" : "text-white"
 
@@ -853,14 +850,14 @@ function DepthJourney({
                 className="absolute left-4 right-4"
                 style={{ top: `${i * 56 + 8}px` }}
                 initial={{ opacity: 0, x: -20 }}
-                animate={isActive ? { opacity: 1, x: 0 } : { opacity: 0.2, x: 0 }}
+                animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0.2, x: 0 }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
               >
                 <div
                   className={cn(
                     "flex items-center gap-3 p-3 border-2 border-charcoal",
-                    isActive ? bgColor : "bg-charcoal/5",
-                    isActive && "shadow-[3px_3px_0_theme(colors.charcoal)]"
+                    isVisible ? bgColor : "bg-charcoal/5",
+                    isVisible && "shadow-[3px_3px_0_theme(colors.charcoal)]"
                   )}
                   style={{ borderRadius: "2px" }}
                 >
@@ -868,31 +865,31 @@ function DepthJourney({
                   <div
                     className={cn(
                       "w-10 h-10 border-2 border-charcoal flex items-center justify-center shrink-0",
-                      isActive ? "bg-white/20" : "bg-charcoal/10"
+                      isVisible ? "bg-white/20" : "bg-charcoal/10"
                     )}
                     style={{ borderRadius: "2px" }}
                   >
-                    <Icon className={cn("h-5 w-5", isActive ? textColor : "text-charcoal/30")} strokeWidth={2} />
+                    <Icon className={cn("h-5 w-5", isVisible ? textColor : "text-charcoal/30")} strokeWidth={2} />
                   </div>
 
                   {/* Text */}
                   <div className="flex-1 min-w-0">
                     <p className={cn(
                       "font-mono text-sm font-bold uppercase tracking-wide",
-                      isActive ? textColor : "text-charcoal/30"
+                      isVisible ? textColor : "text-charcoal/30"
                     )}>
                       {layer.label}
                     </p>
                     <p className={cn(
                       "font-mono text-[10px] uppercase tracking-wider",
-                      isActive ? `${textColor}/70` : "text-charcoal/20"
+                      isVisible ? `${textColor}/70` : "text-charcoal/20"
                     )}>
                       {layer.sublabel}
                     </p>
                   </div>
 
-                  {/* Status */}
-                  {isActive && (
+                  {/* Checkmark - only shows when completed */}
+                  {isCompleted && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
