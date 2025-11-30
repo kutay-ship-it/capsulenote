@@ -62,9 +62,7 @@ export const env = createEnv({
     UNLEASH_API_TOKEN: z.string().optional(),
     UNLEASH_APP_NAME: z.string().default("capsulenote"),
 
-    // Analytics & Observability
-    POSTHOG_API_KEY: z.string().optional(),
-    POSTHOG_HOST: z.string().url().optional(),
+    // Observability
     OTEL_EXPORTER_OTLP_ENDPOINT: z.string().url().optional(),
     OTEL_EXPORTER_OTLP_HEADERS: z.string().optional(),
 
@@ -94,6 +92,7 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().optional(),
+    NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   },
 
   /**
@@ -130,8 +129,6 @@ export const env = createEnv({
     UNLEASH_API_URL: process.env.UNLEASH_API_URL,
     UNLEASH_API_TOKEN: process.env.UNLEASH_API_TOKEN,
     UNLEASH_APP_NAME: process.env.UNLEASH_APP_NAME,
-    POSTHOG_API_KEY: process.env.POSTHOG_API_KEY,
-    POSTHOG_HOST: process.env.POSTHOG_HOST,
     OTEL_EXPORTER_OTLP_ENDPOINT: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     OTEL_EXPORTER_OTLP_HEADERS: process.env.OTEL_EXPORTER_OTLP_HEADERS,
     SENTRY_DSN: process.env.SENTRY_DSN,
@@ -151,6 +148,7 @@ export const env = createEnv({
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
   },
 
   /**

@@ -9,6 +9,7 @@
  * This is the last line of defense for unhandled errors.
  */
 
+import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
@@ -23,17 +24,17 @@ export default function GlobalError({
     // Log error to console in development
     console.error('Global error boundary caught:', error)
 
-    // TODO: Send to error tracking service (Sentry)
-    // Sentry.captureException(error, {
-    //   tags: {
-    //     boundary: 'global',
-    //   },
-    //   contexts: {
-    //     errorDigest: {
-    //       digest: error.digest,
-    //     },
-    //   },
-    // })
+    // Send to Sentry
+    Sentry.captureException(error, {
+      tags: {
+        boundary: 'global',
+      },
+      contexts: {
+        errorDigest: {
+          digest: error.digest,
+        },
+      },
+    })
   }, [error])
 
   return (
