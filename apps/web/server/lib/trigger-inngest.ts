@@ -24,7 +24,7 @@ export async function triggerInngestEvent(eventName: string, data: Record<string
       ? (result as any).ids
       : []
 
-    const eventId = ids.find((id) => typeof id === "string") ?? null
+    const eventId = ids.find((id: unknown) => typeof id === "string") ?? null
 
     if (!eventId) {
       console.error(`Inngest send() returned no event ID for: ${eventName}`, { result, data })

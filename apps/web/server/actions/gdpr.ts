@@ -498,3 +498,8 @@ export async function deleteUserAccount(): Promise<ActionResult<void>> {
     }
   }
 }
+
+/**
+ * Alias for deleteUserAccount for backwards compatibility
+ */
+export { deleteUserAccount as deleteUserData }

@@ -27,7 +27,7 @@ export interface ErrorRecoveryInfo {
 /**
  * Retryable error codes - errors that can be retried automatically
  */
-const RETRYABLE_ERRORS = new Set([
+const RETRYABLE_ERRORS: Set<string> = new Set([
   ErrorCodes.EMAIL_SEND_FAILED,
   ErrorCodes.MAIL_SEND_FAILED,
   ErrorCodes.INTERNAL_ERROR,
@@ -40,7 +40,7 @@ const RETRYABLE_ERRORS = new Set([
 /**
  * User action required errors - errors where user needs to do something
  */
-const USER_ACTION_ERRORS = new Set([
+const USER_ACTION_ERRORS: Set<string> = new Set([
   ErrorCodes.SUBSCRIPTION_REQUIRED,
   ErrorCodes.QUOTA_EXCEEDED,
   ErrorCodes.INSUFFICIENT_CREDITS,
@@ -51,7 +51,7 @@ const USER_ACTION_ERRORS = new Set([
 /**
  * Permanent errors - errors that cannot be fixed by retry
  */
-const PERMANENT_ERRORS = new Set([
+const PERMANENT_ERRORS: Set<string> = new Set([
   ErrorCodes.NOT_FOUND,
   ErrorCodes.FORBIDDEN,
   "INVALID_ADDRESS",

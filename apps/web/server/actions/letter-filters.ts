@@ -154,10 +154,11 @@ export async function getFilteredLetters(filter: LetterFilter = "all"): Promise<
 
     if (letter._count.deliveries === 0) {
       status = "draft"
-    } else if ("deliveries" in letter) {
+    } else if ("deliveries" in letter && Array.isArray(letter.deliveries)) {
       // For "all" filter, determine status from deliveries
-      const hasScheduled = letter.deliveries.some((d) => d.status === "scheduled")
-      const hasSent = letter.deliveries.some((d) => d.status === "sent")
+      const deliveries = letter.deliveries as Array<{ status: string }>
+      const hasScheduled = deliveries.some((d) => d.status === "scheduled")
+      const hasSent = deliveries.some((d) => d.status === "sent")
       status = hasSent ? "delivered" : hasScheduled ? "scheduled" : "draft"
     } else {
       // For filtered queries, use the filter type

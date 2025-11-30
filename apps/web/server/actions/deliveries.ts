@@ -857,12 +857,11 @@ export async function cancelDelivery(
           data: { status: "canceled" },
         })
 
-        if (existing.letter) {
-          await tx.letter.update({
-            where: { id: existing.letter.id },
-            data: { status: "CANCELLED" },
-          })
-        }
+        // Update associated letter status
+        await tx.letter.update({
+          where: { id: existing.letterId },
+          data: { status: "CANCELLED" },
+        })
 
         if (shouldRefundEmail) {
           await tx.user.update({

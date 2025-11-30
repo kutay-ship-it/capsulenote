@@ -73,6 +73,13 @@ export const AuditEventType = {
   LETTER_AUTO_DELETED: "letter.auto_deleted",
   LETTER_SHARED: "letter.shared",
   LETTER_MIGRATED_FROM_ANONYMOUS: "letter.migrated_from_anonymous",
+  LETTER_FIRST_OPENED: "letter.first_opened",
+
+  // User events
+  USER_ONBOARDING_COMPLETED: "user.onboarding_completed",
+
+  // Subscription cleanup events
+  SUBSCRIPTION_CLEANUP: "subscription.cleanup",
 
   // Delivery events
   DELIVERY_SCHEDULED: "delivery.scheduled",
@@ -80,6 +87,8 @@ export const AuditEventType = {
   DELIVERY_FAILED: "delivery.failed",
   DELIVERY_CANCELED: "delivery.canceled",
   DELIVERY_RECONCILED: "delivery.reconciled",
+  DELIVERY_UPDATED: "delivery.updated",
+  DELIVERY_RETRIED: "delivery.retried",
 
   // System events
   SYSTEM_RECONCILER_HIGH_VOLUME: "system.reconciler_high_volume",

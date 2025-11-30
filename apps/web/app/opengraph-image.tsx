@@ -40,7 +40,7 @@ export default function OgImage() {
           <span style={{ fontSize: 18 }}>Write to your future self</span>
         </div>
 
-        <div style={{ marginTop: 32 }}>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: 32 }}>
           <p
             style={{
               fontSize: 54,
