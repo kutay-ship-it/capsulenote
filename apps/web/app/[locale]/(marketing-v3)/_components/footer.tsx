@@ -9,9 +9,8 @@ export function Footer() {
 
   const links = {
     product: [
-      { label: "Features", href: "#" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "How It Works", href: "#" },
+      { label: "Features", href: "#features" },
+      { label: "How It Works", href: "#how-it-works" },
     ],
     company: [
       { label: "About", href: "#" },

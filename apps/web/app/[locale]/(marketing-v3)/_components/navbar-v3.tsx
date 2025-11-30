@@ -15,7 +15,6 @@ interface NavbarV3Props {
 const navLinks = [
   { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "/pricing" },
 ]
 
 export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
@@ -65,9 +64,9 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
             {/* Desktop CTA */}
             <div className="hidden items-center gap-3 md:flex">
               {isSignedIn ? (
-                <Link href="/dashboard">
+                <Link href="/letters">
                   <Button size="sm" className="gap-2">
-                    Dashboard
+                    Letters
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -78,7 +77,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                       Sign In
                     </Button>
                   </Link>
-                  <Link href="/sign-up">
+                  <Link href="/#try-demo">
                     <Button size="sm" className="gap-2">
                       Get Started
                       <ArrowRight className="h-4 w-4" />
@@ -142,15 +141,15 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                 className="flex flex-col gap-3 pt-4"
               >
                 {isSignedIn ? (
-                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/letters" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button className="w-full gap-2">
-                      Dashboard
+                      Letters
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                 ) : (
                   <>
-                    <Link href="/sign-up" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link href="/#try-demo" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full gap-2">
                         Get Started
                         <ArrowRight className="h-4 w-4" />

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { ArrowRight, Mail, Sparkles } from "lucide-react"
+import { ArrowRight, Heart } from "lucide-react"
 import { useRef } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -45,41 +45,29 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
                 className="flex items-center gap-2 border-2 border-charcoal bg-white px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
                 style={{ borderRadius: "2px" }}
               >
-                <Sparkles className="h-4 w-4" strokeWidth={2} />
-                Start Free Today
+                <Heart className="h-4 w-4 fill-coral text-coral" strokeWidth={2} />
+                Built for Time Travel
               </div>
             </div>
 
-            {/* Icon */}
-            <div className="mb-8 flex justify-center">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={isInView ? { scale: 1 } : { scale: 0 }}
-                transition={{ duration: 0.5, delay: 0.2, type: "spring", bounce: 0.5 }}
-                className="flex h-20 w-20 items-center justify-center border-4 border-charcoal bg-white shadow-[4px_4px_0_theme(colors.charcoal)]"
-                style={{ borderRadius: "2px" }}
-              >
-                <Mail className="h-10 w-10 text-charcoal" strokeWidth={2} />
-              </motion.div>
-            </div>
-
             {/* Content */}
-            <div className="text-center">
+            <div className="text-center pt-4">
               <h2 className="mb-4 font-mono text-2xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-3xl md:text-4xl lg:text-5xl">
-                Your Future Self is Waiting
+                Start Your First Letter Today
               </h2>
 
               <p className="mx-auto mb-8 max-w-xl font-mono text-base leading-relaxed text-charcoal/80 sm:text-lg">
-                Start writing your first letter today. It only takes a few minutes
-                to plant a seed that will bloom in your future.
+                It takes just 5 minutes to plant a seed that will bloom in your future.
+                <br className="hidden sm:block" />
+                What will you tell yourself?
               </p>
 
               {/* Stats */}
               <div className="mb-8 flex flex-wrap justify-center gap-4 sm:gap-8">
                 {[
                   { value: "10K+", label: "Letters Sent" },
-                  { value: "99.9%", label: "Delivery Rate" },
-                  { value: "Free", label: "To Start" },
+                  { value: "5 min", label: "To Write" },
+                  { value: "50 yrs", label: "Max Schedule" },
                 ].map((stat) => (
                   <div
                     key={stat.label}
@@ -96,43 +84,18 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
                 ))}
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                {isSignedIn ? (
-                  <Link href="/dashboard">
-                    <Button
-                      variant="secondary"
-                      size="lg"
-                      className="group gap-3 text-lg shadow-md hover:shadow-lg"
-                    >
-                      Go to Dashboard
-                      <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                    </Button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link href="/sign-up">
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        className="group gap-3 text-lg shadow-md hover:shadow-lg"
-                      >
-                        Create Free Account
-                        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                      </Button>
-                    </Link>
-                    <Link href="/pricing">
-                      <Button
-                        variant="ghost"
-                        size="lg"
-                        className="border-2 border-charcoal bg-transparent text-lg text-charcoal hover:bg-charcoal hover:text-white"
-                        style={{ borderRadius: "2px" }}
-                      >
-                        View Pricing
-                      </Button>
-                    </Link>
-                  </>
-                )}
+              {/* CTA Button */}
+              <div className="flex justify-center">
+                <Link href="/#try-demo">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    className="group gap-3 text-lg shadow-md hover:shadow-lg"
+                  >
+                    Write Your First Letter
+                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
