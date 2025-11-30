@@ -107,7 +107,7 @@ export function LetterDraftForm({
           '"': '&quot;',
           "'": '&#39;',
         }
-        return text.replace(/[&<>"']/g, (char) => map[char])
+        return text.replace(/[&<>"']/g, (char) => map[char] ?? char)
       }
 
       const bodyHtml = body
@@ -219,7 +219,7 @@ export function LetterDraftForm({
             '"': '&quot;',
             "'": '&#39;',
           }
-          return text.replace(/[&<>"']/g, (char) => map[char])
+          return text.replace(/[&<>"']/g, (char) => map[char] ?? char)
         }
 
         const bodyHtml = body

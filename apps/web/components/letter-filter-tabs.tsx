@@ -2,10 +2,9 @@
 
 import { useTransition } from "react"
 import { useTranslations } from "next-intl"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, usePathname, useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { usePathname, useRouter } from "@/i18n/routing"
 
 export type LetterFilter = "all" | "drafts" | "scheduled" | "delivered"
 

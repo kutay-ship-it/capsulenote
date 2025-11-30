@@ -3,7 +3,7 @@
 import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
-import { zonedTimeToUtc } from "date-fns-tz"
+import { fromZonedTime } from "date-fns-tz"
 
 import { LetterEditorForm, type LetterFormData } from "@/components/letter-editor-form"
 import { scheduleDelivery } from "@/server/actions/deliveries"
@@ -31,7 +31,7 @@ export function NewLetterForm() {
     if (result.success) {
       const letterId = result.data.letterId
       const timezone = data.timezone || getUserTimezone()
-      const deliverAt = zonedTimeToUtc(`${data.deliveryDate}T09:00`, timezone)
+      const deliverAt = fromZonedTime(`${data.deliveryDate}T09:00`, timezone)
 
       try {
         await scheduleDelivery({

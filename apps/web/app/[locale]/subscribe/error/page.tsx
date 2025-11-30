@@ -128,13 +128,13 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
                 variant="secondary"
                 className="w-full"
               >
-                <Link href={actionHref}>{actionLabel}</Link>
+                <Link href={actionHref as "/subscribe"}>{actionLabel}</Link>
               </Button>
 
               {/* Secondary Action */}
               {secondaryActionLabel && secondaryActionHref && (
                 <Button asChild size="lg" variant="outline" className="w-full">
-                  <Link href={secondaryActionHref}>{secondaryActionLabel}</Link>
+                  <a href={secondaryActionHref}>{secondaryActionLabel}</a>
                 </Button>
               )}
             </div>

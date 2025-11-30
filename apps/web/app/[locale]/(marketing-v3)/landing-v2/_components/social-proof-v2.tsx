@@ -92,7 +92,7 @@ export function SocialProofV2() {
     return () => clearInterval(interval)
   }, [isAutoPlaying])
 
-  const current = TESTIMONIALS[currentIndex]
+  const current = TESTIMONIALS[currentIndex]!
 
   return (
     <section className="bg-charcoal py-20 md:py-32 overflow-hidden">

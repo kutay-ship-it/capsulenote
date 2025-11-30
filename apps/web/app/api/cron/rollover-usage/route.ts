@@ -147,6 +147,7 @@ export async function GET(request: NextRequest) {
       console.warn(`⚠️ Usage rollover took ${processingTimeMs}ms - consider optimization!`)
 
       await createAuditEvent({
+        userId: null,
         type: "system.rollover_slow",
         data: {
           processingTimeMs,
@@ -162,6 +163,7 @@ export async function GET(request: NextRequest) {
       console.error(`❌ Usage rollover error rate too high: ${errorRate.toFixed(2)}%`)
 
       await createAuditEvent({
+        userId: null,
         type: "system.rollover_high_error_rate",
         data: {
           errorRate,

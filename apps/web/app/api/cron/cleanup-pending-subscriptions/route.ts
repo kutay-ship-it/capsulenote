@@ -17,6 +17,7 @@ import { prisma } from "@/server/lib/db"
 import { stripe } from "@/server/providers/stripe/client"
 import { createAuditEvent } from "@/server/lib/audit"
 import { env } from "@/env.mjs"
+import type Stripe from "stripe"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
@@ -76,19 +77,27 @@ export async function GET(request: NextRequest) {
                 ? await stripe.invoices.retrieve(subscription.latest_invoice)
                 : subscription.latest_invoice
 
-            if (invoice.payment_intent) {
+            // Type assertion for payment_intent which may not be in newer SDK types
+            const invoicePaymentIntent = (invoice as { payment_intent?: string | object }).payment_intent
+            if (invoicePaymentIntent) {
               const paymentIntent =
-                typeof invoice.payment_intent === "string"
-                  ? await stripe.paymentIntents.retrieve(invoice.payment_intent)
-                  : invoice.payment_intent
+                typeof invoicePaymentIntent === "string"
+                  ? await stripe.paymentIntents.retrieve(invoicePaymentIntent)
+                  : invoicePaymentIntent as Stripe.PaymentIntent
+
+              // Get the charge ID from the payment intent's latest_charge field
+              const latestCharge = paymentIntent.latest_charge
+              const chargeId = typeof latestCharge === 'string'
+                ? latestCharge
+                : latestCharge?.id
 
               if (
                 paymentIntent.status === "succeeded" &&
                 paymentIntent.amount > 0 &&
-                paymentIntent.charges?.data[0]
+                chargeId
               ) {
                 await stripe.refunds.create({
-                  charge: paymentIntent.charges.data[0].id,
+                  charge: chargeId,
                   reason: "requested_by_customer",
                   metadata: {
                     reason: "subscription_expired_before_activation",

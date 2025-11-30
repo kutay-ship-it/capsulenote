@@ -130,7 +130,7 @@ export function DeleteDataButton() {
 
             <div className="space-y-2 pt-4">
               <p className="font-semibold text-foreground">
-                {t("dialog.confirmPrompt", { keyword: <span className="font-mono bg-muted px-2 py-1 rounded">DELETE</span> })}
+                {t.rich("dialog.confirmPrompt", { keyword: (chunks) => <span className="font-mono bg-muted px-2 py-1 rounded">{chunks}</span> })}
               </p>
               <Input
                 type="text"

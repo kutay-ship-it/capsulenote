@@ -120,11 +120,11 @@ export default function SandboxPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {[
-              { title: "Dashboard & coach", href: "/sandbox/dashboard" },
-              { title: "Scheduling wizard", href: "/sandbox/schedule" },
-              { title: "Plans & billing", href: "/sandbox/entitlements" },
-              { title: "Reflection journal", href: "/sandbox/aftercare" },
-              { title: "Streaks & campaigns", href: "/sandbox/retention" },
+              { title: "Dashboard & coach", href: "/sandbox/dashboard" as const },
+              { title: "Scheduling wizard", href: "/sandbox/schedule" as const },
+              { title: "Plans & billing", href: "/sandbox/entitlements" as const },
+              { title: "Reflection journal", href: "/sandbox/aftercare" as const },
+              { title: "Streaks & campaigns", href: "/sandbox/retention" as const },
             ].map((link) => (
               <div key={link.href} className="flex items-center justify-between border-2 border-charcoal bg-white p-3">
                 <div>

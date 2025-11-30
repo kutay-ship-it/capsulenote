@@ -168,22 +168,24 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
       }
 
       // Before first anchor - extrapolate backward using linear time
-      if (targetTime <= anchors[0].time) {
-        const daysBefore = differenceInDays(new Date(anchors[0].time), targetDate)
-        return Math.max(50, anchors[0].x - daysBefore * pxPerDay)
+      const firstAnchor = anchors[0]!
+      if (targetTime <= firstAnchor.time) {
+        const daysBefore = differenceInDays(new Date(firstAnchor.time), targetDate)
+        return Math.max(50, firstAnchor.x - daysBefore * pxPerDay)
       }
 
       // After last anchor - extrapolate forward using linear time
-      if (targetTime >= anchors[anchors.length - 1].time) {
-        const daysAfter = differenceInDays(targetDate, new Date(anchors[anchors.length - 1].time))
-        return anchors[anchors.length - 1].x + daysAfter * pxPerDay
+      const lastAnchor = anchors[anchors.length - 1]!
+      if (targetTime >= lastAnchor.time) {
+        const daysAfter = differenceInDays(targetDate, new Date(lastAnchor.time))
+        return lastAnchor.x + daysAfter * pxPerDay
       }
 
       // Between anchors - interpolate based on time proportion
       for (let i = 0; i < anchors.length - 1; i++) {
-        if (anchors[i].time <= targetTime && anchors[i + 1].time >= targetTime) {
-          const lower = anchors[i]
-          const upper = anchors[i + 1]
+        const lower = anchors[i]!
+        const upper = anchors[i + 1]!
+        if (lower.time <= targetTime && upper.time >= targetTime) {
           const fraction = (targetTime - lower.time) / (upper.time - lower.time)
           return lower.x + fraction * (upper.x - lower.x)
         }

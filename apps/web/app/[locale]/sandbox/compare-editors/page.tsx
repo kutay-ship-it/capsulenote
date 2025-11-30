@@ -18,7 +18,17 @@ import { SimplifiedLetterEditor } from "@/components/sandbox/simplified-letter-e
 import { ArrowLeft, CheckCircle2, Sparkles, Zap, Palette, Sliders, LayoutPanelLeft, Brain, PenLine } from "lucide-react"
 import { Link } from "@/i18n/routing"
 
-const editorComparison = [
+const editorComparison: readonly {
+  id: string
+  name: string
+  tagline: string
+  icon: React.ReactNode
+  highlights: string[]
+  bestFor: string
+  pros: string[]
+  cons: string[]
+  techStack: string
+}[] = [
   {
     id: "temporal",
     name: "Temporal Canvas Editor",
@@ -282,6 +292,17 @@ const editorComparison = [
   },
 ]
 
+// Extract editors with non-null assertions since array is statically defined
+const temporalEditor = editorComparison[0]!
+const sanctuaryEditor = editorComparison[1]!
+const flowEditor = editorComparison[2]!
+const heroEditor = editorComparison[3]!
+const enhancedEditor = editorComparison[4]!
+const richTextEditorInfo = editorComparison[5]!
+const letterEditorFormInfo = editorComparison[6]!
+const legacyEditor = editorComparison[7]!
+const simplifiedEditor = editorComparison[8]!
+
 export default function CompareEditorsPage() {
   const [activeTab, setActiveTab] = useState("temporal")
   const [richTextContent, setRichTextContent] = useState("")
@@ -510,10 +531,10 @@ export default function CompareEditorsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                      {editorComparison[0].name}
+                      {temporalEditor.name}
                     </CardTitle>
                     <CardDescription className="font-mono text-sm">
-                      {editorComparison[0].tagline}
+                      {temporalEditor.tagline}
                     </CardDescription>
                   </div>
                   <Badge className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 font-mono text-xs uppercase text-white animate-pulse">
@@ -522,13 +543,13 @@ export default function CompareEditorsPage() {
                 </div>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[0].bestFor}
+                    <strong>Best For:</strong> {temporalEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[0].pros.map((pro, i) => (
+                        {temporalEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -536,7 +557,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[0].cons.map((con, i) => (
+                        {temporalEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -560,10 +581,10 @@ export default function CompareEditorsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                      {editorComparison[1].name}
+                      {sanctuaryEditor.name}
                     </CardTitle>
                     <CardDescription className="font-mono text-sm">
-                      {editorComparison[1].tagline}
+                      {sanctuaryEditor.tagline}
                     </CardDescription>
                   </div>
                   <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 font-mono text-xs uppercase text-white">
@@ -572,13 +593,13 @@ export default function CompareEditorsPage() {
                 </div>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[1].bestFor}
+                    <strong>Best For:</strong> {sanctuaryEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[1].pros.map((pro, i) => (
+                        {sanctuaryEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -586,7 +607,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[1].cons.map((con, i) => (
+                        {sanctuaryEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -610,10 +631,10 @@ export default function CompareEditorsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                      {editorComparison[0].name}
+                      {temporalEditor.name}
                     </CardTitle>
                     <CardDescription className="font-mono text-sm">
-                      {editorComparison[0].tagline}
+                      {temporalEditor.tagline}
                     </CardDescription>
                   </div>
                   <Badge className="bg-purple-600 font-mono text-xs uppercase text-white">
@@ -622,13 +643,13 @@ export default function CompareEditorsPage() {
                 </div>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[0].bestFor}
+                    <strong>Best For:</strong> {temporalEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[0].pros.map((pro, i) => (
+                        {temporalEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -636,7 +657,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[0].cons.map((con, i) => (
+                        {temporalEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -663,20 +684,20 @@ export default function CompareEditorsPage() {
             <Card className="border-2 border-charcoal bg-bg-blue-light/20">
               <CardHeader>
                 <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                  {editorComparison[1].name}
+                  {sanctuaryEditor.name}
                 </CardTitle>
                 <CardDescription className="font-mono text-sm">
-                  {editorComparison[1].tagline}
+                  {sanctuaryEditor.tagline}
                 </CardDescription>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[1].bestFor}
+                    <strong>Best For:</strong> {sanctuaryEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[1].pros.map((pro, i) => (
+                        {sanctuaryEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -684,7 +705,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[1].cons.map((con, i) => (
+                        {sanctuaryEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -703,20 +724,20 @@ export default function CompareEditorsPage() {
             <Card className="border-2 border-charcoal bg-bg-yellow-pale/20">
               <CardHeader>
                 <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                  {editorComparison[2].name}
+                  {flowEditor.name}
                 </CardTitle>
                 <CardDescription className="font-mono text-sm">
-                  {editorComparison[2].tagline}
+                  {flowEditor.tagline}
                 </CardDescription>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[2].bestFor}
+                    <strong>Best For:</strong> {flowEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[2].pros.map((pro, i) => (
+                        {flowEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -724,7 +745,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[2].cons.map((con, i) => (
+                        {flowEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -743,20 +764,20 @@ export default function CompareEditorsPage() {
             <Card className="border-2 border-charcoal bg-bg-peach-light/20">
               <CardHeader>
                 <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                  {editorComparison[3].name}
+                  {heroEditor.name}
                 </CardTitle>
                 <CardDescription className="font-mono text-sm">
-                  {editorComparison[3].tagline}
+                  {heroEditor.tagline}
                 </CardDescription>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[3].bestFor}
+                    <strong>Best For:</strong> {heroEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[3].pros.map((pro, i) => (
+                        {heroEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -764,7 +785,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[3].cons.map((con, i) => (
+                        {heroEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -789,20 +810,20 @@ export default function CompareEditorsPage() {
             <Card className="border-2 border-charcoal bg-bg-green-light/20">
               <CardHeader>
                 <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                  {editorComparison[4].name}
+                  {enhancedEditor.name}
                 </CardTitle>
                 <CardDescription className="font-mono text-sm">
-                  {editorComparison[4].tagline}
+                  {enhancedEditor.tagline}
                 </CardDescription>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[4].bestFor}
+                    <strong>Best For:</strong> {enhancedEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[4].pros.map((pro, i) => (
+                        {enhancedEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -810,7 +831,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[4].cons.map((con, i) => (
+                        {enhancedEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -841,20 +862,20 @@ export default function CompareEditorsPage() {
             <Card className="border-2 border-charcoal bg-bg-pink-light/20">
               <CardHeader>
                 <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                  {editorComparison[5].name}
+                  {richTextEditorInfo.name}
                 </CardTitle>
                 <CardDescription className="font-mono text-sm">
-                  {editorComparison[5].tagline}
+                  {richTextEditorInfo.tagline}
                 </CardDescription>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[5].bestFor}
+                    <strong>Best For:</strong> {richTextEditorInfo.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[5].pros.map((pro, i) => (
+                        {richTextEditorInfo.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -862,7 +883,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[5].cons.map((con, i) => (
+                        {richTextEditorInfo.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>
@@ -887,10 +908,10 @@ export default function CompareEditorsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <CardTitle className="font-mono text-2xl uppercase tracking-wide">
-                      {editorComparison[8].name}
+                      {simplifiedEditor.name}
                     </CardTitle>
                     <CardDescription className="font-mono text-sm">
-                      {editorComparison[8].tagline}
+                      {simplifiedEditor.tagline}
                     </CardDescription>
                   </div>
                   <Badge className="bg-blue-600 font-mono text-xs uppercase text-white">
@@ -899,13 +920,13 @@ export default function CompareEditorsPage() {
                 </div>
                 <div className="mt-4 space-y-2">
                   <p className="font-mono text-sm text-charcoal">
-                    <strong>Best For:</strong> {editorComparison[8].bestFor}
+                    <strong>Best For:</strong> {simplifiedEditor.bestFor}
                   </p>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-green-700">Pros:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[8].pros.map((pro, i) => (
+                        {simplifiedEditor.pros.map((pro, i) => (
                           <li key={i}>✓ {pro}</li>
                         ))}
                       </ul>
@@ -913,7 +934,7 @@ export default function CompareEditorsPage() {
                     <div>
                       <p className="mb-1 font-mono text-xs uppercase text-orange-700">Cons:</p>
                       <ul className="space-y-1 font-mono text-xs">
-                        {editorComparison[8].cons.map((con, i) => (
+                        {simplifiedEditor.cons.map((con, i) => (
                           <li key={i}>• {con}</li>
                         ))}
                       </ul>

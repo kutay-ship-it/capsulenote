@@ -349,7 +349,7 @@ async function LetterDetailContent({ id }: { id: string }) {
           {/* Left: Edit action */}
           <div>
             {!isLocked && (
-              <Link href={`/letters/${id}/edit`}>
+              <Link href={{ pathname: "/letters/[id]/edit", params: { id } }}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -365,7 +365,7 @@ async function LetterDetailContent({ id }: { id: string }) {
           {/* Right: Schedule/View delivery */}
           <div>
             {!hasDelivery ? (
-              <Link href={`/letters/${id}/schedule`}>
+              <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
                 <Button size="sm" className="gap-2">
                   <Calendar className="h-4 w-4" />
                   Schedule Delivery
@@ -468,7 +468,7 @@ async function LetterDetailContent({ id }: { id: string }) {
 
                   {/* Actions */}
                   {isScheduled && (
-                    <Link href={`/letters/${id}/schedule`}>
+                    <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
                       <Button variant="outline" size="sm" className="font-mono text-xs uppercase tracking-wider">
                         Reschedule
                       </Button>
@@ -507,7 +507,7 @@ async function LetterDetailContent({ id }: { id: string }) {
             </div>
 
             {/* CTA */}
-            <Link href={`/letters/${id}/schedule`}>
+            <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
               <Button className="gap-2">
                 Schedule Delivery
                 <ArrowRight className="h-4 w-4" />

@@ -89,8 +89,8 @@ export async function createCheckoutSession(input: {
       customerId = await getOrCreateCustomer({
         email: user.email,
         userId: user.id,
-        clerkUserId: user.clerkUserId,
-        existingCustomerId: user.profile?.stripeCustomerId,
+        clerkUserId: user.clerkUserId ?? undefined,
+        existingCustomerId: user.profile?.stripeCustomerId ?? undefined,
       })
 
       // Update profile with customer ID if newly created

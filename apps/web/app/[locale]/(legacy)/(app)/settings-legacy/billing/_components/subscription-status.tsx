@@ -8,7 +8,7 @@ interface SubscriptionStatusProps {
   locale: string
 }
 
-function getStatusBadge(status: Subscription["status"] | "none", t: Awaited<ReturnType<typeof getTranslations>>) {
+function getStatusBadge(status: Subscription["status"] | "none" | string, t: Awaited<ReturnType<typeof getTranslations>>) {
   switch (status) {
     case "active":
       return (

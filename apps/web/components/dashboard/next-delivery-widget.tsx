@@ -74,7 +74,7 @@ export async function NextDeliveryWidget({ userId }: NextDeliveryWidgetProps) {
           translations={translations}
         />
 
-        <Link href={`/letters/${nextDelivery.letterId}`} className="block">
+        <Link href={{ pathname: "/letters/[id]", params: { id: nextDelivery.letterId } }} className="block">
           <Button
             variant="outline"
             className="w-full border-2 border-charcoal bg-off-white text-charcoal hover:bg-duck-yellow/20"

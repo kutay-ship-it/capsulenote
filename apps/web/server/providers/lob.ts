@@ -83,6 +83,7 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
   }
 
   try {
+    // Type assertion needed for Lob SDK v6 compatibility with some parameters
     const letter = await lob.letters.create({
       description: options.description || "Letter to Future Self",
       to: {
@@ -98,18 +99,17 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
       file: options.html,
       color: options.color ?? false,
       double_sided: options.doubleSided ?? false,
-      address_placement: "top_first_page",
       mail_type: options.mailType ?? "usps_first_class",
       use_type: options.useType ?? "operational", // Required by Lob API
-    })
+    } as Parameters<typeof lob.letters.create>[0])
 
     return {
       id: letter.id,
       url: letter.url,
       expectedDeliveryDate: letter.expected_delivery_date,
       carrier: letter.carrier,
-      trackingNumber: letter.tracking_number,
-      thumbnails: letter.thumbnails,
+      trackingNumber: (letter as { tracking_number?: string }).tracking_number,
+      thumbnails: letter.thumbnails as unknown as { small: string; medium: string; large: string }[],
     }
   } catch (error: any) {
     console.error("Lob API error:", error?.message || error)
@@ -128,7 +128,8 @@ export async function verifyAddress(
   }
 
   try {
-    const verification = await lob.usVerifications.verify({
+    // Access usVerifications via type assertion for SDK compatibility
+    const verification = await (lob as any).usVerifications.verify({
       primary_line: address.line1,
       secondary_line: address.line2,
       city: address.city,
@@ -200,6 +201,7 @@ export async function cancelLetter(letterId: string) {
   }
 
   try {
+    // Lob SDK v6 uses delete method to cancel letters
     const result = await lob.letters.delete(letterId)
     return {
       id: result.id,

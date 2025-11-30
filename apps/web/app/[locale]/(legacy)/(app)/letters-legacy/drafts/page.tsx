@@ -69,14 +69,7 @@ async function DraftsContent() {
             {t("empty.title")}
           </h3>
           <p className="mb-6 max-w-md font-mono text-sm text-gray-secondary sm:text-base">
-            {t("empty.description", {
-              interpolation: {
-                delimiters: {
-                  start: "{{",
-                  end: "}}",
-                },
-              },
-            })}
+            {t("empty.description")}
           </p>
           <Link href="/letters/new" className="w-full sm:w-auto">
             <Button size="lg" className="h-12 w-full uppercase sm:h-auto sm:w-auto">
@@ -135,7 +128,7 @@ async function DraftsContent() {
             </div>
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {expiredDrafts.map((draft, index) => (
-                <DraftCard key={draft.id} draft={draft as DraftData} bgColor={bgColors[index % bgColors.length]} expired />
+                <DraftCard key={draft.id} draft={draft as DraftData} bgColor={bgColors[index % bgColors.length]!} expired />
               ))}
             </div>
           </div>
@@ -158,7 +151,7 @@ async function DraftsContent() {
             </div>
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {expiringDrafts.map((draft, index) => (
-                <DraftCard key={draft.id} draft={draft as DraftData} bgColor={bgColors[index % bgColors.length]} expiring />
+                <DraftCard key={draft.id} draft={draft as DraftData} bgColor={bgColors[index % bgColors.length]!} expiring />
               ))}
             </div>
           </div>
@@ -172,7 +165,7 @@ async function DraftsContent() {
             </h2>
             <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
               {activeDrafts.map((draft, index) => (
-                <DraftCard key={draft.id} draft={draft as DraftData} bgColor={bgColors[index % bgColors.length]} />
+                <DraftCard key={draft.id} draft={draft as DraftData} bgColor={bgColors[index % bgColors.length]!} />
               ))}
             </div>
           </div>

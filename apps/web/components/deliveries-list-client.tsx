@@ -141,7 +141,7 @@ export function DeliveriesListClient({ deliveries, locale }: DeliveriesListClien
     <div className={cn("space-y-4 sm:space-y-6", isPending && "opacity-70")}>
       {optimisticDeliveries.map((delivery) => (
         <div key={delivery.id} className="space-y-3">
-          <Link href={`/letters/${delivery.letterId}`}>
+          <Link href={{ pathname: "/letters/[id]", params: { id: delivery.letterId } }}>
             <Card
               className="group border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5"
               style={{ borderRadius: "2px" }}

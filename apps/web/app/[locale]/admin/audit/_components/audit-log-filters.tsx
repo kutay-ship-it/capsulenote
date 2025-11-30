@@ -41,7 +41,7 @@ export function AuditLogFilters() {
     if (startDate) params.set("startDate", startDate)
     if (endDate) params.set("endDate", endDate)
 
-    router.push(`/admin/audit?${params.toString()}`)
+    router.push(`/admin/audit?${params.toString()}` as "/admin/audit")
   }
 
   const handleClearFilters = () => {

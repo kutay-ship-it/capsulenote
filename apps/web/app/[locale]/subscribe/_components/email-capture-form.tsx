@@ -51,7 +51,7 @@ export function EmailCaptureForm({ letterId }: EmailCaptureFormProps) {
     }
 
     // Redirect to same page with email in query
-    router.push(`/subscribe?${params.toString()}`)
+    router.push(`/subscribe?${params.toString()}` as "/subscribe")
   }
 
   return (

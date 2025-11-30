@@ -113,13 +113,13 @@ export function CinematicHeroFull() {
                 transition={{ duration: 0.5 }}
                 className="space-y-6 text-center"
               >
-                <div className="text-8xl">{storyBeats[currentBeat].visual}</div>
+                <div className="text-8xl">{storyBeats[currentBeat]!.visual}</div>
                 <div className="space-y-3">
                   <h3 className="font-mono text-3xl uppercase tracking-tight text-charcoal">
-                    {storyBeats[currentBeat].title}
+                    {storyBeats[currentBeat]!.title}
                   </h3>
                   <p className="mx-auto max-w-xl font-mono text-base text-gray-secondary">
-                    {storyBeats[currentBeat].description}
+                    {storyBeats[currentBeat]!.description}
                   </p>
                 </div>
               </motion.div>

@@ -40,7 +40,7 @@ export function DraftCard({
   const formatAge = (days: number) => t("age", { count: days })
 
   return (
-    <Link href={`/letters/${draft.id}`}>
+    <Link href={{ pathname: "/letters/[id]", params: { id: draft.id } }}>
       <Card
         className={`h-full border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 ${bgColor} ${expired ? "opacity-70" : ""}`}
         style={{ borderRadius: "2px" }}

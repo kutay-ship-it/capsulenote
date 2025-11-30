@@ -565,7 +565,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           } else {
             // All deliveries failed but letter was saved
             clearLetterAutosave()
-            const firstError = failures[0]
+            const firstError = failures[0]!
             const errorMessage = !firstError.result.success
               ? firstError.result.error.message
               : "Unknown error"

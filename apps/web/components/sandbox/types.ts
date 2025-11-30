@@ -22,6 +22,7 @@ export type MockLetter = {
   createdAt: string
   tone?: TonePreference
   templateId?: string | null
+  tags?: string[]
 }
 
 export type MockDeliveryStatus = "scheduled" | "processing" | "sent" | "failed"
@@ -29,10 +30,13 @@ export type MockDeliveryStatus = "scheduled" | "processing" | "sent" | "failed"
 export type MockDelivery = {
   id: string
   letterTitle: string
+  letterId?: string
   channel: "email" | "mail" | "combo"
   deliverAt: string
   timezone: string
   status: MockDeliveryStatus
+  recipientEmail?: string
+  mailingAddress?: string
 }
 
 export type LetterTemplate = {

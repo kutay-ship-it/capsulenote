@@ -159,7 +159,7 @@ export async function InvoiceHistory({ userId, locale }: InvoiceHistoryProps) {
                 </p>
 
                 {payment.metadata && typeof payment.metadata === 'object' && 'invoiceUrl' in payment.metadata && typeof payment.metadata.invoiceUrl === 'string' && (
-                  <Link
+                  <a
                     href={payment.metadata.invoiceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -168,7 +168,7 @@ export async function InvoiceHistory({ userId, locale }: InvoiceHistoryProps) {
                     <Download className="h-4 w-4" strokeWidth={2} />
                     {t("invoices.invoice")}
                     <ExternalLink className="h-3 w-3" strokeWidth={2} />
-                  </Link>
+                  </a>
                 )}
               </div>
             </div>

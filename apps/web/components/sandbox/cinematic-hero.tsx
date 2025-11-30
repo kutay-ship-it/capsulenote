@@ -34,12 +34,12 @@ export function CinematicHero() {
         </div>
 
         <div className="flex justify-center gap-4">
-          <Link href="#hero-editor">
+          <a href="#hero-editor">
             <Button size="lg" className="h-14 border-2 border-charcoal px-8 font-mono text-base uppercase">
               {t("primaryCta")}
             </Button>
-          </Link>
-          <Link href="#how-it-works">
+          </a>
+          <a href="#how-it-works">
             <Button
               variant="outline"
               size="lg"
@@ -48,7 +48,7 @@ export function CinematicHero() {
               <ChevronDown className="mr-2 h-5 w-5" />
               {t("secondaryCta")}
             </Button>
-          </Link>
+          </a>
         </div>
       </motion.div>
     </div>

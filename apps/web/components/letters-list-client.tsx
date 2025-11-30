@@ -113,7 +113,7 @@ export function LettersListClient({ letters, locale }: LettersListClientProps) {
         const StatusIcon = config.icon
 
         return (
-          <Link key={letter.id} href={`/letters/${letter.id}`}>
+          <Link key={letter.id} href={{ pathname: "/letters/[id]", params: { id: letter.id } }}>
             <Card
               className={`group h-full border-2 border-charcoal shadow-sm transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 ${bgColors[index % bgColors.length]}`}
               style={{ borderRadius: "2px" }}

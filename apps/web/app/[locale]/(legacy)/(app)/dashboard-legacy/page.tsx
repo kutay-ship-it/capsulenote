@@ -183,7 +183,7 @@ async function RecentLetters({ userId }: { userId: string }) {
             {stats.recentLetters.map((letter) => (
               <Link
                 key={letter.id}
-                href={`/letters/${letter.id}`}
+                href={{ pathname: "/letters/[id]", params: { id: letter.id } }}
                 className="block rounded-sm border-2 border-charcoal p-4 transition-all duration-fast hover:shadow-md hover:translate-x-0.5 hover:-translate-y-0.5 bg-white"
               >
                 <div className="flex items-start justify-between gap-4">

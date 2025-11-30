@@ -18,11 +18,11 @@ export function AddOnPurchase({ type, label }: AddOnPurchaseProps) {
   const handleClick = () => {
     startTransition(async () => {
       const result = await createAddOnCheckoutSession({ type })
-      if (result.success && result.data?.url) {
+      if (result.success) {
         window.location.href = result.data.url
       } else {
         toast.error(t("failedTitle"), {
-          description: result.error?.message || t("failedDescription"),
+          description: result.error.message || t("failedDescription"),
         })
       }
     })

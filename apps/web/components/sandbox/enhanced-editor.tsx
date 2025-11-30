@@ -186,7 +186,7 @@ export function EnhancedEditor() {
               </div>
               <Slider
                 value={[heroDraft.tone.sentiment]}
-                onValueChange={([value]) => updateHeroDraft({ tone: { ...heroDraft.tone, sentiment: value } })}
+                onValueChange={([value]) => updateHeroDraft({ tone: { ...heroDraft.tone, sentiment: value ?? heroDraft.tone.sentiment } })}
                 max={100}
                 step={1}
                 className="w-full"
@@ -200,7 +200,7 @@ export function EnhancedEditor() {
               </div>
               <Slider
                 value={[heroDraft.tone.formality]}
-                onValueChange={([value]) => updateHeroDraft({ tone: { ...heroDraft.tone, formality: value } })}
+                onValueChange={([value]) => updateHeroDraft({ tone: { ...heroDraft.tone, formality: value ?? heroDraft.tone.formality } })}
                 max={100}
                 step={1}
                 className="w-full"

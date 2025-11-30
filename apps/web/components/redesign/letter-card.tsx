@@ -75,7 +75,7 @@ export async function LetterCard({ letter, locale }: LetterCardProps) {
 
   return (
     <Link
-      href={`/letters/${letter.id}`}
+      href={{ pathname: "/letters/[id]", params: { id: letter.id } }}
       className="block"
     >
       <article

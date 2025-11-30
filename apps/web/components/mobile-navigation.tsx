@@ -30,9 +30,9 @@ export function MobileNavigation({ translations }: MobileNavigationProps) {
   const pathname = usePathname()
 
   const navItems = [
-    { href: "/dashboard", label: translations.dashboard, icon: Home },
-    { href: "/letters", label: translations.letters, icon: FileText },
-    { href: "/settings", label: translations.settings, icon: Settings },
+    { href: "/dashboard" as const, label: translations.dashboard, icon: Home },
+    { href: "/letters" as const, label: translations.letters, icon: FileText },
+    { href: "/settings" as const, label: translations.settings, icon: Settings },
   ]
 
   const isActive = (href: string) => {

@@ -96,15 +96,15 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {event.userEmail ? (
+                    {event.userEmail && event.userId ? (
                       <Link
-                        href={`/admin/users/${event.userId}`}
+                        href={{ pathname: "/admin/users/[id]", params: { id: event.userId } }}
                         className="text-sm hover:underline"
                       >
                         {event.userEmail}
                       </Link>
                     ) : (
-                      <span className="text-sm text-muted-foreground">{t("system")}</span>
+                      <span className="text-sm text-muted-foreground">{event.userEmail || t("system")}</span>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
@@ -139,7 +139,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
             disabled={currentPage === 1}
             asChild
           >
-            <Link href={`/admin/audit?page=${currentPage - 1}`}>
+            <Link href={`/admin/audit?page=${currentPage - 1}` as "/admin/audit"}>
               <ChevronLeft className="h-4 w-4 mr-1" />
               {t("pagination.previous")}
             </Link>
@@ -150,7 +150,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
             disabled={currentPage === totalPages}
             asChild
           >
-            <Link href={`/admin/audit?page=${currentPage + 1}`}>
+            <Link href={`/admin/audit?page=${currentPage + 1}` as "/admin/audit"}>
               {t("pagination.next")}
               <ChevronRight className="h-4 w-4 ml-1" />
             </Link>
@@ -164,7 +164,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
           <DialogHeader>
             <DialogTitle>{tDetails("title")}</DialogTitle>
             <DialogDescription>
-              {tDetails("description", { id: selectedEvent?.id })}
+              {tDetails("description", { id: selectedEvent?.id ?? "" })}
             </DialogDescription>
           </DialogHeader>
 

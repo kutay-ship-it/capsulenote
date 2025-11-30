@@ -52,7 +52,7 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
   const allowlist =
     process.env.ADMIN_EMAILS?.split(",").map((email) => email.trim().toLowerCase()).filter(Boolean) ?? []
 
-  const hasAdminRole = sessionClaims?.metadata?.role === "admin"
+  const hasAdminRole = (sessionClaims?.metadata as { role?: string } | undefined)?.role === "admin"
   const isAllowlisted = user?.email ? allowlist.includes(user.email.toLowerCase()) : false
 
   if (!hasAdminRole && !isAllowlisted) {

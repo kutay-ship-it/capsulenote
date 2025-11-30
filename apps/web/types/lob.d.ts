@@ -84,6 +84,7 @@ declare module "lob" {
   interface Letters {
     create(params: LetterCreateParams): Promise<Letter>
     retrieve(id: string): Promise<Letter>
+    delete(id: string): Promise<{ id: string; deleted: boolean }>
     list(params?: { limit?: number; offset?: number }): Promise<{
       data: Letter[]
       count: number

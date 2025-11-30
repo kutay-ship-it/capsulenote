@@ -132,7 +132,7 @@ export function FlowLetterEditor({
   const [showEmotionPalette, setShowEmotionPalette] = useState(false)
   const [showTimeCapsule, setShowTimeCapsule] = useState(false)
   const [showPrompt, setShowPrompt] = useState(false)
-  const [currentPrompt, setCurrentPrompt] = useState(contextualPrompts[0])
+  const [currentPrompt, setCurrentPrompt] = useState(contextualPrompts[0]!)
   const [achievedMilestones, setAchievedMilestones] = useState<string[]>([])
   const [showMilestoneToast, setShowMilestoneToast] = useState(false)
   const [latestMilestone, setLatestMilestone] = useState<Milestone | null>(null)
@@ -236,7 +236,7 @@ export function FlowLetterEditor({
         setPauseDuration(Date.now() - lastTypingTime)
 
         if (enablePrompts && !isFocused) {
-          const randomPrompt = contextualPrompts[Math.floor(Math.random() * contextualPrompts.length)]
+          const randomPrompt = contextualPrompts[Math.floor(Math.random() * contextualPrompts.length)]!
           setCurrentPrompt(randomPrompt)
           setShowPrompt(true)
         }
@@ -661,7 +661,7 @@ export function FlowLetterEditor({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const randomPrompt = contextualPrompts[Math.floor(Math.random() * contextualPrompts.length)]
+                        const randomPrompt = contextualPrompts[Math.floor(Math.random() * contextualPrompts.length)]!
                         setCurrentPrompt(randomPrompt)
                       }}
                       className="border-2 border-charcoal font-mono text-xs uppercase"

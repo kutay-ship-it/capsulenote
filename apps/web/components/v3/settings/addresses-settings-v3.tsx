@@ -200,8 +200,8 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
                       <p className="font-mono text-sm font-bold text-charcoal truncate">
                         {address.name}
                       </p>
-                      {address.metadata &&
-                        (address.metadata as Record<string, unknown>).verified && (
+                      {!!(address.metadata &&
+                        (address.metadata as Record<string, unknown>).verified) && (
                           <div
                             className="flex items-center gap-1 px-1.5 py-0.5 bg-teal-primary/10 text-teal-primary"
                             style={{ borderRadius: "2px" }}

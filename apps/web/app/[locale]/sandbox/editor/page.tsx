@@ -226,7 +226,7 @@ export default function EditorPage() {
                   </div>
                   <Slider
                     value={[heroDraft.tone.sentiment]}
-                    onValueChange={([value]) => updateHeroDraft({ tone: { ...heroDraft.tone, sentiment: value } })}
+                    onValueChange={(values) => updateHeroDraft({ tone: { ...heroDraft.tone, sentiment: values[0] ?? heroDraft.tone.sentiment } })}
                     max={100}
                     step={1}
                     className="w-full"
@@ -249,7 +249,7 @@ export default function EditorPage() {
                   </div>
                   <Slider
                     value={[heroDraft.tone.formality]}
-                    onValueChange={([value]) => updateHeroDraft({ tone: { ...heroDraft.tone, formality: value } })}
+                    onValueChange={(values) => updateHeroDraft({ tone: { ...heroDraft.tone, formality: values[0] ?? heroDraft.tone.formality } })}
                     max={100}
                     step={1}
                     className="w-full"

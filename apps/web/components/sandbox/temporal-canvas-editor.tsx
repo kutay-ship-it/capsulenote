@@ -204,7 +204,8 @@ function calculateTypingRhythm(recentKeystrokes: number[]): TypingRhythm {
   const avgInterval =
     recentKeystrokes.reduce((sum, time, i, arr) => {
       if (i === 0) return sum
-      return sum + (time - arr[i - 1])
+      const prevTime = arr[i - 1]!
+      return sum + (time - prevTime)
     }, 0) /
     (recentKeystrokes.length - 1)
 
@@ -225,7 +226,7 @@ function generateMockEchoes(body: string): TemporalEcho[] {
   if (body.length < 50) return []
 
   const themes = ["career", "relationships", "growth", "health", "dreams"]
-  const randomTheme = themes[Math.floor(Math.random() * themes.length)]
+  const randomTheme = themes[Math.floor(Math.random() * themes.length)]!
 
   return [
     {
@@ -436,7 +437,7 @@ export function TemporalCanvasEditor({
   // ============================================================================
 
   const timeConfig = TIME_OF_DAY_CONFIG[timeOfDay]
-  const currentMilestone = UNLOCK_MILESTONES[unlockLevel]
+  const currentMilestone = UNLOCK_MILESTONES[unlockLevel]!
   const nextMilestone = UNLOCK_MILESTONES[unlockLevel + 1]
   const progressToNext = nextMilestone
     ? Math.min((wordCount / nextMilestone.threshold) * 100, 100)

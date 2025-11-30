@@ -51,7 +51,7 @@ export function TestimonialsSection() {
     return () => clearInterval(interval)
   }, [isAutoPlaying])
 
-  const current = testimonials[currentIndex]
+  const current = testimonials[currentIndex]!
 
   return (
     <section className="bg-charcoal py-20 md:py-32 overflow-hidden">

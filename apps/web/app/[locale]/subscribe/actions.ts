@@ -306,6 +306,10 @@ export async function linkPendingSubscription(
     })
 
     // 3. Verify email is verified in Clerk
+    if (!user.clerkUserId) {
+      console.error("[linkPendingSubscription] User missing Clerk ID", { userId: user.id })
+      return { success: false, error: "User not linked to Clerk" }
+    }
     const clerk = getClerkClient()
     const clerkUser = await clerk.users.getUser(user.clerkUserId)
 

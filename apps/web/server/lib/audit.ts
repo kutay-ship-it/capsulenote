@@ -92,6 +92,11 @@ export const AuditEventType = {
 
   // System events
   SYSTEM_RECONCILER_HIGH_VOLUME: "system.reconciler_high_volume",
+  SYSTEM_ROLLOVER_SLOW: "system.rollover_slow",
+  SYSTEM_ROLLOVER_HIGH_ERROR_RATE: "system.rollover_high_error_rate",
+
+  // Subscription usage events
+  SUBSCRIPTION_USAGE_ROLLOVER: "subscription.usage_rollover",
 
   // Credit events
   CREDITS_ADDED: "credits.added",

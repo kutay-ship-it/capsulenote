@@ -10,7 +10,7 @@ interface NavbarProps {
 }
 
 export async function Navbar({ isSignedIn = false }: NavbarProps) {
-  const t = await getTranslations({ namespace: "common" })
+  const t = await getTranslations("common")
 
   return (
     <header className="sticky top-0 z-50 w-full border-b-2 border-charcoal bg-white">

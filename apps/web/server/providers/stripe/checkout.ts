@@ -96,7 +96,7 @@ export async function createCheckoutSession(
 export async function getOrCreateCustomer(options: {
   email: string
   userId: string
-  clerkUserId: string
+  clerkUserId?: string
   existingCustomerId?: string | null
 }): Promise<string> {
   const { email, userId, clerkUserId, existingCustomerId } = options
@@ -111,7 +111,7 @@ export async function getOrCreateCustomer(options: {
     email,
     metadata: {
       userId,
-      clerkUserId,
+      ...(clerkUserId && { clerkUserId }),
     },
   })
 

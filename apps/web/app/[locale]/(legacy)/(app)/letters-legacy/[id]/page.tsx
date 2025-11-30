@@ -106,7 +106,7 @@ async function LetterContent({ id, userEmail }: { id: string; userEmail: string 
               <Badge variant="outline" className="font-mono text-xs uppercase">
                 {statusLabel(letter.status)}
               </Badge>
-              <Link href={`/letters/${id}/schedule`}>
+              <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
                 <Button>
                   <Calendar className="mr-2 h-4 w-4" />
                   {t("detail.scheduleCta")}

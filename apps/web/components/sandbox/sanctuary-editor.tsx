@@ -259,7 +259,8 @@ export function SanctuaryEditor({
   const [toolbarPosition, setToolbarPosition] = useState({ x: 0, y: 0 })
 
   // Refs
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLInputElement>(null)
+  const bodyTextareaRef = useRef<HTMLTextAreaElement>(null)
   const startTimeRef = useRef<Date>(new Date())
   const saveTimerRef = useRef<NodeJS.Timeout>()
   const writingTimerRef = useRef<NodeJS.Timeout>()
@@ -492,8 +493,8 @@ export function SanctuaryEditor({
 
   const handleTemplateSelect = useCallback((template: TemplateItem) => {
     setBody(template.content)
-    if (textareaRef.current) {
-      textareaRef.current.focus()
+    if (bodyTextareaRef.current) {
+      bodyTextareaRef.current.focus()
     }
   }, [])
 
