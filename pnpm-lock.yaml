@@ -38,6 +38,9 @@ importers:
       '@clerk/nextjs':
         specifier: ^6.35.0
         version: 6.35.4(next@15.5.6)(react-dom@19.2.0)(react@19.2.0)
+      '@dearme/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@dearme/inngest':
         specifier: workspace:*
         version: link:../../workers/inngest
@@ -246,9 +249,6 @@ importers:
         specifier: ^3.22.4
         version: 3.25.76
     devDependencies:
-      '@dearme/config':
-        specifier: workspace:*
-        version: link:../../packages/config
       '@playwright/test':
         specifier: ^1.40.1
         version: 1.56.1
