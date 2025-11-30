@@ -37,6 +37,21 @@ const nextConfig = {
   },
   // Transpile workspace packages
   transpilePackages: ["@dearme/prisma", "@dearme/types"],
+  // Explicit webpack aliases to ensure path resolution works on Vercel
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@": path.resolve(__dirname),
+      "@/components": path.resolve(__dirname, "components"),
+      "@/lib": path.resolve(__dirname, "lib"),
+      "@/server": path.resolve(__dirname, "server"),
+      "@/styles": path.resolve(__dirname, "styles"),
+      "@/i18n": path.resolve(__dirname, "i18n"),
+      "@/messages": path.resolve(__dirname, "messages"),
+      "@/hooks": path.resolve(__dirname, "hooks"),
+    }
+    return config
+  },
 }
 
 // Sentry configuration options
