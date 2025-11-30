@@ -23,8 +23,12 @@ export async function generateLetterCreatedEmail({
   const messages = await loadMessages(locale)
   const m = messages.emails.letterCreated
 
-  const greetingLine = sanitizedFirstName ? m.subheadPrefix.replace("{name}", sanitizedFirstName) : ""
-  const subhead = sanitizedFirstName ? m.subhead.replace("{name}", "") : m.subheadNoName
+  const greeting = sanitizedFirstName ? `Welcome, ${sanitizedFirstName}!` : "Letter Created!"
+
+  // Replace dashboard with letters/journey
+  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
+  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
+  const settingsUrl = dashboardUrl.replace("/dashboard", "/settings")
 
   return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -33,78 +37,162 @@ export async function generateLetterCreatedEmail({
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="x-apple-disable-message-reformatting">
   <title>${m.subject.replace("{title}", sanitizedTitle)}</title>
-  <!--[if mso]>
-  <style type="text/css">
-    body, table, td { font-family: Arial, Helvetica, sans-serif !important; }
-  </style>
-  <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f5f5f5;">
+<body style="margin: 0; padding: 0; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; background-color: #F4EFE2; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2;">
     <tr>
-      <td align="center" style="padding: 40px 20px;">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      <td align="center" style="padding: 48px 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px;">
+
+          <!-- Header -->
           <tr>
-            <td style="padding: 32px 40px 24px; text-align: center; border-bottom: 1px solid #e5e7eb;">
-              <div style="font-size: 28px; font-weight: 700; color: #1a1a1a; letter-spacing: -0.5px;">Capsule Note</div>
-              <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">Letters to Your Future Self</div>
+            <td style="text-align: center; padding-bottom: 32px;">
+              <div style="font-size: 22px; color: #383838;">Capsule Note</div>
+              <div style="font-size: 11px; color: #666666; margin-top: 4px;">Letters to Your Future Self</div>
             </td>
           </tr>
+
+          <!-- Main Card -->
           <tr>
-            <td style="padding: 40px 40px 24px; text-align: center;">
-              <div style="width: 64px; height: 64px; background-color: #10b981; border-radius: 50%; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 6L9 17L4 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            <td>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff; border: 2px solid #383838; border-radius: 2px; box-shadow: -6px 6px 0 rgba(56,56,56,0.08);">
+                <!-- Teal Bar -->
+                <tr>
+                  <td style="background-color: #38C1B0; height: 6px;"></td>
+                </tr>
+
+                <tr>
+                  <td style="padding: 48px 40px;">
+                    <!-- Success Icon -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td align="center" style="padding-bottom: 24px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                              <td style="width: 80px; height: 80px; background-color: #38C1B0; border: 2px solid #383838; border-radius: 50%; text-align: center; vertical-align: middle; font-size: 36px;">
+                                &#10003;
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <h1 style="font-size: 28px; font-weight: normal; color: #383838; margin: 0 0 8px 0; text-align: center;">
+                      ${greeting}
+                    </h1>
+
+                    <p style="font-size: 15px; color: #666666; margin: 0 0 40px 0; text-align: center; line-height: 1.7;">
+                      Your letter has been saved and encrypted.<br />
+                      Ready to schedule it for future delivery?
+                    </p>
+
+                    <!-- Letter Title Card -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2; border: 2px solid #383838; border-radius: 2px; margin-bottom: 40px;">
+                      <tr>
+                        <td style="padding: 24px; text-align: center;">
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 8px; font-weight: bold;">${m.letterTitleLabel}</div>
+                          <div style="font-size: 20px; color: #383838; line-height: 1.4;">"${sanitizedTitle}"</div>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Steps -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 40px;">
+                      <tr>
+                        <td>
+                          <div style="font-size: 14px; font-weight: bold; color: #383838; margin-bottom: 20px;">${m.whatsNext}</div>
+                        </td>
+                      </tr>
+                      <!-- Step 1 -->
+                      <tr>
+                        <td style="padding-bottom: 16px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td style="width: 40px; vertical-align: top;">
+                                <div style="width: 32px; height: 32px; background-color: #6FC2FF; border: 2px solid #383838; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; font-weight: bold; color: #383838;">1</div>
+                              </td>
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <div style="font-size: 14px; font-weight: bold; color: #383838;">Review Your Letter</div>
+                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">Make sure it says exactly what you want</div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <!-- Connector -->
+                      <tr>
+                        <td>
+                          <div style="border-left: 2px dashed rgba(56,56,56,0.15); height: 16px; margin-left: 15px;"></div>
+                        </td>
+                      </tr>
+                      <!-- Step 2 -->
+                      <tr>
+                        <td style="padding-bottom: 16px;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td style="width: 40px; vertical-align: top;">
+                                <div style="width: 32px; height: 32px; background-color: #FFDE00; border: 2px solid #383838; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; font-weight: bold; color: #383838;">2</div>
+                              </td>
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <div style="font-size: 14px; font-weight: bold; color: #383838;">Schedule Delivery</div>
+                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">Pick when future-you should receive it</div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <!-- Connector -->
+                      <tr>
+                        <td>
+                          <div style="border-left: 2px dashed rgba(56,56,56,0.15); height: 16px; margin-left: 15px;"></div>
+                        </td>
+                      </tr>
+                      <!-- Step 3 -->
+                      <tr>
+                        <td>
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td style="width: 40px; vertical-align: top;">
+                                <div style="width: 32px; height: 32px; background-color: #38C1B0; border: 2px solid #383838; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; font-weight: bold; color: #ffffff;">&#10003;</div>
+                              </td>
+                              <td style="padding-left: 12px; vertical-align: middle;">
+                                <div style="font-size: 14px; font-weight: bold; color: #383838;">Receive &amp; Reflect</div>
+                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">A gift from your past self arrives</div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- CTA -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td align="center">
+                          <a href="${letterUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 16px 40px; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                            ${m.viewLetter}
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 0; text-align: center;">
+              <div style="font-size: 11px; color: #666666; margin-bottom: 16px;">
+                <a href="${lettersUrl}" style="color: #383838; text-decoration: none;">My Letters</a>
+                <span style="margin: 0 8px; color: #383838;">&#183;</span>
+                <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">Journey</a>
               </div>
-              <h1 style="margin: 0 0 16px; font-size: 28px; font-weight: 700; color: #1a1a1a; line-height: 1.3;">${m.headline}</h1>
-              <p style="margin: 0; font-size: 16px; color: #6b7280; line-height: 1.6;">${greetingLine}${subhead}</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 0 40px 32px;">
-              <div style="background-color: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; padding: 24px; text-align: center;">
-                <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; margin-bottom: 8px; font-weight: 600;">${m.letterTitleLabel}</div>
-                <div style="font-size: 20px; font-weight: 600; color: #1a1a1a; line-height: 1.4;">"${sanitizedTitle}"</div>
+              <div style="font-size: 11px; color: #666666;">
+                <a href="${settingsUrl}/notifications" style="color: #383838; text-decoration: underline;">${m.footer.manage}</a>
               </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 0 40px 32px; text-align: center;">
-              <a href="${letterUrl}" style="display: inline-block; background-color: #1a1a1a; color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 6px; font-size: 16px; font-weight: 600; letter-spacing: 0.3px;">${m.viewLetter}</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 0 40px 32px;">
-              <div style="background-color: #f9fafb; border-radius: 8px; padding: 24px;">
-                <h2 style="margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1a1a1a;">${m.whatsNext}</h2>
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-                  ${m.steps
-                    .map(
-                      (step: string) => `
-                  <tr>
-                    <td style="padding: 8px 0;">
-                      <div style="font-size: 15px; color: #374151; line-height: 1.6;">${step}</div>
-                    </td>
-                  </tr>`
-                    )
-                    .join("")}
-                </table>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 0 40px 40px; text-align: center;">
-              <a href="${dashboardUrl}" style="display: inline-block; color: #1a1a1a; text-decoration: none; font-size: 15px; font-weight: 600; padding: 12px 24px; border: 2px solid #e5e7eb; border-radius: 6px;">${m.dashboard}</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 24px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;">
-              <div style="font-size: 13px; color: #6b7280; text-align: center; line-height: 1.6;">
-                ${m.footer.reason}<br>
-                <a href="${dashboardUrl}/settings/notifications" style="color: #1a1a1a; text-decoration: underline;">${m.footer.manage}</a>
-              </div>
-              <div style="font-size: 12px; color: #9ca3af; text-align: center; margin-top: 16px;">${m.footer.copyright}</div>
             </td>
           </tr>
         </table>
@@ -127,24 +215,43 @@ export async function generateLetterCreatedEmailText({
   const m = messages.emails.letterCreated
 
   const sanitizedTitle = letterTitle.replace(/"/g, '\\"')
-  const greeting = userFirstName
-    ? m.text.greeting.replace("{name}", userFirstName)
-    : m.text.greeting.replace("{name}", "").trim() || m.text.body
+  const greeting = userFirstName ? `Welcome, ${userFirstName}!` : "Letter Created!"
+
+  // Replace dashboard with letters/journey
+  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
+  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
+  const settingsUrl = dashboardUrl.replace("/dashboard", "/settings")
 
   return `
+CAPSULE NOTE
+Letters to Your Future Self
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 ${greeting}
 
-${m.text.body.replace("{title}", sanitizedTitle)}
+Your letter has been saved and encrypted.
+Ready to schedule it for future delivery?
+
+YOUR LETTER
+─────────────────
+"${sanitizedTitle}"
 
 ${m.whatsNext}
-- ${m.text.details[0]}
-- ${m.text.details[1]}
-- ${m.text.details[2]}
+─────────────────
+1. Review Your Letter - Make sure it says exactly what you want
+2. Schedule Delivery - Pick when future-you should receive it
+3. Receive & Reflect - A gift from your past self arrives
 
-${m.text.view}: ${letterUrl}
-${m.text.dashboard}: ${dashboardUrl}
+View your letter: ${letterUrl}
 
-${m.footer.reason}
-${m.footer.manage}: ${dashboardUrl}/settings/notifications
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+My Letters: ${lettersUrl}
+Journey: ${journeyUrl}
+
+Manage notifications: ${settingsUrl}/notifications
+
+Sent with Capsule Note
   `.trim()
 }

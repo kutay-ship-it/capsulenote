@@ -444,21 +444,106 @@ export const deliverEmail = inngest.createFunction(
       })
 
       const unlockUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unlock/${delivery.letter.id}`
+      const lettersUrl = `${process.env.NEXT_PUBLIC_APP_URL}/letters`
+      const journeyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/journey`
+      const writtenDate = new Date(delivery.letter.createdAt).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      })
       const emailHtml = `
-        <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #1a1a1a;">A Letter from Your Past Self</h1>
-          <p style="color: #666;">You scheduled this letter to be delivered on ${new Date(delivery.deliverAt).toLocaleDateString()}.</p>
-          <div style="background: #f9f9f9; padding: 24px; border-radius: 8px; margin: 24px 0;">
-            <h2 style="margin-top: 0;">${delivery.letter.title}</h2>
-            ${decryptedContent.bodyHtml}
-          </div>
-          <p style="color: #999; font-size: 14px;">
-            This letter was sent via Capsule Note.<br/>
-            <a href="${unlockUrl}">Open this letter on Capsule Note</a>
-            <br/>
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard">View your dashboard</a>
-          </p>
-        </div>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; background-color: #F4EFE2; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2;">
+    <tr>
+      <td align="center" style="padding: 48px 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px;">
+
+          <!-- Pre-header Badge -->
+          <tr>
+            <td style="text-align: center; padding-bottom: 32px;">
+              <span style="display: inline-block; background-color: #38C1B0; color: #ffffff; padding: 6px 16px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; border: 2px solid #383838; border-radius: 2px;">
+                &#9993; Letter Delivered
+              </span>
+            </td>
+          </tr>
+
+          <!-- Main Letter Card -->
+          <tr>
+            <td>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff; border: 2px solid #383838; border-radius: 2px; box-shadow: -6px 6px 0 rgba(56,56,56,0.08);">
+                <!-- Top Stamp Area -->
+                <tr>
+                  <td style="padding: 24px 32px; border-bottom: 1px dashed rgba(56,56,56,0.2);">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td>
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">From Your Past Self</div>
+                          <div style="font-size: 11px; color: #383838; margin-top: 4px;">Written on ${writtenDate}</div>
+                        </td>
+                        <td style="text-align: right;">
+                          <div style="width: 48px; height: 48px; background-color: #FFDE00; border: 2px solid #383838; border-radius: 2px; text-align: center; line-height: 44px; font-size: 20px; display: inline-block;">&#128140;</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <!-- Title -->
+                <tr>
+                  <td style="padding: 32px 32px 0; text-align: center;">
+                    <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 0; line-height: 1.3;">"${delivery.letter.title}"</h1>
+                  </td>
+                </tr>
+
+                <!-- Decorative Divider -->
+                <tr>
+                  <td style="padding: 24px 32px; text-align: center;">
+                    <div style="display: inline-block; width: 60px; height: 2px; background-color: #383838;"></div>
+                  </td>
+                </tr>
+
+                <!-- Letter Content -->
+                <tr>
+                  <td style="padding: 0 40px 40px; font-size: 15px; line-height: 1.9; color: #383838;">
+                    ${decryptedContent.bodyHtml}
+                  </td>
+                </tr>
+
+                <!-- CTA Section -->
+                <tr>
+                  <td style="background-color: #F4EFE2; padding: 24px 32px; text-align: center; border-top: 1px solid rgba(56,56,56,0.1);">
+                    <a href="${unlockUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 32px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                      View Full Letter &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 0; text-align: center;">
+              <div style="font-size: 18px; color: #383838; margin-bottom: 8px;">Capsule Note</div>
+              <div style="font-size: 11px; color: #666666;">
+                Letters to your future self &middot;
+                <a href="${lettersUrl}" style="color: #383838;">My Letters</a> &middot;
+                <a href="${journeyUrl}" style="color: #383838;">Journey</a>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
       `
 
       // Try primary provider

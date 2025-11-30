@@ -20,7 +20,7 @@ import {
 import { motion, useInView } from "framer-motion"
 
 import { cn, getUserTimezone } from "@/lib/utils"
-import { saveAnonymousDraft } from "@/lib/localStorage-letter"
+import { saveAnonymousDraft, getAnonymousDraft, getLetterAutosave } from "@/lib/localStorage-letter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LetterEditor } from "@/components/letter-editor"
@@ -74,6 +74,40 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   // Validation errors state
   const [errors, setErrors] = React.useState<DemoFormErrors>({})
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false)
+
+  // Restore draft from localStorage on mount
+  React.useEffect(() => {
+    if (isSignedIn) {
+      // For signed-in users, check capsule-letter-autosave
+      const autosave = getLetterAutosave()
+      if (autosave) {
+        setTitle(autosave.title || "")
+        setBodyHtml(autosave.bodyHtml || "")
+        setBodyRich(autosave.bodyRich as Record<string, unknown> | null)
+        setRecipientEmail(autosave.recipientEmail || "")
+        if (autosave.deliveryDate) {
+          setDeliveryDate(new Date(autosave.deliveryDate))
+        }
+        if (autosave.selectedPreset) {
+          setSelectedPreset(autosave.selectedPreset)
+        }
+      }
+    } else {
+      // For anonymous users, check anonymous draft
+      const draft = getAnonymousDraft()
+      if (draft) {
+        setTitle(draft.title || "")
+        setBodyHtml(draft.body || "")
+        setRecipientEmail(draft.recipientEmail || "")
+        if (draft.deliveryDate) {
+          setDeliveryDate(new Date(draft.deliveryDate))
+        }
+        if (draft.selectedPreset) {
+          setSelectedPreset(draft.selectedPreset)
+        }
+      }
+    }
+  }, [isSignedIn])
 
   // Word/char count
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()

@@ -29,9 +29,12 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
   const messages = await loadMessages(locale)
   const m = messages.emails.deliveryScheduled
 
-  const greeting = userFirstName ? m.greeting.replace("{name}", escape(userFirstName)) : m.greeting.replace("{name}", "").trim() || "Hello"
+  const greeting = userFirstName ? `Hi ${escape(userFirstName)}` : "Hello"
   const methodText = m.methods[deliveryMethod]
-  const channel = deliveryMethod === "email" ? m.methods.email.toLowerCase() : m.methods.mail.toLowerCase()
+
+  // Replace dashboard with letters/journey
+  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
+  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
 
   return `
 <!DOCTYPE html>
@@ -41,77 +44,141 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${m.subject.replace("{title}", escape(letterTitle))}</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+<body style="margin: 0; padding: 0; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; background-color: #F4EFE2; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2;">
+    <tr>
+      <td align="center" style="padding: 48px 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px;">
 
-  <div style="background: #FFF9E6; border: 2px solid #333; padding: 30px; margin-bottom: 20px;">
-    <h1 style="margin: 0 0 10px 0; font-size: 24px; font-weight: normal; text-transform: uppercase; letter-spacing: 1px;">
-      ${m.headline}
-    </h1>
-    <p style="margin: 0; font-size: 14px; color: #666;">
-      ${m.subhead}
-    </p>
-  </div>
+          <!-- Header -->
+          <tr>
+            <td style="text-align: center; padding-bottom: 32px;">
+              <div style="font-size: 22px; font-weight: normal; color: #383838;">Capsule Note</div>
+              <div style="font-size: 11px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">Time Capsule for Your Thoughts</div>
+            </td>
+          </tr>
 
-  <div style="background: white; border: 2px solid #333; padding: 30px; margin-bottom: 20px;">
-    <p style="font-size: 16px; margin: 0 0 20px 0;">
-      ${greeting},
-    </p>
+          <!-- Main Card -->
+          <tr>
+            <td>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff; border: 2px solid #383838; border-radius: 2px;">
+                <!-- Accent Bar -->
+                <tr>
+                  <td style="background-color: #6FC2FF; height: 6px;"></td>
+                </tr>
 
-    <p style="font-size: 16px; margin: 0 0 20px 0;">
-      ${m.body.replace("{title}", escape(letterTitle))}
-    </p>
+                <tr>
+                  <td style="padding: 40px;">
+                    <!-- Status Icon -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="width: 64px; height: 64px; background-color: #6FC2FF; border: 2px solid #383838; border-radius: 2px; text-align: center; vertical-align: middle; font-size: 28px;">
+                          &#128197;
+                        </td>
+                      </tr>
+                    </table>
 
-    <div style="background: #E8F4F8; border: 2px solid #333; padding: 20px; margin: 20px 0;">
-      <p style="margin: 0 0 10px 0; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">
-        ${m.detailsLabel}
-      </p>
-      <table style="width: 100%; border-collapse: collapse;">
-        <tr>
-          <td style="padding: 8px 0; font-weight: 600;">${m.fields.date}</td>
-          <td style="padding: 8px 0;">${escape(deliveryDate)}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; font-weight: 600;">${m.fields.method}</td>
-          <td style="padding: 8px 0;">${methodText}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px 0; font-weight: 600;">${m.fields.recipient}</td>
-          <td style="padding: 8px 0;">${escape(recipientEmail)}</td>
-        </tr>
-      </table>
-    </div>
+                    <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
+                      ${m.headline}
+                    </h1>
 
-    <p style="font-size: 16px; margin: 20px 0;">
-      <strong>${m.nextTitle}</strong>
-    </p>
+                    <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
+                      ${greeting}, we've locked in your delivery. Here's the summary:
+                    </p>
 
-    <ul style="font-size: 15px; line-height: 1.8; margin: 0 0 20px 0; padding-left: 20px;">
-      <li>${m.bullets[0]}</li>
-      <li>${m.bullets[1].replace("{channel}", channel).replace("{recipient}", escape(recipientEmail))}</li>
-      <li>${m.bullets[2]}</li>
-      <li>${m.bullets[3]}</li>
-    </ul>
+                    <!-- Timeline Visual -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2; border: 1px solid rgba(56,56,56,0.15); border-radius: 2px; margin-bottom: 32px;">
+                      <tr>
+                        <td style="padding: 24px;">
+                          <!-- Now -->
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td style="width: 20px; vertical-align: top; padding-top: 4px;">
+                                <div style="width: 12px; height: 12px; background-color: #38C1B0; border: 2px solid #383838; border-radius: 50%;"></div>
+                              </td>
+                              <td style="padding-left: 12px;">
+                                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #38C1B0; font-weight: bold;">Now</div>
+                                <div style="font-size: 14px; color: #383838;">Letter encrypted &amp; scheduled</div>
+                              </td>
+                            </tr>
+                          </table>
 
-    <div style="margin: 30px 0;">
-      <a href="${deliveryUrl}" style="display: inline-block; background: #333; color: white; padding: 12px 30px; text-decoration: none; border: 2px solid #333; text-transform: uppercase; letter-spacing: 0.5px; font-size: 14px;">
-        ${m.cta}
-      </a>
-    </div>
+                          <!-- Connector Line -->
+                          <div style="border-left: 2px dashed rgba(56,56,56,0.2); height: 24px; margin-left: 5px;"></div>
 
-    <p style="font-size: 14px; color: #666; margin: 20px 0 0 0;">
-      ${m.change.replace("{dashboard}", `<a href="${dashboardUrl}" style="color: #333; text-decoration: underline;">${m.dashboardCta}</a>`)}
-    </p>
-  </div>
+                          <!-- Delivery -->
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                            <tr>
+                              <td style="width: 20px; vertical-align: top; padding-top: 4px;">
+                                <div style="width: 12px; height: 12px; background-color: #6FC2FF; border: 2px solid #383838; border-radius: 50%;"></div>
+                              </td>
+                              <td style="padding-left: 12px;">
+                                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #6FC2FF; font-weight: bold;">Delivery</div>
+                                <div style="font-size: 14px; color: #383838; font-weight: bold;">${escape(deliveryDate)}</div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
 
-  <div style="text-align: center; padding: 20px; font-size: 12px; color: #999;">
-    <p style="margin: 0 0 5px 0;">
-      ${m.footer.sentWith}
-    </p>
-    <p style="margin: 0;">
-      ${m.footer.tagline}
-    </p>
-  </div>
+                    <!-- Details Table -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
+                      <tr>
+                        <td style="padding: 12px 0; border-bottom: 1px solid rgba(56,56,56,0.1);">
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">Letter</div>
+                          <div style="font-size: 14px; color: #383838;">${escape(letterTitle)}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 12px 0; border-bottom: 1px solid rgba(56,56,56,0.1);">
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">Delivery Method</div>
+                          <div style="font-size: 14px; color: #383838;">${methodText}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 12px 0;">
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">Recipient</div>
+                          <div style="font-size: 14px; color: #383838;">${escape(recipientEmail)}</div>
+                        </td>
+                      </tr>
+                    </table>
 
+                    <!-- Buttons -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="padding-right: 12px;">
+                          <a href="${deliveryUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                            View Details
+                          </a>
+                        </td>
+                        <td>
+                          <a href="${deliveryUrl}/edit" style="display: inline-block; background-color: #ffffff; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                            Edit Delivery
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 0; text-align: center;">
+              <div style="font-size: 11px; color: #666666;">
+                <a href="${lettersUrl}" style="color: #383838; text-decoration: none;">My Letters</a>
+                <span style="margin: 0 8px; color: #383838;">&#183;</span>
+                <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">Journey</a>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
   `.trim()
@@ -132,38 +199,44 @@ export async function generateDeliveryScheduledEmailText(data: DeliveryScheduled
   const messages = await loadMessages(locale)
   const m = messages.emails.deliveryScheduled
 
-  const greeting = userFirstName ? m.greeting.replace("{name}", userFirstName) : m.greeting.replace("{name}", "").trim() || "Hello"
+  const greeting = userFirstName ? `Hi ${userFirstName}` : "Hello"
   const methodText = m.methods[deliveryMethod]
-  const channel = deliveryMethod === "email" ? m.methods.email.toLowerCase() : m.methods.mail.toLowerCase()
+
+  // Replace dashboard with letters/journey
+  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
+  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
 
   return `
-${m.text.headline}
-
-${greeting},
-
-${m.text.body.replace("{title}", letterTitle)}
-
-${m.text.details}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${m.fields.date} ${deliveryDate}
-${m.fields.method} ${methodText}
-${m.fields.recipient} ${recipientEmail}
-
-${m.text.whatNext}
-
-• ${m.text.bullets[0]}
-• ${m.text.bullets[1].replace("{channel}", channel).replace("{recipient}", recipientEmail)}
-• ${m.text.bullets[2]}
-• ${m.text.bullets[3]}
-
-${m.text.view}
-${deliveryUrl}
-
-${m.text.change}
-${dashboardUrl}
+CAPSULE NOTE
+Time Capsule for Your Thoughts
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${m.footer.sentWith}
-${m.footer.tagline}
+
+${m.headline}
+
+${greeting}, we've locked in your delivery. Here's the summary:
+
+DELIVERY TIMELINE
+─────────────────
+● Now: Letter encrypted & scheduled
+│
+○ Delivery: ${deliveryDate}
+
+DETAILS
+─────────────────
+Letter: ${letterTitle}
+Method: ${methodText}
+Recipient: ${recipientEmail}
+
+View delivery details: ${deliveryUrl}
+Edit delivery: ${deliveryUrl}/edit
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+My Letters: ${lettersUrl}
+Journey: ${journeyUrl}
+
+Sent with Capsule Note
+Letters to your future self
   `.trim()
 }

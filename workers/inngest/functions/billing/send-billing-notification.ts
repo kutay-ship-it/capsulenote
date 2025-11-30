@@ -53,33 +53,109 @@ export const sendBillingNotification = inngest.createFunction(
     // Prepare email based on template
     const emailContent = await step.run("prepare-email", async () => {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-      
+      const lettersUrl = `${appUrl}/letters`
+      const journeyUrl = `${appUrl}/journey`
+      const settingsUrl = `${appUrl}/settings`
+
+      // Variation B - Soft Brutalist email wrapper
+      const wrapEmail = (content: string, accentColor: string = "#38C1B0") => `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace; background-color: #F4EFE2; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2;">
+    <tr>
+      <td align="center" style="padding: 48px 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px;">
+          <!-- Header -->
+          <tr>
+            <td style="text-align: center; padding-bottom: 32px;">
+              <div style="font-size: 22px; color: #383838;">Capsule Note</div>
+            </td>
+          </tr>
+          <!-- Main Card -->
+          <tr>
+            <td>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #ffffff; border: 2px solid #383838; border-radius: 2px;">
+                <tr>
+                  <td style="background-color: ${accentColor}; height: 6px;"></td>
+                </tr>
+                <tr>
+                  <td style="padding: 40px;">
+                    ${content}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 32px 0; text-align: center;">
+              <div style="font-size: 11px; color: #666666;">
+                <a href="${lettersUrl}" style="color: #383838; text-decoration: none;">My Letters</a>
+                <span style="margin: 0 8px; color: #383838;">&middot;</span>
+                <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">Journey</a>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+      `
+
       switch (template) {
         case "trial-ending": {
-          const trialEndsDate = new Date(data.trialEndsAt as string).toLocaleDateString()
+          const trialEndsDate = new Date(data.trialEndsAt as string).toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric'
+          })
           return {
             subject: "Your free trial ends in 3 days",
-            html: `
-              <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #1a1a1a;">Your Trial is Ending Soon</h1>
-                <p style="color: #666; font-size: 16px;">
-                  Your 14-day free trial of Capsule Note Pro will end in ${data.daysRemaining} days.
-                </p>
-                <p style="color: #666; font-size: 16px;">
-                  After your trial ends on ${trialEndsDate}, 
-                  you will be charged $9/month to continue using Pro features.
-                </p>
-                <div style="margin: 24px 0;">
-                  <a href="${appUrl}/settings/billing" 
-                     style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                    Manage Subscription
-                  </a>
-                </div>
-                <p style="color: #999; font-size: 14px;">
-                  If you do not want to continue, you can cancel anytime before your trial ends.
-                </p>
-              </div>
-            `,
+            html: wrapEmail(`
+              <!-- Icon -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="width: 64px; height: 64px; background-color: #FFDE00; border: 2px solid #383838; border-radius: 2px; text-align: center; vertical-align: middle; font-size: 28px;">
+                    &#9200;
+                  </td>
+                </tr>
+              </table>
+
+              <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
+                Your Trial is Ending Soon
+              </h1>
+
+              <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
+                Your 14-day free trial of Capsule Note Pro will end in <strong>${data.daysRemaining} days</strong>.
+              </p>
+
+              <!-- Details Box -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2; border: 1px solid rgba(56,56,56,0.15); border-radius: 2px; margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 8px;">Trial Ends</div>
+                    <div style="font-size: 18px; color: #383838; font-weight: bold;">${trialEndsDate}</div>
+                    <div style="font-size: 13px; color: #666666; margin-top: 8px;">After this date, you'll be charged $9/month to continue using Pro features.</div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <a href="${settingsUrl}/billing" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                Manage Subscription
+              </a>
+
+              <p style="font-size: 13px; color: #666666; margin: 24px 0 0 0;">
+                If you do not want to continue, you can cancel anytime before your trial ends.
+              </p>
+            `, "#FFDE00"),
           }
         }
 
@@ -87,83 +163,154 @@ export const sendBillingNotification = inngest.createFunction(
           const amount = formatAmount(data.amountDue as number, data.currency as string)
           return {
             subject: "Payment failed for your Capsule Note subscription",
-            html: `
-              <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #dc2626;">Payment Failed</h1>
-                <p style="color: #666; font-size: 16px;">
-                  We were unable to process your payment of ${amount}.
-                </p>
-                <p style="color: #666; font-size: 16px;">
-                  This was attempt #${data.attemptCount}. Your payment method will be tried again automatically.
-                </p>
-                <div style="margin: 24px 0;">
-                  <a href="${appUrl}/settings/billing" 
-                     style="background: #dc2626; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                    Update Payment Method
-                  </a>
-                </div>
-                <p style="color: #999; font-size: 14px;">
-                  Please update your payment method to avoid subscription cancellation.
-                </p>
-              </div>
-            `,
+            html: wrapEmail(`
+              <!-- Icon -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="width: 64px; height: 64px; background-color: #FF6B6B; border: 2px solid #383838; border-radius: 2px; text-align: center; vertical-align: middle; font-size: 28px;">
+                    &#9888;
+                  </td>
+                </tr>
+              </table>
+
+              <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
+                Payment Failed
+              </h1>
+
+              <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
+                We were unable to process your payment of <strong>${amount}</strong>.
+              </p>
+
+              <!-- Warning Box -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #FFF5F5; border: 2px solid #FF6B6B; border-radius: 2px; margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <div style="font-size: 14px; color: #383838;">
+                      <strong>Attempt #${data.attemptCount}</strong><br />
+                      Your payment method will be tried again automatically, but please update it to avoid subscription cancellation.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <a href="${settingsUrl}/billing" style="display: inline-block; background-color: #FF6B6B; color: #ffffff; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                Update Payment Method
+              </a>
+            `, "#FF6B6B"),
           }
         }
 
         case "subscription-canceled":
           return {
             subject: "Your Capsule Note subscription has been canceled",
-            html: `
-              <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #1a1a1a;">Subscription Canceled</h1>
-                <p style="color: #666; font-size: 16px;">
-                  Your Capsule Note Pro subscription has been canceled.
-                </p>
-                <p style="color: #666; font-size: 16px;">
-                  You will continue to have access to Pro features until the end of your billing period.
-                </p>
-                <div style="margin: 24px 0;">
-                  <a href="${appUrl}/pricing" 
-                     style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                    Reactivate Subscription
-                  </a>
-                </div>
-                <p style="color: #999; font-size: 14px;">
-                  We would love to have you back anytime.
-                </p>
-              </div>
-            `,
+            html: wrapEmail(`
+              <!-- Icon -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="width: 64px; height: 64px; background-color: #F4EFE2; border: 2px solid #383838; border-radius: 2px; text-align: center; vertical-align: middle; font-size: 28px;">
+                    &#128075;
+                  </td>
+                </tr>
+              </table>
+
+              <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
+                Subscription Canceled
+              </h1>
+
+              <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
+                Your Capsule Note Pro subscription has been canceled.
+              </p>
+
+              <!-- Info Box -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2; border: 1px solid rgba(56,56,56,0.15); border-radius: 2px; margin-bottom: 32px;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <div style="font-size: 14px; color: #383838;">
+                      You will continue to have access to Pro features until the end of your current billing period. Your letters remain safe and encrypted.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <a href="${appUrl}/pricing" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                Reactivate Subscription
+              </a>
+
+              <p style="font-size: 13px; color: #666666; margin: 24px 0 0 0;">
+                We'd love to have you back anytime.
+              </p>
+            `, "#383838"),
           }
 
         case "payment-receipt": {
           const amount = formatAmount(data.amountPaid as number, data.currency as string)
           return {
             subject: "Receipt for your Capsule Note payment",
-            html: `
-              <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #1a1a1a;">Payment Receipt</h1>
-                <p style="color: #666; font-size: 16px;">
-                  Thank you for your payment! Here are the details:
-                </p>
-                <div style="background: #f9f9f9; padding: 24px; border-radius: 8px; margin: 24px 0;">
-                  <p style="margin: 0;"><strong>Amount:</strong> ${amount}</p>
-                  <p style="margin: 8px 0 0;"><strong>Invoice:</strong> ${data.invoiceNumber}</p>
-                </div>
-                <div style="margin: 24px 0;">
-                  <a href="${data.invoiceUrl}" 
-                     style="background: #000; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin-right: 8px;">
-                    View Invoice
-                  </a>
-                  <a href="${data.pdfUrl}" 
-                     style="background: #666; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-                    Download PDF
-                  </a>
-                </div>
-                <p style="color: #999; font-size: 14px;">
-                  This receipt has also been emailed to you from Stripe.
-                </p>
-              </div>
-            `,
+            html: wrapEmail(`
+              <!-- Icon -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="width: 64px; height: 64px; background-color: #38C1B0; border: 2px solid #383838; border-radius: 2px; text-align: center; vertical-align: middle; font-size: 28px; color: #ffffff;">
+                    &#10003;
+                  </td>
+                </tr>
+              </table>
+
+              <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
+                Payment Successful
+              </h1>
+
+              <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
+                Thank you for your payment! Here are the details:
+              </p>
+
+              <!-- Receipt Box -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2; border: 2px solid #383838; border-radius: 2px; margin-bottom: 32px;">
+                <tr>
+                  <td style="background-color: #FFDE00; padding: 12px 20px; border-bottom: 2px solid #383838;">
+                    <span style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; color: #383838;">
+                      &#128203; Receipt
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 20px;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td style="padding: 8px 0;">
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">Amount</div>
+                          <div style="font-size: 24px; color: #383838; font-weight: bold; margin-top: 4px;">${amount}</div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; border-top: 1px dashed rgba(56,56,56,0.2);">
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">Invoice</div>
+                          <div style="font-size: 14px; color: #383838; margin-top: 4px;">${data.invoiceNumber}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTAs -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding-right: 12px;">
+                    <a href="${data.invoiceUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                      View Invoice
+                    </a>
+                  </td>
+                  <td>
+                    <a href="${data.pdfUrl}" style="display: inline-block; background-color: #ffffff; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+                      Download PDF
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            `, "#38C1B0"),
           }
         }
 
