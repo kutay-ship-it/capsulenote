@@ -2,6 +2,9 @@ import type { ReactNode } from "react"
 import { Mail } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 
+// Force dynamic rendering - this layout uses getCurrentUser() which requires headers()
+export const dynamic = "force-dynamic"
+
 import { EmailLockGuard } from "@/components/auth/email-lock-guard"
 import { SettingsDropdown } from "@/components/v3/settings-dropdown"
 import { CreditsBarV3 } from "@/components/v3/nav/credit-indicator-v3"
