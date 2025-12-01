@@ -4,6 +4,7 @@ import { Mail, Twitter, Heart } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
+import { FooterLanguageButton } from "@/components/locale"
 
 interface FooterLink {
   label: string
@@ -102,11 +103,14 @@ export function FooterV2() {
             <p className="font-mono text-xs text-charcoal/60">
               {t("copyright", { year: currentYear })}
             </p>
-            <p className="flex items-center gap-1.5 font-mono text-xs text-charcoal/60">
-              {t.rich("madeWith", {
-                heart: () => <Heart className="h-3 w-3 text-coral fill-coral" />,
-              })}
-            </p>
+            <div className="flex items-center gap-4">
+              <FooterLanguageButton />
+              <p className="flex items-center gap-1.5 font-mono text-xs text-charcoal/60">
+                {t.rich("madeWith", {
+                  heart: () => <Heart className="h-3 w-3 text-coral fill-coral" />,
+                })}
+              </p>
+            </div>
           </div>
         </div>
       </div>

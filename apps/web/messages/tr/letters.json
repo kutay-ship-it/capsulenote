@@ -15,10 +15,10 @@
     "delivered": "Teslim edildi"
   },
   "tabs": {
-    "all": "Tümü",
-    "drafts": "Taslaklar",
-    "scheduled": "Planlandı",
-    "delivered": "Teslim Edildi"
+    "all": "TÜMÜ",
+    "drafts": "TASLAKLAR",
+    "scheduled": "PLANLANDI",
+    "delivered": "TESLİM EDİLDİ"
   },
   "emptyStates": {
     "all": {
@@ -46,11 +46,11 @@
     "untitled": "Başlıksız Mektup",
     "noContent": "Henüz içerik yok...",
     "status": {
-      "draft": "Taslak",
-      "delivered": "Teslim Edildi",
-      "failed": "Başarısız",
-      "today": "Bugün",
-      "tomorrow": "Yarın",
+      "draft": "TASLAK",
+      "delivered": "TESLİM EDİLDİ",
+      "failed": "BAŞARISIZ",
+      "today": "BUGÜN",
+      "tomorrow": "YARIN",
       "days": "{count} gün"
     }
   },
@@ -147,8 +147,8 @@
       "description": "Mektubun silindi."
     },
     "deleteError": {
-      "title": "Silme basarisiz",
-      "description": "Mektup silinemedi. Lutfen tekrar deneyin."
+      "title": "Silme başarısız",
+      "description": "Mektup silinemedi. Lütfen tekrar deneyin."
     },
     "draftSaved": {
       "title": "Taslak kaydedildi",
@@ -188,52 +188,52 @@
   "createdOn": "Oluşturuldu {date}",
   "viewAll": "Tümünü gör",
   "deliveryType": {
-    "email": "E-posta",
-    "physical": "Fiziksel",
-    "credits": "kredi",
-    "digitalDelivery": "Dijital teslimat",
-    "realLetter": "Gerçek mektup",
+    "email": "E-POSTA",
+    "physical": "FİZİKSEL",
+    "credits": "KREDİ",
+    "digitalDelivery": "DİJİTAL TESLİMAT",
+    "realLetter": "GERÇEK MEKTUP",
     "doubleDelivery": {
-      "title": "Çift Teslimat",
+      "title": "ÇİFT TESLİMAT",
       "description": "Mektubunuz hem dijital olarak e-posta kutularına hem de fiziksel mektup olarak posta kutularına ulaşacak."
     },
     "hints": {
-      "addPhysical": "Basılı mektup eklemek için Fiziksel'e dokun",
-      "addEmail": "Dijital olarak da göndermek için E-posta'ya dokun"
+      "addPhysical": "BASILI MEKTUP EKLEMEK İÇİN FİZİKSEL'E DOKUN",
+      "addEmail": "DİJİTAL OLARAK DA GÖNDERMEK İÇİN E-POSTA'YA DOKUN"
     }
   },
   "seal": {
     "dialogTitle": "Mektubunu mühürle onayı",
-    "badge": "Son İnceleme",
-    "title": "Mektubunu Mühürle",
-    "subtitle": "Mühürlemeden önce detayları incele",
-    "yourLetter": "Mektubun",
-    "recipient": "Alıcı",
+    "badge": "SON İNCELEME",
+    "title": "MEKTUBUNU MÜHÜRLE",
+    "subtitle": "MÜHÜRLEMEDEN ÖNCE DETAYLARI İNCELE",
+    "yourLetter": "MEKTUBUN",
+    "recipient": "ALICI",
     "futureYou": "Gelecekteki Sen",
-    "deliveryMethod": "Teslimat Yöntemi",
+    "deliveryMethod": "TESLİMAT YÖNTEMİ",
     "methods": {
       "both": "E-posta + Fiziksel Mektup",
       "emailOnly": "Sadece E-posta",
       "physicalOnly": "Sadece Fiziksel Mektup"
     },
-    "arrivesIn": "Ulaşma Tarihi",
+    "arrivesIn": "ULAŞMA TARİHİ",
     "timing": {
       "tomorrow": "Yarın",
       "daysFromNow": "{count} gün sonra"
     },
-    "shippingTo": "Gönderilecek Adres",
+    "shippingTo": "GÖNDERİLECEK ADRES",
     "printOptions": {
       "color": "Renkli",
       "doubleSided": "Çift taraflı"
     },
-    "creditUsage": "Kredi Kullanımı",
-    "emailDelivery": "E-posta teslimi",
-    "physicalMail": "Fiziksel posta",
+    "creditUsage": "KREDİ KULLANIMI",
+    "emailDelivery": "E-POSTA TESLİMİ",
+    "physicalMail": "FİZİKSEL POSTA",
     "creditCost": "1 kredi ({from} → {to})",
     "warning": "Mühürlendikten sonra mektubun teslimat tarihine kadar <bold>kilitli ve şifreli</bold> olacak. Okuyamaz veya düzenleyemezsin.",
-    "goBack": "Geri Dön",
-    "sealing": "Mühürleniyor...",
-    "sealAndSchedule": "Mühürle ve Planla"
+    "goBack": "GERİ DÖN",
+    "sealing": "MÜHÜRLENİYOR...",
+    "sealAndSchedule": "MÜHÜRLE VE PLANLA"
   },
   "templates": {
     "browseButton": "Şablonlara Göz At",

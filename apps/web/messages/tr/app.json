@@ -14,25 +14,25 @@
     "hero": {
       "arrived": {
         "title": "Mektubun ulaştı!",
-        "subtitle": "Geçmişten gelen bir mesaj için gelen kutunu kontrol et",
+        "subtitle": "GEÇMİŞTEN GELEN BİR MESAJ İÇİN GELEN KUTUNU KONTROL ET",
         "openButton": "Zaman Kapsülünü Aç"
       },
       "countdown": {
         "badge": "Gelen Mesaj",
-        "from": "kimden",
-        "you": "Sen",
-        "to": "kime",
-        "futureYou": "Gelecekteki Sen",
+        "from": "KİMDEN",
+        "you": "SEN",
+        "to": "KİME",
+        "futureYou": "GELECEKTEKİ SEN",
         "writtenOn": "{date} tarihinde yazıldı",
         "days": "Gün",
         "hours": "Saat",
         "mins": "Dk",
         "secs": "Sn",
-        "previewButton": "Mektubu Önizle",
-        "rescheduleButton": "Yeniden Planla"
+        "previewButton": "MEKTUBU ÖNİZLE",
+        "rescheduleButton": "YENİDEN PLANLA"
       },
       "empty": {
-        "title": "İlk mektubun yazılmayı bekliyor",
+        "title": "İLK MEKTUBUN YAZILMAYI BEKLİYOR",
         "writeButton": "İlk Mektubunu Yaz",
         "prompts": {
           "0": "Bir yıl sonraki kendine ne söylerdin?",

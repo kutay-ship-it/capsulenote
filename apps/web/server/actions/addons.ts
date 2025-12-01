@@ -45,6 +45,9 @@ export async function createAddOnCheckoutSession(input: {
       }
     }
 
+    // Create Stripe Checkout session with volume pricing
+    // Stripe will calculate the correct total based on quantity tier
+    // @see CREDIT_ADDON_TIERS in billing-constants.ts for tier configuration
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer: customerId,
@@ -56,13 +59,14 @@ export async function createAddOnCheckoutSession(input: {
       ],
       success_url: input.successUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
       cancel_url: input.cancelUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+      // Session metadata - used by checkout.session.completed webhook (PRIMARY fulfillment)
       metadata: {
         userId: user.id,
         addon_type: input.type,
         quantity: (input.quantity ?? 1).toString(),
+        type: "credit_addon", // Identifies this as credit addon for webhook routing
       },
-      // CRITICAL: Pass metadata to payment intent for webhook processing
-      // Checkout session metadata is NOT automatically copied to payment intents
+      // Payment intent metadata - backup for payment_intent.succeeded webhook
       payment_intent_data: {
         metadata: {
           userId: user.id,

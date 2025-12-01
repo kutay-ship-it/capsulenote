@@ -51,6 +51,7 @@ export const routing = defineRouting({
     "/sandbox/entitlements": "/sandbox/entitlements",
     "/sandbox/schedule": "/sandbox/schedule",
     "/sandbox/settings": "/sandbox/settings",
+    "/sandbox/credits-sandbox": "/sandbox/credits-sandbox",
     "/dashboard-v2": "/dashboard-v2",
     "/letters-v2": "/letters-v2",
     "/letters-v2/new": "/letters-v2/new",

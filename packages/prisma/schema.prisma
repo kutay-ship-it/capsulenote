@@ -108,6 +108,7 @@ model Profile {
   userId              String   @id @map("user_id") @db.Uuid
   displayName         String?  @map("display_name")
   timezone            String   @default("UTC") // IANA timezone - canonical source for user timezone
+  locale              String   @default("en") // User's preferred language (en, tr)
   marketingOptIn      Boolean  @default(false) @map("marketing_opt_in")
   onboardingCompleted Boolean  @default(false) @map("onboarding_completed")
   stripeCustomerId    String?  @unique @map("stripe_customer_id")

@@ -1,42 +1,42 @@
 {
   "letters": {
-    "title": "Mektup Islemi Basarisiz",
-    "createError": "Mektubunu olustururken bir sorun yasadik. Calisman kaydedilmemis olabilir.",
-    "editError": "Mektubunu guncellerken bir sorun yasadik. Degisikliklerin kaydedilmemis olabilir.",
-    "loadError": "Mektuplarini yuklerken bir sorun yasadik. Verilerin guvenli.",
+    "title": "Mektup İşlemi Başarısız",
+    "createError": "Mektubunu oluştururken bir sorun yaşadık. Çalışman kaydedilmemiş olabilir.",
+    "editError": "Mektubunu güncellerken bir sorun yaşadık. Değişikliklerin kaydedilmemiş olabilir.",
+    "loadError": "Mektuplarını yüklerken bir sorun yaşadık. Verilerin güvenli.",
     "unsavedChanges": {
-      "title": "Kaydedilmemis Degisiklikler",
-      "message": "Bir mektup duzenliyorduysan, iscini kaybetmemek icin yenilemeden once icerigini kopyala."
+      "title": "Kaydedilmemiş Değişiklikler",
+      "message": "Bir mektup düzenliyorduysan, işini kaybetmemek için yenilemeden önce içeriğini kopyala."
     },
     "actions": {
       "tryAgain": "Tekrar Dene",
       "myLetters": "Mektuplarım",
       "dashboard": "Panel"
     },
-    "help": "Iscini kurtarmak icin yardim mi lazim? {link}.",
-    "contactSupport": "Destek ile iletisime gec"
+    "help": "İşini kurtarmak için yardım mı lazım? {link}.",
+    "contactSupport": "Destek ile iletişime geç"
   },
   "dashboard": {
-    "title": "Panel Hatasi",
-    "message": "Panelini yuklerken bir sorun yasadik. Verilerin guvenli.",
+    "title": "Panel Hatası",
+    "message": "Panelini yüklerken bir sorun yaşadık. Verilerin güvenli.",
     "actions": {
       "reload": "Paneli Yenile",
-      "goHome": "Panel Ana Sayfasina Git"
+      "goHome": "Panel Ana Sayfasına Git"
     },
-    "help": "Bu sorun devam ederse, lutfen {link}.",
-    "contactSupport": "destek ile iletisime gec"
+    "help": "Bu sorun devam ederse, lütfen {link}.",
+    "contactSupport": "destek ile iletişime geç"
   },
   "fallback": {
-    "defaultTitle": "Bir Seyler Ters Gitti",
-    "defaultMessage": "Beklenmeyen bir hata olustu. Lutfen tekrar dene.",
+    "defaultTitle": "Bir Şeyler Ters Gitti",
+    "defaultMessage": "Beklenmeyen bir hata oluştu. Lütfen tekrar dene.",
     "errorIdLabel": "Hata ID:",
-    "errorIdHelp": "Destek ile iletisimde bu ID'yi paylas.",
+    "errorIdHelp": "Destek ile iletişimde bu ID'yi paylaş.",
     "technicalDetails": "Teknik Detaylar",
     "retrying": "Deneniyor...",
     "tryAgain": "Tekrar Dene",
-    "returnHome": "Ana Sayfaya Don",
-    "needHelp": "Yardim mi lazim? {link}",
-    "contactSupport": "Destek ile Iletisime Gec"
+    "returnHome": "Ana Sayfaya Dön",
+    "needHelp": "Yardım mı lazım? {link}",
+    "contactSupport": "Destek ile İletişime Geç"
   },
   "common": {
     "error": "Hata:"

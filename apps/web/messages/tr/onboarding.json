@@ -1,117 +1,117 @@
 {
   "v3": {
-    "title": "Capsule Note'a Hosgeldin",
-    "description": "Zaman kapsulu yolculuguna baslayalim",
-    "skip": "Gecis",
+    "title": "Capsule Note'a Hoş geldin",
+    "description": "Zaman kapsülü yolculuğuna başlayalım",
+    "skip": "Geçiş",
     "navigation": {
       "back": "Geri",
       "continue": "Devam",
-      "skip": "Simdilik gecis"
+      "skip": "Şimdilik geç"
     },
     "welcome": {
-      "title": "Zaman Kapsulun Seni Bekliyor",
-      "description": "Gelecekteki kendine mektuplar yaz. Zamana muhurle. Tam ihtiyacin oldugunda al.",
-      "tagline": "Gecmisinden mektuplar, gelecegine teslim"
+      "title": "Zaman Kapsülün Seni Bekliyor",
+      "description": "Gelecekteki kendine mektuplar yaz. Zamana mühürle. Tam ihtiyacın olduğunda al.",
+      "tagline": "Geçmişinden mektuplar, geleceğine teslim"
     },
     "howItWorks": {
       "badge": "1-2-3 kadar basit",
       "write": "Yaz",
-      "writeDesc": "Gelecekteki kendine kalbini bir mektuba dok",
-      "seal": "Muhurle",
-      "sealDesc": "Ne zaman almak istedigini sec",
+      "writeDesc": "Gelecekteki kendine kalbini bir mektuba dök",
+      "seal": "Mühürle",
+      "sealDesc": "Ne zaman almak istediğini seç",
       "receive": "Al",
-      "receiveDesc": "Tam ihtiyacin oldugunda teslim ederiz",
-      "tagline": "Her mektup sifrelenir ve zamaninda teslim edilir"
+      "receiveDesc": "Tam ihtiyacın olduğunda teslim ederiz",
+      "tagline": "Her mektup şifrelenir ve zamanında teslim edilir"
     },
     "security": {
-      "title": "Sozlerin Guvenle",
-      "description": "Mektuplarin askeri duzeyde sifreleme ile korunur. Sadece sen okuyabilirsin.",
+      "title": "Sözlerin Güvenle",
+      "description": "Mektupların askeri düzeyde şifreleme ile korunur. Sadece sen okuyabilirsin.",
       "encrypted": {
-        "title": "Uctan Uca Sifreli",
-        "description": "AES-256-GCM sifreleme dusuncelerini gizli tutar"
+        "title": "Uçtan Uca Şifreli",
+        "description": "AES-256-GCM şifreleme düşüncelerini gizli tutar"
       },
       "private": {
-        "title": "Sadece Senin Icin",
-        "description": "Biz bile mektuplarini okuyamayiz"
+        "title": "Sadece Senin İçin",
+        "description": "Biz bile mektuplarını okuyamayız"
       },
       "secure": {
-        "title": "Her Zaman Guvenli",
-        "description": "Banka duzeyi guvenlik verilerini korur"
+        "title": "Her Zaman Güvenli",
+        "description": "Banka düzeyi güvenlik verilerini korur"
       }
     },
     "ready": {
-      "title": "Hazirsin!",
-      "description": "Zaman kapsulun hazir. Ilk mektubunu baslatabilir ve gelecekteki kendine mesaj gonderebilirsin.",
-      "tagline": "Yolculugun simdi basliyor",
-      "explore": "Once Kesfet",
-      "startWriting": "Yazmaya Basla"
+      "title": "Hazırsın!",
+      "description": "Zaman kapsülün hazır. İlk mektubunu başlatabilir ve gelecekteki kendine mesaj gönderebilirsin.",
+      "tagline": "Yolculuğun şimdi başlıyor",
+      "explore": "Önce Keşfet",
+      "startWriting": "Yazmaya Başla"
     },
     "toast": {
       "success": {
-        "title": "Hosgeldin!",
-        "description": "Her sey hazir. Gelecekteki kendine ilk mektubunu yazmaya baslayabilirsin!"
+        "title": "Hoş geldin!",
+        "description": "Her şey hazır. Gelecekteki kendine ilk mektubunu yazmaya başlayabilirsin!"
       }
     }
   },
   "modal": {
     "close": "Kapat",
-    "stepOf": "Adim {current} / {total}",
+    "stepOf": "Adım {current} / {total}",
     "navigation": {
-      "next": "Ileri",
-      "previous": "Onceki",
+      "next": "İleri",
+      "previous": "Önceki",
       "back": "Geri"
     },
     "step1": {
-      "title": "Capsule Note'a Hosgeldin!",
-      "description": "Gelecekteki kendine mektuplar yaz ve tam dogru zamanda al. Dusuncelerin sifrelenir ve tam ihtiyacin oldugunda teslim edilir.",
+      "title": "Capsule Note'a Hoş geldin!",
+      "description": "Gelecekteki kendine mektuplar yaz ve tam doğru zamanda al. Düşüncelerin şifrelenir ve tam ihtiyacın olduğunda teslim edilir.",
       "benefits": {
         "encrypted": {
-          "title": "Sifreli",
-          "description": "AES-256-GCM sifreleme mektuplarini gizli tutar"
+          "title": "Şifreli",
+          "description": "AES-256-GCM şifreleme mektuplarını gizli tutar"
         },
         "timed": {
-          "title": "Zamanli",
-          "description": "Planladığin zamanda teslim edilir"
+          "title": "Zamanlı",
+          "description": "Planladığın zamanda teslim edilir"
         },
         "reliable": {
-          "title": "Guvenilir",
-          "description": "%99.95 zamaninda teslimat garantisi"
+          "title": "Güvenilir",
+          "description": "%99.95 zamanında teslimat garantisi"
         }
       }
     },
     "step2": {
-      "title": "Nasil Calisiyor",
-      "description": "Gelecekteki kendine mektup gondermek icin uc basit adim",
+      "title": "Nasıl Çalışıyor",
+      "description": "Gelecekteki kendine mektup göndermek için üç basit adım",
       "steps": {
         "write": {
           "title": "Mektubunu Yaz",
-          "description": "Icini dok. Askeri duzeyde sifreleme ile guvenle saklariz."
+          "description": "İçini dök. Askeri düzeyde şifreleme ile güvenle saklarız."
         },
         "schedule": {
-          "title": "Zamani Sec",
-          "description": "6 ay? 1 yil? 10 yil? Ne zaman almak istedigine sen karar ver."
+          "title": "Zamanı Seç",
+          "description": "6 ay? 1 yıl? 10 yıl? Ne zaman almak istediğine sen karar ver."
         },
         "deliver": {
           "title": "Biz Teslim Ederiz",
-          "description": "Tam dogru zamanda gelen kutuna guvenle teslim edilir. Tam ihtiyacin oldugunda."
+          "description": "Tam doğru zamanda gelen kutuna güvenle teslim edilir. Tam ihtiyacın olduğunda."
         }
       }
     },
     "step3": {
-      "title": "Baslamaya Hazir misin?",
-      "description": "Baslamana yardimci olacak bazi fikirler",
-      "promptsTitle": "Su konularda yazmayi dene:",
+      "title": "Başlamaya Hazır mısın?",
+      "description": "Başlamana yardımcı olacak bazı fikirler",
+      "promptsTitle": "Şu konularda yazmayı dene:",
       "prompts": {
-        "grateful": "Bugun icin minnettar oldugun seyler",
-        "goals": "Bu yil basarmak istedigin hedefler",
+        "grateful": "Bugün için minnettar olduğun şeyler",
+        "goals": "Bu yıl başarmak istediğin hedefler",
         "advice": "Gelecekteki kendine tavsiyeler",
-        "moment": "Sonsuza kadar hatirlamak istedigin bir an",
-        "challenges": "Su anda karsilastigin zorluklar",
-        "future": "Gelecekte hayatinin nasil gorunmesini umdugun"
+        "moment": "Sonsuza kadar hatırlamak istediğin bir an",
+        "challenges": "Şu anda karşılaştığın zorluklar",
+        "future": "Gelecekte hayatının nasıl görünmesini umduğun"
       },
       "buttons": {
-        "explore": "Paneli Kesfet",
-        "start": "Yazmaya Basla"
+        "explore": "Paneli Keşfet",
+        "start": "Yazmaya Başla"
       }
     }
   }

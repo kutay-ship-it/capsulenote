@@ -1,171 +1,171 @@
 {
   "metadata": {
     "title": "Abone Ol - Capsule Note",
-    "description": "Planini sec ve gelecekteki kendine mektup yazmaya basla"
+    "description": "Planını seç ve gelecekteki kendine mektup yazmaya başla"
   },
   "hero": {
-    "badge": "Yillik Planlar",
-    "title": "Kapsulunu Sec",
-    "description": "Iki basit yillik plan. Ucretsiz katman yok, reklam yok—sadece gelecekteki kendine (ve baskalarına) guvenilir teslimatlar."
+    "badge": "Yıllık Planlar",
+    "title": "Kapsülünü Seç",
+    "description": "İki basit yıllık plan. Ücretsiz katman yok, reklam yok—sadece gelecekteki kendine (ve başkalarına) güvenilir teslimatlar."
   },
   "emailCapture": {
-    "heading": "E-postani Gir",
-    "description": "Bu e-posta odeme ve hesap olusturma icin kullanilacak.",
-    "lockedNotice": "Odeme sonrasi degistirilemez (guvenlik icin kilitli)."
+    "heading": "E-postanı Gir",
+    "description": "Bu e-posta ödeme ve hesap oluşturma için kullanılacak.",
+    "lockedNotice": "Ödeme sonrası değiştirilemez (güvenlik için kilitli)."
   },
   "emailLocked": {
     "title": "E-posta Kilitli",
-    "description": "{email} e-postan odeme ve hesap olusturma icin kullanilacak. Guvenlik nedeniyle odeme sonrasi degistirilemez.",
-    "changeEmail": "E-postayi degistir"
+    "description": "{email} e-postan ödeme ve hesap oluşturma için kullanılacak. Güvenlik nedeniyle ödeme sonrası değiştirilemez.",
+    "changeEmail": "E-postayı değiştir"
   },
   "paymentStatus": {
     "incomplete": {
-      "title": "Tamamlanmamis Odeme",
-      "description": "{plan} plani icin tamamlanmamis bir odemen var. Asagidan bir plan secerek odemeye devam edebilirsin."
+      "title": "Tamamlanmamış Ödeme",
+      "description": "{plan} planı için tamamlanmamış bir ödemen var. Aşağıdan bir plan seçerek ödemeye devam edebilirsin."
     },
     "error": {
       "title": "Hata",
-      "description": "Aboneliginde bir sorun olustu. Sorun devam ederse lutfen destekle iletisime gec."
+      "description": "Aboneliğinde bir sorun oluştu. Sorun devam ederse lütfen destekle iletişime geç."
     }
   },
   "plans": {
     "digital": {
-      "name": "Dijital Kapsul",
-      "description": "Kendine kisisel mektuplar icin—tamamen dijital teslimat.",
+      "name": "Dijital Kapsül",
+      "description": "Kendine kişisel mektuplar için—tamamen dijital teslimat.",
       "features": {
-        "emailDeliveries": "Yilda 6 e-posta teslimat",
-        "scheduleYears": "100 yil sonrasina kadar planla",
-        "timezoneReminders": "Saat dilimi duyarli hatirlatmalar",
-        "encryptedStorage": "Sifrelenmis depolama"
+        "emailDeliveries": "Yılda 6 e-posta teslimatı",
+        "scheduleYears": "100 yıl sonrasına kadar planla",
+        "timezoneReminders": "Saat dilimi duyarlı hatırlatmalar",
+        "encryptedStorage": "Şifrelenmiş depolama"
       }
     },
     "paper": {
-      "name": "Kagit ve Piksel",
-      "description": "Hediye ve somut hatiralor icin—e-posta arti premium posta.",
+      "name": "Kağıt ve Piksel",
+      "description": "Hediye ve somut hatıralar için—e-posta artı premium posta.",
       "features": {
-        "emailDeliveries": "Yilda 24 e-posta teslimat",
-        "physicalLetters": "Yilda 3 fiziksel mektup",
-        "addressReminders": "Adres onay hatirlatmalari",
-        "priorityRouting": "Oncelikli teslimat yonlendirme"
+        "emailDeliveries": "Yılda 24 e-posta teslimatı",
+        "physicalLetters": "Yılda 3 fiziksel mektup",
+        "addressReminders": "Adres onay hatırlatmaları",
+        "priorityRouting": "Öncelikli teslimat yönlendirme"
       }
     }
   },
   "pricingCard": {
-    "popular": "En Populer",
+    "popular": "En Popüler",
     "perInterval": "/{interval}",
     "emailLocked": "E-posta kilitli:",
-    "cannotChange": "Odeme sonrasi degistirilemez (guvenlik)",
-    "subscribe": "{planName} Planina Abone Ol"
+    "cannotChange": "Ödeme sonrası değiştirilemez (güvenlik)",
+    "subscribe": "{planName} Planına Abone Ol"
   },
   "trustSignals": {
     "security": {
-      "title": "Banka Duzeyinde Guvenlik",
-      "description": "AES-256 sifreleme"
+      "title": "Banka Düzeyinde Güvenlik",
+      "description": "AES-256 şifreleme"
     },
     "payments": {
-      "title": "Guvenli Odemeler",
-      "description": "Stripe tarafindan destekleniyor"
+      "title": "Güvenli Ödemeler",
+      "description": "Stripe tarafından destekleniyor"
     },
     "cancel": {
-      "title": "Istedigin Zaman Iptal Et",
-      "description": "Uzun vadeli sozlesme yok"
+      "title": "İstediğin Zaman İptal Et",
+      "description": "Uzun vadeli sözleşme yok"
     }
   },
   "button": {
-    "loading": "Yukleniyor...",
-    "subscribe": "{planName} Planina Abone Ol"
+    "loading": "Yükleniyor...",
+    "subscribe": "{planName} Planına Abone Ol"
   },
   "toast": {
     "alreadyPaid": {
-      "title": "Odeme zaten tamamlandi",
-      "description": "Aboneligini aktif etmek icin kaydol"
+      "title": "Ödeme zaten tamamlandı",
+      "description": "Aboneliğini aktif etmek için kaydol"
     },
     "checkoutFailed": {
-      "title": "Odeme baslatilmadi",
-      "description": "Beklenmeyen bir hata olustu. Lutfen tekrar dene."
+      "title": "Ödeme başlatılmadı",
+      "description": "Beklenmeyen bir hata oluştu. Lütfen tekrar dene."
     }
   },
   "success": {
     "metadata": {
-      "title": "Odeme Basarili - Capsule Note",
-      "description": "Odemen basarili. Aboneligini aktif etmek icin kaydini tamamla."
+      "title": "Ödeme Başarılı - Capsule Note",
+      "description": "Ödemen başarılı. Aboneliğini aktif etmek için kaydını tamamla."
     },
     "paymentNotComplete": {
-      "title": "Odeme Tamamlanmadi",
-      "description": "Odemen henuz tamamlanmadi. Lutfen odeme talimatlari icin e-postani kontrol et veya tekrar dene."
+      "title": "Ödeme Tamamlanmadı",
+      "description": "Ödemen henüz tamamlanmadı. Lütfen ödeme talimatları için e-postanı kontrol et veya tekrar dene."
     },
-    "returnToPricing": "Fiyatlandirmaya Don",
-    "paymentSuccessful": "Odeme Basarili!",
-    "subscriptionActivated": "{planName} aboneligin aktif edildi.",
-    "startWriting": "Artik gelecekteki kendine mektup yazmaya baslayabilirsin.",
-    "whatsNext": "Simdi Ne Yapmaliyim:",
-    "headToDashboard": "Ilk mektubunu yazmak icin paneline git.",
+    "returnToPricing": "Fiyatlandırmaya Dön",
+    "paymentSuccessful": "Ödeme Başarılı!",
+    "subscriptionActivated": "{planName} aboneliğin aktif edildi.",
+    "startWriting": "Artık gelecekteki kendine mektup yazmaya başlayabilirsin.",
+    "whatsNext": "Şimdi Ne Yapmalıyım:",
+    "headToDashboard": "İlk mektubunu yazmak için paneline git.",
     "goToDashboard": "Panele Git",
-    "redirecting": "5 saniye icinde otomatik yonlendiriliyorsun...",
+    "redirecting": "5 saniye içinde otomatik yönlendiriliyorsun...",
     "unableToRetrieveEmail": {
-      "title": "E-posta Alinamadi",
-      "description": "Odeme oturumundan e-postani alamadik. Lutfen oturum kimligiyle destekle iletisime gec: {sessionId}"
+      "title": "E-posta Alınamadı",
+      "description": "Ödeme oturumundan e-postanı alamadık. Lütfen oturum kimliğiyle destekle iletişime geç: {sessionId}"
     },
     "completeSignup": {
-      "title": "Kaydini Tamamla",
-      "description": "Aboneligini aktif etmek icin hesabini olustur"
+      "title": "Kaydını Tamamla",
+      "description": "Aboneliğini aktif etmek için hesabını oluştur"
     },
-    "paymentProcessed": "{planName} icin odemen islendi. Aboneligini aktif etmek icin asagidan kaydini tamamla.",
-    "securityNotice": "Aboneligin aktif edilmeden once e-posta adresini dogrulaman gerekiyor. Gelen kutunu dogrulama e-postasi icin kontrol et."
+    "paymentProcessed": "{planName} için ödemen işlendi. Aboneliğini aktif etmek için aşağıdan kaydını tamamla.",
+    "securityNotice": "Aboneliğin aktif edilmeden önce e-posta adresini doğrulaman gerekiyor. Gelen kutunu doğrulama e-postası için kontrol et."
   },
   "emailForm": {
     "label": "E-posta adresi",
     "placeholder": "sen@example.com",
     "submit": "Devam et",
-    "helper": "E-postan sadece odeme ve hesap olusturma icin kullanilir. Guvenlik nedeniyle odeme sonrasi e-posta degistirilemez.",
+    "helper": "E-postan sadece ödeme ve hesap oluşturma için kullanılır. Güvenlik nedeniyle ödeme sonrası e-posta değiştirilemez.",
     "error": {
-      "invalid": "Lutfen gecerli bir e-posta adresi girin"
+      "invalid": "Lütfen geçerli bir e-posta adresi girin"
     }
   },
   "error": {
     "metadata": {
-      "title": "Odeme Hatasi - Capsule Note",
-      "description": "Odemenizde bir sorun olustu. Lutfen tekrar deneyin veya destekle iletisime gecin."
+      "title": "Ödeme Hatası - Capsule Note",
+      "description": "Ödemenizde bir sorun oluştu. Lütfen tekrar deneyin veya destekle iletişime geçin."
     },
-    "whatToDoNext": "Simdi Ne Yapmaliyim?",
-    "needHelp": "Yardima mi Ihtiyacin Var?",
-    "contactSupport": "Destek ekibimize ulasabilirsin:",
+    "whatToDoNext": "Şimdi Ne Yapmalıyım?",
+    "needHelp": "Yardıma mı İhtiyacın Var?",
+    "contactSupport": "Destek ekibimize ulaşabilirsin:",
     "errorCode": "Hata Kodu:",
-    "returnHome": "Ana Sayfaya Don",
+    "returnHome": "Ana Sayfaya Dön",
     "types": {
       "payment_failed": {
-        "title": "Odeme Basarisiz",
-        "description": "Odemen islenemedi. Bu yetersiz bakiye, suresi dolmus kart veya diger odeme sorunlarindan kaynaklanabilir. Lutfen odeme yontemini kontrol edip tekrar dene.",
+        "title": "Ödeme Başarısız",
+        "description": "Ödemen işlenemedi. Bu yetersiz bakiye, süresi dolmuş kart veya diğer ödeme sorunlarından kaynaklanabilir. Lütfen ödeme yöntemini kontrol edip tekrar dene.",
         "action": "Tekrar Dene",
-        "secondaryAction": "Destekle Iletisime Gec"
+        "secondaryAction": "Destekle İletişime Geç"
       },
       "session_expired": {
-        "title": "Odeme Oturumu Suresi Doldu",
-        "description": "Guvenlik nedeniyle odeme oturumunun suresi doldu. Oturumlar 24 saat gecerlidir. Abone olmak icin yeni bir odeme baslat.",
-        "action": "Yeniden Basla"
+        "title": "Ödeme Oturumu Süresi Doldu",
+        "description": "Güvenlik nedeniyle ödeme oturumunun süresi doldu. Oturumlar 24 saat geçerlidir. Abone olmak için yeni bir ödeme başlat.",
+        "action": "Yeniden Başla"
       },
       "email_mismatch": {
-        "title": "E-posta Uyusmazligi",
-        "description": "Odeme oturumundaki e-posta adresi hesabinla uyusmuyor. Guvenlik icin odeme icin kullanilan e-posta ile giris yapman gerekiyor.",
-        "action": "Giris Yap",
-        "secondaryAction": "Yeni Odeme Baslat"
+        "title": "E-posta Uyuşmazlığı",
+        "description": "Ödeme oturumundaki e-posta adresi hesabınla uyuşmuyor. Güvenlik için ödeme için kullanılan e-posta ile giriş yapman gerekiyor.",
+        "action": "Giriş Yap",
+        "secondaryAction": "Yeni Ödeme Başlat"
       },
       "email_not_verified": {
-        "title": "E-posta Dogrulanmadi",
-        "description": "Aboneliginin aktif edilmesi icin e-posta adresini dogrulaman gerekiyor. Gelen kutunu Capsule Note'tan gelen dogrulama e-postasi icin kontrol et.",
-        "action": "Dogrulama E-postasini Yeniden Gonder"
+        "title": "E-posta Doğrulanmadı",
+        "description": "Aboneliğinin aktif edilmesi için e-posta adresini doğrulaman gerekiyor. Gelen kutunu Capsule Note'tan gelen doğrulama e-postası için kontrol et.",
+        "action": "Doğrulama E-postasını Yeniden Gönder"
       },
       "pending_subscription_not_found": {
-        "title": "Abonelik Bulunamadi",
-        "description": "Bekleyen aboneligini bulamadik. Bu, suresinin dolmus olmasi veya zaten aktif edilmis olmasi anlamina gelebilir. Bunun bir hata oldugunu dusunuyorsan lutfen destekle iletisime gec.",
-        "action": "Faturalandirmayi Kontrol Et",
-        "secondaryAction": "Destekle Iletisime Gec"
+        "title": "Abonelik Bulunamadı",
+        "description": "Bekleyen aboneliğini bulamadık. Bu, süresinin dolmuş olması veya zaten aktif edilmiş olması anlamına gelebilir. Bunun bir hata olduğunu düşünüyorsan lütfen destekle iletişime geç.",
+        "action": "Faturalandırmayı Kontrol Et",
+        "secondaryAction": "Destekle İletişime Geç"
       },
       "unknown": {
-        "title": "Bir Seyler Yanlis Gitti",
-        "description": "Odeme sirasinda beklenmeyen bir hata olustu. Lutfen tekrar dene veya sorun devam ederse destekle iletisime gec.",
+        "title": "Bir Şeyler Yanlış Gitti",
+        "description": "Ödeme sırasında beklenmeyen bir hata oluştu. Lütfen tekrar dene veya sorun devam ederse destekle iletişime geç.",
         "action": "Tekrar Dene",
-        "secondaryAction": "Destekle Iletisime Gec"
+        "secondaryAction": "Destekle İletişime Geç"
       }
     }
   }

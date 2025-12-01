@@ -1,64 +1,64 @@
 {
   "audit": {
-    "pageTitle": "Denetim Gunlugu | Yonetici | Capsule Note",
-    "pageDescription": "Uyumluluk ve izleme icin sistem denetim gunluklerini goruntule",
-    "heading": "Denetim Gunlugu",
-    "subtitle": "Uyumluluk ve guvenlik analizi icin sistem olaylarini izle",
+    "pageTitle": "Denetim Günlüğü | Yönetici | Capsule Note",
+    "pageDescription": "Uyumluluk ve izleme için sistem denetim günlüklerini görüntüle",
+    "heading": "Denetim Günlüğü",
+    "subtitle": "Uyumluluk ve güvenlik analizi için sistem olaylarını izle",
     "stats": {
-      "title": "Denetim Istatistikleri",
-      "description": "Toplam {total} olaydan {count} tanesi gosteriliyor",
+      "title": "Denetim İstatistikleri",
+      "description": "Toplam {total} olaydan {count} tanesi gösteriliyor",
       "totalEvents": "Toplam Olay",
       "currentPage": "Mevcut Sayfa",
       "filtersActive": "Aktif Filtreler",
-      "retentionPeriod": "Saklama Suresi",
-      "years": "{count} yil"
+      "retentionPeriod": "Saklama Süresi",
+      "years": "{count} yıl"
     },
     "filters": {
       "title": "Filtreler",
-      "description": "Denetim olaylarini ture, kullaniciya ve tarih araligina gore filtrele",
+      "description": "Denetim olaylarını türe, kullanıcıya ve tarih aralığına göre filtrele",
       "clearFilters": "Filtreleri Temizle",
-      "eventType": "Olay Turu",
-      "allTypes": "Tum turler",
-      "userId": "Kullanici ID",
-      "userIdPlaceholder": "Kullanici ID'sine gore filtrele",
-      "startDate": "Baslangic Tarihi",
-      "endDate": "Bitis Tarihi",
+      "eventType": "Olay Türü",
+      "allTypes": "Tüm türler",
+      "userId": "Kullanıcı ID",
+      "userIdPlaceholder": "Kullanıcı ID'sine göre filtrele",
+      "startDate": "Başlangıç Tarihi",
+      "endDate": "Bitiş Tarihi",
       "applyFilters": "Filtreleri Uygula",
       "categories": {
-        "checkout": "Odeme",
+        "checkout": "Ödeme",
         "subscription": "Abonelik",
-        "payment": "Odeme",
+        "payment": "Ödeme",
         "gdpr": "GDPR",
-        "security": "Guvenlik",
-        "admin": "Yonetici",
-        "other": "Diger"
+        "security": "Güvenlik",
+        "admin": "Yönetici",
+        "other": "Diğer"
       }
     },
     "table": {
-      "timestamp": "Zaman Damgasi",
-      "eventType": "Olay Turu",
-      "user": "Kullanici",
+      "timestamp": "Zaman Damgası",
+      "eventType": "Olay Türü",
+      "user": "Kullanıcı",
       "ipAddress": "IP Adresi",
-      "actions": "Islemler",
-      "noEvents": "Denetim olayi bulunamadi",
+      "actions": "İşlemler",
+      "noEvents": "Denetim olayı bulunamadı",
       "system": "Sistem",
       "notAvailable": "Yok",
       "details": "Detaylar",
       "pagination": {
         "pageOf": "Sayfa {current} / {total}",
-        "previous": "Onceki",
+        "previous": "Önceki",
         "next": "Sonraki"
       }
     },
     "eventDetails": {
-      "title": "Denetim Olayi Detaylari",
-      "description": "{id} olayi icin tam detaylar",
+      "title": "Denetim Olayı Detayları",
+      "description": "{id} olayı için tam detaylar",
       "eventId": "Olay ID",
-      "eventType": "Olay Turu",
-      "timestamp": "Zaman Damgasi",
-      "user": "Kullanici",
+      "eventType": "Olay Türü",
+      "timestamp": "Zaman Damgası",
+      "user": "Kullanıcı",
       "ipAddress": "IP Adresi",
-      "userAgent": "Kullanici Ajani",
+      "userAgent": "Kullanıcı Ajanı",
       "eventData": "Olay Verileri"
     }
   }

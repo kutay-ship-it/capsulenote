@@ -1,225 +1,225 @@
 {
   "letterEditor": {
     "recipient": {
-      "legend": "Alici",
+      "legend": "Alıcı",
       "toMyself": "Kendime",
-      "toSomeone": "Baskasina",
-      "namePlaceholder": "Alicinin adi",
-      "nameLabel": "Alici adi",
-      "nameRequired": "Alici adi gerekli"
+      "toSomeone": "Başkasına",
+      "namePlaceholder": "Alıcının adı",
+      "nameLabel": "Alıcı adı",
+      "nameRequired": "Alıcı adı gerekli"
     },
     "title": {
-      "label": "Mektup Basligi",
+      "label": "Mektup Başlığı",
       "placeholder": "Gelecekteki Bana Mektubum...",
-      "description": "Mektubuna akilda kalici bir baslik ver (en fazla 100 karakter)",
-      "required": "Baslik gerekli"
+      "description": "Mektubuna akılda kalıcı bir başlık ver (en fazla 100 karakter)",
+      "required": "Başlık gerekli"
     },
     "content": {
-      "label": "Mektup Icerigi",
-      "placeholder": "Sevgili Gelecekteki Ben,\n\nSana hatirlatmak icin bu mektubu yaziyorum...",
-      "description": "Gelecekteki kendine mektubunu yaz. Durust ol, nazik ol, kendin ol.",
-      "required": "Mektup icerigi gerekli",
+      "label": "Mektup İçeriği",
+      "placeholder": "Sevgili Gelecekteki Ben,\n\nSana hatırlatmak için bu mektubu yazıyorum...",
+      "description": "Gelecekteki kendine mektubunu yaz. Dürüst ol, nazik ol, kendin ol.",
+      "required": "Mektup içeriği gerekli",
       "words": "{count} kelime",
       "chars": "{count} karakter",
       "templateHint": "veya sıfırdan başla"
     },
     "delivery": {
-      "legend": "Teslimat Ayarlari",
+      "legend": "Teslimat Ayarları",
       "typeLabel": "Teslimat Tipi",
       "email": "E-posta",
-      "physical": "Fiziksel (yakin zamanda)",
+      "physical": "Fiziksel (yakın zamanda)",
       "emailLabel": "E-posta Adresin",
       "emailPlaceholder": "gelecek-ben@ornek.com",
-      "emailDescription": "Zamani geldiginde mektubunu nereye gonderelim?",
+      "emailDescription": "Zamanı geldiğinde mektubunu nereye gönderelim?",
       "emailRequired": "E-posta adresi gerekli",
-      "emailInvalid": "Gecersiz e-posta adresi",
+      "emailInvalid": "Geçersiz e-posta adresi",
       "dateLabel": "Teslimat Tarihi",
-      "dateDescription": "Gelecekteki kendinin bu mektubu ne zaman almasini istiyorsun?",
+      "dateDescription": "Gelecekteki kendinin bu mektubu ne zaman almasını istiyorsun?",
       "dateRequired": "Teslimat tarihi gerekli",
-      "dateFuture": "Teslimat tarihi gelecekte olmali"
+      "dateFuture": "Teslimat tarihi gelecekte olmalı"
     },
     "datePresets": {
       "6months": "6 Ay",
-      "1year": "1 Yil",
-      "3years": "3 Yil",
-      "5years": "5 Yil",
-      "10years": "10 Yil",
-      "custom": "Ozel Tarih"
+      "1year": "1 Yıl",
+      "3years": "3 Yıl",
+      "5years": "5 Yıl",
+      "10years": "10 Yıl",
+      "custom": "Özel Tarih"
     },
     "datePicker": {
-      "placeholder": "Ozel bir tarih sec",
-      "scheduledFor": "Planlandigi tarih:"
+      "placeholder": "Özel bir tarih seç",
+      "scheduledFor": "Planlandığı tarih:"
     },
     "submit": {
       "schedule": "Mektubu Planla",
-      "creating": "Olusturuluyor..."
+      "creating": "Oluşturuluyor..."
     },
     "clear": {
       "button": "Temizle",
       "title": "Formu Temizle?",
-      "description": "Bu, mektubundaki tum ilerlemeyi silecek. Bu islem geri alinamaz. Her seyi temizlemek istediginizden emin misin?",
-      "cancel": "Iptal",
-      "confirm": "Her Seyi Temizle"
+      "description": "Bu, mektubundaki tüm ilerlemeyi silecek. Bu işlem geri alınamaz. Her şeyi temizlemek istediğinden emin misin?",
+      "cancel": "İptal",
+      "confirm": "Her Şeyi Temizle"
     }
   },
   "scheduleDelivery": {
     "preview": {
-      "title": "Mektup Onizlemesi"
+      "title": "Mektup Önizlemesi"
     },
     "options": {
-      "title": "Teslimat Secenekleri",
-      "description": "Mektubunun ne zaman ve nasil teslim edilecegini sec"
+      "title": "Teslimat Seçenekleri",
+      "description": "Mektubunun ne zaman ve nasıl teslim edileceğini seç"
     },
     "method": {
-      "label": "Teslimat Yontemi",
+      "label": "Teslimat Yöntemi",
       "email": "E-posta",
       "physicalMail": "Fiziksel Posta",
-      "soon": "Yakin zamanda"
+      "soon": "Yakın zamanda"
     },
     "sendTo": {
-      "label": "Gonderilecek Adres",
+      "label": "Gönderilecek Adres",
       "placeholder": "sen@ornek.com",
-      "description": "Gelecekteki kendin bu e-postayi alacak"
+      "description": "Gelecekteki kendin bu e-postayı alacak"
     },
     "when": {
-      "label": "Ne Zaman Almak Istiyorsun?",
-      "custom": "Ozel Tarih",
+      "label": "Ne Zaman Almak İstiyorsun?",
+      "custom": "Özel Tarih",
       "date": "Tarih",
       "time": "Saat",
       "presets": {
         "6months": "6 Ay",
-        "1year": "1 Yil",
-        "3years": "3 Yil",
-        "5years": "5 Yil",
-        "10years": "10 Yil"
+        "1year": "1 Yıl",
+        "3years": "3 Yıl",
+        "5years": "5 Yıl",
+        "10years": "10 Yıl"
       }
     },
     "arrival": {
-      "willArrive": "Varacagi tarih:"
+      "willArrive": "Varacağı tarih:"
     },
     "actions": {
-      "back": "Duzenlemeye Don",
-      "schedule": "Teslimati Planla",
-      "scheduling": "Planlaniyor..."
+      "back": "Düzenlemeye Dön",
+      "schedule": "Teslimatı Planla",
+      "scheduling": "Planlanıyor..."
     }
   },
   "letterDraft": {
     "title": "Mektubunu Yaz",
-    "description": "Dusuncelerine odaklan. Sonraki adimda teslimati planlayacaksin.",
+    "description": "Düşüncelerine odaklan. Sonraki adımda teslimatı planlayacaksın.",
     "untitledLetter": "Başlıksız Mektup",
     "titleField": {
-      "label": "Baslik",
-      "optional": "(Istege bagli)",
+      "label": "Başlık",
+      "optional": "(İsteğe bağlı)",
       "placeholder": "Gelecekteki kendime bir mektup...",
-      "description": "Mektubuna akilda kalici bir baslik ver"
+      "description": "Mektubuna akılda kalıcı bir başlık ver"
     },
     "bodyField": {
       "label": "Mektubun",
       "required": "*",
-      "placeholder": "Sevgili Gelecekteki Ben,\n\nDusuncelerini buraya yaz...",
+      "placeholder": "Sevgili Gelecekteki Ben,\n\nDüşüncelerini buraya yaz...",
       "stats": "{chars} karakter · {words} kelime"
     },
     "status": {
-      "draftRestored": "Taslak son ziyaretinden geri yuklendi",
+      "draftRestored": "Taslak son ziyaretinden geri yüklendi",
       "saved": "{time} kaydedildi",
       "saving": "Kaydediliyor..."
     },
     "actions": {
-      "saveDraft": "Taslagi Kaydet",
+      "saveDraft": "Taslağı Kaydet",
       "continue": "Planlamaya Devam Et",
       "saving": "Kaydediliyor..."
     },
     "prompts": {
-      "title": "Yazma Onerileri",
-      "description": "Takildin mi? Bunlardan birini dene",
+      "title": "Yazma Önerileri",
+      "description": "Takıldın mı? Bunlardan birini dene",
       "items": {
-        "grateful": "Su anda neye minnettar hissediyorsun?",
-        "challenges": "Su anda hangi zorluklarla karsilasiyorsun?",
-        "goals": "Hangi hedeflere ulasmak istiyorsun?",
-        "tellFuture": "Gelecekteki kendine ne soylerdin?",
-        "proud": "Bugun seni ne gurur duyduruyor?",
-        "lessons": "Son zamanlarda hangi dersler ogrendin?"
+        "grateful": "Şu anda neye minnettar hissediyorsun?",
+        "challenges": "Şu anda hangi zorluklarla karşılaşıyorsun?",
+        "goals": "Hangi hedeflere ulaşmak istiyorsun?",
+        "tellFuture": "Gelecekteki kendine ne söylerdin?",
+        "proud": "Bugün seni ne gururlandırıyor?",
+        "lessons": "Son zamanlarda hangi dersler öğrendin?"
       }
     }
   },
   "anonymousTryout": {
     "signUpPrompt": {
-      "title": "Guzel yaziyor!",
-      "description": "{wordCount} kelime yazdin. Bu mektubu gelecekteki kendine planlamak ister misin?",
-      "signUp": "Kaydetmek icin Kaydol",
+      "title": "Güzel yazıyor!",
+      "description": "{wordCount} kelime yazdın. Bu mektubu gelecekteki kendine planlamak ister misin?",
+      "signUp": "Kaydetmek için Kaydol",
       "keepWriting": "Yazmaya Devam Et",
-      "features": "Sonsuza kadar ucretsiz • Kredi karti gerekmez • Taslak yerel olarak kaydedilir"
+      "features": "Sonsuza kadar ücretsiz • Kredi kartı gerekmez • Taslak yerel olarak kaydedilir"
     },
     "editor": {
-      "title": "Yazmaya Basla",
+      "title": "Yazmaya Başla",
       "subtitle": "Hesap gerekmez • Yerel olarak kaydedilir",
       "saved": "Kaydedildi",
       "savedTime": "{time} kaydedildi"
     },
     "fields": {
-      "titleLabel": "Mektup Basligi (istege bagli)",
-      "titlePlaceholder": "Mektubuna bir baslik ver...",
-      "emailLabel": "E-postan (planlama icin)",
+      "titleLabel": "Mektup Başlığı (isteğe bağlı)",
+      "titlePlaceholder": "Mektubuna bir başlık ver...",
+      "emailLabel": "E-postan (planlama için)",
       "emailPlaceholder": "sen@ornek.com",
-      "emailDescription": "Teslimatinin sana bagli olmasi icin bu e-postayi odeme ve kayit icin kilitleyecegiz.",
+      "emailDescription": "Teslimatının sana bağlı olması için bu e-postayı ödeme ve kayıt için kilitleyeceğiz.",
       "letterLabel": "Mektubun",
-      "letterPlaceholder": "Sevgili Gelecekteki Ben,\n\nBuraya yazmaya basla... Dusuncelerin her 10 saniyede otomatik olarak kaydedilecek.",
+      "letterPlaceholder": "Sevgili Gelecekteki Ben,\n\nBuraya yazmaya başla... Düşüncelerin her 10 saniyede otomatik olarak kaydedilecek.",
       "wordCount": "{count} kelime",
       "wordCountPlural": "{count} kelime"
     },
     "actions": {
-      "saveNow": "Simdi Kaydet",
-      "sendSchedule": "Gonder ve Planla",
-      "signUpFirst": "Once Kaydol"
+      "saveNow": "Şimdi Kaydet",
+      "sendSchedule": "Gönder ve Planla",
+      "signUpFirst": "Önce Kaydol"
     },
     "features": {
       "autoSave": "Her 10 saniyede otomatik kaydedilir",
-      "draftKept": "Taslak 7 gun saklanir"
+      "draftKept": "Taslak 7 gün saklanır"
     },
     "prompts": {
-      "title": "Yazma Onerileri",
+      "title": "Yazma Önerileri",
       "items": {
-        "grateful": "Bugun neye minnettar hissediyorum?",
-        "challenges": "Hangi zorluklarla karsilasiyorum?",
-        "goals": "Gelecek icin hedeflerim neler?",
+        "grateful": "Bugün neye minnettar hissediyorum?",
+        "challenges": "Hangi zorluklarla karşılaşıyorum?",
+        "goals": "Gelecek için hedeflerim neler?",
         "advice": "Kendime ne tavsiye verirdim?",
-        "remember": "Neyi hatirlamak istiyorum?",
-        "grown": "Son zamanlarda nasil buyudum?"
+        "remember": "Neyi hatırlamak istiyorum?",
+        "grown": "Son zamanlarda nasıl büyüdüm?"
       }
     }
   },
   "dashboardEditor": {
     "resumePrompt": {
-      "title": "Kaldigin yerden devam et?",
-      "description": "Son ziyaretinden kayitli bir taslak bulduk.",
-      "resume": "Taslaga devam et",
-      "startFresh": "Sifirdan basla"
+      "title": "Kaldığın yerden devam et?",
+      "description": "Son ziyaretinden kayıtlı bir taslak bulduk.",
+      "resume": "Taslağa devam et",
+      "startFresh": "Sıfırdan başla"
     },
     "toasts": {
       "deliveryNotScheduled": {
-        "title": "Teslimat Planlanamadi",
-        "description": "Mektup kaydedildi ama planlama basarisiz oldu. Lutfen mektup sayfasindan tekrar dene."
+        "title": "Teslimat Planlanamadı",
+        "description": "Mektup kaydedildi ama planlama başarısız oldu. Lütfen mektup sayfasından tekrar dene."
       },
       "letterCreated": {
-        "title": "Mektup Olusturuldu",
-        "description": "\"{title}\" sifrelenmis kasana kaydedildi{scheduled}.",
-        "scheduled": " ve planlandi"
+        "title": "Mektup Oluşturuldu",
+        "description": "\"{title}\" şifrelenmiş kasana kaydedildi{scheduled}.",
+        "scheduled": " ve planlandı"
       },
       "quotaExceeded": {
-        "title": "Kota Asildi"
+        "title": "Kota Aşıldı"
       },
       "validationError": {
-        "title": "Dogrulama Hatasi"
+        "title": "Doğrulama Hatası"
       },
       "error": {
         "title": "Hata",
-        "description": "Mektup olusturulamadi. Lutfen tekrar dene."
+        "description": "Mektup oluşturulamadı. Lütfen tekrar dene."
       },
       "unexpectedError": {
         "title": "Beklenmeyen Hata",
-        "description": "Bir seyler yanlis gitti. Lutfen tekrar dene."
+        "description": "Bir şeyler yanlış gitti. Lütfen tekrar dene."
       },
-      "upgrade": "Yukseltt"
+      "upgrade": "Yükselt"
     }
   }
 }

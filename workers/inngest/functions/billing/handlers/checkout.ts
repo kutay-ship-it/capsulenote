@@ -2,8 +2,17 @@
  * Checkout Event Handlers
  *
  * Handles checkout.session.* webhook events from Stripe:
- * - checkout.session.completed (includes anonymous checkout support)
+ * - checkout.session.completed (includes anonymous checkout support + credit addons)
  * - checkout.session.expired
+ *
+ * Credit Addon Flow (checkout.session.completed with mode="payment"):
+ * 1. User clicks "Add Credits" in navbar → createAddOnCheckoutSession()
+ * 2. Stripe Checkout with volume pricing calculates correct total
+ * 3. checkout.session.completed webhook fires
+ * 4. handleCreditAddonCheckout() adds credits to user account
+ *
+ * This is the PRIMARY fulfillment point for credit purchases (per Stripe best practices).
+ * @see https://docs.stripe.com/payments/checkout/fulfill-orders
  */
 
 import Stripe from "stripe"
@@ -19,6 +28,7 @@ import { linkPendingSubscription } from "../../../../../apps/web/app/[locale]/su
 import { sendPaymentConfirmationEmail } from "../../../../../apps/web/server/lib/emails/payment-confirmation"
 import { env } from "../../../../../apps/web/env.mjs"
 import { stripe } from "../../../../../apps/web/server/providers/stripe/client"
+import { recordCreditTransaction } from "../../../../../apps/web/server/lib/entitlements"
 
 import {
   PLAN_CREDITS,
@@ -132,23 +142,179 @@ async function upsertSubscriptionForUser({
 }
 
 /**
+ * Handle credit addon checkout completion
+ *
+ * This is the PRIMARY fulfillment point for credit purchases.
+ * Called when checkout.session.completed fires for mode="payment" with type="credit_addon".
+ *
+ * Flow:
+ * 1. Verify this is a credit addon checkout (mode=payment, metadata.type=credit_addon)
+ * 2. Check idempotency (prevent double-crediting from duplicate webhooks)
+ * 3. Add credits to user account in atomic transaction
+ * 4. Record audit trail
+ * 5. Invalidate entitlements cache
+ *
+ * @param session - Stripe Checkout Session object
+ * @param userId - User ID from metadata or customer lookup
+ * @returns true if handled as credit addon, false if not a credit addon checkout
+ */
+async function handleCreditAddonCheckout(
+  session: Stripe.Checkout.Session,
+  userId: string
+): Promise<boolean> {
+  // Check if this is a credit addon checkout
+  if (session.mode !== "payment") {
+    return false
+  }
+
+  const metadata = session.metadata || {}
+  if (metadata.type !== "credit_addon") {
+    return false
+  }
+
+  const addonType = metadata.addon_type as "email" | "physical" | undefined
+  const quantity = Number(metadata.quantity || "1")
+
+  if (!addonType || isNaN(quantity) || quantity <= 0) {
+    console.warn("[Checkout Handler] Invalid credit addon metadata", {
+      sessionId: session.id,
+      metadata,
+    })
+    return false
+  }
+
+  console.log("[Checkout Handler] Processing credit addon checkout", {
+    sessionId: session.id,
+    userId,
+    addonType,
+    quantity,
+    amountTotal: session.amount_total,
+  })
+
+  // IDEMPOTENCY CHECK: Check if payment already recorded
+  // The payment_intent from the session is our idempotency key
+  const paymentIntentId = session.payment_intent as string
+  if (paymentIntentId) {
+    const existingPayment = await prisma.payment.findUnique({
+      where: { stripePaymentIntentId: paymentIntentId },
+    })
+
+    if (existingPayment?.status === "succeeded") {
+      console.log("[Checkout Handler] Credit addon already fulfilled (idempotent)", {
+        sessionId: session.id,
+        paymentIntentId,
+        existingPaymentId: existingPayment.id,
+      })
+      return true // Already handled, skip
+    }
+  }
+
+  // ATOMIC TRANSACTION: All operations succeed or none do
+  await prisma.$transaction(async (tx) => {
+    // 1. Record payment (if not exists)
+    if (paymentIntentId) {
+      await tx.payment.upsert({
+        where: { stripePaymentIntentId: paymentIntentId },
+        create: {
+          userId,
+          type: "credit_addon",
+          amountCents: session.amount_total || 0,
+          currency: session.currency || "usd",
+          stripePaymentIntentId: paymentIntentId,
+          status: "succeeded",
+          metadata: {
+            checkoutSessionId: session.id,
+            addon_type: addonType,
+            quantity: quantity.toString(),
+          },
+        },
+        update: {
+          status: "succeeded",
+          metadata: {
+            checkoutSessionId: session.id,
+            addon_type: addonType,
+            quantity: quantity.toString(),
+            fulfilledAt: new Date().toISOString(),
+          },
+        },
+      })
+    }
+
+    // 2. Verify user exists
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    })
+
+    if (!user) {
+      throw new Error(`User not found: ${userId}`)
+    }
+
+    // 3. Record credit transaction (audit trail)
+    await recordCreditTransaction({
+      userId,
+      creditType: addonType,
+      transactionType: "grant_addon",
+      amount: quantity,
+      source: session.id,
+      metadata: {
+        checkoutSessionId: session.id,
+        paymentIntentId,
+        quantity,
+        amountTotal: session.amount_total,
+      },
+      tx,
+    })
+
+    // 4. Update user credits
+    const creditField = addonType === "email" ? "emailCredits" : "physicalCredits"
+    const addonField = addonType === "email" ? "emailAddonCredits" : "physicalAddonCredits"
+
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        [creditField]: { increment: quantity },
+        [addonField]: { increment: quantity },
+      },
+    })
+  })
+
+  // 5. Invalidate cache and record audit
+  await invalidateEntitlementsCache(userId)
+  await recordBillingAudit(userId, AuditEventType.ENTITLEMENTS_UPDATED, {
+    addonType,
+    quantity,
+    checkoutSessionId: session.id,
+    amountTotal: session.amount_total,
+  })
+
+  console.log("[Checkout Handler] Credit addon fulfilled successfully", {
+    sessionId: session.id,
+    userId,
+    addonType,
+    quantity,
+  })
+
+  return true
+}
+
+/**
  * Handle checkout.session.completed event
  *
- * Supports both authenticated and anonymous checkout flows:
- * 1. If user exists → log completion audit event
- * 2. If no user (anonymous checkout):
- *    - Update PendingSubscription to payment_complete
- *    - Store subscription ID
- *    - Check if user already exists with email (auto-link)
- *    - If no user, trigger signup reminder email
+ * Supports multiple checkout flows:
+ * 1. Credit addon purchase (mode="payment", metadata.type="credit_addon")
+ * 2. Authenticated subscription checkout
+ * 3. Anonymous subscription checkout (PendingSubscription flow)
  *
  * @param session - Stripe Checkout Session object
  */
 export async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   console.log("[Checkout Handler] Checkout completed", {
     sessionId: session.id,
+    mode: session.mode,
     customerId: session.customer,
     subscriptionId: session.subscription,
+    metadata: session.metadata,
   })
 
   const customerId = session.customer as string
@@ -162,8 +328,38 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
   // Try to find existing user
   const user = await getUserByStripeCustomer(customerId)
 
+  // =========================================================================
+  // FLOW 1: Credit Addon Purchase (mode="payment", type="credit_addon")
+  // This is the PRIMARY fulfillment point for credit purchases
+  // =========================================================================
+  if (session.mode === "payment" && session.metadata?.type === "credit_addon") {
+    // Try to get userId from metadata first (more reliable), then from customer lookup
+    const userId = session.metadata?.userId || user?.id
+
+    if (!userId) {
+      console.error("[Checkout Handler] No user found for credit addon checkout", {
+        sessionId: session.id,
+        customerId,
+        metadata: session.metadata,
+      })
+      return
+    }
+
+    const handled = await handleCreditAddonCheckout(session, userId)
+    if (handled) {
+      console.log("[Checkout Handler] Credit addon checkout handled", {
+        sessionId: session.id,
+        userId,
+      })
+      return
+    }
+  }
+
+  // =========================================================================
+  // FLOW 2: Authenticated Subscription Checkout
+  // =========================================================================
   if (user) {
-    // Authenticated checkout - just log completion
+    // Authenticated checkout - log completion and sync subscription
     await recordBillingAudit(user.id, AuditEventType.CHECKOUT_COMPLETED, {
       sessionId: session.id,
       subscriptionId: session.subscription,

@@ -14,54 +14,54 @@
     "contactSupport": "Birkaç dakika içinde aboneliğinizi göremezseniz, lütfen destekle iletişime geçin."
   },
   "success": {
-    "title": "Capsule Note Pro'ya Hosgeldin!",
-    "subtitle": "Aboneligin basariyla aktif edildi",
-    "subscriptionDetails": "Abonelik Detaylari",
+    "title": "Capsule Note Pro'ya Hoş geldin!",
+    "subtitle": "Aboneliğin başarıyla aktif edildi",
+    "subscriptionDetails": "Abonelik Detayları",
     "badge": {
       "trial": "Deneme Aktif",
       "active": "Aktif"
     },
     "planName": "Capsule Note Pro",
-    "planDescription": "Sinirsiz mektup, e-posta teslimati ve fiziksel posta kredisi",
+    "planDescription": "Sınırsız mektup, e-posta teslimatı ve fiziksel posta kredisi",
     "trial": {
-      "title": "14 Gunluk Ucretsiz Deneme",
-      "endsOn": "Deneme suren {date} tarihinde sona eriyor ({days} gun kaldi)",
-      "endingSoon": "Deneme suren yakinda sona eriyor",
-      "noBilling": "Deneme suren bitene kadar ucret alinmayacak. O zamana kadar istedigin zaman iptal edebilirsin."
+      "title": "14 Günlük Ücretsiz Deneme",
+      "endsOn": "Deneme süren {date} tarihinde sona eriyor ({days} gün kaldı)",
+      "endingSoon": "Deneme süren yakında sona eriyor",
+      "noBilling": "Deneme süren bitene kadar ücret alınmayacak. O zamana kadar istediğin zaman iptal edebilirsin."
     },
     "features": {
       "title": "Dahil olanlar:",
-      "unlimited": "Gelecekteki kendine sinirsiz mektup yaz",
-      "emailDelivery": "Sinirsiz e-posta teslimati planla",
+      "unlimited": "Gelecekteki kendine sınırsız mektup yaz",
+      "emailDelivery": "Sınırsız e-posta teslimatı planla",
       "mailCredits": "Ayda 2 fiziksel posta kredisi",
-      "support": "Oncelikli destek"
+      "support": "Öncelikli destek"
     },
     "buttons": {
       "dashboard": "Panele Git",
-      "writeLetter": "Ilk Mektubunu Yaz"
+      "writeLetter": "İlk Mektubunu Yaz"
     },
-    "confirmEmail": "Gelen kutuna bir onay e-postasi gonderildi.",
-    "manageSubscription": "Aboneligini istedigin zaman {link} uzerinden yonetebilirsin.",
-    "billingSettings": "fatura ayarlari"
+    "confirmEmail": "Gelen kutuna bir onay e-postası gönderildi.",
+    "manageSubscription": "Aboneliğini istediğin zaman {link} üzerinden yönetebilirsin.",
+    "billingSettings": "fatura ayarları"
   },
   "cancel": {
-    "title": "Odeme Iptal Edildi",
-    "description": "Sorun degil! Fiyatlandirma sayfasina donup hazir oldugunda tekrar deneyebilirsin.",
-    "freePlanInfo": "Hesabin ucretsiz planda kalmaya devam ediyor. Istedigin zaman yukseltme yaparak sunlari acabilirsin:",
+    "title": "Ödeme İptal Edildi",
+    "description": "Sorun değil! Fiyatlandırma sayfasına dönüp hazır olduğunda tekrar deneyebilirsin.",
+    "freePlanInfo": "Hesabın ücretsiz planda kalmaya devam ediyor. İstediğin zaman yükseltme yaparak şunları açabilirsin:",
     "features": {
-      "unlimited": "Sinirsiz mektup ve e-posta teslimati",
-      "mail": "Fiziksel posta teslimati",
-      "support": "Oncelikli destek"
+      "unlimited": "Sınırsız mektup ve e-posta teslimatı",
+      "mail": "Fiziksel posta teslimatı",
+      "support": "Öncelikli destek"
     },
     "buttons": {
-      "dashboard": "Panele Don",
-      "pricing": "Fiyatlandirmayi Gor"
+      "dashboard": "Panele Dön",
+      "pricing": "Fiyatlandırmayı Gör"
     },
-    "support": "Sorularin mi var? {link}",
-    "contactSupport": "Destekle iletisime gec"
+    "support": "Soruların mı var? {link}",
+    "contactSupport": "Destekle iletişime geç"
   },
   "metadata": {
-    "cancelTitle": "Odeme Iptal Edildi | Capsule Note",
-    "cancelDescription": "Odeme iptal edildi"
+    "cancelTitle": "Ödeme İptal Edildi | Capsule Note",
+    "cancelDescription": "Ödeme iptal edildi"
   }
 }

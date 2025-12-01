@@ -35,7 +35,7 @@
   },
   "invite": {
     "heading": "E-posta ile Davet Et",
-    "placeholder": "arkadas@ornek.com",
+    "placeholder": "arkadaş@örnek.com",
     "button": "Davet Gönder",
     "sending": "Gönderiliyor...",
     "success": "Davet gönderildi!",

@@ -14,6 +14,7 @@ const links = [
   { href: "/sandbox/aftercare", label: "Aftercare" },
   { href: "/sandbox/retention", label: "Retention" },
   { href: "/sandbox/settings", label: "Settings" },
+  { href: "/sandbox/credits-sandbox", label: "i18n UX" },
 ]
 
 export function SandboxNav() {

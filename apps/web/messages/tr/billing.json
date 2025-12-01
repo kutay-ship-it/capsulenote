@@ -1,116 +1,116 @@
 {
-  "back": "Ayarlara don",
-  "heading": "Faturalandirma ve abonelik",
-  "subtitle": "Aboneligini, kullanimini ve odeme yontemlerini yonet",
+  "back": "Ayarlara dön",
+  "heading": "Faturalandırma ve abonelik",
+  "subtitle": "Aboneliğini, kullanımını ve ödeme yöntemlerini yönet",
   "subscription": {
     "plan": {
-      "DIGITAL_CAPSULE": "Dijital Kapsul",
-      "PAPER_PIXELS": "Kagit ve Pikseller",
+      "DIGITAL_CAPSULE": "Dijital Kapsül",
+      "PAPER_PIXELS": "Kağıt ve Pikseller",
       "pro": "Pro",
       "enterprise": "Kurumsal",
-      "none": "Ucretsiz"
+      "none": "Ücretsiz"
     },
     "status": {
       "active": "Aktif",
       "trialing": "Deneme",
-      "canceled": "Iptal edildi",
-      "past_due": "Vadesi gecmis",
+      "canceled": "İptal edildi",
+      "past_due": "Vadesi geçmiş",
       "incomplete": "Eksik",
       "incomplete_expired": "Eksik",
-      "unpaid": "Odenmemis",
-      "none": "Ucretsiz"
+      "unpaid": "Ödenmemiş",
+      "none": "Ücretsiz"
     },
-    "freeTitle": "Ucretsiz plan",
+    "freeTitle": "Ücretsiz plan",
     "freeDescription": "Aktif abonelik yok",
-    "freeCta": "Sinirsiz mektup, planli teslimatlar ve fiziksel posta icin Pro'ya yukselt.",
-    "trialEnds": "Deneme bitisi {date}",
-    "trialHint": "Abonelige devam etmek icin deneme bitmeden odeme yontemi ekle.",
+    "freeCta": "Sınırsız mektup, planlı teslimatlar ve fiziksel posta için Pro'ya yükselt.",
+    "trialEnds": "Deneme bitişi {date}",
+    "trialHint": "Aboneliğe devam etmek için deneme bitmeden ödeme yöntemi ekle.",
     "cancelTitle": "Abonelik {date} tarihinde sona erecek",
-    "cancelHint": "Bu tarihe kadar Pro erisimin devam eder. Oncesinde yeniden etkinlestirebilirsin.",
-    "paymentFailedTitle": "Odeme basarisiz",
-    "paymentFailedHint": "Hizmet kesintisi yasamaman icin odeme yontemini guncelle.",
+    "cancelHint": "Bu tarihe kadar Pro erişimin devam eder. Öncesinde yeniden etkinleştirebilirsin.",
+    "paymentFailedTitle": "Ödeme başarısız",
+    "paymentFailedHint": "Hizmet kesintisi yaşamaman için ödeme yöntemini güncelle.",
     "nextBilling": "Sonraki fatura tarihi",
     "renewalDate": "Yenilenme tarihi: {date}"
   },
   "manageButton": {
-    "manage": "Aboneligi yonet",
-    "upgrade": "Pro'ya yukselt",
-    "loading": "Yukleniyor..."
+    "manage": "ABONELİĞİ YÖNET",
+    "upgrade": "PRO'YA YÜKSELT",
+    "loading": "YÜKLENİYOR..."
   },
   "usage": {
-    "heading": "Bu ayki kullanim",
+    "heading": "Bu ayki kullanım",
     "range": "{start} - {end}",
-    "lettersTitle": "Olusturulan mektuplar",
+    "lettersTitle": "Oluşturulan mektuplar",
     "lettersBadge": "Bu ay toplam {count}",
-    "lettersHint": "Taslak olusturmak serbest; planlama kredi tuketir.",
-    "emailsTitle": "E-posta teslimatlari",
-    "emailsRemaining": "{count} kaldi",
-    "emailsHint": "Bu plan yili icin kalan e-posta kredileri.",
+    "lettersHint": "Taslak oluşturmak serbest; planlama kredi tüketir.",
+    "emailsTitle": "E-posta teslimatları",
+    "emailsRemaining": "{count} kaldı",
+    "emailsHint": "Bu plan yılı için kalan e-posta kredileri.",
     "mailTitle": "Fiziksel posta kredileri",
     "mailRemaining": "{remaining} / {total}",
-    "mailExhausted": "Kredi kalmadi. Ek satin al veya yenilemeyi bekle.",
-    "freeMessage": "Teslimat planlamak ve kredileri acmak icin bir plan ekle."
+    "mailExhausted": "Kredi kalmadı. Ek satın al veya yenilemeyi bekle.",
+    "freeMessage": "Teslimat planlamak ve kredileri açmak için bir plan ekle."
   },
   "invoices": {
-    "heading": "Odeme gecmisi",
-    "subtitle": "Son faturalar ve odemeler",
-    "empty": "Henuz odeme gecmisi yok",
-    "count": "Son {count} odeme",
-    "paymentId": "Odeme ID: {id}",
+    "heading": "Ödeme geçmişi",
+    "subtitle": "Son faturalar ve ödemeler",
+    "empty": "Henüz ödeme geçmişi yok",
+    "count": "Son {count} ödeme",
+    "paymentId": "Ödeme ID: {id}",
     "invoice": "Fatura",
-    "footer": "Tum faturalari Stripe Musteri Portali'nda gor"
+    "footer": "Tüm faturaları Stripe Müşteri Portalı'nda gör"
   },
   "portal": {
-    "title": "Stripe Musteri Portali",
-    "description": "\"Aboneligi yonet\" butonu Stripe'in guvenli portalini acar, burada sunlari yapabilirsin:",
+    "title": "Stripe Müşteri Portalı",
+    "description": "\"Aboneliği yönet\" butonu Stripe'in güvenli portalını açar, burada şunları yapabilirsin:",
     "items": [
-      "Odeme yontemini guncelle",
-      "Tum faturalari goruntule ve indir",
-      "Fatura bilgilerini guncelle",
-      "Aboneligini iptal et (donem sonuna kadar erisim devam eder)",
-      "Iptal edilen aboneligi yeniden etkinlestir"
+      "Ödeme yöntemini güncelle",
+      "Tüm faturaları görüntüle ve indir",
+      "Fatura bilgilerini güncelle",
+      "Aboneliğini iptal et (dönem sonuna kadar erişim devam eder)",
+      "İptal edilen aboneliği yeniden etkinleştir"
     ],
-    "note": "Tum odemeler Stripe tarafindan guvenli sekilde islenir. Odeme bilgilerini biz saklamiyoruz."
+    "note": "Tüm ödemeler Stripe tarafından güvenli şekilde işlenir. Ödeme bilgilerini biz saklamıyoruz."
   },
   "addons": {
-    "title": "Ek kredi satin al",
+    "title": "Ek kredi satın al",
     "email": "+5 E-posta kredisi ($4)",
     "physical": "+1 Fiziksel mektup ($5)",
     "toast": {
-      "failedTitle": "Ek satin alma basarisiz",
-      "failedDescription": "Lutfen tekrar dene.",
-      "redirect": "Yonlendiriliyor..."
+      "failedTitle": "Ek satın alma başarısız",
+      "failedDescription": "Lütfen tekrar dene.",
+      "redirect": "Yönlendiriliyor..."
     }
   },
   "toasts": {
     "errorTitle": "Hata",
-    "portalFailed": "Faturalandirma portali acilamadi",
-    "portalUnexpected": "Beklenmeyen bir hata olustu. Lutfen tekrar deneyin."
+    "portalFailed": "Faturalandırma portalı açılamadı",
+    "portalUnexpected": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
   },
   "upgradeModal": {
-    "quotaTitle": "Ucretsiz Plan Limitine Ulasildi",
+    "quotaTitle": "Ücretsiz Plan Limitine Ulaşıldı",
     "subscriptionTitle": "Pro Abonelik Gerekli",
     "creditsTitle": "Posta Kredisi Yok",
-    "defaultTitle": "Devam Etmek Icin Yukselt",
-    "defaultDescription": "Bu ozelligi acmak icin Pro'ya yukselt",
-    "currentUsage": "Mevcut Kullanim",
+    "defaultTitle": "Devam Etmek İçin Yükselt",
+    "defaultDescription": "Bu özelliği açmak için Pro'ya yükselt",
+    "currentUsage": "Mevcut Kullanım",
     "proIncludes": "Pro Plana Dahil:",
     "features": {
-      "unlimited": "Ayda sinirsiz mektup",
-      "email": "E-posta teslimati planla",
-      "mail": "Fiziksel posta teslimati (ayda 2 kredi)",
-      "support": "Oncelikli destek",
-      "trial": "14 gunluk ucretsiz deneme"
+      "unlimited": "Ayda sınırsız mektup",
+      "email": "E-posta teslimatı planla",
+      "mail": "Fiziksel posta teslimatı (ayda 2 kredi)",
+      "support": "Öncelikli destek",
+      "trial": "14 günlük ücretsiz deneme"
     },
-    "cancel": "Iptal",
-    "upgrade": "Pro'ya Yukselt"
+    "cancel": "İptal",
+    "upgrade": "Pro'ya Yükselt"
   },
   "quotaBanner": {
-    "limitReached": "Ucretsiz Plan Limitine Ulasildi",
-    "approaching": "Plan Limitine Yaklasiyorsun",
-    "limitReachedDescription": "Bu ay icin {max} mektubun tumunu kullandin. Sinirsiz mektup icin Pro'ya yukselt.",
-    "approachingDescription": "Bu ay {max} mektuptan {used} tanesini kullandin. Sinirsiz erisim icin Pro'ya yukselt.",
-    "lettersUsed": "Kullanilan Mektuplar",
-    "upgrade": "Pro'ya Yukselt"
+    "limitReached": "Ücretsiz Plan Limitine Ulaşıldı",
+    "approaching": "Plan Limitine Yaklaşıyorsun",
+    "limitReachedDescription": "Bu ay için {max} mektubun tümünü kullandın. Sınırsız mektup için Pro'ya yükselt.",
+    "approachingDescription": "Bu ay {max} mektuptan {used} tanesini kullandın. Sınırsız erişim için Pro'ya yükselt.",
+    "lettersUsed": "Kullanılan Mektuplar",
+    "upgrade": "Pro'ya Yükselt"
   }
 }

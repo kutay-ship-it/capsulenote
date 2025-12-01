@@ -6,6 +6,21 @@ export const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }>
   PAPER_PIXELS: { email: 24, physical: 3 },
 }
 
+// ============================================================================
+// CREDIT ADDON PRICING
+// Re-exported from shared pricing-constants.ts for backward compatibility
+// @see apps/web/lib/pricing-constants.ts for the source of truth
+// ============================================================================
+export {
+  type CreditAddonType,
+  type PricingTier,
+  CREDIT_ADDON_BASE_PRICES,
+  CREDIT_ADDON_TIERS,
+  getCreditAddonTier,
+  calculateCreditAddonPrice,
+  getCreditAddonDiscount,
+} from "@/lib/pricing-constants"
+
 export function toDateOrNow(seconds: number | null | undefined, label: string): Date {
   if (typeof seconds === "number" && Number.isFinite(seconds)) {
     return new Date(seconds * 1000)

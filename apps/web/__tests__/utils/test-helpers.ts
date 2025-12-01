@@ -75,6 +75,7 @@ export function createTestProfileData(userId: string, overrides: Partial<Profile
     userId,
     displayName: 'Test User',
     timezone: 'America/New_York',
+    locale: 'en',
     marketingOptIn: false,
     onboardingCompleted: false,
     stripeCustomerId: null,

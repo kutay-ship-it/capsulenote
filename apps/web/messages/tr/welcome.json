@@ -4,27 +4,27 @@
   },
   "migrating": {
     "title": "Mektubun kaydediliyor...",
-    "description": "Taslaginizi hesabiniza guvenli bir sekilde kaydediyoruz."
+    "description": "Taslağınızı hesabınıza güvenli bir şekilde kaydediyoruz."
   },
   "success": {
-    "title": "Capsule Note'a Hosgeldin!",
-    "description": "Mektubun basariyla kaydedildi. Yonlendiriliyor...",
-    "nextSteps": "Sonraki adimlar:",
+    "title": "Capsule Note'a Hoş geldin!",
+    "description": "Mektubun başarıyla kaydedildi. Yönlendiriliyor...",
+    "nextSteps": "Sonraki adımlar:",
     "steps": {
-      "review": "Mektubunu gozden gecir ve duzenle",
-      "schedule": "Ne zaman almak istedigini planla",
-      "delivery": "Teslimat yontemini sec (e-posta veya posta)"
+      "review": "Mektubunu gözden geçir ve düzenle",
+      "schedule": "Ne zaman almak istediğini planla",
+      "delivery": "Teslimat yöntemini seç (e-posta veya posta)"
     }
   },
   "noDraft": {
-    "title": "Capsule Note'a Hosgeldin!",
-    "description": "Ilk mektubunla baslayalim."
+    "title": "Capsule Note'a Hoş geldin!",
+    "description": "İlk mektubunla başlayalım."
   },
   "error": {
-    "title": "Hay aksi! Bir Seyler Yanlis Gitti",
-    "defaultMessage": "Beklenmeyen bir hata olustu. Lutfen tekrar dene.",
+    "title": "Hay aksi! Bir Şeyler Yanlış Gitti",
+    "defaultMessage": "Beklenmeyen bir hata oluştu. Lütfen tekrar dene.",
     "buttons": {
-      "newLetter": "Yeni Mektup Baslat",
+      "newLetter": "Yeni Mektup Başlat",
       "dashboard": "Panele Git"
     }
   }

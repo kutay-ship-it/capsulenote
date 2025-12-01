@@ -4,6 +4,7 @@ import { Mail, Github, Twitter } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
+import { FooterLanguageButton } from "@/components/locale"
 
 export function Footer() {
   const t = useTranslations("marketing.footer")
@@ -96,9 +97,12 @@ export function Footer() {
             <p className="font-mono text-xs text-charcoal/60">
               {currentYear} {t("copyright")}
             </p>
-            <p className="font-mono text-xs text-charcoal/60">
-              {t("madeWith")}
-            </p>
+            <div className="flex items-center gap-4">
+              <FooterLanguageButton />
+              <p className="font-mono text-xs text-charcoal/60">
+                {t("madeWith")}
+              </p>
+            </div>
           </div>
         </div>
       </div>

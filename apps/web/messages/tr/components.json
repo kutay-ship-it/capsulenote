@@ -1,49 +1,49 @@
 {
   "timezoneWarning": {
-    "title": "Saat Dilimi Degisti",
-    "detected": "Saat diliminin <strong>{savedTimezone}</strong> yerine <strong>{currentTimezone}</strong> oldugunu tespit ettik.",
-    "explanation": "Planlanan mektup teslimatlar hala orijinal olarak sectigin <strong>yerel saatte</strong> gelecek, ama bu yeni saat diliminde farkli bir saat olacak.",
-    "updateButton": "Ayarlarda Saat Dilimini Guncelle",
-    "dismissButton": "Simdilik Kapat"
+    "title": "Saat Dilimi Değişti",
+    "detected": "Saat diliminin <strong>{savedTimezone}</strong> yerine <strong>{currentTimezone}</strong> olduğunu tespit ettik.",
+    "explanation": "Planlanan mektup teslimatları hâlâ orijinal olarak seçtiğin <strong>yerel saatte</strong> gelecek, ama bu yeni saat diliminde farklı bir saat olacak.",
+    "updateButton": "Ayarlarda Saat Dilimini Güncelle",
+    "dismissButton": "Şimdilik Kapat"
   },
   "timezoneTooltip": {
     "ariaLabel": "Saat dilimi bilgisi",
     "yourTimezone": "Saat Dilimin:",
-    "currentlyDST": "Su anda Yaz Saati Uygulamasinda"
+    "currentlyDST": "Şu anda Yaz Saati Uygulamasında"
   },
   "dstTooltip": {
-    "ariaLabel": "Yaz Saati Uygulamasi bilgisi",
-    "title": "Yaz Saati Uygulamasi Hakkinda",
-    "explanation": "Yaz saati uygulamasi sirasinda bir mektup planlarsan, yaz saati sona ermis olsa bile sectigin yerel saatte teslim edilecek.",
-    "example": "Ornek: 09:00 PDT icin planlanan bir mektup, yaz saati sona ermisse 09:00 PST'de ulasacak.",
-    "tip": "Saatler mevcut saat dilimine gore ayarlanir"
+    "ariaLabel": "Yaz Saati Uygulaması bilgisi",
+    "title": "Yaz Saati Uygulaması Hakkında",
+    "explanation": "Yaz saati uygulaması sırasında bir mektup planlarsan, yaz saati sona ermiş olsa bile seçtiğin yerel saatte teslim edilecek.",
+    "example": "Örnek: 09:00 PDT için planlanan bir mektup, yaz saati sona ermişse 09:00 PST'de ulaşacak.",
+    "tip": "Saatler mevcut saat dilimine göre ayarlanır"
   },
   "resumeDraftBanner": {
-    "title": "Kaldigin yerden devam et?",
-    "description": "Son ziyaretinden kayitli bir taslak bulduk.",
-    "resume": "Taslaga devam et",
-    "startFresh": "Sifirdan basla"
+    "title": "Kaldığın yerden devam et?",
+    "description": "Son ziyaretinden kayıtlı bir taslak bulduk.",
+    "resume": "Taslağa devam et",
+    "startFresh": "Sıfırdan başla"
   },
   "deliveryError": {
-    "title": "Teslimat Basarisiz",
+    "title": "Teslimat Başarısız",
     "categories": {
-      "retryable": "Bu hata genellikle gecicidir",
-      "actionRequired": "Islem gerekli",
-      "permanent": "Bu hata otomatik olarak duzeltilemez"
+      "retryable": "Bu hata genellikle geçicidir",
+      "actionRequired": "İşlem gerekli",
+      "permanent": "Bu hata otomatik olarak düzeltilemez"
     },
-    "attemptCount": "{count} denemeden sonra basarisiz oldu",
+    "attemptCount": "{count} denemeden sonra başarısız oldu",
     "actions": {
-      "retryDelivery": "Teslimati Tekrar Dene",
+      "retryDelivery": "Teslimatı Tekrar Dene",
       "retrying": "Tekrar deneniyor...",
-      "contactSupport": "Destekle Iletisim"
+      "contactSupport": "Destekle İletişim"
     },
     "toasts": {
       "retryScheduled": {
-        "title": "Teslimat Yeniden Deneme Planlandi",
-        "description": "\"{title}\" tekrar gondermeyi deneyecegiz."
+        "title": "Teslimat Yeniden Deneme Planlandı",
+        "description": "\"{title}\" tekrar göndermeyi deneyeceğiz."
       },
       "retryFailed": {
-        "title": "Yeniden Deneme Basarisiz"
+        "title": "Yeniden Deneme Başarısız"
       },
       "error": {
         "title": "Hata",

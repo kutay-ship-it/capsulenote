@@ -5,7 +5,7 @@
     "account": "Hesap",
     "billing": "Faturalandırma",
     "addresses": "Adresler",
-    "privacy": "Gizlilik",
+    "privacy": "GİZLİLİK",
     "referrals": "Davetler"
   },
   "profile": {
@@ -315,8 +315,8 @@
     "share": {
       "copied": "Link panoya kopyalandı!",
       "copyFailed": "Link kopyalanamadı",
-      "copiedButton": "Kopyalandı!",
-      "copyButton": "Linki Kopyala"
+      "copiedButton": "KOPYALANDI!",
+      "copyButton": "LİNKİ KOPYALA"
     }
   }
 }
