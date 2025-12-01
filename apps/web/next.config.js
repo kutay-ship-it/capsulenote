@@ -17,6 +17,9 @@ const nextConfig = {
     // Disable type checking during build (can be enabled later with proper fixes)
     ignoreBuildErrors: true,
   },
+  // Mark jsdom and isomorphic-dompurify as external to prevent bundling issues
+  // jsdom requires access to its CSS assets which aren't bundled correctly by webpack
+  serverExternalPackages: ["jsdom", "isomorphic-dompurify", "dompurify"],
   experimental: {
     ppr: false, // Partial Prerendering (requires Next.js canary)
     serverActions: {

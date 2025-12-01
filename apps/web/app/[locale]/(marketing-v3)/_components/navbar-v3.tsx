@@ -86,7 +86,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                       {t("signIn")}
                     </Button>
                   </Link>
-                  <Link href="/#try-demo">
+                  <Link href={"/#try-demo" as "/"}>
                     <Button size="sm" className="gap-2">
                       {t("getStarted")}
                       <ArrowRight className="h-4 w-4" />
@@ -161,7 +161,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                   </Link>
                 ) : (
                   <>
-                    <Link href="/#try-demo" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Link href={"/#try-demo" as "/"} onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full gap-2">
                         {t("getStarted")}
                         <ArrowRight className="h-4 w-4" />

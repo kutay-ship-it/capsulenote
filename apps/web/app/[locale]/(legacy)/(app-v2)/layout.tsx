@@ -5,7 +5,6 @@ import { getTranslations } from "next-intl/server"
 
 import { EmailLockGuard } from "@/components/auth/email-lock-guard"
 import { Link } from "@/i18n/routing"
-import type { Locale } from "@/i18n/routing"
 import { V2Background } from "@/components/v2/design-system"
 
 export default async function AppV2Layout({
@@ -13,7 +12,7 @@ export default async function AppV2Layout({
     params,
 }: {
     children: ReactNode
-    params: Promise<{ locale: Locale }>
+    params: Promise<{ locale: string }>
 }) {
     const { locale } = await params
     const t = await getTranslations({ locale, namespace: "app" })

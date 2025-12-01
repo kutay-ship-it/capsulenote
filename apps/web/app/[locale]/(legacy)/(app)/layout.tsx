@@ -8,14 +8,13 @@ import { LanguageSwitcher } from "@/components/language-switcher"
 import { MobileNavigation } from "@/components/mobile-navigation"
 import { PushNotificationProvider } from "@/components/providers/push-notification-provider"
 import { Link } from "@/i18n/routing"
-import type { Locale } from "@/i18n/routing"
 
 export default async function AppLayout({
   children,
   params,
 }: {
   children: ReactNode
-  params: Promise<{ locale: Locale }>
+  params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "app" })

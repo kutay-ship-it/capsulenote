@@ -4,13 +4,13 @@
  * Uses isomorphic-dompurify for SSR-safe HTML sanitization to prevent XSS attacks.
  * This module provides consistent sanitization across Server and Client Components.
  */
-import DOMPurify from "isomorphic-dompurify"
+import DOMPurify, { type Config } from "isomorphic-dompurify"
 
 /**
  * Allowed HTML tags for letter content
  * Restrictive allowlist to prevent XSS while preserving formatting
  */
-const LETTER_CONTENT_CONFIG: DOMPurify.Config = {
+const LETTER_CONTENT_CONFIG: Config = {
   ALLOWED_TAGS: [
     // Text formatting
     "p",
@@ -57,7 +57,7 @@ const LETTER_CONTENT_CONFIG: DOMPurify.Config = {
 /**
  * Configuration for template content (more restrictive)
  */
-const TEMPLATE_CONTENT_CONFIG: DOMPurify.Config = {
+const TEMPLATE_CONTENT_CONFIG: Config = {
   ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote"],
   ALLOWED_ATTR: ["class"],
 }
@@ -75,7 +75,7 @@ const TEMPLATE_CONTENT_CONFIG: DOMPurify.Config = {
  */
 export function sanitizeLetterHtml(html: string | null | undefined): string {
   if (!html) return ""
-  return DOMPurify.sanitize(html, LETTER_CONTENT_CONFIG)
+  return DOMPurify.sanitize(html, LETTER_CONTENT_CONFIG) as string
 }
 
 /**
@@ -87,7 +87,7 @@ export function sanitizeLetterHtml(html: string | null | undefined): string {
  */
 export function sanitizeTemplateHtml(html: string | null | undefined): string {
   if (!html) return ""
-  return DOMPurify.sanitize(html, TEMPLATE_CONTENT_CONFIG)
+  return DOMPurify.sanitize(html, TEMPLATE_CONTENT_CONFIG) as string
 }
 
 /**
@@ -100,8 +100,8 @@ export function sanitizeTemplateHtml(html: string | null | undefined): string {
  */
 export function sanitizeHtml(
   html: string | null | undefined,
-  config?: DOMPurify.Config
+  config?: Config
 ): string {
   if (!html) return ""
-  return DOMPurify.sanitize(html, config)
+  return DOMPurify.sanitize(html, config) as string
 }

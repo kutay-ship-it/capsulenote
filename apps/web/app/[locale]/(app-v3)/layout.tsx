@@ -11,7 +11,6 @@ import { CreditsBarV3 } from "@/components/v3/nav/credit-indicator-v3"
 import { WriteButtonV3 } from "@/components/v3/nav/write-button-v3"
 import { OnboardingProvider } from "@/components/v3/onboarding"
 import { Link } from "@/i18n/routing"
-import type { Locale } from "@/i18n/routing"
 import { getCurrentUser } from "@/server/lib/auth"
 import { getEntitlements, getPhysicalTrialStatus } from "@/server/lib/entitlements"
 
@@ -20,7 +19,7 @@ export default async function AppV3Layout({
   params,
 }: {
   children: ReactNode
-  params: Promise<{ locale: Locale }>
+  params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "app" })

@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next"
 import { ClerkProvider } from "@clerk/nextjs"
 import { enUS, trTR } from "@clerk/localizations"
 import { NextIntlClientProvider } from "next-intl"
-import { getMessages, getTranslations } from "next-intl/server"
+import { getLocale, getMessages, getTranslations } from "next-intl/server"
 
 import { Toaster } from "@/components/ui/sonner"
 import "@/styles/globals.css"
@@ -61,12 +61,10 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: ReactNode
-  params: Promise<{ locale: Locale }>
 }>) {
-  const { locale } = await params
+  const locale = await getLocale() as Locale
   const messages = await getMessages()
   const clerkLocalization = locale === "tr" ? trTR : enUS
 

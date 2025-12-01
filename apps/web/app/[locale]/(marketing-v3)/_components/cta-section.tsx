@@ -85,7 +85,7 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
 
               {/* CTA Button */}
               <div className="flex justify-center">
-                <Link href="/#try-demo">
+                <Link href={"/#try-demo" as "/"}>
                   <Button
                     variant="secondary"
                     size="lg"

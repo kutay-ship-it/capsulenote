@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { AnimatedEnvelope } from "@/components/animated-envelope"
 
+// Force dynamic rendering - this page uses database queries and decryption
+export const dynamic = "force-dynamic"
+
 export const metadata: Metadata = {
   title: "View Letter | Capsule Note",
   robots: { index: false, follow: false },
