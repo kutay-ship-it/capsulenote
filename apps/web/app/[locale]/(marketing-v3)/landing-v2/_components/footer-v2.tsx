@@ -1,10 +1,11 @@
 "use client"
 
 import { Mail, Twitter, Heart } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 import { FooterLanguageButton } from "@/components/locale"
+import { cn } from "@/lib/utils"
 
 interface FooterLink {
   label: string
@@ -12,10 +13,12 @@ interface FooterLink {
 }
 
 export function FooterV2() {
+  const locale = useLocale()
   const t = useTranslations("marketing.footerV2")
   const productLinks = t.raw("productLinks") as FooterLink[]
   const legalLinks = t.raw("legalLinks") as FooterLink[]
   const currentYear = new Date().getFullYear()
+  const uppercaseClass = locale === "tr" ? "" : "uppercase"
 
   return (
     <footer className="border-t-2 border-charcoal bg-cream">
@@ -25,7 +28,7 @@ export function FooterV2() {
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-2">
             <div className="mb-4">
-              <span className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal">
+              <span className={cn("font-mono text-xl font-bold tracking-wide text-charcoal", uppercaseClass)}>
                 Capsule<span className="text-duck-blue">Note</span>
               </span>
             </div>
@@ -58,7 +61,12 @@ export function FooterV2() {
 
           {/* Product Links */}
           <div>
-            <h4 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
+            <h4
+              className={cn(
+                "mb-4 font-mono text-sm font-bold tracking-wider text-charcoal",
+                uppercaseClass
+              )}
+            >
               {t("productTitle")}
             </h4>
             <ul className="space-y-3">
@@ -77,7 +85,12 @@ export function FooterV2() {
 
           {/* Legal Links */}
           <div>
-            <h4 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
+            <h4
+              className={cn(
+                "mb-4 font-mono text-sm font-bold tracking-wider text-charcoal",
+                uppercaseClass
+              )}
+            >
               {t("legalTitle")}
             </h4>
             <ul className="space-y-3">

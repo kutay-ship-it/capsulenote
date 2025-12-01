@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ArrowRight } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
@@ -14,9 +14,13 @@ interface NavbarV3Props {
 }
 
 export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
+  const locale = useLocale()
   const t = useTranslations("marketing.nav")
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // Avoid locale-insensitive uppercase transformations for Turkish text
+  const uppercaseClass = locale === "tr" ? "" : "uppercase"
 
   const navLinks = [
     { label: t("features"), href: "#features" },
@@ -53,13 +57,16 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
             {/* Desktop Navigation */}
             <div className="hidden items-center gap-6 md:flex">
               {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href as any}
-                  className="font-mono text-sm uppercase tracking-wide text-charcoal transition-opacity hover:opacity-70"
-                >
-                  {link.label}
-                </Link>
+            <Link
+              key={link.label}
+              href={link.href as any}
+              className={cn(
+                "font-mono text-sm tracking-wide text-charcoal transition-opacity hover:opacity-70",
+                uppercaseClass
+              )}
+            >
+              {link.label}
+            </Link>
               ))}
             </div>
 
@@ -128,7 +135,10 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                     <Link
                       href={link.href as any}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block border-b-2 border-charcoal/10 py-4 font-mono text-lg uppercase tracking-wide text-charcoal"
+                      className={cn(
+                        "block border-b-2 border-charcoal/10 py-4 font-mono text-lg tracking-wide text-charcoal",
+                        uppercaseClass
+                      )}
                     >
                       {link.label}
                     </Link>

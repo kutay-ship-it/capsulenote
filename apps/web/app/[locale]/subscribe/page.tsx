@@ -98,6 +98,54 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
   if (recipientName) checkoutMetadata.recipientName = recipientName
   if (recipientType) checkoutMetadata.recipientType = recipientType
 
+  // New view uses full-width layout with its own containers
+  const useNewView = view !== "old"
+
+  // For new view with email, render full-width layout
+  if (useNewView && email) {
+    return (
+      <div className="min-h-screen bg-cream">
+        {/* Payment Status Banner (if applicable) */}
+        {pendingSubscription && (
+          <div className="container px-4 pt-6 sm:px-6">
+            <Alert
+              variant={pendingSubscription.status === "awaiting_payment" ? "default" : "destructive"}
+            >
+              {pendingSubscription.status === "awaiting_payment" ? (
+                <>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>{t("paymentStatus.incomplete.title")}</AlertTitle>
+                  <AlertDescription>
+                    {t("paymentStatus.incomplete.description", { plan: pendingSubscription.plan })}
+                  </AlertDescription>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>{t("paymentStatus.error.title")}</AlertTitle>
+                  <AlertDescription>
+                    {t("paymentStatus.error.description")}
+                  </AlertDescription>
+                </>
+              )}
+            </Alert>
+          </div>
+        )}
+
+        {/* Full-width pricing layout */}
+        <SubscribePricingWrapper
+          email={email}
+          letterId={letterId}
+          metadata={checkoutMetadata}
+          digitalPriceId={digitalPriceId}
+          paperPriceId={paperPriceId}
+          useNewView={true}
+        />
+      </div>
+    )
+  }
+
+  // Default/old view or email capture form
   return (
     <div className="container px-4 py-12 sm:px-6 sm:py-16 md:py-20">
       <div className="mx-auto max-w-6xl space-y-12">
@@ -126,7 +174,7 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
           </Alert>
         )}
 
-        {/* Main Content: Email Capture or Pricing */}
+        {/* Main Content: Email Capture or Pricing (old view) */}
         {!email ? (
           // Email Capture Form
           <Card className="mx-auto max-w-md border-4 border-charcoal shadow-lg">
@@ -146,47 +194,44 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
             </CardContent>
           </Card>
         ) : (
-          // Pricing Cards with Locked Email
+          // Old Pricing Cards with Locked Email
           <>
-            {/* Pricing Cards - Switchable View */}
             <SubscribePricingWrapper
               email={email}
               letterId={letterId}
               metadata={checkoutMetadata}
               digitalPriceId={digitalPriceId}
               paperPriceId={paperPriceId}
-              useNewView={view !== "old"}
+              useNewView={false}
             />
 
-            {/* Trust Signals - Only show for old view (new view has its own) */}
-            {view === "old" && (
-              <div className="border-2 border-charcoal bg-off-white p-6 rounded-lg">
-                <div className="grid gap-4 sm:grid-cols-3 text-center">
-                  <div>
-                    <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                      🔒 {t("trustSignals.security.title")}
-                    </p>
-                    <p className="font-mono text-xs text-gray-secondary mt-1">
-                      {t("trustSignals.security.description")}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                      💳 {t("trustSignals.payments.title")}
-                    </p>
-                    <p className="font-mono text-xs text-gray-secondary mt-1">{t("trustSignals.payments.description")}</p>
-                  </div>
-                  <div>
-                    <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
-                      ❌ {t("trustSignals.cancel.title")}
-                    </p>
-                    <p className="font-mono text-xs text-gray-secondary mt-1">
-                      {t("trustSignals.cancel.description")}
-                    </p>
-                  </div>
+            {/* Trust Signals - Only for old view */}
+            <div className="border-2 border-charcoal bg-off-white p-6 rounded-lg">
+              <div className="grid gap-4 sm:grid-cols-3 text-center">
+                <div>
+                  <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+                    🔒 {t("trustSignals.security.title")}
+                  </p>
+                  <p className="font-mono text-xs text-gray-secondary mt-1">
+                    {t("trustSignals.security.description")}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+                    💳 {t("trustSignals.payments.title")}
+                  </p>
+                  <p className="font-mono text-xs text-gray-secondary mt-1">{t("trustSignals.payments.description")}</p>
+                </div>
+                <div>
+                  <p className="font-mono text-sm font-normal uppercase tracking-wide text-charcoal">
+                    ❌ {t("trustSignals.cancel.title")}
+                  </p>
+                  <p className="font-mono text-xs text-gray-secondary mt-1">
+                    {t("trustSignals.cancel.description")}
+                  </p>
                 </div>
               </div>
-            )}
+            </div>
           </>
         )}
       </div>

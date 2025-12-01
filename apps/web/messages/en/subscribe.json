@@ -8,6 +8,120 @@
     "title": "Choose Your Capsule",
     "description": "Two simple yearly plans. No free tier, no ads—just dependable deliveries to your future self (and others)."
   },
+  "v3": {
+    "hero": {
+      "badge": "SECURE CHECKOUT",
+      "title": "CHOOSE YOUR PLAN",
+      "subtitle": "Start your time capsule journey today. Simple pricing, no surprises.",
+      "checkoutFor": "Checkout for:",
+      "socialProof": "10,000+ letters delivered",
+      "stats": {
+        "uptime": {
+          "value": "99.9%",
+          "label": "Uptime"
+        },
+        "rating": {
+          "value": "4.9/5",
+          "label": "Rating"
+        },
+        "users": {
+          "value": "10K+",
+          "label": "Users"
+        }
+      }
+    },
+    "pricing": {
+      "popularBadge": "MOST POPULAR",
+      "bestValue": "BEST VALUE",
+      "perYear": "/year",
+      "billedAnnually": "{price}/month billed annually",
+      "digitalLetters": "{count} digital letters/year",
+      "physicalLetters": "{count} physical letters/year",
+      "choosePlan": "Choose {planName}",
+      "plans": {
+        "digital": {
+          "name": "Digital Capsule",
+          "tagline": "For personal reflection",
+          "features": {
+            "deliveries": "6 digital letter deliveries per year",
+            "recipients": "Send to yourself or loved ones",
+            "schedule": "Schedule up to 100 years ahead",
+            "timezone": "Timezone-aware delivery",
+            "encryption": "End-to-end encryption",
+            "extra": "Purchase extra letters anytime"
+          }
+        },
+        "paper": {
+          "name": "Paper & Pixels",
+          "tagline": "For meaningful keepsakes",
+          "features": {
+            "digitalDeliveries": "24 digital letter deliveries per year",
+            "physicalDeliveries": "3 physical letters per year",
+            "recipients": "Send to yourself or loved ones",
+            "addressReminders": "Address confirmation reminders",
+            "priorityRouting": "Priority mail routing",
+            "extra": "Purchase extra letters anytime"
+          }
+        }
+      }
+    },
+    "trustSignals": {
+      "secureCheckout": {
+        "title": "SECURE CHECKOUT",
+        "description": "256-bit SSL encryption"
+      },
+      "stripe": {
+        "title": "POWERED BY STRIPE",
+        "description": "Industry-leading security"
+      },
+      "guarantee": {
+        "title": "30-DAY GUARANTEE",
+        "description": "Full refund, no questions"
+      },
+      "cancel": {
+        "title": "CANCEL ANYTIME",
+        "description": "No contracts required"
+      },
+      "instantAccess": {
+        "title": "INSTANT ACCESS",
+        "description": "Start writing immediately"
+      },
+      "delivery": {
+        "title": "LETTERS DELIVERED",
+        "description": "99.9% uptime guarantee"
+      }
+    },
+    "guarantee": {
+      "title": "30-Day Money Back Guarantee",
+      "description": "Try Capsule Note risk-free. If you're not completely satisfied within the first 30 days, we'll refund you in full—no questions asked. We're confident you'll love it."
+    },
+    "testimonials": {
+      "heading": "Join 10,000+ People Reflecting with Capsule Note",
+      "items": {
+        "sarah": {
+          "quote": "Reading my letter one year later was incredibly powerful. I forgot I wrote those goals, and I actually achieved most of them!",
+          "author": "Sarah K., Digital Plan"
+        },
+        "michael": {
+          "quote": "The physical letter to my daughter for her 18th birthday is going to be priceless. This is more than an app—it's a time capsule.",
+          "author": "Michael T., Paper & Pixels"
+        },
+        "emma": {
+          "quote": "I use it for gratitude journaling. Getting those letters quarterly reminds me how far I've come. Simple, but life-changing.",
+          "author": "Emma L., Digital Plan"
+        }
+      }
+    },
+    "valueProposition": {
+      "title": "Why Capsule Note?",
+      "description": "We believe in the power of reflection. Every letter you write is an investment in your future self—a moment of clarity, connection, or celebration delivered exactly when you need it most."
+    },
+    "stickyMobile": {
+      "mostPopular": "Most Popular",
+      "planPrice": "Paper & Pixels - $29/year",
+      "choosePlan": "Choose Plan"
+    }
+  },
   "emailCapture": {
     "heading": "Enter Your Email",
     "description": "This email will be used for payment and account creation.",

@@ -1,14 +1,17 @@
 "use client"
 
 import { Mail, Github, Twitter } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 import { FooterLanguageButton } from "@/components/locale"
+import { cn } from "@/lib/utils"
 
 export function Footer() {
+  const locale = useLocale()
   const t = useTranslations("marketing.footer")
   const currentYear = new Date().getFullYear()
+  const uppercaseClass = locale === "tr" ? "" : "uppercase"
 
   const links = {
     product: [
@@ -41,7 +44,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="mb-4">
-              <span className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal">
+              <span className={cn("font-mono text-xl font-bold tracking-wide text-charcoal", uppercaseClass)}>
                 Capsule<span className="text-duck-blue">Note</span>
               </span>
             </div>
@@ -70,7 +73,12 @@ export function Footer() {
           {/* Links Columns */}
           {Object.entries(links).map(([category, categoryLinks]) => (
             <div key={category}>
-              <h4 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
+              <h4
+                className={cn(
+                  "mb-4 font-mono text-sm font-bold tracking-wider text-charcoal",
+                  uppercaseClass
+                )}
+              >
                 {categoryLabels[category]}
               </h4>
               <ul className="space-y-3">

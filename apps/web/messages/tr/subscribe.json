@@ -8,6 +8,120 @@
     "title": "Kapsülünü Seç",
     "description": "İki basit yıllık plan. Ücretsiz katman yok, reklam yok—sadece gelecekteki kendine (ve başkalarına) güvenilir teslimatlar."
   },
+  "v3": {
+    "hero": {
+      "badge": "GÜVENLİ ÖDEME",
+      "title": "PLANINI SEÇ",
+      "subtitle": "Zaman kapsülü yolculuğuna bugün başla. Basit fiyatlandırma, sürpriz yok.",
+      "checkoutFor": "Ödeme yapılacak hesap:",
+      "socialProof": "10.000+ mektup teslim edildi",
+      "stats": {
+        "uptime": {
+          "value": "%99,9",
+          "label": "Çalışma Süresi"
+        },
+        "rating": {
+          "value": "4,9/5",
+          "label": "Puan"
+        },
+        "users": {
+          "value": "10B+",
+          "label": "Kullanıcı"
+        }
+      }
+    },
+    "pricing": {
+      "popularBadge": "EN POPÜLERİ",
+      "bestValue": "EN AVANTAJLI",
+      "perYear": "/yıl",
+      "billedAnnually": "Yıllık faturalandırmada aylık {price}",
+      "digitalLetters": "Yılda {count} dijital mektup",
+      "physicalLetters": "Yılda {count} fiziksel mektup",
+      "choosePlan": "{planName} Seç",
+      "plans": {
+        "digital": {
+          "name": "Dijital Kapsül",
+          "tagline": "Kişisel yansımalar için",
+          "features": {
+            "deliveries": "Yılda 6 dijital mektup teslimatı",
+            "recipients": "Kendine veya sevdiklerine gönder",
+            "schedule": "100 yıl sonrasına kadar zamanla",
+            "timezone": "Saat dilimine duyarlı teslimat",
+            "encryption": "Uçtan uca şifreleme",
+            "extra": "İstediğin zaman ekstra mektup satın al"
+          }
+        },
+        "paper": {
+          "name": "Kağıt ve Piksel",
+          "tagline": "Anlamlı hatıralar için",
+          "features": {
+            "digitalDeliveries": "Yılda 24 dijital mektup teslimatı",
+            "physicalDeliveries": "Yılda 3 fiziksel mektup",
+            "recipients": "Kendine veya sevdiklerine gönder",
+            "addressReminders": "Adres doğrulama hatırlatmaları",
+            "priorityRouting": "Öncelikli posta yönlendirmesi",
+            "extra": "İstediğin zaman ekstra mektup satın al"
+          }
+        }
+      }
+    },
+    "trustSignals": {
+      "secureCheckout": {
+        "title": "GÜVENLİ ÖDEME",
+        "description": "256-bit SSL şifreleme"
+      },
+      "stripe": {
+        "title": "STRIPE İLE GÜÇLENDİRİLDİ",
+        "description": "Sektör lideri güvenlik"
+      },
+      "guarantee": {
+        "title": "30 GÜN GARANTİ",
+        "description": "Tam iade, soru sorulmaz"
+      },
+      "cancel": {
+        "title": "İSTEDİĞİN ZAMAN İPTAL",
+        "description": "Sözleşme zorunluluğu yok"
+      },
+      "instantAccess": {
+        "title": "ANINDA ERİŞİM",
+        "description": "Hemen yazmaya başla"
+      },
+      "delivery": {
+        "title": "MEKTUPLAR TESLİM EDİLİR",
+        "description": "%99,9 çalışma garantisi"
+      }
+    },
+    "guarantee": {
+      "title": "30 Gün Para İade Garantisi",
+      "description": "Capsule Note'u risksiz dene. İlk 30 gün içinde tamamen memnun kalmazsan, soru sormadan paranı iade ederiz. Seveceğinden eminiz."
+    },
+    "testimonials": {
+      "heading": "Capsule Note ile Yansıma Yapan 10.000+ Kişiye Katıl",
+      "items": {
+        "sarah": {
+          "quote": "Bir yıl sonra mektubumu okumak inanılmaz güçlüydü. O hedefleri yazdığımı unutmuştum ve çoğunu gerçekten başarmışım!",
+          "author": "Sarah K., Dijital Plan"
+        },
+        "michael": {
+          "quote": "Kızımın 18. yaş günü için fiziksel mektup paha biçilemez olacak. Bu bir uygulamadan fazlası—bu bir zaman kapsülü.",
+          "author": "Michael T., Kağıt ve Piksel"
+        },
+        "emma": {
+          "quote": "Şükran günlüğü için kullanıyorum. O mektupları üç ayda bir almak ne kadar yol kat ettiğimi hatırlatıyor. Basit ama hayat değiştirici.",
+          "author": "Emma L., Dijital Plan"
+        }
+      }
+    },
+    "valueProposition": {
+      "title": "Neden Capsule Note?",
+      "description": "Yansımanın gücüne inanıyoruz. Yazdığın her mektup gelecekteki kendine bir yatırım—tam ihtiyacın olduğunda ulaşan bir berraklık, bağlantı veya kutlama anı."
+    },
+    "stickyMobile": {
+      "mostPopular": "En Popüler",
+      "planPrice": "Kağıt ve Piksel - $29/yıl",
+      "choosePlan": "Planı Seç"
+    }
+  },
   "emailCapture": {
     "heading": "E-postanı Gir",
     "description": "Bu e-posta ödeme ve hesap oluşturma için kullanılacak.",
