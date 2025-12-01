@@ -63,6 +63,8 @@ export function createTestUserData(overrides: Partial<User> = {}): Omit<User, 'i
     physicalAddonCredits: 0,
     creditExpiresAt: null,
     timezone: 'UTC',
+    physicalMailTrialPurchasedAt: null,
+    physicalMailTrialUsed: false,
     ...overrides,
   }
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { cleanupExpiredDrafts } from "@/server/lib/drafts"
 import { logger } from "@/server/lib/logger"
+import { validateCronSecret } from "@/server/lib/crypto-utils"
 
 /**
  * Draft Cleanup Cron Job
@@ -15,19 +16,9 @@ import { logger } from "@/server/lib/logger"
  */
 export async function GET(request: NextRequest) {
   try {
-    // Verify cron secret
+    // Verify cron secret using constant-time comparison (prevents timing attacks)
     const authHeader = request.headers.get("authorization")
-    const cronSecret = process.env.CRON_SECRET
-
-    if (!cronSecret) {
-      await logger.error("CRON_SECRET not configured")
-      return NextResponse.json(
-        { error: "Cron secret not configured" },
-        { status: 500 }
-      )
-    }
-
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    if (!validateCronSecret(authHeader, process.env.CRON_SECRET)) {
       await logger.warn("Unauthorized cron request", {
         ip: request.headers.get("x-forwarded-for") || "unknown",
       })

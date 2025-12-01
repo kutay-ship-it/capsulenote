@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
+import { validateCronSecret } from "@/server/lib/crypto-utils"
 
 /**
  * Backstop reconciler for stuck deliveries
@@ -9,11 +10,9 @@ import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
  * Finds deliveries that should have been processed but weren't
  */
 export async function GET(request: NextRequest) {
-  // Verify cron secret (Vercel Cron sends this header)
+  // Verify cron secret using constant-time comparison (prevents timing attacks)
   const authHeader = request.headers.get("authorization")
-  const cronSecret = process.env.CRON_SECRET
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!validateCronSecret(authHeader, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -65,30 +64,69 @@ export async function GET(request: NextRequest) {
     }
 
     // Re-enqueue each delivery by triggering Inngest jobs
+    // Process each in a transaction to prevent race conditions with concurrent cron runs
     const results = []
 
     for (const delivery of stuckDeliveries) {
       try {
-        // Trigger Inngest job to re-process delivery
-        await triggerInngestEvent("delivery.scheduled", {
-          deliveryId: delivery.id
+        // Use transaction to atomically update and re-enqueue
+        // This prevents duplicate re-enqueues if cron runs again before completion
+        const eventId = await prisma.$transaction(async (tx) => {
+          // Re-check that delivery is still stuck (might have been processed by another cron run)
+          const current = await tx.delivery.findUnique({
+            where: { id: delivery.id },
+            select: { status: true, updatedAt: true },
+          })
+
+          // Skip if status changed or was recently updated (processed by concurrent run)
+          const oneMinuteAgo = new Date(Date.now() - 60 * 1000)
+          if (!current || current.status !== "scheduled" || current.updatedAt > oneMinuteAgo) {
+            return null // Skip - already being processed
+          }
+
+          // Mark as being reconciled BEFORE triggering Inngest
+          // This prevents duplicate re-enqueues from concurrent cron runs
+          await tx.delivery.update({
+            where: { id: delivery.id },
+            data: {
+              attemptCount: { increment: 1 },
+              updatedAt: new Date(),
+            },
+          })
+
+          // Trigger Inngest job (outside transaction would be better for atomicity,
+          // but we've already marked the record to prevent duplicates)
+          const inngestEventId = await triggerInngestEvent("delivery.scheduled", {
+            deliveryId: delivery.id
+          })
+
+          // Store the event ID for correlation
+          if (inngestEventId) {
+            await tx.delivery.update({
+              where: { id: delivery.id },
+              data: { inngestRunId: inngestEventId },
+            })
+          }
+
+          return inngestEventId
         })
 
-        // Update delivery to mark reconciliation attempt
-        await prisma.delivery.update({
-          where: { id: delivery.id },
-          data: {
-            attemptCount: { increment: 1 },
-            updatedAt: new Date(),
-          },
-        })
+        if (eventId === null) {
+          results.push({
+            deliveryId: delivery.id,
+            status: "skipped",
+            reason: "already_processing",
+          })
+          continue
+        }
 
         results.push({
           deliveryId: delivery.id,
           status: "re-enqueued",
+          eventId,
         })
 
-        // Log audit event
+        // Log audit event (non-blocking)
         await createAuditEvent({
           userId: null,
           type: "delivery.reconciled",
@@ -96,6 +134,7 @@ export async function GET(request: NextRequest) {
             deliveryId: delivery.id,
             deliverAt: delivery.deliver_at,
             attemptCount: delivery.attempt_count + 1,
+            eventId,
           },
         })
       } catch (error) {

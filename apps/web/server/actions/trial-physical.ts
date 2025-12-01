@@ -142,36 +142,31 @@ export async function fulfillTrialPhysicalCredit(
   stripeSessionId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Idempotency check - don't grant twice
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        physicalMailTrialPurchasedAt: true,
-        physicalCredits: true,
-      },
-    })
-
-    if (!user) {
-      await logger.error("User not found for trial fulfillment", {
-        userId,
-        stripeSessionId,
+    // Grant credit and mark purchased in transaction with idempotency check inside
+    // This prevents race conditions where concurrent webhook calls could grant duplicate credits
+    const result = await prisma.$transaction(async (tx) => {
+      // Idempotency check INSIDE transaction with row lock
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: {
+          physicalMailTrialPurchasedAt: true,
+          physicalCredits: true,
+        },
       })
-      return { success: false, error: "User not found" }
-    }
 
-    // Already fulfilled - idempotent success
-    if (user.physicalMailTrialPurchasedAt) {
-      await logger.info("Trial credit already fulfilled (idempotent)", {
-        userId,
-        stripeSessionId,
-        purchasedAt: user.physicalMailTrialPurchasedAt,
-      })
-      return { success: true }
-    }
+      if (!user) {
+        return { status: "user_not_found" as const }
+      }
 
-    // Grant credit and mark purchased in transaction
-    await prisma.$transaction(async (tx) => {
-      // Record credit transaction
+      // Already fulfilled - idempotent success
+      if (user.physicalMailTrialPurchasedAt) {
+        return {
+          status: "already_fulfilled" as const,
+          purchasedAt: user.physicalMailTrialPurchasedAt,
+        }
+      }
+
+      // Record credit transaction with current balance
       await tx.creditTransaction.create({
         data: {
           userId,
@@ -193,7 +188,27 @@ export async function fulfillTrialPhysicalCredit(
           physicalMailTrialPurchasedAt: new Date(),
         },
       })
+
+      return { status: "granted" as const, newCredits: user.physicalCredits + 1 }
     })
+
+    // Handle transaction results
+    if (result.status === "user_not_found") {
+      await logger.error("User not found for trial fulfillment", {
+        userId,
+        stripeSessionId,
+      })
+      return { success: false, error: "User not found" }
+    }
+
+    if (result.status === "already_fulfilled") {
+      await logger.info("Trial credit already fulfilled (idempotent)", {
+        userId,
+        stripeSessionId,
+        purchasedAt: result.purchasedAt,
+      })
+      return { success: true }
+    }
 
     // Invalidate entitlements cache
     await invalidateEntitlementsCache(userId)
@@ -201,7 +216,7 @@ export async function fulfillTrialPhysicalCredit(
     await logger.info("Trial physical mail credit fulfilled successfully", {
       userId,
       stripeSessionId,
-      newCredits: user.physicalCredits + 1,
+      newCredits: result.newCredits,
     })
 
     return { success: true }

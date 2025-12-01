@@ -20,6 +20,7 @@ import {
 import { Link } from "@/i18n/routing"
 import { getLetter } from "@/server/actions/letters"
 import { requireUser } from "@/server/lib/auth"
+import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -196,17 +197,53 @@ async function LetterDetailContent({ id }: { id: string }) {
           <span>{statusConfig.badgeText}</span>
         </div>
 
-        {/* Lock/Opened indicator */}
-        {isLocked && (
-          <div className="absolute top-4 right-6">
-            <Lock className="h-5 w-5 text-charcoal/30" strokeWidth={2} />
-          </div>
-        )}
-        {isSent && hasBeenOpened && (
-          <div className="absolute top-4 right-6">
-            <MailOpen className="h-5 w-5 text-teal-primary" strokeWidth={2} />
-          </div>
-        )}
+        {/* Top-right action icons */}
+        <div className="absolute top-4 right-6 flex items-center gap-2">
+          {/* Edit button - only for drafts */}
+          {!hasDelivery && (
+            <Link href={{ pathname: "/letters/[id]/edit", params: { id } }}>
+              <button
+                className="flex h-8 w-8 items-center justify-center border-2 border-charcoal bg-duck-yellow text-charcoal hover:bg-duck-yellow/80 transition-colors"
+                style={{ borderRadius: "2px" }}
+                title="Edit Letter"
+              >
+                <PenLine className="h-4 w-4" strokeWidth={2} />
+              </button>
+            </Link>
+          )}
+          {/* Schedule button - only for drafts */}
+          {!hasDelivery && (
+            <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
+              <button
+                className="flex h-8 w-8 items-center justify-center border-2 border-charcoal bg-teal-primary text-white hover:bg-teal-primary/90 transition-colors"
+                style={{ borderRadius: "2px" }}
+                title="Schedule Delivery"
+              >
+                <Calendar className="h-4 w-4" strokeWidth={2} />
+              </button>
+            </Link>
+          )}
+          {/* Lock indicator - for scheduled letters */}
+          {isLocked && (
+            <div
+              className="flex h-8 w-8 items-center justify-center border-2 border-charcoal/20 bg-charcoal/5"
+              style={{ borderRadius: "2px" }}
+              title="Letter is sealed"
+            >
+              <Lock className="h-4 w-4 text-charcoal/30" strokeWidth={2} />
+            </div>
+          )}
+          {/* Opened indicator - for delivered letters */}
+          {isSent && hasBeenOpened && (
+            <div
+              className="flex h-8 w-8 items-center justify-center border-2 border-teal-primary bg-teal-primary/10"
+              style={{ borderRadius: "2px" }}
+              title="Letter has been opened"
+            >
+              <MailOpen className="h-4 w-4 text-teal-primary" strokeWidth={2} />
+            </div>
+          )}
+        </div>
 
         {/* Title */}
         <h1 className="mt-4 mb-2 font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal">
@@ -226,7 +263,7 @@ async function LetterDetailContent({ id }: { id: string }) {
         {!hasDelivery && (
           <div
             className="prose prose-sm sm:prose max-w-none prose-p:font-mono prose-p:text-charcoal/80 prose-p:leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
+            dangerouslySetInnerHTML={{ __html: sanitizeLetterHtml(letter.bodyHtml) }}
           />
         )}
 
@@ -344,41 +381,15 @@ async function LetterDetailContent({ id }: { id: string }) {
         {/* Dashed separator */}
         <div className="w-full border-t-2 border-dashed border-charcoal/10 mt-8 mb-4" />
 
-        {/* Actions Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          {/* Left: Edit action */}
-          <div>
-            {!isLocked && (
-              <Link href={{ pathname: "/letters/[id]/edit", params: { id } }}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 font-mono text-xs uppercase tracking-wider text-charcoal/60 hover:text-charcoal"
-                >
-                  <PenLine className="h-4 w-4" />
-                  Edit Letter
-                </Button>
-              </Link>
-            )}
-          </div>
-
-          {/* Right: Schedule/View delivery */}
-          <div>
-            {!hasDelivery ? (
-              <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
-                <Button size="sm" className="gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Schedule Delivery
-                </Button>
-              </Link>
-            ) : (
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                {latestDelivery?.status === "sent"
-                  ? `Delivered ${format(new Date(latestDelivery.deliverAt), "MMM d, yyyy")}`
-                  : `Delivers ${format(new Date(latestDelivery!.deliverAt), "MMM d, yyyy")}`}
-              </span>
-            )}
-          </div>
+        {/* Footer - Delivery Info */}
+        <div className="flex flex-wrap items-center justify-end gap-4">
+          {hasDelivery && (
+            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
+              {latestDelivery?.status === "sent"
+                ? `Delivered ${format(new Date(latestDelivery.deliverAt), "MMM d, yyyy")}`
+                : `Delivers ${format(new Date(latestDelivery!.deliverAt), "MMM d, yyyy")}`}
+            </span>
+          )}
         </div>
       </article>
 

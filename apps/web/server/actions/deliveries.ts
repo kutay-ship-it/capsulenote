@@ -25,10 +25,12 @@ import {
   validateArrivalDate,
   type MailType,
 } from "@/server/lib/mail-delivery-calculator"
+import { ratelimit } from "@/server/lib/redis"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
 const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
 const MAX_DELAY_YEARS = 100
+const MIN_PHYSICAL_MAIL_LEAD_DAYS = 30 // Minimum 30 days advance notice for physical mail
 
 /**
  * Schedule a new delivery for a letter
@@ -39,6 +41,22 @@ export async function scheduleDelivery(
 ): Promise<ActionResult<{ deliveryId: string }>> {
   try {
     const user = await requireUser()
+
+    // Rate limiting: 20 deliveries per hour
+    const { success: rateLimitOk } = await ratelimit.scheduleDelivery.limit(user.id)
+    if (!rateLimitOk) {
+      await logger.warn('Delivery scheduling rate limit exceeded', {
+        userId: user.id,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.RATE_LIMIT_EXCEEDED,
+          message: 'You have scheduled too many deliveries. Please try again later.',
+        },
+      }
+    }
 
     // Validate input
     const validated = scheduleDeliverySchema.safeParse(input)
@@ -195,6 +213,37 @@ export async function scheduleDelivery(
     let mailSendDate: Date | null = null
 
     if (data.channel === 'mail') {
+      // 30-day minimum lead time validation for physical mail
+      const millisecondsPerDay = 1000 * 60 * 60 * 24
+      const daysUntilDelivery = Math.floor(
+        (data.deliverAt.getTime() - Date.now()) / millisecondsPerDay
+      )
+
+      if (daysUntilDelivery < MIN_PHYSICAL_MAIL_LEAD_DAYS) {
+        const earliestDate = new Date(Date.now() + MIN_PHYSICAL_MAIL_LEAD_DAYS * millisecondsPerDay)
+
+        await logger.warn('Physical mail delivery date too soon', {
+          userId: user.id,
+          requestedDate: data.deliverAt,
+          daysUntilDelivery,
+          minimumRequired: MIN_PHYSICAL_MAIL_LEAD_DAYS,
+          earliestAllowedDate: earliestDate,
+        })
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.VALIDATION_FAILED,
+            message: `Physical mail requires at least ${MIN_PHYSICAL_MAIL_LEAD_DAYS} days advance notice. Please select a date on or after ${earliestDate.toLocaleDateString()}.`,
+            details: {
+              daysProvided: daysUntilDelivery,
+              minimumRequired: MIN_PHYSICAL_MAIL_LEAD_DAYS,
+              earliestAllowedDate: earliestDate.toISOString(),
+            },
+          },
+        }
+      }
+
       if (!entitlements.features.canSchedulePhysicalMail) {
         await logger.warn('User attempted to schedule physical mail without Paper & Pixels', {
           userId: user.id,
@@ -337,17 +386,29 @@ export async function scheduleDelivery(
         } else if (data.channel === "mail") {
           const userCredits = await tx.user.findUnique({
             where: { id: user.id },
-            select: { physicalCredits: true },
+            select: {
+              physicalCredits: true,
+              planType: true,
+              physicalMailTrialUsed: true,
+            },
           })
 
           if (!userCredits || userCredits.physicalCredits <= 0) {
             throw new QuotaExceededError("physical_credits", 0, 0)
           }
 
-          // Deduct credit
+          // Check if user is using their trial credit (Digital Capsule user with unused trial)
+          const isUsingTrialCredit =
+            userCredits.planType === "DIGITAL_CAPSULE" &&
+            userCredits.physicalMailTrialUsed !== true
+
+          // Deduct credit and mark trial used if applicable
           await tx.user.update({
             where: { id: user.id },
-            data: { physicalCredits: { decrement: 1 } },
+            data: {
+              physicalCredits: { decrement: 1 },
+              ...(isUsingTrialCredit && { physicalMailTrialUsed: true }),
+            },
           })
 
           // Record audit trail
@@ -360,7 +421,11 @@ export async function scheduleDelivery(
               balanceBefore: userCredits.physicalCredits,
               balanceAfter: userCredits.physicalCredits - 1,
               source: null, // Will be updated after delivery creation
-              metadata: { letterId: data.letterId, channel: data.channel },
+              metadata: {
+                letterId: data.letterId,
+                channel: data.channel,
+                ...(isUsingTrialCredit && { trialCreditUsed: true }),
+              },
             },
           })
         }
@@ -863,17 +928,63 @@ export async function cancelDelivery(
           data: { status: "CANCELLED" },
         })
 
+        // Refund email credits with audit trail
         if (shouldRefundEmail) {
+          const currentUser = await tx.user.findUnique({
+            where: { id: user.id },
+            select: { emailCredits: true },
+          })
+          const balanceBefore = currentUser?.emailCredits ?? 0
+
           await tx.user.update({
             where: { id: user.id },
             data: { emailCredits: { increment: 1 } },
           })
+
+          await tx.creditTransaction.create({
+            data: {
+              userId: user.id,
+              creditType: "email",
+              transactionType: "grant_refund",
+              amount: 1,
+              balanceBefore,
+              balanceAfter: balanceBefore + 1,
+              source: deliveryId,
+              metadata: {
+                reason: "delivery_canceled",
+                letterId: existing.letterId,
+              },
+            },
+          })
         }
 
+        // Refund physical credits with audit trail
         if (shouldRefundPhysical) {
+          const currentUser = await tx.user.findUnique({
+            where: { id: user.id },
+            select: { physicalCredits: true },
+          })
+          const balanceBefore = currentUser?.physicalCredits ?? 0
+
           await tx.user.update({
             where: { id: user.id },
             data: { physicalCredits: { increment: 1 } },
+          })
+
+          await tx.creditTransaction.create({
+            data: {
+              userId: user.id,
+              creditType: "physical",
+              transactionType: "grant_refund",
+              amount: 1,
+              balanceBefore,
+              balanceAfter: balanceBefore + 1,
+              source: deliveryId,
+              metadata: {
+                reason: "delivery_canceled",
+                letterId: existing.letterId,
+              },
+            },
           })
         }
       })

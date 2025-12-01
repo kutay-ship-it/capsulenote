@@ -1,5 +1,6 @@
 "use server"
 
+import { z } from "zod"
 import { requireUser } from "@/server/lib/auth"
 import { stripe } from "@/server/providers/stripe/client"
 import { env } from "@/env.mjs"
@@ -13,6 +14,23 @@ const ADDON_PRICE_IDS: Record<AddOnType, string | undefined> = {
   physical: env.STRIPE_PRICE_ADDON_PHYSICAL,
 }
 
+// Validation constraints for addon quantities
+const MIN_ADDON_QUANTITY = 1
+const MAX_ADDON_QUANTITY = 100 // Reasonable upper limit to prevent abuse
+
+const addonCheckoutSchema = z.object({
+  type: z.enum(["email", "physical"]),
+  quantity: z
+    .number()
+    .int("Quantity must be a whole number")
+    .min(MIN_ADDON_QUANTITY, `Minimum quantity is ${MIN_ADDON_QUANTITY}`)
+    .max(MAX_ADDON_QUANTITY, `Maximum quantity is ${MAX_ADDON_QUANTITY}`)
+    .optional()
+    .default(1),
+  successUrl: z.string().url().optional(),
+  cancelUrl: z.string().url().optional(),
+})
+
 export async function createAddOnCheckoutSession(input: {
   type: AddOnType
   quantity?: number
@@ -21,7 +39,22 @@ export async function createAddOnCheckoutSession(input: {
 }): Promise<ActionResult<{ url: string }>> {
   try {
     const user = await requireUser()
-    const priceId = ADDON_PRICE_IDS[input.type]
+
+    // Validate input
+    const validated = addonCheckoutSchema.safeParse(input)
+    if (!validated.success) {
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.VALIDATION_FAILED,
+          message: "Invalid addon request",
+          details: validated.error.flatten().fieldErrors,
+        },
+      }
+    }
+
+    const { type, quantity, successUrl, cancelUrl } = validated.data
+    const priceId = ADDON_PRICE_IDS[type]
 
     if (!priceId) {
       return {
@@ -54,24 +87,24 @@ export async function createAddOnCheckoutSession(input: {
       line_items: [
         {
           price: priceId,
-          quantity: input.quantity ?? 1,
+          quantity,
         },
       ],
-      success_url: input.successUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
-      cancel_url: input.cancelUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+      success_url: successUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+      cancel_url: cancelUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
       // Session metadata - used by checkout.session.completed webhook (PRIMARY fulfillment)
       metadata: {
         userId: user.id,
-        addon_type: input.type,
-        quantity: (input.quantity ?? 1).toString(),
+        addon_type: type,
+        quantity: quantity.toString(),
         type: "credit_addon", // Identifies this as credit addon for webhook routing
       },
       // Payment intent metadata - backup for payment_intent.succeeded webhook
       payment_intent_data: {
         metadata: {
           userId: user.id,
-          addon_type: input.type,
-          quantity: (input.quantity ?? 1).toString(),
+          addon_type: type,
+          quantity: quantity.toString(),
           type: "credit_addon",
         },
       },

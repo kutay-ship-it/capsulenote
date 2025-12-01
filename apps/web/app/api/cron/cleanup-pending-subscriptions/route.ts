@@ -17,15 +17,16 @@ import { prisma } from "@/server/lib/db"
 import { stripe } from "@/server/providers/stripe/client"
 import { createAuditEvent } from "@/server/lib/audit"
 import { env } from "@/env.mjs"
+import { validateCronSecret } from "@/server/lib/crypto-utils"
 import type Stripe from "stripe"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret using constant-time comparison (prevents timing attacks)
   const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!validateCronSecret(authHeader, env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

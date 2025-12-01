@@ -10,20 +10,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
+import { validateCronSecret } from "@/server/lib/crypto-utils"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret using constant-time comparison (prevents timing attacks)
   const authHeader = request.headers.get("authorization")
-
-  if (!env.CRON_SECRET) {
-    console.error("CRON_SECRET not configured")
-    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 })
-  }
-
-  if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  if (!validateCronSecret(authHeader, env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 

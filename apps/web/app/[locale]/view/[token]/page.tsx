@@ -3,6 +3,7 @@ import { Link } from "@/i18n/routing"
 import { notFound } from "next/navigation"
 import { prisma } from "@/server/lib/db"
 import { decryptLetter } from "@/server/lib/encryption"
+import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -64,7 +65,7 @@ export default async function ViewLetterPage({ params }: ViewLetterPageProps) {
               {letter.title}
             </CardTitle>
           </CardHeader>
-          <CardContent className="prose max-w-none font-sans text-charcoal" dangerouslySetInnerHTML={{ __html: decrypted.bodyHtml }} />
+          <CardContent className="prose max-w-none font-sans text-charcoal" dangerouslySetInnerHTML={{ __html: sanitizeLetterHtml(decrypted.bodyHtml) }} />
         </Card>
 
         <div className="text-center space-y-3">

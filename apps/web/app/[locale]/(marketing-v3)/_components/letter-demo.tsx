@@ -44,8 +44,16 @@ interface DemoFormErrors {
 
 interface DatePreset {
   label: string
-  months: number
   key: string
+}
+
+// Hardcoded months values - translations only provide label/key, not numeric values
+const MONTHS_BY_KEY: Record<string, number> = {
+  "6mo": 6,
+  "1yr": 12,
+  "3yr": 36,
+  "5yr": 60,
+  "10yr": 120,
 }
 
 interface LetterDemoProps {
@@ -77,6 +85,15 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   const [errors, setErrors] = React.useState<DemoFormErrors>({})
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false)
 
+  // Helper to safely parse a date string and return undefined if invalid
+  const parseDateSafe = (dateString: string | null | undefined): Date | undefined => {
+    if (!dateString) return undefined
+    const date = new Date(dateString)
+    // Check if the date is valid (Invalid Date returns NaN for getTime())
+    if (isNaN(date.getTime())) return undefined
+    return date
+  }
+
   // Restore draft from localStorage on mount
   React.useEffect(() => {
     if (isSignedIn) {
@@ -87,8 +104,9 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
         setBodyHtml(autosave.bodyHtml || "")
         setBodyRich(autosave.bodyRich as Record<string, unknown> | null)
         setRecipientEmail(autosave.recipientEmail || "")
-        if (autosave.deliveryDate) {
-          setDeliveryDate(new Date(autosave.deliveryDate))
+        const parsedDate = parseDateSafe(autosave.deliveryDate)
+        if (parsedDate) {
+          setDeliveryDate(parsedDate)
         }
         if (autosave.selectedPreset) {
           setSelectedPreset(autosave.selectedPreset)
@@ -101,8 +119,9 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
         setTitle(draft.title || "")
         setBodyHtml(draft.body || "")
         setRecipientEmail(draft.recipientEmail || "")
-        if (draft.deliveryDate) {
-          setDeliveryDate(new Date(draft.deliveryDate))
+        const parsedDate = parseDateSafe(draft.deliveryDate)
+        if (parsedDate) {
+          setDeliveryDate(parsedDate)
         }
         if (draft.selectedPreset) {
           setSelectedPreset(draft.selectedPreset)
@@ -145,9 +164,26 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
     return Object.keys(newErrors).length === 0
   }
 
+  // Helper to safely convert date to ISO string, returns null if invalid
+  const toISOStringSafe = (date: Date | undefined): string | null => {
+    if (!date) return null
+    if (isNaN(date.getTime())) return null
+    return date.toISOString()
+  }
+
   const handlePresetDate = (months: number, key: string) => {
+    // Validate months is a valid number
+    if (typeof months !== "number" || isNaN(months)) {
+      console.warn("Invalid months value:", months)
+      return
+    }
     const today = new Date()
     const futureDate = new Date(today.setMonth(today.getMonth() + months))
+    // Validate the resulting date is valid
+    if (isNaN(futureDate.getTime())) {
+      console.warn("Created invalid date from months:", months)
+      return
+    }
     setDeliveryDate(futureDate)
     setSelectedPreset(key)
     setShowCustomDate(false)
@@ -206,7 +242,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
               recipientName: "",
               recipientEmail: trimmedEmail,
               deliveryChannels: ["email"],
-              deliveryDate: deliveryDate?.toISOString() ?? null,
+              deliveryDate: toISOStringSafe(deliveryDate),
               selectedPreset,
               selectedAddressId: null,
               printOptions: { color: false, doubleSided: false },
@@ -229,7 +265,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
             title,
             bodyHtml,
             trimmedEmail,
-            deliveryDate?.toISOString(),
+            toISOStringSafe(deliveryDate) ?? undefined,
             "email",
             timezone,
             "self",
@@ -520,7 +556,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                           <button
                             key={preset.key}
                             type="button"
-                            onClick={() => handlePresetDate(preset.months, preset.key)}
+                            onClick={() => handlePresetDate(MONTHS_BY_KEY[preset.key] ?? 6, preset.key)}
                             className={cn(
                               "border-2 border-charcoal px-3 py-2 font-mono text-[10px] uppercase tracking-wider transition-all duration-150",
                               "hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]",
@@ -566,7 +602,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     )}
 
                     {/* Selected Date Display */}
-                    {deliveryDate && (
+                    {deliveryDate && !isNaN(deliveryDate.getTime()) && (
                       <div
                         className="flex items-center gap-3 p-3 border-2 border-duck-blue bg-duck-blue/10"
                         style={{ borderRadius: "2px" }}

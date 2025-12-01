@@ -128,6 +128,8 @@ export async function exportUserData(): Promise<
     ])
 
     // 2. Decrypt letter content
+    // GDPR Article 15 requires ALL personal data - we must fail if any letter cannot be decrypted
+    const decryptionErrors: { letterId: string; error: string }[] = []
     const decryptedLetters = await Promise.all(
       letters.map(async (letter) => {
         try {
@@ -154,14 +156,66 @@ export async function exportUserData(): Promise<
             `[GDPR Export] Failed to decrypt letter ${letter.id}:`,
             error
           )
+          decryptionErrors.push({
+            letterId: letter.id,
+            error: error instanceof Error ? error.message : String(error),
+          })
+          // Return placeholder - will be caught by validation below
           return {
             id: letter.id,
             title: letter.title,
-            error: "Failed to decrypt content",
+            _decryptionFailed: true as const,
+            bodyRich: null,
+            bodyHtml: null,
+            bodyFormat: letter.bodyFormat,
+            visibility: letter.visibility,
+            tags: letter.tags,
             createdAt: letter.createdAt,
+            updatedAt: letter.updatedAt,
+            deletedAt: letter.deletedAt,
           }
         }
       })
+    )
+
+    // GDPR compliance: Fail the entire export if any letters couldn't be decrypted
+    // Users have the right to access ALL their personal data (Article 15)
+    if (decryptionErrors.length > 0) {
+      // Log the failure for investigation
+      await createAuditEvent({
+        userId: user.id,
+        type: AuditEventType.DATA_EXPORT_COMPLETED,
+        data: {
+          success: false,
+          reason: "decryption_failure",
+          failedLetterCount: decryptionErrors.length,
+          failedLetterIds: decryptionErrors.map((e) => e.letterId),
+        },
+      })
+
+      console.error(
+        `[GDPR Export] Export failed - ${decryptionErrors.length} letter(s) failed decryption:`,
+        decryptionErrors
+      )
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.INTERNAL_ERROR,
+          message:
+            "Unable to export all data due to a technical issue. Please contact support for assistance.",
+          details: {
+            failedLetterCount: decryptionErrors.length,
+            supportInfo:
+              "Reference this error when contacting support for GDPR data access request.",
+          },
+        },
+      }
+    }
+
+    // Filter out any failed entries (shouldn't exist at this point but safety check)
+    const validDecryptedLetters = decryptedLetters.filter(
+      (l) => !("_decryptionFailed" in l)
     )
 
     // 3. Build comprehensive export
@@ -190,7 +244,7 @@ export async function exportUserData(): Promise<
             updatedAt: profile.updatedAt,
           }
         : null,
-      letters: decryptedLetters,
+      letters: validDecryptedLetters,
       deliveries: deliveries.map((d) => ({
         id: d.id,
         letterId: d.letterId,

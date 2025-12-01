@@ -413,15 +413,22 @@ export const deliverMail = inngest.createFunction(
 
     delivery = refreshed
 
-    // Update status to processing
+    // Update status to processing and store Inngest event ID for tracking/reconciliation
     await step.run("update-status-processing", async () => {
       try {
         await prisma.delivery.update({
           where: { id: deliveryId },
-          data: { status: "processing" },
+          data: {
+            status: "processing",
+            // Store Inngest event ID for job tracking and backstop reconciler detection
+            inngestRunId: event.id,
+          },
         })
 
-        logger.info("Delivery status updated to processing", { deliveryId })
+        logger.info("Delivery status updated to processing", {
+          deliveryId,
+          inngestRunId: event.id,
+        })
       } catch (error) {
         const classified = classifyDatabaseError(error)
         logger.error("Failed to update delivery status", {

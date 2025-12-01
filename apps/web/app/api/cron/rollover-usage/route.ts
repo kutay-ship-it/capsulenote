@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
+import { validateCronSecret } from "@/server/lib/crypto-utils"
 
 /**
  * Usage Period Rollover Cron Job
@@ -17,9 +18,9 @@ import { createAuditEvent } from "@/server/lib/audit"
 export async function GET(request: NextRequest) {
   const startTime = Date.now()
 
-  // Verify cron secret
+  // Verify cron secret using constant-time comparison (prevents timing attacks)
   const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!validateCronSecret(authHeader, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -78,29 +79,69 @@ export async function GET(request: NextRequest) {
         // Get mail credits for this plan
         const mailCredits = mailCreditsMap[subscription.plan] || 0
 
-        // Create new usage record for next period using upsert
-        // This handles race conditions and duplicate runs gracefully
-        const usageRecord = await prisma.subscriptionUsage.upsert({
-          where: {
-            userId_period: {
+        // Use transaction to ensure all updates succeed or fail together
+        await prisma.$transaction(async (tx) => {
+          // 1. Create/update usage record for next period (for tracking purposes)
+          await tx.subscriptionUsage.upsert({
+            where: {
+              userId_period: {
+                userId: subscription.userId,
+                period: nextPeriod
+              }
+            },
+            create: {
               userId: subscription.userId,
-              period: nextPeriod
+              period: nextPeriod,
+              lettersCreated: 0,
+              emailsSent: 0,
+              mailsSent: 0,
+              mailCredits
+            },
+            update: {
+              // If record exists, reset counters and replenish credits
+              lettersCreated: 0,
+              emailsSent: 0,
+              mailsSent: 0,
+              mailCredits
             }
-          },
-          create: {
-            userId: subscription.userId,
-            period: nextPeriod,
-            lettersCreated: 0,
-            emailsSent: 0,
-            mailsSent: 0,
-            mailCredits
-          },
-          update: {
-            // If record exists, reset counters and replenish credits
-            lettersCreated: 0,
-            emailsSent: 0,
-            mailsSent: 0,
-            mailCredits
+          })
+
+          // 2. CRITICAL: Replenish User.physicalCredits (the actual balance used by entitlements)
+          // Only replenish if this plan includes mail credits
+          if (mailCredits > 0) {
+            // Get current balance for audit trail
+            const currentUser = await tx.user.findUnique({
+              where: { id: subscription.userId },
+              select: { physicalCredits: true }
+            })
+
+            const balanceBefore = currentUser?.physicalCredits ?? 0
+
+            // Add monthly credits to user's balance
+            await tx.user.update({
+              where: { id: subscription.userId },
+              data: {
+                physicalCredits: { increment: mailCredits }
+              }
+            })
+
+            // 3. Create credit transaction for audit trail
+            await tx.creditTransaction.create({
+              data: {
+                userId: subscription.userId,
+                creditType: "physical",
+                transactionType: "grant_subscription",
+                amount: mailCredits,
+                balanceBefore,
+                balanceAfter: balanceBefore + mailCredits,
+                source: subscription.id,
+                metadata: {
+                  plan: subscription.plan,
+                  period: nextPeriod.toISOString(),
+                  reason: "monthly_replenishment"
+                }
+              }
+            })
           }
         })
 

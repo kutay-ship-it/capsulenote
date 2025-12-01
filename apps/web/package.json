@@ -16,9 +16,9 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "@dearme/config": "workspace:*",
     "@clerk/localizations": "^3.28.3",
     "@clerk/nextjs": "^6.35.0",
+    "@dearme/config": "workspace:*",
     "@dearme/inngest": "workspace:*",
     "@dearme/prisma": "workspace:*",
     "@dearme/types": "workspace:*",
@@ -54,6 +54,9 @@
     "@tiptap/pm": "^2.1.16",
     "@tiptap/react": "^2.1.16",
     "@tiptap/starter-kit": "^2.1.16",
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
     "@upstash/ratelimit": "^1.0.3",
     "@upstash/redis": "^1.28.2",
     "class-variance-authority": "^0.7.0",
@@ -65,6 +68,7 @@
     "html-escaper": "^3.0.3",
     "import-in-the-middle": "^2.0.0",
     "inngest": "^3.15.11",
+    "isomorphic-dompurify": "^2.33.0",
     "lob": "^6.6.3",
     "lucide-react": "^0.307.0",
     "nanoid": "^5.1.6",
@@ -86,12 +90,9 @@
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.181.1",
-    "web-push": "^3.6.7",
-    "zod": "^3.22.4",
     "typescript": "^5.3.3",
-    "@types/node": "^20.10.5",
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.18"
+    "web-push": "^3.6.7",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",

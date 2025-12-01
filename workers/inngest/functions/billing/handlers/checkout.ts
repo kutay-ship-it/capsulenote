@@ -328,35 +328,30 @@ async function handlePhysicalMailTrialCheckout(
     amountTotal: session.amount_total,
   })
 
-  // IDEMPOTENCY CHECK: Check if trial already purchased
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      physicalMailTrialPurchasedAt: true,
-      physicalCredits: true,
-    },
-  })
-
-  if (!user) {
-    console.error("[Checkout Handler] User not found for trial fulfillment", {
-      sessionId: session.id,
-      userId,
+  // ATOMIC TRANSACTION: Check idempotency INSIDE transaction and grant credit
+  // This prevents race conditions where concurrent webhooks could both pass the check
+  const result = await prisma.$transaction(async (tx) => {
+    // IDEMPOTENCY CHECK: Inside transaction to prevent race conditions
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: {
+        physicalMailTrialPurchasedAt: true,
+        physicalCredits: true,
+      },
     })
-    return false
-  }
 
-  // Already fulfilled - idempotent success
-  if (user.physicalMailTrialPurchasedAt) {
-    console.log("[Checkout Handler] Physical mail trial already fulfilled (idempotent)", {
-      sessionId: session.id,
-      userId,
-      purchasedAt: user.physicalMailTrialPurchasedAt,
-    })
-    return true
-  }
+    if (!user) {
+      return { status: "user_not_found" as const }
+    }
 
-  // ATOMIC TRANSACTION: Grant credit and mark purchased
-  await prisma.$transaction(async (tx) => {
+    // Already fulfilled - idempotent success
+    if (user.physicalMailTrialPurchasedAt) {
+      return {
+        status: "already_fulfilled" as const,
+        purchasedAt: user.physicalMailTrialPurchasedAt,
+      }
+    }
+
     // 1. Record credit transaction (audit trail)
     await tx.creditTransaction.create({
       data: {
@@ -379,7 +374,27 @@ async function handlePhysicalMailTrialCheckout(
         physicalMailTrialPurchasedAt: new Date(),
       },
     })
+
+    return { status: "granted" as const, newCredits: user.physicalCredits + 1 }
   })
+
+  // Handle transaction results
+  if (result.status === "user_not_found") {
+    console.error("[Checkout Handler] User not found for trial fulfillment", {
+      sessionId: session.id,
+      userId,
+    })
+    return false
+  }
+
+  if (result.status === "already_fulfilled") {
+    console.log("[Checkout Handler] Physical mail trial already fulfilled (idempotent)", {
+      sessionId: session.id,
+      userId,
+      purchasedAt: result.purchasedAt,
+    })
+    return true
+  }
 
   // 3. Invalidate cache and record audit
   await invalidateEntitlementsCache(userId)
@@ -392,7 +407,7 @@ async function handlePhysicalMailTrialCheckout(
   console.log("[Checkout Handler] Physical mail trial fulfilled successfully", {
     sessionId: session.id,
     userId,
-    newCredits: user.physicalCredits + 1,
+    newCredits: result.newCredits,
   })
 
   return true

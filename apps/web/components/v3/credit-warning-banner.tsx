@@ -7,7 +7,7 @@ import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
 import { createAddOnCheckoutSession } from "@/server/actions/addons"
-import type { DeliveryEligibility } from "@/server/actions/entitlements"
+import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
 import type { DeliveryChannel } from "@/components/v3/delivery-type-v3"
 
 // ============================================================================

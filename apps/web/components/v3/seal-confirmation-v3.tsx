@@ -26,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import type { DeliveryChannel } from "@/components/v3/delivery-type-v3"
-import type { DeliveryEligibility } from "@/server/actions/entitlements"
+import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
 import type { ShippingAddress } from "@/server/actions/addresses"
 import type { PrintOptions } from "@/components/v3/print-options-v3"
 

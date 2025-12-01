@@ -6,6 +6,7 @@ import { getLocale, getTranslations } from "next-intl/server"
 import { Link } from "@/i18n/routing"
 import { getLetter } from "@/server/actions/letters"
 import { requireUser } from "@/server/lib/auth"
+import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TimezoneTooltip } from "@/components/timezone-tooltip"
@@ -107,7 +108,7 @@ async function LetterContent({ id, userEmail }: { id: string; userEmail: string 
                 <div className="p-8 md:p-12 bg-[#FDFBF7]">
                     <div
                         className="prose prose-stone max-w-none font-serif leading-relaxed"
-                        dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeLetterHtml(letter.bodyHtml) }}
                     />
                 </div>
             </div>

@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing"
 import { getLetter } from "@/server/actions/letters"
 import { requireUser } from "@/server/lib/auth"
 import { decryptLetter } from "@/server/lib/encryption"
+import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TimezoneTooltip } from "@/components/timezone-tooltip"
@@ -118,7 +119,7 @@ async function LetterContent({ id, userEmail }: { id: string; userEmail: string 
         <CardContent className="space-y-6">
           <div
             className="prose prose-sm sm:prose lg:prose-lg max-w-none"
-            dangerouslySetInnerHTML={{ __html: letter.bodyHtml }}
+            dangerouslySetInnerHTML={{ __html: sanitizeLetterHtml(letter.bodyHtml) }}
           />
 
           {/* Letter Timeline Visualization */}

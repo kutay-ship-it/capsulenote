@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Lock, Key, Sparkles, MailOpen } from "lucide-react"
+import DOMPurify from "dompurify"
 import { cn } from "@/lib/utils"
 
 interface LetterUnlockerProps {
@@ -159,7 +160,7 @@ export function LetterUnlocker({
                         {/* Content */}
                         <div
                             className="prose prose-lg font-serif text-charcoal leading-relaxed max-w-none"
-                            dangerouslySetInnerHTML={{ __html: letterContent }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(letterContent) }}
                         />
 
                         {/* Footer */}

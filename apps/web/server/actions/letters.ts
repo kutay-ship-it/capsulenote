@@ -10,6 +10,7 @@ import { encryptLetter, decryptLetter } from "@/server/lib/encryption"
 import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 import { trackLetterCreation } from "@/server/lib/entitlements"
+import { ratelimit } from "@/server/lib/redis"
 
 /**
  * Create a new letter with encrypted content
@@ -21,6 +22,22 @@ export async function createLetter(
   try {
     // Get authenticated user
     const user = await requireUser()
+
+    // Rate limiting: 10 letters per hour
+    const { success: rateLimitOk } = await ratelimit.createLetter.limit(user.id)
+    if (!rateLimitOk) {
+      await logger.warn('Letter creation rate limit exceeded', {
+        userId: user.id,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.RATE_LIMIT_EXCEEDED,
+          message: 'You have created too many letters. Please try again later.',
+        },
+      }
+    }
 
     // Validate input
     const validated = createLetterSchema.safeParse(input)
@@ -314,14 +331,43 @@ export async function updateLetter(
 }
 
 /**
+ * Schema for delete letter validation
+ */
+const deleteLetterSchema = z.object({
+  letterId: z.string().uuid("Invalid letter ID format"),
+})
+
+/**
  * Soft delete a letter
  * Returns error instead of throwing for predictable error handling
  */
 export async function deleteLetter(
-  letterId: string
+  input: unknown
 ): Promise<ActionResult<void>> {
   try {
     const user = await requireUser()
+
+    // Validate input
+    const validated = deleteLetterSchema.safeParse(
+      typeof input === "string" ? { letterId: input } : input
+    )
+    if (!validated.success) {
+      await logger.warn("Letter deletion validation failed", {
+        userId: user.id,
+        errors: validated.error.flatten().fieldErrors,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.VALIDATION_FAILED,
+          message: "Invalid letter ID format.",
+          details: validated.error.flatten().fieldErrors,
+        },
+      }
+    }
+
+    const { letterId } = validated.data
 
     // Verify ownership
     const existing = await prisma.letter.findFirst({

@@ -345,15 +345,22 @@ export const deliverEmail = inngest.createFunction(
     // Use the freshest copy for the remainder of the flow
     delivery = refreshed
 
-    // Update status to processing
+    // Update status to processing and store Inngest event ID for tracking/reconciliation
     await step.run("update-status-processing", async () => {
       try {
         const updated = await prisma.delivery.update({
           where: { id: deliveryId },
-          data: { status: "processing" },
+          data: {
+            status: "processing",
+            // Store Inngest event ID for job tracking and backstop reconciler detection
+            inngestRunId: event.id,
+          },
         })
 
-        logger.info("Delivery status updated to processing", { deliveryId })
+        logger.info("Delivery status updated to processing", {
+          deliveryId,
+          inngestRunId: event.id,
+        })
 
         return updated
       } catch (error) {
@@ -430,7 +437,10 @@ export const deliverEmail = inngest.createFunction(
 
     // Send email via email provider with runtime fallback support
     const sendResult = await step.run("send-email", async () => {
-      const idempotencyKey = `delivery-${deliveryId}-attempt-${delivery.attemptCount}`
+      // CRITICAL: Use event.id + attempt for idempotency to prevent race conditions
+      // Previously used delivery.attemptCount which is read before increment, causing duplicates
+      // event.id is unique per Inngest trigger, attempt is unique per retry within that event
+      const idempotencyKey = `delivery-${deliveryId}-event-${event.id}-attempt-${attempt}`
       const sender = getEmailSender('delivery')
 
       logger.info("Sending email", {
@@ -440,7 +450,8 @@ export const deliverEmail = inngest.createFunction(
         senderEmail: sender.email,
         senderDisplayName: sender.displayName,
         idempotencyKey,
-        attempt: delivery.attemptCount,
+        inngestEventId: event.id,
+        inngestAttempt: attempt,
       })
 
       const unlockUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unlock/${delivery.letter.id}`
