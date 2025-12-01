@@ -190,9 +190,12 @@
   "deliveryType": {
     "email": "E-POSTA",
     "physical": "FİZİKSEL",
+    "locked": "KİLİTLİ",
     "credits": "KREDİ",
     "digitalDelivery": "DİJİTAL TESLİMAT",
     "realLetter": "GERÇEK MEKTUP",
+    "upgradeRequired": "Yükseltme Gerekli",
+    "tryFor499": "$4.99'a Dene",
     "doubleDelivery": {
       "title": "ÇİFT TESLİMAT",
       "description": "Mektubunuz hem dijital olarak e-posta kutularına hem de fiziksel mektup olarak posta kutularına ulaşacak."
@@ -201,6 +204,58 @@
       "addPhysical": "BASILI MEKTUP EKLEMEK İÇİN FİZİKSEL'E DOKUN",
       "addEmail": "DİJİTAL OLARAK DA GÖNDERMEK İÇİN E-POSTA'YA DOKUN"
     }
+  },
+  "physicalMailTrial": {
+    "dialogTitle": "Fiziksel Postayı Dene",
+    "badge": "Tek Seferlik Teklif",
+    "title": "Fiziksel Postayı Dene",
+    "subtitle": "Posta kutunuza teslim edilen gerçek mektupları deneyimleyin",
+    "description": "Premium fiziksel posta teslimatımızı tek krediyle deneyin. Yükseltmeden önce test etmek için mükemmel.",
+    "features": {
+      "realLetter": "Premium kağıda basılmış gerçek mektup",
+      "printedMailed": "Profesyonelce basılmış ve postalanmış",
+      "thirtyDaysNotice": "30 gün önceden planlama gerekli"
+    },
+    "priceLabel": "Deneme Fiyatı",
+    "oneTime": "tek seferlik",
+    "trialNote": "Bir fiziksel mektup teslimatı için geçerlidir",
+    "upgradeHint": "Beğendiniz mi? Yılda 3 kredi dahil sınırsız erişim için Paper & Pixels'e yükseltin.",
+    "notNow": "Şimdi Değil",
+    "processing": "İşleniyor...",
+    "tryPhysicalMail": "Fiziksel Postayı Dene",
+    "errors": {
+      "checkoutFailed": "Ödeme başlatılamadı",
+      "tryAgainLater": "Lütfen daha sonra tekrar deneyin."
+    }
+  },
+  "physicalMailUpgrade": {
+    "dialogTitle": "Paper & Pixels'e Yükselt",
+    "badge": "Fiziksel Postayı Aç",
+    "title": "Planınızı Yükseltin",
+    "subtitle": "E-posta + fiziksel posta teslimatı alın",
+    "description": "Fiziksel posta teslimatıyla tam Capsule Note deneyiminin kilidini açın. Mektuplarınız, premium kağıda basılmış ve herhangi bir posta kutusuna teslim edilmiş.",
+    "plans": {
+      "digital": {
+        "title": "Mevcut Plan",
+        "feature1": "Yılda 6 e-posta teslimatı",
+        "feature2": "Sınırsız mektup depolama",
+        "feature3": "Fiziksel posta teslimatı",
+        "feature4": "Premium kağıt baskı"
+      },
+      "paper": {
+        "title": "Paper & Pixels",
+        "recommended": "Önerilen",
+        "feature1": "Yılda 24 e-posta teslimatı",
+        "feature2": "Sınırsız mektup depolama",
+        "feature3": "Yılda 3 fiziksel posta kredisi",
+        "feature4": "Premium kağıt baskı"
+      }
+    },
+    "prorationTitle": "Akıllı Fiyatlandırma",
+    "prorationDescription": "Sadece fatura döngünüzün geri kalanı için farkı ödersiniz. Stripe otomatik olarak orantılı tutarı hesaplar.",
+    "maybeLater": "Belki Sonra",
+    "loading": "Yükleniyor...",
+    "upgradeNow": "Şimdi Yükselt"
   },
   "seal": {
     "dialogTitle": "Mektubunu mühürle onayı",

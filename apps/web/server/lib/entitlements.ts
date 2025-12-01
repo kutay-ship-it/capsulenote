@@ -354,6 +354,57 @@ export async function addEmailCredits(
 }
 
 /**
+ * Physical mail trial status for UI display
+ */
+export interface PhysicalTrialStatus {
+  canPurchase: boolean
+  hasUsedTrial: boolean
+}
+
+/**
+ * Check if user is eligible to purchase physical mail trial credit
+ * - Must be on DIGITAL_CAPSULE plan with active subscription
+ * - Must not have already purchased trial credit
+ */
+export async function canPurchasePhysicalTrial(userId: string): Promise<boolean> {
+  const status = await getPhysicalTrialStatus(userId)
+  return status.canPurchase
+}
+
+/**
+ * Get complete physical mail trial status in a single query
+ * Returns both purchase eligibility and usage status
+ * Use this instead of separate queries for canPurchase + hasUsedTrial
+ */
+export async function getPhysicalTrialStatus(userId: string): Promise<PhysicalTrialStatus> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      planType: true,
+      physicalMailTrialPurchasedAt: true,
+      physicalMailTrialUsed: true,
+      subscriptions: {
+        where: { status: { in: ACTIVE_SUBSCRIPTION_STATUSES } },
+        take: 1,
+      },
+    },
+  })
+
+  if (!user) {
+    return { canPurchase: false, hasUsedTrial: false }
+  }
+
+  const hasActiveSubscription = user.subscriptions.length > 0
+  const isDigitalCapsule = user.planType === "DIGITAL_CAPSULE"
+  const hasNotPurchasedTrial = user.physicalMailTrialPurchasedAt === null
+
+  return {
+    canPurchase: hasActiveSubscription && isDigitalCapsule && hasNotPurchasedTrial,
+    hasUsedTrial: user.physicalMailTrialUsed ?? false,
+  }
+}
+
+/**
  * Deduct credits on refund (for add-on purchases)
  * Deducts from both total credits and addon tracking
  */
@@ -471,6 +522,12 @@ async function buildEntitlements(userId: string): Promise<Entitlements> {
         }
       : undefined
 
+  // Check for trial credit eligibility (Digital Capsule user with purchased trial credit)
+  const hasTrialCredit =
+    user.planType === "DIGITAL_CAPSULE" &&
+    user.physicalCredits > 0 &&
+    user.physicalMailTrialUsed !== true
+
   return {
     userId,
     plan: plan ?? "none",
@@ -480,7 +537,7 @@ async function buildEntitlements(userId: string): Promise<Entitlements> {
       canScheduleDeliveries: ACTIVE_SUBSCRIPTION_STATUSES.includes(status as SubscriptionStatus),
       canSchedulePhysicalMail:
         ACTIVE_SUBSCRIPTION_STATUSES.includes(status as SubscriptionStatus) &&
-        plan === "PAPER_PIXELS",
+        (plan === "PAPER_PIXELS" || hasTrialCredit),
       maxLettersPerMonth: "unlimited",
       emailDeliveriesIncluded: user.emailCredits,
       mailCreditsPerMonth: user.physicalCredits,

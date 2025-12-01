@@ -1,30 +1,12 @@
 "use server"
 
 import { requireUser } from "@/server/lib/auth"
-import { getEntitlements } from "@/server/lib/entitlements"
-
-// ============================================================================
-// TYPES
-// ============================================================================
-
-/**
- * Delivery eligibility data for the letter editor
- * Used to determine which delivery channels are available
- */
-export interface DeliveryEligibility {
-  /** Whether user can schedule email deliveries (has subscription + credits) */
-  canScheduleEmail: boolean
-  /** Whether user can schedule physical mail (Paper & Pixels plan + credits) */
-  canSchedulePhysical: boolean
-  /** Current email credits remaining */
-  emailCredits: number
-  /** Current physical mail credits remaining */
-  physicalCredits: number
-  /** Whether user has any active subscription */
-  hasActiveSubscription: boolean
-  /** User's current plan type */
-  plan: string
-}
+import { getEntitlements, canPurchasePhysicalTrial } from "@/server/lib/entitlements"
+import { prisma } from "@/server/lib/db"
+import {
+  PHYSICAL_MAIL_MIN_LEAD_DAYS,
+  type DeliveryEligibility,
+} from "@/server/lib/entitlement-types"
 
 // ============================================================================
 // SERVER ACTIONS
@@ -38,6 +20,17 @@ export async function getDeliveryEligibility(): Promise<DeliveryEligibility> {
   const user = await requireUser()
   const entitlements = await getEntitlements(user.id)
 
+  // Get trial status from database
+  const userRecord = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { physicalMailTrialUsed: true },
+  })
+
+  // Check if user can purchase trial credit
+  const canPurchaseTrial = await canPurchasePhysicalTrial(user.id)
+
+  const isDigitalCapsule = entitlements.plan === "DIGITAL_CAPSULE"
+
   return {
     canScheduleEmail:
       entitlements.features.canScheduleDeliveries &&
@@ -49,5 +42,9 @@ export async function getDeliveryEligibility(): Promise<DeliveryEligibility> {
     physicalCredits: entitlements.usage.mailCreditsRemaining,
     hasActiveSubscription: entitlements.features.canScheduleDeliveries,
     plan: entitlements.plan,
+    canPurchasePhysicalTrial: canPurchaseTrial,
+    hasUsedPhysicalTrial: userRecord?.physicalMailTrialUsed ?? false,
+    physicalMailMinLeadDays: PHYSICAL_MAIL_MIN_LEAD_DAYS,
+    isDigitalCapsule,
   }
 }

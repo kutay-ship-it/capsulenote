@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import {
   Mail,
   FileText,
@@ -11,6 +12,10 @@ import {
   AlertTriangle,
   Zap,
   Check,
+  Lock,
+  Sparkles,
+  Crown,
+  ArrowRight,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
@@ -20,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { createAddOnCheckoutSession } from "@/server/actions/addons"
+import { createTrialPhysicalCheckoutSession } from "@/server/actions/trial-physical"
 import { toast } from "sonner"
 import {
   type CreditAddonType,
@@ -369,6 +375,230 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
 }
 
 // ============================================================================
+// DIGITAL CAPSULE MAIL PANEL
+// Shows trial offer or upgrade prompt for Digital Capsule users
+// ============================================================================
+
+interface DigitalCapsuleMailPanelProps {
+  currentCredits: number
+  canPurchaseTrial: boolean
+  hasUsedTrial: boolean
+  onClose: () => void
+}
+
+function DigitalCapsuleMailPanel({
+  currentCredits,
+  canPurchaseTrial,
+  hasUsedTrial,
+  onClose,
+}: DigitalCapsuleMailPanelProps) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const t = useTranslations("settings.billing.mailCredits")
+
+  const handleTrialPurchase = () => {
+    startTransition(async () => {
+      const result = await createTrialPhysicalCheckoutSession()
+      if (result.success && result.data?.url) {
+        router.push(result.data.url)
+        onClose()
+      } else if (!result.success) {
+        toast.error("Failed to start checkout", {
+          description: result.error?.message || "Please try again",
+        })
+      }
+    })
+  }
+
+  const handleUpgrade = () => {
+    router.push("/pricing?upgrade=paper_pixels")
+    onClose()
+  }
+
+  // If user has credits (from trial), show available state
+  if (currentCredits > 0) {
+    return (
+      <div className="w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2 border-b-2 border-charcoal bg-teal-primary">
+          <div className="flex items-center gap-2">
+            <Check className="h-4 w-4 text-white" strokeWidth={2.5} />
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+              {t("available", { count: currentCredits })}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <FileText className="h-3.5 w-3.5 text-white" strokeWidth={2} />
+            <span className="font-mono text-[10px] uppercase text-white">
+              {t("headerMail")}
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-3">
+          <p className="font-mono text-xs text-charcoal/70">
+            {t("trialReady")}
+          </p>
+
+          <div className="border-2 border-dashed border-charcoal/20 bg-duck-cream p-3" style={{ borderRadius: "2px" }}>
+            <p className="font-mono text-[10px] text-charcoal/60 leading-relaxed">
+              <Sparkles className="h-3 w-3 inline mr-1 text-duck-yellow" strokeWidth={2} />
+              {t.rich("upgradeHint", {
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </p>
+          </div>
+
+          <button
+            onClick={handleUpgrade}
+            className="flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-2.5 bg-white hover:bg-off-white font-mono text-xs font-bold uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]"
+            style={{ borderRadius: "2px" }}
+          >
+            <Crown className="h-3.5 w-3.5" strokeWidth={2} />
+            {t("viewUpgradeOptions")}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // If can purchase trial, show trial offer
+  if (canPurchaseTrial) {
+    const trialFeatures = [
+      t("trialFeature1"),
+      t("trialFeature2"),
+      t("trialFeature3"),
+    ]
+
+    return (
+      <div className="w-full">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-2 border-b-2 border-charcoal bg-duck-yellow">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-charcoal" strokeWidth={2.5} />
+            <span className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
+              {t("tryPhysicalMail")}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <FileText className="h-3.5 w-3.5 text-charcoal" strokeWidth={2} />
+            <span className="font-mono text-[10px] uppercase text-charcoal">
+              {t("headerMail")}
+            </span>
+          </div>
+        </div>
+
+        <div className="p-4 space-y-3">
+          <p className="font-mono text-xs text-charcoal/70">
+            {t("trialDescription")}
+          </p>
+
+          {/* Features */}
+          <div className="border-2 border-charcoal/20 bg-off-white p-3 space-y-2" style={{ borderRadius: "2px" }}>
+            {trialFeatures.map((feature, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Check className="h-3 w-3 text-teal-primary" strokeWidth={3} />
+                <span className="font-mono text-[10px] text-charcoal">{feature}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Price */}
+          <div className="text-center py-2">
+            <span className="font-mono text-2xl font-bold text-charcoal">{t("trialPrice")}</span>
+            <span className="font-mono text-xs text-charcoal/50 ml-1">{t("trialPriceLabel")}</span>
+          </div>
+
+          <button
+            onClick={handleTrialPurchase}
+            disabled={isPending}
+            className="flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-3 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs font-bold uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ borderRadius: "2px" }}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                {t("processing")}
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-3.5 w-3.5" strokeWidth={2.5} />
+                {t("tryForPrice")}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // User has used trial and has no credits - show upgrade
+  const upgradeFeatures = [
+    t("feature24Email"),
+    t("feature3Mail"),
+    t("featurePremium"),
+  ]
+
+  return (
+    <div className="w-full">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-2 border-b-2 border-charcoal bg-charcoal">
+        <div className="flex items-center gap-2">
+          <Lock className="h-4 w-4 text-white" strokeWidth={2.5} />
+          <span className="font-mono text-xs font-bold uppercase tracking-wider text-white">
+            {t("upgradeRequired")}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <FileText className="h-3.5 w-3.5 text-white" strokeWidth={2} />
+          <span className="font-mono text-[10px] uppercase text-white">
+            {t("headerMail")}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-4 space-y-3">
+        <p className="font-mono text-xs text-charcoal/70">
+          {hasUsedTrial
+            ? t("trialUsedMessage")
+            : t("noTrialMessage")
+          }
+        </p>
+
+        {/* Plan comparison hint */}
+        <div className="border-2 border-charcoal/20 bg-off-white p-3" style={{ borderRadius: "2px" }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Crown className="h-4 w-4 text-teal-primary" strokeWidth={2} />
+            <span className="font-mono text-xs font-bold text-charcoal">{t("paperPixelsTitle")}</span>
+          </div>
+          <ul className="space-y-1.5">
+            {upgradeFeatures.map((feature, i) => (
+              <li key={i} className="flex items-center gap-2">
+                <Check className="h-2.5 w-2.5 text-teal-primary" strokeWidth={3} />
+                <span className="font-mono text-[10px] text-charcoal/70">{feature}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-2 pt-2 border-t border-charcoal/10">
+            <span className="font-mono text-lg font-bold text-charcoal">{t("yearlyPrice")}</span>
+            <span className="font-mono text-[10px] text-charcoal/50">{t("perYear")}</span>
+          </div>
+        </div>
+
+        <button
+          onClick={handleUpgrade}
+          className="flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-3 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs font-bold uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
+          style={{ borderRadius: "2px" }}
+        >
+          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          {t("upgradeNow")}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
 // CREDIT INDICATOR COMPONENT
 // Minimal trigger + Smart Adaptive Panel popover
 // ============================================================================
@@ -436,10 +666,86 @@ export function EmailCreditIndicatorV3({ count, className }: EmailCreditIndicato
 interface MailCreditIndicatorV3Props {
   count: number
   className?: string
+  /** If true, user is on Digital Capsule plan */
+  isDigitalCapsule?: boolean
+  /** If true, user can purchase trial credit */
+  canPurchaseTrial?: boolean
+  /** If true, user has used their trial credit */
+  hasUsedTrial?: boolean
 }
 
-export function MailCreditIndicatorV3({ count, className }: MailCreditIndicatorV3Props) {
-  return <CreditIndicatorV3 type="mail" count={count} className={className} />
+export function MailCreditIndicatorV3({
+  count,
+  className,
+  isDigitalCapsule = false,
+  canPurchaseTrial = false,
+  hasUsedTrial = false,
+}: MailCreditIndicatorV3Props) {
+  const [open, setOpen] = useState(false)
+
+  const config = CREDIT_CONFIG.mail
+  const Icon = config.icon
+
+  // For Digital Capsule users, always show as "locked" unless they have credits
+  const isLockedForDigitalCapsule = isDigitalCapsule && count === 0
+  const showTrialBadge = isDigitalCapsule && canPurchaseTrial && count === 0
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      {/* Minimal Trigger */}
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "flex items-center gap-1 px-2 py-1 font-mono text-xs font-bold transition-opacity hover:opacity-80",
+            isLockedForDigitalCapsule
+              ? "text-charcoal/40"
+              : count === 0
+                ? "text-coral"
+                : count <= 2
+                  ? "text-duck-yellow"
+                  : "text-charcoal",
+            className
+          )}
+          aria-label={`${count} ${count === 1 ? config.singularLabel : config.label}`}
+        >
+          {isLockedForDigitalCapsule ? (
+            <Lock className="h-3.5 w-3.5" strokeWidth={2.5} />
+          ) : (
+            <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
+          )}
+          <span className="tabular-nums">{count}</span>
+          {showTrialBadge && (
+            <span className="ml-0.5 px-1 py-0.5 bg-duck-yellow text-charcoal font-mono text-[8px] font-bold uppercase" style={{ borderRadius: "2px" }}>
+              Try
+            </span>
+          )}
+        </button>
+      </PopoverTrigger>
+
+      {/* Popover Content - Different panel for Digital Capsule users */}
+      <PopoverContent
+        className="w-80 border-2 border-charcoal bg-white p-0 shadow-[4px_4px_0_theme(colors.charcoal)]"
+        style={{ borderRadius: "2px" }}
+        align="end"
+        sideOffset={8}
+      >
+        {isDigitalCapsule ? (
+          <DigitalCapsuleMailPanel
+            currentCredits={count}
+            canPurchaseTrial={canPurchaseTrial}
+            hasUsedTrial={hasUsedTrial}
+            onClose={() => setOpen(false)}
+          />
+        ) : (
+          <SmartAdaptivePanel
+            type="mail"
+            currentCredits={count}
+            onClose={() => setOpen(false)}
+          />
+        )}
+      </PopoverContent>
+    </Popover>
+  )
 }
 
 // ============================================================================
@@ -450,6 +756,12 @@ interface CreditsBarV3Props {
   emailCredits: number
   mailCredits: number
   className?: string
+  /** If true, user is on Digital Capsule plan */
+  isDigitalCapsule?: boolean
+  /** If true, user can purchase trial credit */
+  canPurchaseTrial?: boolean
+  /** If true, user has used their trial credit */
+  hasUsedTrial?: boolean
 }
 
 /**
@@ -457,7 +769,14 @@ interface CreditsBarV3Props {
  * Designed for navbar placement
  * Listens for credit updates from other tabs (after Stripe checkout)
  */
-export function CreditsBarV3({ emailCredits, mailCredits, className }: CreditsBarV3Props) {
+export function CreditsBarV3({
+  emailCredits,
+  mailCredits,
+  className,
+  isDigitalCapsule = false,
+  canPurchaseTrial = false,
+  hasUsedTrial = false,
+}: CreditsBarV3Props) {
   const router = useRouter()
 
   // Listen for credit updates from other tabs and refresh the page data
@@ -468,7 +787,12 @@ export function CreditsBarV3({ emailCredits, mailCredits, className }: CreditsBa
   return (
     <div className={cn("flex items-center gap-1", className)}>
       <EmailCreditIndicatorV3 count={emailCredits} />
-      <MailCreditIndicatorV3 count={mailCredits} />
+      <MailCreditIndicatorV3
+        count={mailCredits}
+        isDigitalCapsule={isDigitalCapsule}
+        canPurchaseTrial={canPurchaseTrial}
+        hasUsedTrial={hasUsedTrial}
+      />
     </div>
   )
 }

@@ -24,6 +24,7 @@ export const env = createEnv({
     STRIPE_PRICE_PAPER_ANNUAL: z.string().min(1),
     STRIPE_PRICE_ADDON_EMAIL: z.string().min(1).optional(),
     STRIPE_PRICE_ADDON_PHYSICAL: z.string().min(1).optional(),
+    STRIPE_PRICE_TRIAL_PHYSICAL: z.string().min(1).optional(), // One-time $4.99 physical mail trial for Digital Capsule
 
     // Email
     RESEND_API_KEY: z.string().min(1),
@@ -111,6 +112,7 @@ export const env = createEnv({
     STRIPE_PRICE_PAPER_ANNUAL: process.env.STRIPE_PRICE_PAPER_ANNUAL,
     STRIPE_PRICE_ADDON_EMAIL: process.env.STRIPE_PRICE_ADDON_EMAIL,
     STRIPE_PRICE_ADDON_PHYSICAL: process.env.STRIPE_PRICE_ADDON_PHYSICAL,
+    STRIPE_PRICE_TRIAL_PHYSICAL: process.env.STRIPE_PRICE_TRIAL_PHYSICAL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
     EMAIL_FROM_NOTIFICATION: process.env.EMAIL_FROM_NOTIFICATION,

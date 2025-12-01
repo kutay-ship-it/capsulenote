@@ -190,9 +190,12 @@
   "deliveryType": {
     "email": "Email",
     "physical": "Physical",
+    "locked": "Locked",
     "credits": "credits",
     "digitalDelivery": "Digital delivery",
     "realLetter": "Real letter",
+    "upgradeRequired": "Upgrade Required",
+    "tryFor499": "Try for $4.99",
     "doubleDelivery": {
       "title": "Double Delivery",
       "description": "Your letter will arrive digitally in their inbox and as a physical letter in their mailbox."
@@ -201,6 +204,58 @@
       "addPhysical": "Tap Physical to add a printed letter",
       "addEmail": "Tap Email to also send digitally"
     }
+  },
+  "physicalMailTrial": {
+    "dialogTitle": "Try Physical Mail",
+    "badge": "One-Time Offer",
+    "title": "Try Physical Mail",
+    "subtitle": "Experience real letters delivered to your mailbox",
+    "description": "Get a taste of our premium physical mail delivery with a single credit. Perfect for testing before upgrading.",
+    "features": {
+      "realLetter": "Real printed letter on premium paper",
+      "printedMailed": "Professionally printed and mailed",
+      "thirtyDaysNotice": "30-day advance scheduling required"
+    },
+    "priceLabel": "Trial Price",
+    "oneTime": "one-time",
+    "trialNote": "Valid for one physical letter delivery",
+    "upgradeHint": "Love it? Upgrade to Paper & Pixels for unlimited access with 3 credits/year included.",
+    "notNow": "Not Now",
+    "processing": "Processing...",
+    "tryPhysicalMail": "Try Physical Mail",
+    "errors": {
+      "checkoutFailed": "Failed to start checkout",
+      "tryAgainLater": "Please try again later."
+    }
+  },
+  "physicalMailUpgrade": {
+    "dialogTitle": "Upgrade to Paper & Pixels",
+    "badge": "Unlock Physical Mail",
+    "title": "Upgrade Your Plan",
+    "subtitle": "Get email + physical mail delivery",
+    "description": "Unlock the full Capsule Note experience with physical mail delivery. Your letters, printed on premium paper and delivered to any mailbox.",
+    "plans": {
+      "digital": {
+        "title": "Current Plan",
+        "feature1": "6 email deliveries/year",
+        "feature2": "Unlimited letter storage",
+        "feature3": "Physical mail delivery",
+        "feature4": "Premium paper printing"
+      },
+      "paper": {
+        "title": "Paper & Pixels",
+        "recommended": "Recommended",
+        "feature1": "24 email deliveries/year",
+        "feature2": "Unlimited letter storage",
+        "feature3": "3 physical mail credits/year",
+        "feature4": "Premium paper printing"
+      }
+    },
+    "prorationTitle": "Smart Pricing",
+    "prorationDescription": "You'll only pay the difference for the remainder of your billing cycle. Stripe automatically calculates the prorated amount.",
+    "maybeLater": "Maybe Later",
+    "loading": "Loading...",
+    "upgradeNow": "Upgrade Now"
   },
   "seal": {
     "dialogTitle": "Seal your letter confirmation",

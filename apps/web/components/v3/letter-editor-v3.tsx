@@ -55,11 +55,13 @@ import { TemplateSelectorV3 } from "@/components/v3/template-selector-v3"
 import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-type-v3"
 import { SealConfirmationV3 } from "@/components/v3/seal-confirmation-v3"
 import { SealCelebrationV3 } from "@/components/v3/seal-celebration-v3"
+import { PhysicalMailTrialModal } from "@/components/v3/physical-mail-trial-modal"
+import { PhysicalMailUpgradeModal } from "@/components/v3/physical-mail-upgrade-modal"
 import { CreditWarningBanner } from "@/components/v3/credit-warning-banner"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
 import { PrintOptionsV3, type PrintOptions } from "@/components/v3/print-options-v3"
 import type { LetterTemplate } from "@/server/actions/templates"
-import type { DeliveryEligibility } from "@/server/actions/entitlements"
+import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
 import type { ShippingAddress } from "@/server/actions/addresses"
 
 type RecipientType = "myself" | "someone-else"
@@ -112,6 +114,9 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const [showCustomDate, setShowCustomDate] = React.useState(false)
   const [showSealConfirmation, setShowSealConfirmation] = React.useState(false)
   const [showCelebration, setShowCelebration] = React.useState(false)
+  // Physical mail upsell modals
+  const [showTrialModal, setShowTrialModal] = React.useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false)
   const [sealedLetterId, setSealedLetterId] = React.useState<string | null>(null)
   const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
   const [restoredFromDraft, setRestoredFromDraft] = React.useState(false)
@@ -185,6 +190,15 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     }, [onRefreshEligibility, t])
   )
 
+  // Helper to safely parse a date string and return undefined if invalid
+  const parseDateSafe = (dateString: string | null | undefined): Date | undefined => {
+    if (!dateString) return undefined
+    const date = new Date(dateString)
+    // Check if the date is valid (Invalid Date returns NaN for getTime())
+    if (isNaN(date.getTime())) return undefined
+    return date
+  }
+
   // Load autosaved draft on mount (only for new letters)
   // Priority: Anonymous draft (from homepage before signup) > Authenticated draft
   React.useEffect(() => {
@@ -201,8 +215,9 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       setDeliveryChannels(
         anonymousDraft.deliveryType === "physical" ? ["physical"] : ["email"]
       )
-      if (anonymousDraft.deliveryDate) {
-        setDeliveryDate(new Date(anonymousDraft.deliveryDate))
+      const parsedDate = parseDateSafe(anonymousDraft.deliveryDate)
+      if (parsedDate) {
+        setDeliveryDate(parsedDate)
       }
       if (anonymousDraft.selectedPreset) {
         setSelectedPreset(anonymousDraft.selectedPreset)
@@ -251,8 +266,9 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       setRecipientName(savedDraft.recipientName)
       setRecipientEmail(savedDraft.recipientEmail)
       setDeliveryChannels(savedDraft.deliveryChannels)
-      if (savedDraft.deliveryDate) {
-        setDeliveryDate(new Date(savedDraft.deliveryDate))
+      const savedParsedDate = parseDateSafe(savedDraft.deliveryDate)
+      if (savedParsedDate) {
+        setDeliveryDate(savedParsedDate)
       }
       setSelectedPreset(savedDraft.selectedPreset)
       setSelectedAddressId(savedDraft.selectedAddressId)
@@ -439,6 +455,22 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     setSelectedAddressId(addressId)
     setSelectedAddress(address || null)
   }
+
+  // Handler for physical mail upsell - decides which modal to show
+  const handlePhysicalUpsellTriggered = React.useCallback(() => {
+    // If user can purchase trial, show trial modal
+    if (currentEligibility.canPurchasePhysicalTrial) {
+      setShowTrialModal(true)
+      return
+    }
+    // If user has used trial but no credits (needs upgrade), show upgrade modal
+    if (currentEligibility.hasUsedPhysicalTrial && currentEligibility.physicalCredits <= 0) {
+      setShowUpgradeModal(true)
+      return
+    }
+    // Fallback: show upgrade modal
+    setShowUpgradeModal(true)
+  }, [currentEligibility])
 
   const handleTemplateSelect = (template: LetterTemplate) => {
     // Apply template content to the editor
@@ -825,6 +857,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                   value={deliveryChannels}
                   onChange={setDeliveryChannels}
                   eligibility={currentEligibility}
+                  onPhysicalUpsellTriggered={handlePhysicalUpsellTriggered}
                 />
               </div>
 
@@ -1102,6 +1135,18 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           onComplete={handleCelebrationComplete}
         />
       )}
+
+      {/* Physical Mail Trial Modal */}
+      <PhysicalMailTrialModal
+        open={showTrialModal}
+        onOpenChange={setShowTrialModal}
+      />
+
+      {/* Physical Mail Upgrade Modal */}
+      <PhysicalMailUpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+      />
     </form>
   )
 }

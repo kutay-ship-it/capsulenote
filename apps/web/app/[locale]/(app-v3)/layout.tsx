@@ -13,7 +13,7 @@ import { OnboardingProvider } from "@/components/v3/onboarding"
 import { Link } from "@/i18n/routing"
 import type { Locale } from "@/i18n/routing"
 import { getCurrentUser } from "@/server/lib/auth"
-import { getEntitlements } from "@/server/lib/entitlements"
+import { getEntitlements, getPhysicalTrialStatus } from "@/server/lib/entitlements"
 
 export default async function AppV3Layout({
   children,
@@ -36,6 +36,12 @@ export default async function AppV3Layout({
   const entitlements = user ? await getEntitlements(user.id) : null
   const emailCredits = entitlements?.features.emailDeliveriesIncluded ?? 0
   const mailCredits = entitlements?.usage.mailCreditsRemaining ?? 0
+
+  // Get trial eligibility for the mail credit indicator (single optimized query)
+  const isDigitalCapsule = entitlements?.plan === "DIGITAL_CAPSULE"
+  const trialStatus = user ? await getPhysicalTrialStatus(user.id) : null
+  const canPurchaseTrial = trialStatus?.canPurchase ?? false
+  const hasUsedTrial = trialStatus?.hasUsedTrial ?? false
 
   // Check if user needs onboarding
   const shouldShowOnboarding = user ? !user.profile?.onboardingCompleted : false
@@ -89,6 +95,9 @@ export default async function AppV3Layout({
                 <CreditsBarV3
                   emailCredits={emailCredits}
                   mailCredits={mailCredits}
+                  isDigitalCapsule={isDigitalCapsule}
+                  canPurchaseTrial={canPurchaseTrial}
+                  hasUsedTrial={hasUsedTrial}
                 />
               )}
 

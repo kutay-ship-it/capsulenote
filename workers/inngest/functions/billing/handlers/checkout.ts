@@ -299,6 +299,106 @@ async function handleCreditAddonCheckout(
 }
 
 /**
+ * Handle physical mail trial credit checkout completion
+ *
+ * One-time $4.99 purchase for Digital Capsule users to try physical mail.
+ * Only grants 1 credit and marks the trial as purchased (idempotent).
+ *
+ * @param session - Stripe Checkout Session object
+ * @param userId - User ID from metadata or customer lookup
+ * @returns true if handled as trial credit, false if not a trial checkout
+ */
+async function handlePhysicalMailTrialCheckout(
+  session: Stripe.Checkout.Session,
+  userId: string
+): Promise<boolean> {
+  // Check if this is a physical mail trial checkout
+  if (session.mode !== "payment") {
+    return false
+  }
+
+  const metadata = session.metadata || {}
+  if (metadata.type !== "physical_mail_trial") {
+    return false
+  }
+
+  console.log("[Checkout Handler] Processing physical mail trial checkout", {
+    sessionId: session.id,
+    userId,
+    amountTotal: session.amount_total,
+  })
+
+  // IDEMPOTENCY CHECK: Check if trial already purchased
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      physicalMailTrialPurchasedAt: true,
+      physicalCredits: true,
+    },
+  })
+
+  if (!user) {
+    console.error("[Checkout Handler] User not found for trial fulfillment", {
+      sessionId: session.id,
+      userId,
+    })
+    return false
+  }
+
+  // Already fulfilled - idempotent success
+  if (user.physicalMailTrialPurchasedAt) {
+    console.log("[Checkout Handler] Physical mail trial already fulfilled (idempotent)", {
+      sessionId: session.id,
+      userId,
+      purchasedAt: user.physicalMailTrialPurchasedAt,
+    })
+    return true
+  }
+
+  // ATOMIC TRANSACTION: Grant credit and mark purchased
+  await prisma.$transaction(async (tx) => {
+    // 1. Record credit transaction (audit trail)
+    await tx.creditTransaction.create({
+      data: {
+        userId,
+        creditType: "physical",
+        transactionType: "grant_trial",
+        amount: 1,
+        balanceBefore: user.physicalCredits,
+        balanceAfter: user.physicalCredits + 1,
+        source: session.id,
+        metadata: { type: "physical_mail_trial" },
+      },
+    })
+
+    // 2. Grant credit and mark purchased
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        physicalCredits: { increment: 1 },
+        physicalMailTrialPurchasedAt: new Date(),
+      },
+    })
+  })
+
+  // 3. Invalidate cache and record audit
+  await invalidateEntitlementsCache(userId)
+  await recordBillingAudit(userId, AuditEventType.ENTITLEMENTS_UPDATED, {
+    type: "physical_mail_trial",
+    checkoutSessionId: session.id,
+    amountTotal: session.amount_total,
+  })
+
+  console.log("[Checkout Handler] Physical mail trial fulfilled successfully", {
+    sessionId: session.id,
+    userId,
+    newCredits: user.physicalCredits + 1,
+  })
+
+  return true
+}
+
+/**
  * Handle checkout.session.completed event
  *
  * Supports multiple checkout flows:
@@ -348,6 +448,33 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
     const handled = await handleCreditAddonCheckout(session, userId)
     if (handled) {
       console.log("[Checkout Handler] Credit addon checkout handled", {
+        sessionId: session.id,
+        userId,
+      })
+      return
+    }
+  }
+
+  // =========================================================================
+  // FLOW 1b: Physical Mail Trial Credit (mode="payment", type="physical_mail_trial")
+  // One-time $4.99 trial for Digital Capsule users
+  // =========================================================================
+  if (session.mode === "payment" && session.metadata?.type === "physical_mail_trial") {
+    // Try to get userId from metadata first (more reliable), then from customer lookup
+    const userId = session.metadata?.userId || user?.id
+
+    if (!userId) {
+      console.error("[Checkout Handler] No user found for physical mail trial checkout", {
+        sessionId: session.id,
+        customerId,
+        metadata: session.metadata,
+      })
+      return
+    }
+
+    const handled = await handlePhysicalMailTrialCheckout(session, userId)
+    if (handled) {
+      console.log("[Checkout Handler] Physical mail trial checkout handled", {
         sessionId: session.id,
         userId,
       })

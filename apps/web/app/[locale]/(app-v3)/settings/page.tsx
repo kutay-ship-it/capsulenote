@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 
 import { getCurrentUser } from "@/server/lib/auth"
-import { getEntitlements } from "@/server/lib/entitlements"
+import { getEntitlements, canPurchasePhysicalTrial } from "@/server/lib/entitlements"
 import { prisma } from "@/server/lib/db"
 import { getOrCreateReferralCode, getReferralStats } from "@/server/actions/referral-codes"
 import { buildReferralLink } from "@/server/actions/referrals"
@@ -35,6 +35,7 @@ import { ExportDataButton } from "./_components/export-data-button"
 import { DeleteDataButton } from "./_components/delete-data-button"
 import { ManageSubscriptionButton } from "./_components/manage-subscription-button"
 import { AddOnPurchase } from "./_components/addon-purchase"
+import { BillingTrialSection } from "./_components/billing-trial-section"
 import { ReferralShareV3 } from "@/components/v3/settings/referral-share-v3"
 
 // Force dynamic rendering
@@ -219,6 +220,13 @@ interface BillingContentProps {
     metadata: unknown
   }>
   locale: string
+  /** Trial-related data for Digital Capsule users */
+  trialData: {
+    isDigitalCapsule: boolean
+    canPurchaseTrial: boolean
+    hasUsedTrial: boolean
+    physicalCredits: number
+  }
   translations: {
     subscription: {
       title: string
@@ -255,9 +263,17 @@ interface BillingContentProps {
   }
 }
 
-function BillingContent({ subscription, entitlements, payments, locale, translations }: BillingContentProps) {
+function BillingContent({ subscription, entitlements, payments, locale, trialData, translations }: BillingContentProps) {
   return (
     <>
+      {/* Physical Mail Trial Section - Shows for Digital Capsule users */}
+      <BillingTrialSection
+        isDigitalCapsule={trialData.isDigitalCapsule}
+        canPurchaseTrial={trialData.canPurchaseTrial}
+        hasUsedTrial={trialData.hasUsedTrial}
+        physicalCredits={trialData.physicalCredits}
+      />
+
       {/* Subscription Status */}
       <SettingsCardV3
         icon={<CreditCard className="h-3.5 w-3.5" strokeWidth={2} />}
@@ -706,7 +722,7 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
   // Parallel fetch ALL tab data for instant tab switching
   // Note: We call getOrCreateReferralCode once and build referralLink from the result
   // to avoid race conditions from parallel calls to the same function
-  const [entitlements, subscription, payments, addresses, referralCode, referralStats] =
+  const [entitlements, subscription, payments, addresses, referralCode, referralStats, canPurchaseTrial, userTrialStatus] =
     await Promise.all([
       getEntitlements(user.id),
       prisma.subscription.findFirst({
@@ -735,10 +751,24 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
       }),
       getOrCreateReferralCode(),
       getReferralStats(),
+      // Trial-related data
+      canPurchasePhysicalTrial(user.id),
+      prisma.user.findUnique({
+        where: { id: user.id },
+        select: { physicalMailTrialUsed: true },
+      }),
     ])
 
   // Build referral link from the code (no DB call needed)
   const referralLink = await buildReferralLink(referralCode.code)
+
+  // Build trial data for billing section
+  const trialData = {
+    isDigitalCapsule: entitlements.plan === "DIGITAL_CAPSULE",
+    canPurchaseTrial,
+    hasUsedTrial: userTrialStatus?.physicalMailTrialUsed ?? false,
+    physicalCredits: entitlements.usage.mailCreditsRemaining,
+  }
 
   // Build translations objects for each content section
   const accountTranslations = {
@@ -893,6 +923,7 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
                 entitlements={entitlements}
                 payments={payments}
                 locale={locale}
+                trialData={trialData}
                 translations={billingTranslations}
               />
             }

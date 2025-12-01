@@ -44,6 +44,7 @@ enum CreditTransactionType {
   grant_addon         // Purchased add-on credits
   grant_referral      // Referral bonus
   grant_refund        // Credits restored on delivery rollback
+  grant_trial         // One-time physical mail trial credit for Digital Capsule users
   deduct_delivery     // Used for delivery
   deduct_refund       // Refunded purchase
   deduct_cancel       // Credits removed on subscription cancel
@@ -81,6 +82,9 @@ model User {
   emailAddonCredits    Int @default(0) @map("email_addon_credits")
   physicalAddonCredits Int @default(0) @map("physical_addon_credits")
   creditExpiresAt DateTime? @map("credit_expires_at") @db.Timestamptz(3)
+  // Trial physical mail credit for Digital Capsule users (one-time $4.99 purchase)
+  physicalMailTrialPurchasedAt DateTime? @map("physical_mail_trial_purchased_at") @db.Timestamptz(3)
+  physicalMailTrialUsed        Boolean   @default(false) @map("physical_mail_trial_used")
   /// @deprecated Use Profile.timezone instead. This field is kept for backward compatibility.
   timezone        String?  @default("UTC")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
