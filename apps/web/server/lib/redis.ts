@@ -29,4 +29,11 @@ export const ratelimit = {
     limiter: Ratelimit.slidingWindow(20, "1 h"),
     analytics: true,
   }),
+
+  // Contact form: 5 per hour per IP
+  contactForm: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, "1 h"),
+    analytics: true,
+  }),
 }

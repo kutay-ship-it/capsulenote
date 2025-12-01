@@ -1,0 +1,518 @@
+{
+  "about": {
+    "meta": {
+      "title": "About Us | Capsule Note",
+      "description": "Learn about Capsule Note's mission to help people connect with their future selves through meaningful time capsule letters."
+    },
+    "hero": {
+      "badge": "About Us",
+      "title": "About Capsule Note",
+      "description": "Helping people send meaningful messages through time since 2024."
+    },
+    "sections": {
+      "mission": {
+        "title": "Our Mission",
+        "content": [
+          "At Capsule Note, we believe in the power of reflection and the importance of connecting with your future self. In a world of instant communication, we're building something different—a bridge between your present thoughts and your future moments.",
+          "Our mission is to help people preserve their thoughts, dreams, goals, and memories for delivery at the perfect moment in the future. Whether it's a letter of encouragement before a big event, reflections on a milestone, or simply words you want your future self to remember."
+        ],
+        "highlight": "Every letter you write today becomes a gift to your future self—a snapshot of who you were, delivered exactly when you need it most."
+      },
+      "story": {
+        "title": "Our Story",
+        "content": [
+          "Capsule Note was born from a simple idea: what if you could send a letter to yourself in the future? Not just a reminder or a calendar notification, but a real, thoughtful message that captures who you are today.",
+          "We started building Capsule Note after realizing how meaningful it can be to receive words from your past self. A letter written before starting a new job, arriving on your one-year anniversary. Birthday wishes you wrote to yourself a decade ago. Encouragement you penned during a difficult time, delivered when you're thriving.",
+          "Today, we're dedicated to making time capsule letters secure, reliable, and delightful. Every feature we build is designed to honor the trust you place in us to keep your words safe until their moment arrives."
+        ]
+      },
+      "values": {
+        "title": "Our Values",
+        "intro": "Everything we do is guided by three core principles:"
+      }
+    },
+    "values": {
+      "privacy": {
+        "title": "Privacy First",
+        "description": "Your letters are encrypted end-to-end. We literally cannot read them. Your words are yours alone."
+      },
+      "time": {
+        "title": "Time Matters",
+        "description": "We treat your scheduled delivery times with the utmost care. 99.95% on-time delivery is our commitment."
+      },
+      "words": {
+        "title": "Words Endure",
+        "description": "The things worth saying are worth preserving. We build for permanence and reliability."
+      }
+    },
+    "cta": {
+      "title": "Ready to Write to Your Future Self?",
+      "description": "Start your first time capsule letter today. It's free to begin, and your words will be waiting exactly when you need them.",
+      "primaryButton": "Write Your First Letter",
+      "secondaryButton": "See Pricing"
+    }
+  },
+
+  "contact": {
+    "meta": {
+      "title": "Contact Us | Capsule Note",
+      "description": "Get in touch with the Capsule Note team. We're here to help with questions, feedback, and support."
+    },
+    "hero": {
+      "badge": "Contact",
+      "title": "Get in Touch",
+      "description": "Have a question, feedback, or just want to say hello? We'd love to hear from you."
+    },
+    "formSection": {
+      "title": "Send Us a Message",
+      "description": "Fill out the form below and we'll get back to you as soon as possible."
+    },
+    "form": {
+      "name": "Your Name",
+      "namePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "you@example.com",
+      "subject": "Subject",
+      "subjectPlaceholder": "Select a subject...",
+      "subjects": {
+        "general": "General Inquiry",
+        "support": "Support",
+        "sales": "Sales",
+        "press": "Press",
+        "other": "Other"
+      },
+      "message": "Your Message",
+      "messagePlaceholder": "Tell us how we can help...",
+      "submit": "Send Message",
+      "sending": "Sending...",
+      "success": {
+        "title": "Message Sent!",
+        "description": "Thank you for reaching out. We'll get back to you within 24-48 hours.",
+        "sendAnother": "Send Another Message"
+      }
+    },
+    "methods": {
+      "email": {
+        "title": "Email",
+        "description": "For general inquiries"
+      },
+      "twitter": {
+        "title": "Twitter",
+        "description": "Follow us for updates"
+      }
+    },
+    "sidebar": {
+      "otherWays": "Other Ways to Reach Us",
+      "responseTime": {
+        "title": "Response Time",
+        "description": "We typically respond to all inquiries within 24-48 hours during business days."
+      },
+      "openSource": {
+        "title": "Open Source",
+        "action": "View on GitHub"
+      }
+    }
+  },
+
+  "privacy": {
+    "meta": {
+      "title": "Privacy Policy | Capsule Note",
+      "description": "Learn how Capsule Note protects your data and privacy. Read our comprehensive privacy policy."
+    },
+    "hero": {
+      "badge": "Privacy Policy",
+      "title": "Your Privacy Matters",
+      "description": "We're committed to protecting your personal information and being transparent about how we use it."
+    },
+    "common": {
+      "tableOfContents": "Contents",
+      "jumpToSection": "Jump to Section"
+    },
+    "sections": {
+      "introduction": {
+        "title": "Introduction",
+        "content": [
+          "This Privacy Policy explains how Capsule Note (\"we\", \"us\", or \"our\") collects, uses, and protects your personal information when you use our time capsule letter service.",
+          "By using Capsule Note, you agree to the collection and use of information in accordance with this policy. We will not use or share your information with anyone except as described in this Privacy Policy."
+        ]
+      },
+      "collection": {
+        "title": "Information We Collect",
+        "intro": "We collect several types of information to provide and improve our service:",
+        "account": {
+          "title": "Account Information",
+          "items": [
+            "Email address (required for account creation and letter delivery)",
+            "Name or display name (optional)",
+            "Profile picture (optional, via OAuth providers)",
+            "Timezone preference"
+          ]
+        },
+        "content": {
+          "title": "Letter Content",
+          "items": [
+            "Letter text and rich content you create",
+            "Scheduled delivery dates and times",
+            "Recipient email addresses for letter delivery",
+            "Note: All letter content is encrypted at rest"
+          ]
+        },
+        "usage": {
+          "title": "Usage Information",
+          "items": [
+            "Log data (IP address, browser type, pages visited)",
+            "Device information (operating system, device type)",
+            "Analytics data (feature usage, session duration)"
+          ]
+        }
+      },
+      "usage": {
+        "title": "How We Use Your Information",
+        "intro": "We use the information we collect for the following purposes:",
+        "items": [
+          "To create and manage your account",
+          "To deliver your letters at the scheduled time",
+          "To send transactional emails (confirmations, delivery notifications)",
+          "To improve our service and develop new features",
+          "To respond to your support requests",
+          "To detect and prevent fraud or abuse"
+        ],
+        "highlight": "We never sell your personal information to third parties. We never use your letter content for advertising or marketing purposes."
+      },
+      "storage": {
+        "title": "Data Storage & Security",
+        "intro": "We take the security of your data seriously:",
+        "items": [
+          "All letter content is encrypted using AES-256-GCM encryption",
+          "Data is stored on secure, SOC 2 compliant infrastructure",
+          "All data transmission uses TLS 1.3 encryption",
+          "Regular security audits and penetration testing",
+          "Strict access controls and employee training"
+        ],
+        "retention": "We retain your data for as long as your account is active. If you delete your account, we will delete your personal data within 30 days, except where we need to retain it for legal purposes."
+      },
+      "sharing": {
+        "title": "Information Sharing",
+        "intro": "We share your information only in the following circumstances:",
+        "providers": {
+          "title": "Service Providers",
+          "columns": {
+            "service": "Service",
+            "purpose": "Purpose",
+            "data": "Data Shared"
+          },
+          "list": [
+            { "service": "Clerk", "purpose": "Authentication", "data": "Email, name, profile" },
+            { "service": "Stripe", "purpose": "Payments", "data": "Payment info, email" },
+            { "service": "Resend", "purpose": "Email delivery", "data": "Email addresses, letter content" },
+            { "service": "Neon", "purpose": "Database", "data": "Encrypted data storage" },
+            { "service": "Inngest", "purpose": "Job scheduling", "data": "Delivery metadata" }
+          ]
+        },
+        "noSelling": "We never sell, rent, or share your personal information with third parties for their marketing purposes."
+      },
+      "cookies": {
+        "title": "Cookies & Tracking",
+        "intro": "We use cookies and similar technologies to improve your experience:",
+        "columns": {
+          "name": "Cookie",
+          "purpose": "Purpose",
+          "duration": "Duration",
+          "required": "Type"
+        },
+        "list": [
+          { "name": "__clerk_session", "purpose": "Authentication session", "duration": "Session", "required": true },
+          { "name": "NEXT_LOCALE", "purpose": "Language preference", "duration": "1 year", "required": true },
+          { "name": "_ph_*", "purpose": "Analytics (PostHog)", "duration": "1 year", "required": false }
+        ],
+        "required": "Required",
+        "optional": "Optional"
+      },
+      "rights": {
+        "title": "Your Rights",
+        "intro": "You have the following rights regarding your personal data:",
+        "items": [
+          "Access: Request a copy of your personal data",
+          "Rectification: Correct inaccurate personal data",
+          "Erasure: Request deletion of your personal data",
+          "Portability: Export your data in a machine-readable format",
+          "Objection: Object to certain processing of your data",
+          "Restriction: Request limited processing of your data"
+        ],
+        "exportButton": "Export My Data",
+        "deleteButton": "Delete My Account"
+      },
+      "gdpr": {
+        "title": "GDPR Compliance",
+        "intro": "For users in the European Economic Area (EEA), we comply with the General Data Protection Regulation (GDPR):",
+        "items": [
+          "We process data based on your consent or contract necessity",
+          "You can withdraw consent at any time",
+          "You can file a complaint with your local data protection authority",
+          "We conduct Data Protection Impact Assessments when required"
+        ],
+        "legal": "Our lawful bases for processing include: contract performance (delivering your letters), consent (marketing communications), and legitimate interests (improving our service, fraud prevention)."
+      },
+      "contact": {
+        "title": "Contact Us",
+        "intro": "If you have questions about this Privacy Policy or want to exercise your rights, please contact our Data Protection Officer:",
+        "dpo": "Data Protection Officer"
+      },
+      "changes": {
+        "title": "Policy Changes",
+        "content": [
+          "We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the \"Last updated\" date.",
+          "For significant changes, we will also notify you via email at least 30 days before the changes take effect."
+        ]
+      }
+    }
+  },
+
+  "security": {
+    "meta": {
+      "title": "Security | Capsule Note",
+      "description": "Learn how Capsule Note protects your letters with industry-leading security measures including AES-256 encryption."
+    },
+    "hero": {
+      "badge": "Security",
+      "title": "Your Letters, Protected",
+      "description": "Security isn't an afterthought—it's the foundation of everything we build."
+    },
+    "pillars": {
+      "encryption": {
+        "title": "Encryption",
+        "description": "AES-256-GCM encryption for all letter content with unique keys per record."
+      },
+      "infrastructure": {
+        "title": "Infrastructure",
+        "description": "Enterprise-grade cloud infrastructure with multiple layers of protection."
+      },
+      "access": {
+        "title": "Access Control",
+        "description": "Strict access controls ensure only you can read your letters."
+      }
+    },
+    "sections": {
+      "overview": {
+        "title": "Security Overview",
+        "content": [
+          "At Capsule Note, we understand that you're entrusting us with your most personal thoughts and memories. We take this responsibility seriously and have built our platform with security as a core principle.",
+          "Our security architecture is designed around the concept of \"zero knowledge\"—meaning we cannot access your letter content, even if we wanted to. Your letters are encrypted on our servers, and only you hold the keys to decrypt them."
+        ]
+      },
+      "encryption": {
+        "title": "Encryption",
+        "intro": "All letter content is encrypted using industry-standard encryption algorithms:",
+        "highlight": {
+          "title": "Zero-Knowledge Architecture",
+          "description": "We cannot read your letters. Your content is encrypted before storage using keys derived from your account, making it mathematically impossible for us to access your letter content."
+        },
+        "specs": {
+          "title": "Technical Specifications",
+          "algorithm": "Algorithm",
+          "keyDerivation": "Key Derivation",
+          "transport": "Transport",
+          "nonce": "Nonce"
+        },
+        "zeroKnowledge": "Each letter is encrypted with a unique nonce, ensuring that even identical content produces different ciphertext. Key rotation is supported to allow periodic key updates without re-encrypting all existing content."
+      },
+      "infrastructure": {
+        "title": "Infrastructure Security",
+        "intro": "Our infrastructure is built on enterprise-grade cloud platforms with multiple layers of security:",
+        "features": [
+          "SOC 2 Type II compliant cloud infrastructure",
+          "Database encryption at rest and in transit",
+          "Automated daily backups with point-in-time recovery",
+          "DDoS protection and Web Application Firewall (WAF)",
+          "Network isolation and VPC architecture",
+          "Regular vulnerability scanning and patching"
+        ]
+      },
+      "access": {
+        "title": "Access Control",
+        "intro": "We implement strict access controls to protect your data:",
+        "features": [
+          "Multi-factor authentication for all administrative access",
+          "Role-based access control (RBAC) with least-privilege principle",
+          "Comprehensive audit logging of all data access",
+          "Regular access reviews and certification",
+          "Secure development practices and code review",
+          "Employee security training and background checks"
+        ]
+      },
+      "compliance": {
+        "title": "Compliance",
+        "intro": "We maintain compliance with industry standards and regulations:",
+        "certifications": [
+          { "name": "GDPR", "description": "Compliant with EU data protection requirements" },
+          { "name": "CCPA", "description": "Compliant with California privacy requirements" },
+          { "name": "TLS 1.3", "description": "Latest transport layer security protocol" },
+          { "name": "AES-256", "description": "Military-grade encryption standard" }
+        ]
+      },
+      "reporting": {
+        "title": "Security Reporting",
+        "intro": "We take all security reports seriously and appreciate the security research community's efforts to help keep Capsule Note safe.",
+        "contact": {
+          "title": "Report a Vulnerability",
+          "description": "If you believe you've found a security vulnerability in Capsule Note, please report it responsibly:"
+        },
+        "process": "We will acknowledge receipt of your report within 48 hours and provide regular updates on our investigation. We do not pursue legal action against security researchers who follow responsible disclosure practices."
+      }
+    }
+  },
+
+  "terms": {
+    "meta": {
+      "title": "Terms of Service | Capsule Note",
+      "description": "Read the terms and conditions for using Capsule Note's time capsule letter service."
+    },
+    "hero": {
+      "badge": "Terms of Service",
+      "title": "Terms of Service",
+      "description": "Please read these terms carefully before using Capsule Note."
+    },
+    "common": {
+      "tableOfContents": "Contents",
+      "jumpToSection": "Jump to Section"
+    },
+    "sections": {
+      "acceptance": {
+        "title": "Acceptance of Terms",
+        "content": [
+          "By accessing or using Capsule Note (the \"Service\"), you agree to be bound by these Terms of Service (\"Terms\"). If you disagree with any part of these terms, you may not access the Service.",
+          "These Terms apply to all visitors, users, and others who access or use the Service. By using the Service, you represent that you are at least 16 years of age."
+        ],
+        "warning": "If you do not agree to these Terms, please do not use our Service. Your continued use constitutes acceptance of these Terms."
+      },
+      "description": {
+        "title": "Service Description",
+        "intro": "Capsule Note is a time capsule letter service that allows you to:",
+        "features": [
+          "Write and save letters for future delivery",
+          "Schedule letters to be delivered to yourself or others via email",
+          "Optionally send physical letters via postal mail",
+          "Store and manage your letter collection",
+          "Access your letters from any device"
+        ]
+      },
+      "accounts": {
+        "title": "User Accounts",
+        "intro": "To use certain features of the Service, you must create an account.",
+        "requirements": {
+          "title": "Account Requirements",
+          "items": [
+            "You must be at least 16 years old to create an account",
+            "You must provide accurate and complete information",
+            "You must keep your account credentials secure",
+            "You must not share your account with others"
+          ]
+        },
+        "responsibilities": {
+          "title": "Your Responsibilities",
+          "items": [
+            "You are responsible for all activity under your account",
+            "You must notify us immediately of any unauthorized access",
+            "You must not use the Service for any illegal purpose",
+            "You must comply with all applicable laws and regulations"
+          ]
+        }
+      },
+      "payments": {
+        "title": "Payments & Billing",
+        "intro": "Some features of the Service require payment:",
+        "items": [
+          "Prices are displayed in your local currency where possible",
+          "All payments are processed securely through Stripe",
+          "Subscriptions automatically renew unless cancelled",
+          "You can cancel your subscription at any time from your account settings",
+          "Unused credits do not expire while your account is active"
+        ],
+        "refunds": {
+          "title": "Refund Policy",
+          "content": "We offer a 30-day money-back guarantee for new subscriptions. If you're not satisfied within 30 days of your first payment, contact us for a full refund. Refunds for letter credits are provided on a case-by-case basis."
+        }
+      },
+      "content": {
+        "title": "User Content",
+        "ownership": "You retain ownership of all content you create in Capsule Note, including your letters, drafts, and any other materials you upload or create.",
+        "license": "By using the Service, you grant us a limited license to store, process, and transmit your content solely for the purpose of providing the Service. We will not use your content for any other purpose without your consent.",
+        "encryption": "Your letter content is encrypted and we cannot access it. This means we cannot monitor, review, or moderate the content of your letters."
+      },
+      "prohibited": {
+        "title": "Prohibited Uses",
+        "intro": "You may not use Capsule Note for any of the following:",
+        "items": [
+          "Sending threatening, harassing, or abusive content to others",
+          "Sending spam or unsolicited commercial messages",
+          "Impersonating another person or entity",
+          "Attempting to gain unauthorized access to our systems",
+          "Interfering with other users' use of the Service",
+          "Violating any applicable law or regulation",
+          "Transmitting malware or other harmful code",
+          "Using automated systems to access the Service without permission"
+        ],
+        "warning": "Violation of these terms may result in immediate termination of your account and, where applicable, referral to law enforcement."
+      },
+      "intellectual": {
+        "title": "Intellectual Property",
+        "ownership": "The Service and its original content (excluding user content), features, and functionality are owned by Capsule Note and are protected by international copyright, trademark, and other intellectual property laws.",
+        "restrictions": "You may not copy, modify, distribute, sell, or lease any part of our Service, nor may you reverse engineer or attempt to extract the source code of our software."
+      },
+      "termination": {
+        "title": "Termination",
+        "byUser": {
+          "title": "Termination by You",
+          "content": "You may terminate your account at any time through your account settings. Upon termination, your scheduled letters will be cancelled and your data will be deleted within 30 days."
+        },
+        "byUs": {
+          "title": "Termination by Us",
+          "content": "We may terminate or suspend your account immediately, without prior notice, if you breach these Terms. We may also terminate the Service entirely with 90 days' notice to users."
+        },
+        "effects": {
+          "title": "Effect of Termination",
+          "items": [
+            "Your right to use the Service will cease immediately",
+            "Any scheduled letters will be cancelled",
+            "Your data will be deleted within 30 days",
+            "Any prepaid credits will be forfeited unless refunded"
+          ]
+        }
+      },
+      "disclaimers": {
+        "title": "Disclaimers",
+        "content": [
+          "The Service is provided \"as is\" and \"as available\" without warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement.",
+          "We do not guarantee that the Service will be uninterrupted, secure, or error-free. We do not guarantee that letters will be delivered exactly on time in all circumstances, though we strive for 99.95% on-time delivery."
+        ],
+        "highlight": "While we strive for reliable delivery, factors outside our control (email filtering, server issues, etc.) may occasionally affect delivery timing."
+      },
+      "liability": {
+        "title": "Limitation of Liability",
+        "content": [
+          "To the maximum extent permitted by law, Capsule Note shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of the Service.",
+          "This includes, but is not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses, even if we have been advised of the possibility of such damages."
+        ],
+        "maxLiability": {
+          "title": "Maximum Liability:",
+          "content": "Our total liability to you for any claims arising from or related to the Service shall not exceed the amount you have paid us in the 12 months preceding the claim."
+        }
+      },
+      "governing": {
+        "title": "Governing Law",
+        "content": [
+          "These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which Capsule Note is incorporated, without regard to its conflict of law provisions.",
+          "Any disputes arising from these Terms or the Service shall be resolved through binding arbitration in accordance with the rules of the applicable arbitration association."
+        ]
+      },
+      "changes": {
+        "title": "Changes to Terms",
+        "content": [
+          "We reserve the right to modify these Terms at any time. We will provide notice of material changes by posting the updated Terms on this page and updating the \"Last updated\" date.",
+          "For significant changes, we will notify you via email at least 30 days before the changes take effect. Your continued use of the Service after changes become effective constitutes acceptance of the new Terms."
+        ],
+        "questions": "Questions about our Terms?"
+      }
+    }
+  }
+}

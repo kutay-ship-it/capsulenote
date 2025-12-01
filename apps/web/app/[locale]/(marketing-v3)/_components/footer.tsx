@@ -19,14 +19,14 @@ export function Footer() {
       { label: t("links.howItWorks"), href: "#how-it-works" },
     ],
     company: [
-      { label: t("links.about"), href: "#" },
+      { label: t("links.about"), href: "/about" },
       { label: t("links.blog"), href: "#" },
-      { label: t("links.contact"), href: "#" },
+      { label: t("links.contact"), href: "/contact" },
     ],
     legal: [
       { label: t("links.privacy"), href: "/privacy" },
       { label: t("links.terms"), href: "/terms" },
-      { label: t("links.security"), href: "#" },
+      { label: t("links.security"), href: "/security" },
     ],
   }
 
