@@ -1,45 +1,28 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { Shield, Lock, Clock, CheckCircle, Mail, Server, Eye, FileCheck } from "lucide-react"
+import { Shield, Lock, Clock, CheckCircle, Eye, FileCheck, LucideIcon } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
-const TRUST_POINTS = [
-  {
-    icon: Lock,
-    title: "AES-256-GCM Encryption",
-    description: "Military-grade encryption protects your letters from the moment you write them.",
-    color: "bg-teal-primary",
-  },
-  {
-    icon: Eye,
-    title: "Zero-Knowledge Architecture",
-    description: "We can't read your letters. Only you can decrypt them when they arrive.",
-    color: "bg-duck-blue",
-  },
-  {
-    icon: Clock,
-    title: "99.9% Delivery Guarantee",
-    description: "Your letters arrive on time, every time. Backed by our delivery SLO.",
-    color: "bg-duck-yellow",
-  },
-  {
-    icon: FileCheck,
-    title: "GDPR Compliant",
-    description: "Full data export and deletion rights. Your data, your control.",
-    color: "bg-coral",
-  },
-]
+interface TrustPoint {
+  title: string
+  description: string
+}
 
-const COMPARISON = [
-  { feature: "End-to-end encryption", us: true, email: false },
-  { feature: "Guaranteed future delivery", us: true, email: false },
-  { feature: "Physical mail option", us: true, email: false },
-  { feature: "Can't be accidentally opened early", us: true, email: false },
-  { feature: "Survives account changes", us: true, email: false },
-]
+interface ComparisonRow {
+  feature: string
+  us: boolean
+  email: boolean
+}
+
+const TRUST_ICONS: LucideIcon[] = [Lock, Eye, Clock, FileCheck]
+const TRUST_COLORS = ["bg-teal-primary", "bg-duck-blue", "bg-duck-yellow", "bg-coral"]
 
 export function TrustSection() {
+  const t = useTranslations("marketing.trustSection")
+  const trustPoints = t.raw("trustPoints") as TrustPoint[]
+  const comparison = t.raw("comparison") as ComparisonRow[]
   const headerRef = useRef(null)
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-100px" })
   const comparisonRef = useRef(null)
@@ -61,13 +44,13 @@ export function TrustSection() {
             style={{ borderRadius: "2px" }}
           >
             <Shield className="h-4 w-4" strokeWidth={2} />
-            Security First
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-white sm:text-4xl md:text-5xl">
-            Your Words,{" "}
+            {t("title")}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10">Protected</span>
+              <span className="relative z-10">{t("titleHighlight")}</span>
               <span
                 className="absolute bottom-1 left-0 right-0 h-3 bg-teal-primary -z-0 sm:h-4"
                 style={{ borderRadius: "2px" }}
@@ -76,16 +59,15 @@ export function TrustSection() {
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-white/70 sm:text-lg">
-            Bank-grade encryption ensures your letters stay private until delivery day.
-            <br className="hidden sm:block" />
-            No one — not even us — can read your messages.
+            {t("description")}
           </p>
         </motion.div>
 
         {/* Trust Points Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-16">
-          {TRUST_POINTS.map((point, index) => {
-            const Icon = point.icon
+          {trustPoints.map((point, index) => {
+            const Icon = TRUST_ICONS[index] ?? Lock
+            const color = TRUST_COLORS[index] ?? "bg-teal-primary"
             return (
               <motion.div
                 key={point.title}
@@ -97,7 +79,7 @@ export function TrustSection() {
               >
                 {/* Icon */}
                 <div
-                  className={`mb-4 inline-flex h-12 w-12 items-center justify-center border-2 border-white ${point.color}`}
+                  className={`mb-4 inline-flex h-12 w-12 items-center justify-center border-2 border-white ${color}`}
                   style={{ borderRadius: "2px" }}
                 >
                   <Icon className="h-6 w-6 text-charcoal" strokeWidth={2} />
@@ -130,21 +112,21 @@ export function TrustSection() {
             {/* Table Header */}
             <div className="grid grid-cols-3 bg-charcoal border-b-2 border-white">
               <div className="p-4 font-mono text-xs font-bold uppercase tracking-wider text-white">
-                Feature
+                {t("tableHeaders.feature")}
               </div>
               <div className="p-4 text-center font-mono text-xs font-bold uppercase tracking-wider text-duck-yellow border-l-2 border-white/20">
-                Capsule Note
+                {t("tableHeaders.capsuleNote")}
               </div>
               <div className="p-4 text-center font-mono text-xs font-bold uppercase tracking-wider text-white/60 border-l-2 border-white/20">
-                Regular Email
+                {t("tableHeaders.regularEmail")}
               </div>
             </div>
 
             {/* Table Rows */}
-            {COMPARISON.map((row, index) => (
+            {comparison.map((row, index) => (
               <div
                 key={row.feature}
-                className={`grid grid-cols-3 ${index !== COMPARISON.length - 1 ? "border-b-2 border-charcoal/10" : ""}`}
+                className={`grid grid-cols-3 ${index !== comparison.length - 1 ? "border-b-2 border-charcoal/10" : ""}`}
               >
                 <div className="p-4 font-mono text-xs text-charcoal">
                   {row.feature}
@@ -178,7 +160,7 @@ export function TrustSection() {
           </div>
 
           <p className="mt-4 text-center font-mono text-xs text-white/50">
-            Unlike regular email, your letters are encrypted and locked until delivery.
+            {t("comparisonNote")}
           </p>
         </motion.div>
       </div>

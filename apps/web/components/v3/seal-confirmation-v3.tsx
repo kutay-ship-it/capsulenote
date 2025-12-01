@@ -17,6 +17,7 @@ import {
   Palette,
   BookOpen,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
   Dialog,
   DialogContent,
@@ -60,11 +61,12 @@ export function SealConfirmationV3({
   shippingAddress,
   printOptions,
 }: SealConfirmationV3Props) {
+  const t = useTranslations("letters.seal")
   const hasEmail = deliveryChannels.includes("email")
   const hasPhysical = deliveryChannels.includes("physical")
   const isBothChannels = hasEmail && hasPhysical
 
-  const recipientDisplay = recipientType === "myself" ? "Future You" : recipientName || recipientEmail
+  const recipientDisplay = recipientType === "myself" ? t("futureYou") : recipientName || recipientEmail
   const formattedDate = format(deliveryDate, "EEEE, MMMM d, yyyy")
   const daysFromNow = Math.ceil((deliveryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
 
@@ -83,7 +85,7 @@ export function SealConfirmationV3({
           boxShadow: "8px 8px 0px 0px rgb(56, 56, 56)",
         }}
       >
-        <DialogTitle className="sr-only">Seal your letter confirmation</DialogTitle>
+        <DialogTitle className="sr-only">{t("dialogTitle")}</DialogTitle>
         {/* Header with Wax Seal */}
         <div className="relative border-b-2 border-charcoal bg-duck-yellow p-6 pt-8 text-center">
           {/* Floating Badge */}
@@ -92,7 +94,7 @@ export function SealConfirmationV3({
             style={{ borderRadius: "2px" }}
           >
             <Lock className="h-3 w-3" strokeWidth={2} />
-            <span>Final Review</span>
+            <span>{t("badge")}</span>
           </div>
 
           {/* Wax Seal Icon */}
@@ -104,10 +106,10 @@ export function SealConfirmationV3({
           </div>
 
           <h2 className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal">
-            Seal Your Letter
+            {t("title")}
           </h2>
           <p className="mt-1 font-mono text-[10px] text-charcoal/70 uppercase tracking-wider">
-            Review details before sealing
+            {t("subtitle")}
           </p>
         </div>
 
@@ -119,7 +121,7 @@ export function SealConfirmationV3({
             style={{ borderRadius: "2px" }}
           >
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-1">
-              Your Letter
+              {t("yourLetter")}
             </p>
             <p className="font-mono text-sm font-bold text-charcoal line-clamp-1">
               "{letterTitle}"
@@ -148,7 +150,7 @@ export function SealConfirmationV3({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                  Recipient
+                  {t("recipient")}
                 </p>
                 <p className="font-mono text-xs font-bold text-charcoal truncate">
                   {recipientDisplay}
@@ -181,14 +183,14 @@ export function SealConfirmationV3({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                  Delivery Method
+                  {t("deliveryMethod")}
                 </p>
                 <p className="font-mono text-xs font-bold text-charcoal">
                   {isBothChannels
-                    ? "Email + Physical Letter"
+                    ? t("methods.both")
                     : hasEmail
-                      ? "Email Only"
-                      : "Physical Letter Only"}
+                      ? t("methods.emailOnly")
+                      : t("methods.physicalOnly")}
                 </p>
               </div>
             </div>
@@ -206,13 +208,13 @@ export function SealConfirmationV3({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                  Arrives In
+                  {t("arrivesIn")}
                 </p>
                 <p className="font-mono text-xs font-bold text-charcoal">
                   {formattedDate}
                 </p>
                 <p className="font-mono text-[10px] text-duck-blue font-bold">
-                  {daysFromNow === 1 ? "Tomorrow" : `${daysFromNow} days from now`}
+                  {daysFromNow === 1 ? t("timing.tomorrow") : t("timing.daysFromNow", { count: daysFromNow })}
                 </p>
               </div>
             </div>
@@ -231,7 +233,7 @@ export function SealConfirmationV3({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                    Shipping To
+                    {t("shippingTo")}
                   </p>
                   <p className="font-mono text-xs font-bold text-charcoal">
                     {shippingAddress.name}
@@ -248,13 +250,13 @@ export function SealConfirmationV3({
                       {printOptions.color && (
                         <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
                           <Palette className="h-3 w-3" strokeWidth={2} />
-                          Color
+                          {t("printOptions.color")}
                         </span>
                       )}
                       {printOptions.doubleSided && (
                         <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
                           <BookOpen className="h-3 w-3" strokeWidth={2} />
-                          Double-sided
+                          {t("printOptions.doubleSided")}
                         </span>
                       )}
                     </div>
@@ -270,17 +272,17 @@ export function SealConfirmationV3({
             style={{ borderRadius: "2px" }}
           >
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70">
-              Credit Usage
+              {t("creditUsage")}
             </p>
             <div className="space-y-1.5">
               {hasEmail && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Mail className="h-3.5 w-3.5 text-charcoal/60" strokeWidth={2} />
-                    <span className="font-mono text-xs text-charcoal">Email delivery</span>
+                    <span className="font-mono text-xs text-charcoal">{t("emailDelivery")}</span>
                   </div>
                   <span className="font-mono text-xs font-bold text-charcoal">
-                    1 credit ({eligibility.emailCredits} → {emailCreditsAfter})
+                    {t("creditCost", { from: eligibility.emailCredits, to: emailCreditsAfter })}
                   </span>
                 </div>
               )}
@@ -288,10 +290,10 @@ export function SealConfirmationV3({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <FileText className="h-3.5 w-3.5 text-charcoal/60" strokeWidth={2} />
-                    <span className="font-mono text-xs text-charcoal">Physical mail</span>
+                    <span className="font-mono text-xs text-charcoal">{t("physicalMail")}</span>
                   </div>
                   <span className="font-mono text-xs font-bold text-charcoal">
-                    1 credit ({eligibility.physicalCredits} → {physicalCreditsAfter})
+                    {t("creditCost", { from: eligibility.physicalCredits, to: physicalCreditsAfter })}
                   </span>
                 </div>
               )}
@@ -305,7 +307,9 @@ export function SealConfirmationV3({
           >
             <Lock className="h-4 w-4 text-charcoal/50 flex-shrink-0 mt-0.5" strokeWidth={2} />
             <p className="font-mono text-[10px] text-charcoal/60 leading-relaxed">
-              Once sealed, your letter will be <span className="font-bold text-charcoal">locked and encrypted</span> until the delivery date. You won't be able to read or edit it.
+              {t.rich("warning", {
+                bold: (chunks) => <span className="font-bold text-charcoal">{chunks}</span>
+              })}
             </p>
           </div>
         </div>
@@ -322,7 +326,7 @@ export function SealConfirmationV3({
               style={{ borderRadius: "2px" }}
             >
               <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-              Go Back
+              {t("goBack")}
             </Button>
             <Button
               type="button"
@@ -334,12 +338,12 @@ export function SealConfirmationV3({
               {isSubmitting ? (
                 <>
                   <Clock className="h-4 w-4 animate-pulse" strokeWidth={2} />
-                  Sealing...
+                  {t("sealing")}
                 </>
               ) : (
                 <>
                   <Stamp className="h-4 w-4" strokeWidth={2} />
-                  Seal & Schedule
+                  {t("sealAndSchedule")}
                 </>
               )}
             </Button>

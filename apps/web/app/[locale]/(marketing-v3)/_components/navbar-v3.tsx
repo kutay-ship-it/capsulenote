@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ArrowRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
@@ -12,14 +13,15 @@ interface NavbarV3Props {
   isSignedIn?: boolean
 }
 
-const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-]
-
 export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
+  const t = useTranslations("marketing.nav")
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const navLinks = [
+    { label: t("features"), href: "#features" },
+    { label: t("howItWorks"), href: "#how-it-works" },
+  ]
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,7 +68,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
               {isSignedIn ? (
                 <Link href="/letters">
                   <Button size="sm" className="gap-2">
-                    Letters
+                    {t("letters")}
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -74,12 +76,12 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                 <>
                   <Link href="/sign-in">
                     <Button variant="ghost" size="sm">
-                      Sign In
+                      {t("signIn")}
                     </Button>
                   </Link>
                   <Link href="/#try-demo">
                     <Button size="sm" className="gap-2">
-                      Get Started
+                      {t("getStarted")}
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -143,7 +145,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                 {isSignedIn ? (
                   <Link href="/letters" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button className="w-full gap-2">
-                      Letters
+                      {t("letters")}
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -151,13 +153,13 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                   <>
                     <Link href="/#try-demo" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button className="w-full gap-2">
-                        Get Started
+                        {t("getStarted")}
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </Link>
                     <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full">
-                        Sign In
+                        {t("signIn")}
                       </Button>
                     </Link>
                   </>

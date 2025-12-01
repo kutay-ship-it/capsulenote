@@ -1,6 +1,13 @@
 {
   "heading": "Settings",
   "subtitle": "Manage your account and preferences",
+  "tabs": {
+    "account": "Account",
+    "billing": "Billing",
+    "addresses": "Addresses",
+    "privacy": "Privacy",
+    "referrals": "Referrals"
+  },
   "profile": {
     "title": "Profile",
     "description": "Your account information",
@@ -9,13 +16,13 @@
     "memberSince": "Member Since"
   },
   "account": {
-    "title": "Account Information",
+    "title": "Account",
     "description": "Your basic account details",
     "email": "Email",
     "displayName": "Display Name",
     "timezone": "Timezone",
-    "status": "Account Status",
-    "plan": "Account Tier",
+    "status": "Status",
+    "plan": "Plan",
     "notSet": "Not set",
     "statusLabel": {
       "active": "Active",
@@ -31,13 +38,13 @@
     "planLabel": {
       "DIGITAL_CAPSULE": "Digital Capsule",
       "PAPER_PIXELS": "Paper & Pixels",
-      "none": "Free Tier"
+      "none": "Free"
     },
     "badges": {
       "premium": "Premium",
       "trial": "Trial"
     },
-    "displayNamePlaceholder": "Enter your display name",
+    "displayNamePlaceholder": "Enter your name",
     "displayNameSuccess": "Display name updated",
     "displayNameError": "Failed to update display name",
     "timezoneSuccess": "Timezone updated",
@@ -83,7 +90,7 @@
     "title": "Notifications",
     "description": "Control how you receive updates",
     "body": "Get notified when your letters are delivered.",
-    "badge": "Notification settings coming soon",
+    "badge": "Coming Soon",
     "push": {
       "title": "Push Notifications",
       "description": "Receive browser notifications when your letters are delivered",
@@ -108,7 +115,48 @@
     "body": "View your subscription status, track usage, manage payment methods, and access invoices.",
     "badge": "View Billing Settings →",
     "viewFull": "View Billing Settings",
-    "manageSubscription": "Manage Subscription"
+    "manageSubscription": "Manage Subscription",
+    "subscription": {
+      "title": "Subscription",
+      "plan": "Plan",
+      "status": "Status",
+      "renews": "Renews",
+      "unknown": "Unknown",
+      "freePlanMessage": "You're on the free plan. Upgrade to unlock more features.",
+      "statusLabel": {
+        "active": "Active",
+        "trialing": "Trial",
+        "past_due": "Past Due",
+        "canceled": "Canceled",
+        "unpaid": "Unpaid",
+        "incomplete": "Incomplete"
+      }
+    },
+    "usage": {
+      "title": "Usage",
+      "emailCredits": "Email Credits",
+      "physicalLetterCredits": "Physical Letter Credits",
+      "remaining": "remaining",
+      "allCreditsUsed": "All credits used"
+    },
+    "invoices": {
+      "title": "Invoices",
+      "noInvoices": "No invoices yet."
+    },
+    "paymentStatus": {
+      "succeeded": "Succeeded",
+      "pending": "Pending",
+      "failed": "Failed",
+      "processing": "Processing",
+      "requires_action": "Requires Action",
+      "canceled": "Canceled"
+    },
+    "addons": {
+      "title": "Add-ons",
+      "description": "Need more deliveries? Purchase additional credits.",
+      "emailCredits": "+ Email Credits",
+      "mailCredits": "+ Mail Credits"
+    }
   },
   "privacy": {
     "title": "Privacy & Data",
@@ -117,7 +165,35 @@
     "badge": "Privacy controls coming soon",
     "viewFull": "View Privacy Settings",
     "exportData": "Export Data",
-    "deleteAccount": "Delete Account"
+    "deleteAccount": "Delete Account",
+    "export": {
+      "title": "Export Data",
+      "description": "Download all your data including letters, deliveries, and account information.",
+      "includesTitle": "Includes",
+      "includes": {
+        "profile": "Profile & account settings",
+        "letters": "All letters and drafts",
+        "deliveries": "Delivery history",
+        "subscription": "Subscription & payments",
+        "usage": "Usage statistics"
+      }
+    },
+    "legal": {
+      "title": "Legal",
+      "privacyPolicy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "gdpr": "GDPR Rights"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "beforeDelete": "Before you delete",
+      "warnings": {
+        "export": "Export your data first",
+        "cancel": "Cancel any active subscriptions",
+        "signOut": "You will be signed out immediately"
+      }
+    }
   },
   "danger": {
     "title": "Danger Zone",
@@ -125,12 +201,122 @@
     "body": "Permanently delete your account and all associated data. This action cannot be undone.",
     "badge": "Account deletion coming soon"
   },
+  "addresses": {
+    "title": "Saved Addresses",
+    "addButton": "Add Address",
+    "newAddress": "New Address",
+    "editAddress": "Edit Address",
+    "saveButton": "Save Address",
+    "updateButton": "Update Address",
+    "cancelButton": "Cancel",
+    "empty": {
+      "title": "No saved addresses yet",
+      "description": "Add an address to use for physical letter deliveries"
+    },
+    "verified": "Verified",
+    "toasts": {
+      "saved": "Address saved successfully",
+      "updated": "Address updated successfully",
+      "deleted": "Address deleted"
+    },
+    "verification": {
+      "title": "Address Verification",
+      "description": "We verify addresses to ensure successful delivery of your physical letters. Verified addresses show a green checkmark.",
+      "supportedTitle": "Supported Countries",
+      "supportedDescription": "We currently support physical mail delivery to the United States, Canada, United Kingdom, and Australia. More countries coming soon!"
+    },
+    "form": {
+      "country": "Country",
+      "recipientName": "Recipient Name",
+      "recipientNamePlaceholder": "John Doe",
+      "streetAddress": "Street Address",
+      "streetAddressPlaceholder": "123 Main Street",
+      "aptSuite": "Apt, Suite, Unit (Optional)",
+      "aptSuitePlaceholder": "Apt 4B",
+      "city": "City",
+      "cityPlaceholder": "San Francisco",
+      "state": "State",
+      "stateOptional": "(Optional)",
+      "statePlaceholder": "State/Province",
+      "stateLabels": {
+        "State": "State",
+        "Province": "Province",
+        "County": "County",
+        "Canton": "Canton",
+        "Prefecture": "Prefecture",
+        "District": "District",
+        "Region": "Region",
+        "Department": "Department",
+        "Island": "Island",
+        "Parish": "Parish",
+        "Oblast": "Oblast",
+        "Governorate": "Governorate",
+        "Emirate": "Emirate",
+        "State/Region": "State/Region",
+        "County/City": "County/City"
+      },
+      "postalCode": "Postal Code",
+      "postalCodeExample": "e.g., {example}",
+      "verify": "Verify",
+      "verifying": "Verifying...",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "errors": {
+        "nameRequired": "Name is required",
+        "addressRequired": "Address is required",
+        "cityRequired": "City is required",
+        "stateRequired": "{label} is required",
+        "postalRequired": "{label} is required",
+        "postalInvalid": "Invalid {label} format"
+      },
+      "verificationStatus": {
+        "verified": "Address Verified",
+        "deliverable": "This address is deliverable",
+        "issue": "Address Issue",
+        "notDeliverable": "Address may not be deliverable"
+      },
+      "suggestion": {
+        "title": "Suggested Address Format",
+        "useSuggested": "Use Suggested",
+        "keepOriginal": "Keep Original",
+        "updated": "Address updated with suggestion"
+      },
+      "toasts": {
+        "verifySuccess": "Address verified successfully!",
+        "verifyError": "Address may not be deliverable",
+        "verifyFailed": "Verification failed",
+        "verifyErrorGeneric": "Please try again later."
+      }
+    }
+  },
   "referral": {
     "title": "Refer a Friend",
     "description": "Earn credits by inviting friends",
     "body": "Share your unique referral link with friends. When they subscribe, you both earn 1 email credit.",
     "viewFull": "View Referral Dashboard",
     "statsSignups": "Signups",
-    "statsCredits": "Credits Earned"
+    "statsCredits": "Credits Earned",
+    "yourCode": {
+      "title": "Your Code",
+      "description": "Share your referral code and earn credits when friends sign up."
+    },
+    "yourStats": {
+      "title": "Your Stats",
+      "clicks": "Clicks",
+      "signups": "Signups",
+      "conversions": "Conversions",
+      "credits": "Credits"
+    },
+    "history": {
+      "title": "History",
+      "referralPrefix": "Referral #",
+      "empty": "No referrals yet. Share your code to get started!"
+    },
+    "share": {
+      "copied": "Link copied to clipboard!",
+      "copyFailed": "Failed to copy link",
+      "copiedButton": "Copied!",
+      "copyButton": "Copy Link"
+    }
   }
 }

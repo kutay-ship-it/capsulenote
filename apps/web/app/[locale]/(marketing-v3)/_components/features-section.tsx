@@ -10,70 +10,33 @@ import {
   Sparkles,
   Lock,
   Send,
+  type LucideIcon,
 } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
-const features = [
-  {
-    icon: PenSquare,
-    title: "Rich Text Editor",
-    description: "Write your thoughts with a beautiful, distraction-free editor. Format your letters exactly how you want them.",
-    bg: "bg-bg-blue-light",
-    borderColor: "border-duck-blue",
-    badgeBg: "bg-duck-blue",
-  },
-  {
-    icon: Clock,
-    title: "Schedule Delivery",
-    description: "Choose any date in the future. Your letter will arrive exactly when you need it — days, months, or years from now.",
-    bg: "bg-bg-yellow-pale",
-    borderColor: "border-duck-yellow",
-    badgeBg: "bg-duck-yellow",
-  },
-  {
-    icon: ShieldCheck,
-    title: "End-to-End Encryption",
-    description: "Your words are encrypted the moment you write them. Only you can read your letters when they arrive.",
-    bg: "bg-bg-green-light",
-    borderColor: "border-teal-primary",
-    badgeBg: "bg-teal-primary",
-  },
-  {
-    icon: Mail,
-    title: "Email & Physical Mail",
-    description: "Receive your letters digitally via email, or opt for real physical mail delivered to your door.",
-    bg: "bg-bg-peach-light",
-    borderColor: "border-peach",
-    badgeBg: "bg-peach",
-  },
-  {
-    icon: Lock,
-    title: "Locked Until Arrival",
-    description: "Your letters remain sealed and unreadable until their delivery date. True anticipation, true surprise.",
-    bg: "bg-bg-purple-light",
-    borderColor: "border-lavender",
-    badgeBg: "bg-lavender",
-  },
-  {
-    icon: Sparkles,
-    title: "Writing Prompts",
-    description: "Need inspiration? Choose from thoughtful prompts designed for reflection, goals, and gratitude.",
-    bg: "bg-bg-pink-light",
-    borderColor: "border-coral",
-    badgeBg: "bg-coral",
-  },
+const FEATURE_ICONS: LucideIcon[] = [PenSquare, Clock, ShieldCheck, Mail, Lock, Sparkles]
+
+const FEATURE_STYLES = [
+  { bg: "bg-bg-blue-light", borderColor: "border-duck-blue", badgeBg: "bg-duck-blue" },
+  { bg: "bg-bg-yellow-pale", borderColor: "border-duck-yellow", badgeBg: "bg-duck-yellow" },
+  { bg: "bg-bg-green-light", borderColor: "border-teal-primary", badgeBg: "bg-teal-primary" },
+  { bg: "bg-bg-peach-light", borderColor: "border-peach", badgeBg: "bg-peach" },
+  { bg: "bg-bg-purple-light", borderColor: "border-lavender", badgeBg: "bg-lavender" },
+  { bg: "bg-bg-pink-light", borderColor: "border-coral", badgeBg: "bg-coral" },
 ]
 
-function FeatureCard({
-  feature,
-  index,
-}: {
-  feature: (typeof features)[0]
+interface FeatureCardProps {
+  feature: { title: string; description: string }
+  style: (typeof FEATURE_STYLES)[0]
+  Icon: LucideIcon
   index: number
-}) {
+  featureBadge: string
+}
+
+function FeatureCard({ feature, style, Icon, index, featureBadge }: FeatureCardProps) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
-  const Icon = feature.icon
 
   return (
     <motion.article
@@ -81,16 +44,16 @@ function FeatureCard({
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`relative border-2 ${feature.borderColor} ${feature.bg} p-6 shadow-[2px_2px_0_theme(colors.charcoal)] transition-all duration-150 hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]`}
+      className={`relative border-2 ${style.borderColor} ${style.bg} p-6 shadow-[2px_2px_0_theme(colors.charcoal)] transition-all duration-150 hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]`}
       style={{ borderRadius: "2px" }}
     >
       {/* Floating Badge */}
       <div
-        className={`absolute -top-3 left-4 flex items-center gap-1.5 ${feature.badgeBg} px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal`}
+        className={`absolute -top-3 left-4 flex items-center gap-1.5 ${style.badgeBg} px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal`}
         style={{ borderRadius: "2px" }}
       >
         <Icon className="h-3 w-3" strokeWidth={2.5} />
-        <span>Feature</span>
+        <span>{featureBadge}</span>
       </div>
 
       {/* Content */}
@@ -115,11 +78,13 @@ function FeatureCard({
 }
 
 export function FeaturesSection() {
+  const t = useTranslations("marketing.featuresSection")
+  const features = t.raw("features") as Array<{ title: string; description: string }>
   const headerRef = useRef(null)
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-100px" })
 
   return (
-    <section className="bg-cream py-20 md:py-32">
+    <section id="features" className="bg-cream py-20 md:py-32">
       <div className="container px-4 sm:px-6">
         {/* Section Header */}
         <motion.div
@@ -134,14 +99,14 @@ export function FeaturesSection() {
             style={{ borderRadius: "2px" }}
           >
             <Send className="h-4 w-4" strokeWidth={2} />
-            Features
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-4xl md:text-5xl">
-            Everything You Need to
+            {t("title")}
             <br />
             <span className="relative inline-block mt-2">
-              <span className="relative z-10">Connect with Tomorrow</span>
+              <span className="relative z-10">{t("titleHighlight")}</span>
               <span
                 className="absolute bottom-1 left-0 right-0 h-3 bg-duck-yellow -z-0 sm:h-4"
                 style={{ borderRadius: "2px" }}
@@ -150,15 +115,21 @@ export function FeaturesSection() {
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            Write letters that matter. Schedule them for any moment in the future.
-            Let your past self speak to who you'll become.
+            {t("description")}
           </p>
         </motion.div>
 
         {/* Features Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
-            <FeatureCard key={feature.title} feature={feature} index={index} />
+            <FeatureCard
+              key={feature.title}
+              feature={feature}
+              style={FEATURE_STYLES[index]!}
+              Icon={FEATURE_ICONS[index]!}
+              index={index}
+              featureBadge={t("featureBadge")}
+            />
           ))}
         </div>
       </div>

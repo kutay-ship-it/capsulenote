@@ -2,9 +2,75 @@
   "nav": {
     "brand": "Capsule Note",
     "dashboard": "Dashboard",
+    "journey": "Journey",
     "letters": "Letters",
     "deliveries": "Deliveries",
     "settings": "Settings",
     "openMenu": "Open menu"
+  },
+  "journey": {
+    "title": "Your Journey",
+    "description": "Letters traveling through time, waiting to find you.",
+    "hero": {
+      "arrived": {
+        "title": "Your letter has arrived!",
+        "subtitle": "Check your inbox for a message from the past",
+        "openButton": "Open Time Capsule"
+      },
+      "countdown": {
+        "badge": "Incoming Message",
+        "from": "from",
+        "you": "You",
+        "to": "to",
+        "futureYou": "Future You",
+        "writtenOn": "Written on {date}",
+        "days": "Days",
+        "hours": "Hours",
+        "mins": "Mins",
+        "secs": "Secs",
+        "previewButton": "Preview Letter",
+        "rescheduleButton": "Reschedule"
+      },
+      "empty": {
+        "title": "Your first letter is waiting to be written",
+        "writeButton": "Write Your First Letter",
+        "prompts": {
+          "0": "What would you tell yourself one year from now?",
+          "1": "What do you want to remember about today?",
+          "2": "What advice would help future-you?",
+          "3": "What are you grateful for right now?",
+          "4": "What dreams are you chasing right now?"
+        }
+      },
+      "writeBanner": {
+        "writeButton": "Write a Letter",
+        "prompts": {
+          "0": "What does future-you need to hear right now?",
+          "1": "What would you tell yourself in 5 years?",
+          "2": "What moment do you want to remember forever?",
+          "3": "What are you proud of today?",
+          "4": "What advice would help you next year?"
+        }
+      }
+    },
+    "timeline": {
+      "sectionTitle": "Your Journey",
+      "emptyTitle": "Your Emotional Journey",
+      "emptySubtitle": "Write your first letter to start building your timeline",
+      "legend": {
+        "delivered": "Delivered",
+        "waiting": "Waiting"
+      },
+      "now": "Now",
+      "tomorrow": "Tomorrow!",
+      "daysShort": "{days}d",
+      "untitledLetter": "Untitled Letter",
+      "card": {
+        "deliveredDescription": "This memory has been unlocked and delivered.",
+        "scheduledDescription": "Safely sealed in a time capsule, waiting for the right moment.",
+        "statusDelivered": "Delivered",
+        "statusScheduled": "Scheduled"
+      }
+    }
   }
 }

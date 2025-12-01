@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import { MapPin, Plus, Pencil, Trash2, Loader2, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -23,6 +24,7 @@ interface AddressesSettingsV3Props {
 }
 
 export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Props) {
+  const t = useTranslations("settings.addresses")
   const [addresses, setAddresses] = useState<ShippingAddress[]>(initialAddresses)
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -38,7 +40,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
       if (result.success) {
         setAddresses((prev) => [result.data, ...prev])
         setIsAdding(false)
-        toast.success("Address saved successfully")
+        toast.success(t("toasts.saved"))
       } else {
         toast.error(result.error.message)
       }
@@ -57,7 +59,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
           prev.map((addr) => (addr.id === id ? result.data : addr))
         )
         setEditingId(null)
-        toast.success("Address updated successfully")
+        toast.success(t("toasts.updated"))
       } else {
         toast.error(result.error.message)
       }
@@ -70,7 +72,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
       const result = await deleteShippingAddress(id)
       if (result.success) {
         setAddresses((prev) => prev.filter((addr) => addr.id !== id))
-        toast.success("Address deleted")
+        toast.success(t("toasts.deleted"))
       } else {
         toast.error(result.error.message)
       }
@@ -105,7 +107,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
       {/* Saved Addresses */}
       <SettingsCardV3
         icon={<MapPin className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Saved Addresses"
+        title={t("title")}
         badgeBg="bg-duck-blue"
         badgeText="text-charcoal"
         actions={
@@ -117,7 +119,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
               style={{ borderRadius: "2px" }}
             >
               <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-              Add Address
+              {t("addButton")}
             </Button>
           )
         }
@@ -129,13 +131,13 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
             style={{ borderRadius: "2px" }}
           >
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-4">
-              New Address
+              {t("newAddress")}
             </p>
             <AddressFormV3
               onSubmit={handleAddAddress}
               onCancel={() => setIsAdding(false)}
               isSubmitting={isPending}
-              submitLabel="Save Address"
+              submitLabel={t("saveButton")}
             />
           </div>
         )}
@@ -147,7 +149,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
             style={{ borderRadius: "2px" }}
           >
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-4">
-              Edit Address
+              {t("editAddress")}
             </p>
             <AddressFormV3
               initialData={getEditingAddress()}
@@ -156,7 +158,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
               }
               onCancel={() => setEditingId(null)}
               isSubmitting={isPending}
-              submitLabel="Update Address"
+              submitLabel={t("updateButton")}
             />
           </div>
         )}
@@ -166,10 +168,10 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
           <div className="text-center py-8">
             <MapPin className="h-8 w-8 mx-auto text-charcoal/20 mb-3" strokeWidth={1.5} />
             <p className="font-mono text-sm text-charcoal/50">
-              No saved addresses yet
+              {t("empty.title")}
             </p>
             <p className="font-mono text-xs text-charcoal/40 mt-1">
-              Add an address to use for physical letter deliveries
+              {t("empty.description")}
             </p>
           </div>
         )}
@@ -208,7 +210,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
                           >
                             <CheckCircle2 className="h-3 w-3" strokeWidth={2} />
                             <span className="font-mono text-[9px] font-bold uppercase">
-                              Verified
+                              {t("verified")}
                             </span>
                           </div>
                         )}
@@ -267,24 +269,22 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
       {/* Info Card */}
       <SettingsCardV3
         icon={<CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Address Verification"
+        title={t("verification.title")}
         badgeBg="bg-teal-primary"
         badgeText="text-white"
       >
         <p className="font-mono text-xs text-charcoal/60">
-          We verify addresses to ensure successful delivery of your physical letters.
-          Verified addresses show a green checkmark.
+          {t("verification.description")}
         </p>
         <div
           className="border-2 border-dashed border-charcoal/20 bg-off-white p-4"
           style={{ borderRadius: "2px" }}
         >
           <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-2">
-            Supported Countries
+            {t("verification.supportedTitle")}
           </p>
           <p className="font-mono text-xs text-charcoal/60">
-            We currently support physical mail delivery to the United States, Canada,
-            United Kingdom, and Australia. More countries coming soon!
+            {t("verification.supportedDescription")}
           </p>
         </div>
       </SettingsCardV3>

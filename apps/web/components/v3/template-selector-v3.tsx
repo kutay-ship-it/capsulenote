@@ -3,6 +3,7 @@
 import * as React from "react"
 import DOMPurify from "dompurify"
 import { FileText, Sparkles, ChevronRight, ArrowLeft, Eye, Check } from "lucide-react"
+import { useTranslations } from "next-intl"
 import {
   Dialog,
   DialogContent,
@@ -18,14 +19,17 @@ interface TemplateSelectorV3Props {
   onSelect: (template: LetterTemplate) => void
 }
 
-const CATEGORIES = [
-  { value: "reflection", label: "Reflection", icon: "🪞" },
-  { value: "goals", label: "Goals", icon: "🎯" },
-  { value: "gratitude", label: "Gratitude", icon: "💝" },
-  { value: "future-self", label: "Future Self", icon: "🔮" },
-] as const
+type CategoryValue = "reflection" | "goals" | "gratitude" | "future-self"
+
+const CATEGORY_VALUES: { value: CategoryValue; icon: string; labelKey: string }[] = [
+  { value: "reflection", icon: "🪞", labelKey: "reflection" },
+  { value: "goals", icon: "🎯", labelKey: "goals" },
+  { value: "gratitude", icon: "💝", labelKey: "gratitude" },
+  { value: "future-self", icon: "🔮", labelKey: "futureSelf" },
+]
 
 export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
+  const t = useTranslations("letters.templates")
   const [open, setOpen] = React.useState(false)
   const [selectedCategory, setSelectedCategory] = React.useState<string>("reflection")
   const [templates, setTemplates] = React.useState<LetterTemplate[]>([])
@@ -78,7 +82,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
         >
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" strokeWidth={2} />
-            <span>Browse Templates</span>
+            <span>{t("browseButton")}</span>
           </div>
           <ChevronRight className="h-4 w-4" strokeWidth={2} />
         </button>
@@ -100,7 +104,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                 style={{ borderRadius: "2px" }}
               >
                 <Eye className="h-3.5 w-3.5" strokeWidth={2} />
-                <span>Preview</span>
+                <span>{t("preview")}</span>
               </div>
               <DialogTitle className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal pt-2">
                 {previewTemplate.title}
@@ -119,7 +123,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                 style={{ borderRadius: "2px" }}
               >
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-3 flex-shrink-0">
-                  Template Content
+                  {t("templateContent")}
                 </p>
                 <div
                   className="flex-1 overflow-y-auto min-h-0"
@@ -144,7 +148,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                   style={{ borderRadius: "2px" }}
                 >
                   <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-                  Back
+                  {t("back")}
                 </Button>
                 <Button
                   type="button"
@@ -153,7 +157,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                   style={{ borderRadius: "2px" }}
                 >
                   <Check className="h-4 w-4" strokeWidth={2} />
-                  Apply Template
+                  {t("applyTemplate")}
                 </Button>
               </div>
             </div>
@@ -168,13 +172,13 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                 style={{ borderRadius: "2px" }}
               >
                 <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
-                <span>Templates</span>
+                <span>{t("badge")}</span>
               </div>
               <DialogTitle className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal pt-2">
-                Choose a Template
+                {t("title")}
               </DialogTitle>
               <p className="font-mono text-xs text-charcoal/70 mt-1">
-                Start with a prompt to inspire your letter
+                {t("subtitle")}
               </p>
             </DialogHeader>
 
@@ -182,10 +186,10 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
               {/* Category Sidebar */}
               <div className="w-48 flex-shrink-0 border-r-2 border-charcoal bg-off-white p-3 overflow-y-auto">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-3 px-2">
-                  Categories
+                  {t("categories")}
                 </p>
                 <div className="space-y-1">
-                  {CATEGORIES.map((cat) => {
+                  {CATEGORY_VALUES.map((cat) => {
                     const isSelected = selectedCategory === cat.value
                     return (
                       <button
@@ -201,7 +205,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                         style={{ borderRadius: "2px" }}
                       >
                         <span className="text-sm">{cat.icon}</span>
-                        <span>{cat.label}</span>
+                        <span>{t(`categoryLabels.${cat.labelKey}`)}</span>
                       </button>
                     )
                   })}
@@ -229,7 +233,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                       <FileText className="h-8 w-8 text-charcoal/30" strokeWidth={2} />
                     </div>
                     <p className="font-mono text-sm text-charcoal/50">
-                      No templates in this category yet
+                      {t("noTemplates")}
                     </p>
                   </div>
                 ) : (
@@ -275,7 +279,7 @@ export function TemplateSelectorV3({ onSelect }: TemplateSelectorV3Props) {
                         <div className="mt-2 flex items-center justify-between border-t border-dashed border-charcoal/10 pt-2">
                           <span className="font-mono text-[9px] uppercase tracking-wider text-charcoal/40 flex items-center gap-1">
                             <Eye className="h-3 w-3" strokeWidth={2} />
-                            Click to preview
+                            {t("clickToPreview")}
                           </span>
                           <ChevronRight
                             className="h-3.5 w-3.5 text-charcoal/30 transition-transform group-hover:translate-x-1 group-hover:text-duck-blue"

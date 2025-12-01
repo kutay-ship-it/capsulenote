@@ -1,24 +1,20 @@
 "use client"
 
 import { Mail, Twitter, Heart } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 
-export function FooterV2() {
-  const currentYear = new Date().getFullYear()
+interface FooterLink {
+  label: string
+  href: string
+}
 
-  // Only working links - removed dead # hrefs
-  const links = {
-    product: [
-      { label: "Pricing", href: "/pricing" },
-      { label: "Sign Up", href: "/sign-up" },
-      { label: "Sign In", href: "/sign-in" },
-    ],
-    legal: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-    ],
-  }
+export function FooterV2() {
+  const t = useTranslations("marketing.footerV2")
+  const productLinks = t.raw("productLinks") as FooterLink[]
+  const legalLinks = t.raw("legalLinks") as FooterLink[]
+  const currentYear = new Date().getFullYear()
 
   return (
     <footer className="border-t-2 border-charcoal bg-cream">
@@ -33,7 +29,7 @@ export function FooterV2() {
               </span>
             </div>
             <p className="mb-6 max-w-sm font-mono text-sm leading-relaxed text-charcoal/70">
-              Write letters to your future self. Encrypted, scheduled, delivered exactly when you need them most.
+              {t("tagline")}
             </p>
 
             {/* Social Links - Removed GitHub (B2C product) */}
@@ -62,10 +58,10 @@ export function FooterV2() {
           {/* Product Links */}
           <div>
             <h4 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
-              Product
+              {t("productTitle")}
             </h4>
             <ul className="space-y-3">
-              {links.product.map((link) => (
+              {productLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href as any}
@@ -81,10 +77,10 @@ export function FooterV2() {
           {/* Legal Links */}
           <div>
             <h4 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
-              Legal
+              {t("legalTitle")}
             </h4>
             <ul className="space-y-3">
-              {links.legal.map((link) => (
+              {legalLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href as any}
@@ -104,10 +100,12 @@ export function FooterV2() {
         <div className="container px-4 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
             <p className="font-mono text-xs text-charcoal/60">
-              © {currentYear} Capsule Note. All rights reserved.
+              {t("copyright", { year: currentYear })}
             </p>
             <p className="flex items-center gap-1.5 font-mono text-xs text-charcoal/60">
-              Made with <Heart className="h-3 w-3 text-coral fill-coral" /> for future-you
+              {t.rich("madeWith", {
+                heart: () => <Heart className="h-3 w-3 text-coral fill-coral" />,
+              })}
             </p>
           </div>
         </div>

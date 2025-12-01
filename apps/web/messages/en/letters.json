@@ -14,6 +14,46 @@
     "scheduled": "Scheduled",
     "delivered": "Delivered"
   },
+  "tabs": {
+    "all": "All",
+    "drafts": "Drafts",
+    "scheduled": "Scheduled",
+    "delivered": "Delivered"
+  },
+  "emptyStates": {
+    "all": {
+      "title": "No letters yet",
+      "description": "Start writing your first letter to your future self."
+    },
+    "drafts": {
+      "title": "No drafts",
+      "description": "Letters you're still working on will appear here."
+    },
+    "scheduled": {
+      "title": "No scheduled letters",
+      "description": "Letters waiting to be delivered will appear here."
+    },
+    "delivered": {
+      "title": "No delivered letters",
+      "description": "Letters that have been delivered will appear here."
+    }
+  },
+  "accessibility": {
+    "gridView": "Grid view",
+    "listView": "List view"
+  },
+  "card": {
+    "untitled": "Untitled Letter",
+    "noContent": "No content yet...",
+    "status": {
+      "draft": "Draft",
+      "delivered": "Delivered",
+      "failed": "Failed",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "days": "{count} days"
+    }
+  },
   "drafts": {
     "heading": "Draft Letters",
     "subtitle": "Unscheduled letters • Auto-deleted after 30 days",
@@ -46,6 +86,21 @@
     "title": "No Letters Yet",
     "description": "Start your journey by writing your first letter to your future self.",
     "cta": "Create Your First Letter"
+  },
+  "page": {
+    "title": "Your Letters",
+    "description": "Messages to your future self, organized and waiting."
+  },
+  "emptyHero": {
+    "title": "Your letter collection starts here",
+    "cta": "Write Your First Letter",
+    "prompts": [
+      "What would you tell yourself one year from now?",
+      "What do you want to remember about today?",
+      "What advice would help future-you?",
+      "What are you grateful for right now?",
+      "What dreams are you chasing right now?"
+    ]
   },
   "status": {
     "draft": "Draft",
@@ -131,5 +186,154 @@
     "tagOverflow": "+{count}"
   },
   "createdOn": "Created {date}",
-  "viewAll": "View all"
+  "viewAll": "View all",
+  "deliveryType": {
+    "email": "Email",
+    "physical": "Physical",
+    "credits": "credits",
+    "digitalDelivery": "Digital delivery",
+    "realLetter": "Real letter",
+    "doubleDelivery": {
+      "title": "Double Delivery",
+      "description": "Your letter will arrive digitally in their inbox and as a physical letter in their mailbox."
+    },
+    "hints": {
+      "addPhysical": "Tap Physical to add a printed letter",
+      "addEmail": "Tap Email to also send digitally"
+    }
+  },
+  "seal": {
+    "dialogTitle": "Seal your letter confirmation",
+    "badge": "Final Review",
+    "title": "Seal Your Letter",
+    "subtitle": "Review details before sealing",
+    "yourLetter": "Your Letter",
+    "recipient": "Recipient",
+    "futureYou": "Future You",
+    "deliveryMethod": "Delivery Method",
+    "methods": {
+      "both": "Email + Physical Letter",
+      "emailOnly": "Email Only",
+      "physicalOnly": "Physical Letter Only"
+    },
+    "arrivesIn": "Arrives In",
+    "timing": {
+      "tomorrow": "Tomorrow",
+      "daysFromNow": "{count} days from now"
+    },
+    "shippingTo": "Shipping To",
+    "printOptions": {
+      "color": "Color",
+      "doubleSided": "Double-sided"
+    },
+    "creditUsage": "Credit Usage",
+    "emailDelivery": "Email delivery",
+    "physicalMail": "Physical mail",
+    "creditCost": "1 credit ({from} → {to})",
+    "warning": "Once sealed, your letter will be <bold>locked and encrypted</bold> until the delivery date. You won't be able to read or edit it.",
+    "goBack": "Go Back",
+    "sealing": "Sealing...",
+    "sealAndSchedule": "Seal & Schedule"
+  },
+  "templates": {
+    "browseButton": "Browse Templates",
+    "preview": "Preview",
+    "templateContent": "Template Content",
+    "back": "Back",
+    "applyTemplate": "Apply Template",
+    "badge": "Templates",
+    "title": "Choose a Template",
+    "subtitle": "Start with a prompt to inspire your letter",
+    "categories": "Categories",
+    "noTemplates": "No templates in this category yet",
+    "clickToPreview": "Click to preview",
+    "categoryLabels": {
+      "reflection": "Reflection",
+      "goals": "Goals",
+      "gratitude": "Gratitude",
+      "futureSelf": "Future Self"
+    }
+  },
+  "editor": {
+    "badge": "New Letter",
+    "titleLabel": "Letter Title",
+    "titlePlaceholder": "A letter to my future self...",
+    "messageLabel": "Your Message",
+    "words": "words",
+    "chars": "chars",
+    "messagePlaceholder": "Dear future me...",
+    "settingsBadge": "Settings",
+    "recipientLabel": "Recipient",
+    "myself": "Myself",
+    "someoneElse": "Someone Else",
+    "theirName": "Their Name",
+    "namePlaceholder": "John Doe",
+    "yourEmail": "Your Email",
+    "theirEmail": "Their Email",
+    "yourEmailPlaceholder": "your@email.com",
+    "theirEmailPlaceholder": "their@email.com",
+    "deliveryMethodLabel": "Delivery Method",
+    "deliveryMethodHint": "How should we deliver your letter?",
+    "shippingAddressLabel": "Shipping Address",
+    "shippingAddressHint": "Where should we mail your letter?",
+    "printOptionsLabel": "Print Options",
+    "printOptionsHint": "Customize how your letter is printed",
+    "whenToDeliver": "When to Deliver",
+    "customDate": "Custom Date",
+    "pickDate": "Pick a date",
+    "scheduledFor": "Scheduled for",
+    "templatesLabel": "Templates",
+    "templatesHint": "Need inspiration? Start with a prompt",
+    "sealing": "Sealing...",
+    "sealAndSchedule": "Seal & Schedule Letter",
+    "subscribeToSchedule": "Subscribe to schedule letters",
+    "selectChannelToContinue": "Select a delivery channel to continue",
+    "clearButton": "Clear",
+    "clearDialog": {
+      "title": "Clear Letter?",
+      "description": "This will clear all your progress. This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Clear"
+    },
+    "datePresets": {
+      "6mo": "6 Months",
+      "1yr": "1 Year",
+      "3yr": "3 Years",
+      "5yr": "5 Years",
+      "10yr": "10 Years"
+    },
+    "validation": {
+      "titleRequired": "Title is required",
+      "contentRequired": "Letter content is required",
+      "recipientNameRequired": "Recipient name is required",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email format",
+      "dateRequired": "Delivery date is required",
+      "dateMustBeFuture": "Delivery date must be in the future"
+    },
+    "toasts": {
+      "creditsAdded": "Credits added!",
+      "creditsRefreshed": "Your credits have been refreshed. You can now schedule your letter.",
+      "creditsRefreshFailed": "Failed to refresh credits",
+      "pleaseRefreshPage": "Please refresh the page manually.",
+      "creditsUpdated": "Credits updated!",
+      "purchaseSuccessful": "Your purchase was successful. You can now schedule your letter.",
+      "draftRestored": "Draft restored",
+      "lastSaved": "Last saved {time}",
+      "draftCleared": "Draft cleared",
+      "welcomeDraftRestored": "Welcome! Your letter draft has been restored",
+      "continueWriting": "Continue writing from where you left off ({wordCount} words)",
+      "partialDelivery": "Letter saved with partial delivery",
+      "retryFromPage": "You can retry from the letter page.",
+      "deliveryFailed": "Letter saved but delivery scheduling failed",
+      "quotaExceeded": "Quota exceeded",
+      "upgrade": "Upgrade",
+      "createFailed": "Failed to create letter",
+      "somethingWentWrong": "Something went wrong",
+      "tryAgainLater": "Please try again later.",
+      "unknownError": "Unknown error",
+      "physicalMail": "Physical mail",
+      "email": "Email"
+    }
+  }
 }

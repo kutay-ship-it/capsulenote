@@ -1,42 +1,21 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { Lock, Clock, Mail, Shield, Zap } from "lucide-react"
+import { Lock, Clock, Mail, Shield, Zap, LucideIcon } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
-// Prioritized features (4 instead of 6)
-const FEATURES = [
-  {
-    icon: Lock,
-    title: "Encrypted & Sealed",
-    description: "AES-256 encryption protects your letters. Even we can't read them until delivery.",
-    color: "bg-teal-primary",
-    borderColor: "border-teal-primary",
-  },
-  {
-    icon: Clock,
-    title: "Arrives On Time",
-    description: "99.9% delivery guarantee. Your letters arrive exactly when scheduled — no exceptions.",
-    color: "bg-duck-yellow",
-    borderColor: "border-duck-yellow",
-  },
-  {
-    icon: Mail,
-    title: "Email or Paper",
-    description: "Digital delivery to your inbox, or real physical mail delivered to your door.",
-    color: "bg-duck-blue",
-    borderColor: "border-duck-blue",
-  },
-  {
-    icon: Shield,
-    title: "Never Lost",
-    description: "Redundant backups across multiple data centers. Your letters survive anything.",
-    color: "bg-coral",
-    borderColor: "border-coral",
-  },
-]
+interface Feature {
+  title: string
+  description: string
+}
+
+const FEATURE_ICONS: LucideIcon[] = [Lock, Clock, Mail, Shield]
+const FEATURE_COLORS = ["bg-teal-primary", "bg-duck-yellow", "bg-duck-blue", "bg-coral"]
 
 export function FeaturesV2() {
+  const t = useTranslations("marketing.featuresV2")
+  const features = t.raw("features") as Feature[]
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
@@ -55,13 +34,13 @@ export function FeaturesV2() {
             style={{ borderRadius: "2px" }}
           >
             <Zap className="h-4 w-4" strokeWidth={2} />
-            Features
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-4xl md:text-5xl">
-            Built for{" "}
+            {t("title")}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10">Time Travel</span>
+              <span className="relative z-10">{t("titleHighlight")}</span>
               <span
                 className="absolute bottom-1 left-0 right-0 h-3 bg-duck-yellow -z-0 sm:h-4"
                 style={{ borderRadius: "2px" }}
@@ -70,14 +49,15 @@ export function FeaturesV2() {
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            Everything you need to send meaningful messages to your future self.
+            {t("description")}
           </p>
         </motion.div>
 
         {/* Features Grid - 2x2 on desktop */}
         <div className="mx-auto max-w-4xl grid gap-6 sm:grid-cols-2">
-          {FEATURES.map((feature, index) => {
-            const Icon = feature.icon
+          {features.map((feature, index) => {
+            const Icon = FEATURE_ICONS[index] ?? Lock
+            const color = FEATURE_COLORS[index] ?? "bg-teal-primary"
             return (
               <motion.article
                 key={feature.title}
@@ -89,7 +69,7 @@ export function FeaturesV2() {
               >
                 {/* Icon */}
                 <div
-                  className={`mb-4 inline-flex h-14 w-14 items-center justify-center border-2 border-charcoal ${feature.color}`}
+                  className={`mb-4 inline-flex h-14 w-14 items-center justify-center border-2 border-charcoal ${color}`}
                   style={{ borderRadius: "2px" }}
                 >
                   <Icon className="h-7 w-7 text-charcoal" strokeWidth={2} />
@@ -106,7 +86,7 @@ export function FeaturesV2() {
 
                 {/* Accent line */}
                 <div
-                  className={`absolute bottom-0 left-0 right-0 h-1 ${feature.color}`}
+                  className={`absolute bottom-0 left-0 right-0 h-1 ${color}`}
                   style={{ borderRadius: "0 0 2px 2px" }}
                 />
               </motion.article>

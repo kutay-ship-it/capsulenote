@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { format, differenceInDays, startOfYear } from "date-fns"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Mail, Lock } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import type { DeliveryTimelineItem } from "@/server/actions/redesign-dashboard"
 
@@ -13,6 +14,7 @@ interface EmotionalJourneyV2Props {
 
 // V2: Smooth S-curves with gradient stroke
 export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
+  const t = useTranslations("app.journey.timeline")
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [isMounted, setIsMounted] = useState(false)
@@ -247,10 +249,10 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
       <section className="w-full border-y-2 border-charcoal bg-duck-cream">
         <div className="container py-16 text-center">
           <h3 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal mb-4">
-            Your Emotional Journey (V2 - Smooth Curves)
+            {t("emptyTitle")}
           </h3>
           <p className="font-mono text-sm text-charcoal/60">
-            Write your first letter to start building your timeline
+            {t("emptySubtitle")}
           </p>
         </div>
       </section>
@@ -273,16 +275,16 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
           <div className="container py-6">
             <div className="flex items-center justify-between">
               <h3 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
-                Your Journey
+                {t("sectionTitle")}
               </h3>
               <div className="flex gap-6 text-xs font-mono text-charcoal/60">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-teal-primary border-2 border-teal-primary" />
-                  <span>Delivered</span>
+                  <span>{t("legend.delivered")}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-white border-2 border-charcoal" />
-                  <span>Waiting</span>
+                  <span>{t("legend.waiting")}</span>
                 </div>
               </div>
             </div>
@@ -369,7 +371,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                   {/* Main Badge (Green Layer) */}
                   <div className="relative bg-teal-primary px-5 py-2 border-2 border-teal-primary rounded-[2px] flex items-center justify-center">
                     <span className="font-mono text-xs font-bold uppercase text-white tracking-[0.2em] translate-x-[1px]">
-                      Now
+                      {t("now")}
                     </span>
                   </div>
                 </div>
@@ -568,7 +570,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                     {/* Opening Soon Badge (for imminent deliveries) */}
                     {isImminent && (
                       <div className="absolute -top-3 right-4 px-2 py-0.5 bg-teal-primary border-2 border-teal-primary text-[9px] font-mono font-bold uppercase tracking-wider text-white rounded-[2px] shadow-sm">
-                        {daysUntilDelivery === 1 ? 'Tomorrow!' : `${daysUntilDelivery}d`}
+                        {daysUntilDelivery === 1 ? t("tomorrow") : t("daysShort", { days: daysUntilDelivery })}
                       </div>
                     )}
 
@@ -589,13 +591,13 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                           isSent ? "text-teal-primary" : "text-charcoal"
                         )}
                       >
-                        {item.letter.title || "Untitled Letter"}
+                        {item.letter.title || t("untitledLetter")}
                       </h4>
 
                       <p className="font-mono text-xs text-charcoal/50 line-clamp-2 mb-4 leading-relaxed">
                         {isSent
-                          ? "This memory has been unlocked and delivered."
-                          : "Safely sealed in a time capsule, waiting for the right moment."}
+                          ? t("card.deliveredDescription")
+                          : t("card.scheduledDescription")}
                       </p>
 
                       {/* Dashed Separator */}
@@ -606,7 +608,7 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                         <span
                           className={isSent ? "text-teal-primary" : "text-charcoal"}
                         >
-                          {isSent ? "Delivered" : "Scheduled"}
+                          {isSent ? t("card.statusDelivered") : t("card.statusScheduled")}
                         </span>
                         <ArrowRight
                           className={cn(

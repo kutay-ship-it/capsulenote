@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FileEdit, Clock, Mail, Inbox, LayoutGrid, List } from "lucide-react"
+import { FileEdit, Clock, Mail, Inbox, LayoutGrid, List, type LucideIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -12,6 +13,14 @@ import type { LetterWithPreview } from "@/server/actions/redesign-dashboard"
 export type LetterFilter = "all" | "drafts" | "scheduled" | "delivered"
 
 const VIEW_MODE_STORAGE_KEY = "letters-view-mode"
+
+// Icon configuration for tabs
+const TAB_ICONS: Record<LetterFilter, LucideIcon> = {
+  all: Inbox,
+  drafts: FileEdit,
+  scheduled: Clock,
+  delivered: Mail,
+}
 
 /**
  * All letters grouped by filter - prefetched on server for instant tab switching
@@ -34,41 +43,16 @@ interface LettersListV3Props {
   initialFilter: LetterFilter
 }
 
-/**
- * Tab configuration with icons and labels
- */
-const TAB_CONFIG: {
-  value: LetterFilter
-  label: string
-  icon: React.ReactNode
-}[] = [
-  {
-    value: "all",
-    label: "All",
-    icon: <Inbox className="h-4 w-4" strokeWidth={2} />,
-  },
-  {
-    value: "drafts",
-    label: "Drafts",
-    icon: <FileEdit className="h-4 w-4" strokeWidth={2} />,
-  },
-  {
-    value: "scheduled",
-    label: "Scheduled",
-    icon: <Clock className="h-4 w-4" strokeWidth={2} />,
-  },
-  {
-    value: "delivered",
-    label: "Delivered",
-    icon: <Mail className="h-4 w-4" strokeWidth={2} />,
-  },
-]
+// Filter values for iteration
+const FILTER_VALUES: LetterFilter[] = ["all", "drafts", "scheduled", "delivered"]
 
 export function LettersListV3({
   lettersByFilter,
   counts,
   initialFilter,
 }: LettersListV3Props) {
+  const t = useTranslations("letters")
+
   // Local state for instant tab switching - no server roundtrip
   const [activeFilter, setActiveFilter] = useState<LetterFilter>(initialFilter)
 
@@ -123,36 +107,39 @@ export function LettersListV3({
           className="inline-flex h-auto flex-1 justify-start gap-0 rounded-none border-2 border-charcoal bg-white p-0"
           style={{ borderRadius: "2px 0 0 2px" }}
         >
-        {TAB_CONFIG.map((tab, index) => (
-          <TabsTrigger
-            key={tab.value}
-            value={tab.value}
-            className={cn(
-              "relative flex items-center gap-2 rounded-none px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider transition-all",
-              "data-[state=active]:bg-charcoal data-[state=active]:text-white data-[state=active]:shadow-none",
-              "data-[state=inactive]:bg-white data-[state=inactive]:text-charcoal data-[state=inactive]:hover:bg-off-white",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-duck-blue focus-visible:ring-offset-0",
-              // Add border between tabs
-              index > 0 && "border-l-2 border-charcoal"
-            )}
-            style={{ borderRadius: "0" }}
-          >
-            {tab.icon}
-            <span className="hidden sm:inline">{tab.label}</span>
-            {/* Count badge */}
-            <span
+        {FILTER_VALUES.map((filterValue, index) => {
+          const Icon = TAB_ICONS[filterValue]
+          return (
+            <TabsTrigger
+              key={filterValue}
+              value={filterValue}
               className={cn(
-                "ml-1 flex h-5 min-w-5 items-center justify-center px-1 font-mono text-[10px] font-bold",
-                "data-[state=active]:bg-white data-[state=active]:text-charcoal",
-                "data-[state=inactive]:bg-charcoal data-[state=inactive]:text-white"
+                "relative flex items-center gap-2 rounded-none px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider transition-all",
+                "data-[state=active]:bg-charcoal data-[state=active]:text-white data-[state=active]:shadow-none",
+                "data-[state=inactive]:bg-white data-[state=inactive]:text-charcoal data-[state=inactive]:hover:bg-off-white",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-duck-blue focus-visible:ring-offset-0",
+                // Add border between tabs
+                index > 0 && "border-l-2 border-charcoal"
               )}
-              style={{ borderRadius: "2px" }}
-              data-state={activeFilter === tab.value ? "active" : "inactive"}
+              style={{ borderRadius: "0" }}
             >
-              {counts[tab.value]}
-            </span>
-          </TabsTrigger>
-        ))}
+              <Icon className="h-4 w-4" strokeWidth={2} />
+              <span className="hidden sm:inline">{t(`tabs.${filterValue}`)}</span>
+              {/* Count badge */}
+              <span
+                className={cn(
+                  "ml-1 flex h-5 min-w-5 items-center justify-center px-1 font-mono text-[10px] font-bold",
+                  "data-[state=active]:bg-white data-[state=active]:text-charcoal",
+                  "data-[state=inactive]:bg-charcoal data-[state=inactive]:text-white"
+                )}
+                style={{ borderRadius: "2px" }}
+                data-state={activeFilter === filterValue ? "active" : "inactive"}
+              >
+                {counts[filterValue]}
+              </span>
+            </TabsTrigger>
+          )
+        })}
         </TabsList>
 
         {/* View Mode Toggle */}
@@ -165,7 +152,7 @@ export function LettersListV3({
         >
           <ToggleGroupItem
             value="grid"
-            aria-label="Grid view"
+            aria-label={t("accessibility.gridView")}
             className={cn(
               "h-full rounded-none px-3 py-3 transition-all",
               "data-[state=on]:bg-charcoal data-[state=on]:text-white",
@@ -178,7 +165,7 @@ export function LettersListV3({
           </ToggleGroupItem>
           <ToggleGroupItem
             value="list"
-            aria-label="List view"
+            aria-label={t("accessibility.listView")}
             className={cn(
               "h-full rounded-none border-l-2 border-charcoal px-3 py-3 transition-all",
               "data-[state=on]:bg-charcoal data-[state=on]:text-white",
@@ -193,16 +180,20 @@ export function LettersListV3({
       </div>
 
       {/* Tab Content - Each tab has its own prefetched data */}
-      {TAB_CONFIG.map((tab) => {
-        const letters = lettersByFilter[tab.value]
+      {FILTER_VALUES.map((filterValue) => {
+        const letters = lettersByFilter[filterValue]
         return (
           <TabsContent
-            key={tab.value}
-            value={tab.value}
+            key={filterValue}
+            value={filterValue}
             className="mt-6 focus-visible:outline-none focus-visible:ring-0"
           >
             {letters.length === 0 ? (
-              <EmptyStateV3 filter={tab.value} />
+              <EmptyStateV3
+                filter={filterValue}
+                title={t(`emptyStates.${filterValue}.title`)}
+                description={t(`emptyStates.${filterValue}.description`)}
+              />
             ) : (
               <div
                 className={cn(
@@ -223,37 +214,27 @@ export function LettersListV3({
   )
 }
 
+// Icons for empty states
+const EMPTY_STATE_ICONS: Record<LetterFilter, LucideIcon> = {
+  all: Inbox,
+  drafts: FileEdit,
+  scheduled: Clock,
+  delivered: Mail,
+}
+
 /**
  * Empty state component for filtered views
  */
-function EmptyStateV3({ filter }: { filter: LetterFilter }) {
-  const config: Record<
-    LetterFilter,
-    { icon: React.ReactNode; title: string; description: string }
-  > = {
-    all: {
-      icon: <Inbox className="h-8 w-8 text-charcoal" strokeWidth={2} />,
-      title: "No letters yet",
-      description: "Start writing your first letter to your future self.",
-    },
-    drafts: {
-      icon: <FileEdit className="h-8 w-8 text-charcoal" strokeWidth={2} />,
-      title: "No drafts",
-      description: "Letters you're still working on will appear here.",
-    },
-    scheduled: {
-      icon: <Clock className="h-8 w-8 text-charcoal" strokeWidth={2} />,
-      title: "No scheduled letters",
-      description: "Letters waiting to be delivered will appear here.",
-    },
-    delivered: {
-      icon: <Mail className="h-8 w-8 text-charcoal" strokeWidth={2} />,
-      title: "No delivered letters",
-      description: "Letters that have been delivered will appear here.",
-    },
-  }
-
-  const { icon, title, description } = config[filter]
+function EmptyStateV3({
+  filter,
+  title,
+  description,
+}: {
+  filter: LetterFilter
+  title: string
+  description: string
+}) {
+  const Icon = EMPTY_STATE_ICONS[filter]
 
   return (
     <div
@@ -265,7 +246,7 @@ function EmptyStateV3({ filter }: { filter: LetterFilter }) {
         className="mb-4 flex h-16 w-16 items-center justify-center border-2 border-charcoal bg-white"
         style={{ borderRadius: "2px" }}
       >
-        {icon}
+        <Icon className="h-8 w-8 text-charcoal" strokeWidth={2} />
       </div>
 
       {/* Title */}

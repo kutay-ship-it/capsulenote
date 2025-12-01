@@ -1,56 +1,30 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { PenSquare, CalendarDays, Lock, Mail, ArrowRight } from "lucide-react"
+import { PenSquare, CalendarDays, Lock, Mail, ArrowRight, type LucideIcon } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
-const steps = [
-  {
-    number: "01",
-    icon: PenSquare,
-    title: "Write Your Letter",
-    description: "Pour your thoughts, dreams, advice, or reflections into a letter. Take your time — there's no rush.",
-    color: "bg-duck-blue",
-    borderColor: "border-duck-blue",
-  },
-  {
-    number: "02",
-    icon: CalendarDays,
-    title: "Choose a Date",
-    description: "Select when your letter should arrive. Tomorrow, next month, or years from now — you decide.",
-    color: "bg-duck-yellow",
-    borderColor: "border-duck-yellow",
-  },
-  {
-    number: "03",
-    icon: Lock,
-    title: "Seal & Encrypt",
-    description: "Your letter is encrypted and sealed. Even you can't read it until the delivery date arrives.",
-    color: "bg-teal-primary",
-    borderColor: "border-teal-primary",
-  },
-  {
-    number: "04",
-    icon: Mail,
-    title: "Receive Your Message",
-    description: "On the scheduled date, your letter arrives — a gift from your past self, exactly when you need it.",
-    color: "bg-coral",
-    borderColor: "border-coral",
-  },
+const STEP_ICONS: LucideIcon[] = [PenSquare, CalendarDays, Lock, Mail]
+
+const STEP_STYLES = [
+  { color: "bg-duck-blue", borderColor: "border-duck-blue" },
+  { color: "bg-duck-yellow", borderColor: "border-duck-yellow" },
+  { color: "bg-teal-primary", borderColor: "border-teal-primary" },
+  { color: "bg-coral", borderColor: "border-coral" },
 ]
 
-function StepCard({
-  step,
-  index,
-  isLast,
-}: {
-  step: (typeof steps)[0]
+interface StepCardProps {
+  step: { number: string; title: string; description: string }
+  style: (typeof STEP_STYLES)[0]
+  Icon: LucideIcon
   index: number
   isLast: boolean
-}) {
+}
+
+function StepCard({ step, style, Icon, index, isLast }: StepCardProps) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-50px" })
-  const Icon = step.icon
 
   return (
     <div ref={ref} className="relative flex flex-col items-center">
@@ -67,7 +41,7 @@ function StepCard({
       >
         {/* Step Number */}
         <div
-          className={`mb-6 flex h-20 w-20 items-center justify-center border-4 border-charcoal ${step.color} font-mono text-2xl font-bold text-charcoal shadow-[4px_4px_0_theme(colors.charcoal)]`}
+          className={`mb-6 flex h-20 w-20 items-center justify-center border-4 border-charcoal ${style.color} font-mono text-2xl font-bold text-charcoal shadow-[4px_4px_0_theme(colors.charcoal)]`}
           style={{ borderRadius: "2px" }}
         >
           {step.number}
@@ -102,11 +76,13 @@ function StepCard({
 }
 
 export function HowItWorksSection() {
+  const t = useTranslations("marketing.howItWorksSteps")
+  const steps = t.raw("steps") as Array<{ number: string; title: string; description: string }>
   const headerRef = useRef(null)
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-100px" })
 
   return (
-    <section className="bg-off-white py-20 md:py-32">
+    <section id="how-it-works" className="bg-off-white py-20 md:py-32">
       <div className="container px-4 sm:px-6">
         {/* Section Header */}
         <motion.div
@@ -120,16 +96,15 @@ export function HowItWorksSection() {
             className="mb-6 inline-flex items-center gap-2 border-2 border-charcoal bg-duck-yellow px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
             style={{ borderRadius: "2px" }}
           >
-            Simple Process
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-4xl md:text-5xl">
-            How It Works
+            {t("title")}
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            Four simple steps to send a message to your future self.
-            It's like having a time machine for your thoughts.
+            {t("description")}
           </p>
         </motion.div>
 
@@ -139,6 +114,8 @@ export function HowItWorksSection() {
             <StepCard
               key={step.number}
               step={step}
+              style={STEP_STYLES[index]!}
+              Icon={STEP_ICONS[index]!}
               index={index}
               isLast={index === steps.length - 1}
             />

@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTransition } from "react"
+import { useTranslations } from "next-intl"
 import {
   Mail,
   Calendar,
@@ -74,12 +75,12 @@ interface LetterFormData {
 }
 
 const DATE_PRESETS = [
-  { label: "6 Months", months: 6, key: "6mo" },
-  { label: "1 Year", months: 12, key: "1yr" },
-  { label: "3 Years", months: 36, key: "3yr" },
-  { label: "5 Years", months: 60, key: "5yr" },
-  { label: "10 Years", months: 120, key: "10yr" },
-]
+  { months: 6, key: "6mo" },
+  { months: 12, key: "1yr" },
+  { months: 36, key: "3yr" },
+  { months: 60, key: "5yr" },
+  { months: 120, key: "10yr" },
+] as const
 
 interface LetterEditorV3Props {
   eligibility: DeliveryEligibility
@@ -87,6 +88,7 @@ interface LetterEditorV3Props {
 }
 
 export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEditorV3Props) {
+  const t = useTranslations("letters.editor")
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -151,13 +153,13 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       // Refresh eligibility data
       onRefreshEligibility()
         .then(() => {
-          toast.success("Credits added!", {
-            description: "Your credits have been refreshed. You can now schedule your letter.",
+          toast.success(t("toasts.creditsAdded"), {
+            description: t("toasts.creditsRefreshed"),
           })
         })
         .catch(() => {
-          toast.error("Failed to refresh credits", {
-            description: "Please refresh the page manually.",
+          toast.error(t("toasts.creditsRefreshFailed"), {
+            description: t("toasts.pleaseRefreshPage"),
           })
         })
     }
@@ -173,14 +175,14 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     React.useCallback(() => {
       onRefreshEligibility?.()
         .then(() => {
-          toast.success("Credits updated!", {
-            description: "Your purchase was successful. You can now schedule your letter.",
+          toast.success(t("toasts.creditsUpdated"), {
+            description: t("toasts.purchaseSuccessful"),
           })
         })
         .catch(() => {
           // Silent fail - user can manually refresh if needed
         })
-    }, [onRefreshEligibility])
+    }, [onRefreshEligibility, t])
   )
 
   // Load autosaved draft on mount (only for new letters)
@@ -208,10 +210,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       setRestoredFromDraft(true)
 
       // Show toast for anonymous draft recovery
-      toast.success("Welcome! Your letter draft has been restored", {
-        description: `Continue writing from where you left off (${anonymousDraft.wordCount} words)`,
+      toast.success(t("toasts.welcomeDraftRestored"), {
+        description: t("toasts.continueWriting", { wordCount: anonymousDraft.wordCount }),
         action: {
-          label: "Clear",
+          label: t("clearButton"),
           onClick: () => {
             clearAnonymousDraft()
             // Clear the form
@@ -227,7 +229,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             setSelectedAddressId(null)
             setPrintOptions({ color: false, doubleSided: false })
             setRestoredFromDraft(false)
-            toast.success("Draft cleared")
+            toast.success(t("toasts.draftCleared"))
           },
         },
       })
@@ -260,10 +262,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       setRestoredFromDraft(true)
 
       // Show toast with last saved time
-      toast.info("Draft restored", {
-        description: `Last saved ${formatLastSaved(savedDraft.lastSaved)}`,
+      toast.info(t("toasts.draftRestored"), {
+        description: t("toasts.lastSaved", { time: formatLastSaved(savedDraft.lastSaved) }),
         action: {
-          label: "Clear",
+          label: t("clearButton"),
           onClick: () => {
             clearLetterAutosave()
             // Clear the form
@@ -279,7 +281,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             setSelectedAddressId(null)
             setPrintOptions({ color: false, doubleSided: false })
             setRestoredFromDraft(false)
-            toast.success("Draft cleared")
+            toast.success(t("toasts.draftCleared"))
           },
         },
       })
@@ -456,31 +458,31 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     const newErrors: Partial<Record<keyof LetterFormData, string>> = {}
 
     if (!title.trim()) {
-      newErrors.title = "Title is required"
+      newErrors.title = t("validation.titleRequired")
     }
 
     if (!plainText) {
-      newErrors.bodyHtml = "Letter content is required"
+      newErrors.bodyHtml = t("validation.contentRequired")
     }
 
     // Validate recipient name for "someone else"
     if (recipientType === "someone-else" && !recipientName.trim()) {
-      newErrors.recipientName = "Recipient name is required"
+      newErrors.recipientName = t("validation.recipientNameRequired")
     }
 
     if (!recipientEmail.trim()) {
-      newErrors.recipientEmail = "Email is required"
+      newErrors.recipientEmail = t("validation.emailRequired")
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) {
-      newErrors.recipientEmail = "Invalid email format"
+      newErrors.recipientEmail = t("validation.emailInvalid")
     }
 
     if (!deliveryDate) {
-      newErrors.deliveryDate = "Delivery date is required"
+      newErrors.deliveryDate = t("validation.dateRequired")
     } else {
       const today = new Date()
       today.setHours(0, 0, 0, 0)
       if (deliveryDate < today) {
-        newErrors.deliveryDate = "Delivery date must be in the future"
+        newErrors.deliveryDate = t("validation.dateMustBeFuture")
       }
     }
 
@@ -553,12 +555,12 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             // Partial success - some deliveries failed but letter was saved
             clearLetterAutosave()
             const failedDetails = failures.map(({ channel, result }) => {
-              const channelLabel = channel === "physical" ? "Physical mail" : "Email"
-              const errorMsg = !result.success ? result.error.message : "Unknown error"
+              const channelLabel = channel === "physical" ? t("toasts.physicalMail") : t("toasts.email")
+              const errorMsg = !result.success ? result.error.message : t("toasts.unknownError")
               return `${channelLabel}: ${errorMsg}`
             })
-            toast.warning("Letter saved with partial delivery", {
-              description: failedDetails.join(". ") + ". You can retry from the letter page.",
+            toast.warning(t("toasts.partialDelivery"), {
+              description: failedDetails.join(". ") + ". " + t("toasts.retryFromPage"),
             })
             setSealedLetterId(letterId)
             setShowCelebration(true)
@@ -568,24 +570,24 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             const firstError = failures[0]!
             const errorMessage = !firstError.result.success
               ? firstError.result.error.message
-              : "Unknown error"
-            toast.error("Letter saved but delivery scheduling failed", {
-              description: `${errorMessage}. You can schedule delivery from the letter page.`,
+              : t("toasts.unknownError")
+            toast.error(t("toasts.deliveryFailed"), {
+              description: `${errorMessage}. ${t("toasts.retryFromPage")}`,
             })
             router.push(`/letters/${letterId}`)
           }
         } else {
           setShowSealConfirmation(false)
           if (result.error.code === "QUOTA_EXCEEDED") {
-            toast.error("Quota exceeded", {
+            toast.error(t("toasts.quotaExceeded"), {
               description: result.error.message,
               action: {
-                label: "Upgrade",
+                label: t("toasts.upgrade"),
                 onClick: () => router.push("/pricing"),
               },
             })
           } else {
-            toast.error("Failed to create letter", {
+            toast.error(t("toasts.createFailed"), {
               description: result.error.message,
             })
           }
@@ -593,8 +595,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       } catch (error) {
         console.error("Letter creation error:", error)
         setShowSealConfirmation(false)
-        toast.error("Something went wrong", {
-          description: "Please try again later.",
+        toast.error(t("toasts.somethingWentWrong"), {
+          description: t("toasts.tryAgainLater"),
         })
       }
     })
@@ -622,7 +624,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             style={{ borderRadius: "2px" }}
           >
             <PenLine className="h-3.5 w-3.5" strokeWidth={2} />
-            <span>New Letter</span>
+            <span>{t("badge")}</span>
           </div>
 
           {/* Mail stamp */}
@@ -640,7 +642,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 htmlFor="title"
                 className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal"
               >
-                Letter Title
+                {t("titleLabel")}
               </label>
               <Input
                 id="title"
@@ -649,7 +651,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                   setTitle(e.target.value)
                   if (errors.title) setErrors({ ...errors, title: undefined })
                 }}
-                placeholder="A letter to my future self..."
+                placeholder={t("titlePlaceholder")}
                 className="border-2 border-charcoal font-mono"
                 style={{ borderRadius: "2px" }}
                 maxLength={100}
@@ -667,11 +669,11 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <div className="flex items-center justify-between mb-2 flex-shrink-0">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
-                  Your Message
+                  {t("messageLabel")}
                 </label>
                 <div className="flex gap-3 font-mono text-[10px] text-charcoal/50 uppercase tracking-wider">
-                  <span>{wordCount} words</span>
-                  <span>{characterCount} chars</span>
+                  <span>{wordCount} {t("words")}</span>
+                  <span>{characterCount} {t("chars")}</span>
                 </div>
               </div>
               <div className="flex-1 flex flex-col min-h-0">
@@ -682,7 +684,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     setBodyHtml(html)
                     if (errors.bodyHtml) setErrors({ ...errors, bodyHtml: undefined })
                   }}
-                  placeholder="Dear future me..."
+                  placeholder={t("messagePlaceholder")}
                   className="flex-1 flex flex-col min-h-0"
                 />
               </div>
@@ -706,7 +708,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
               style={{ borderRadius: "2px" }}
             >
               <Settings className="h-3.5 w-3.5" strokeWidth={2} />
-              <span>Settings</span>
+              <span>{t("settingsBadge")}</span>
             </div>
 
             <div className="space-y-5 mt-4">
@@ -714,7 +716,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
               <div className="space-y-3">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
                   <User className="h-3.5 w-3.5" strokeWidth={2} />
-                  Recipient
+                  {t("recipientLabel")}
                 </label>
 
                 {/* Recipient Type Buttons */}
@@ -732,7 +734,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     style={{ borderRadius: "2px" }}
                   >
                     <User className="h-3.5 w-3.5" strokeWidth={2} />
-                    Myself
+                    {t("myself")}
                   </button>
                   <button
                     type="button"
@@ -747,7 +749,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     style={{ borderRadius: "2px" }}
                   >
                     <Users className="h-3.5 w-3.5" strokeWidth={2} />
-                    Someone Else
+                    {t("someoneElse")}
                   </button>
                 </div>
 
@@ -758,7 +760,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                       htmlFor="recipientName"
                       className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
                     >
-                      Their Name
+                      {t("theirName")}
                     </label>
                     <Input
                       id="recipientName"
@@ -768,7 +770,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                         setRecipientName(e.target.value)
                         if (errors.recipientName) setErrors({ ...errors, recipientName: undefined })
                       }}
-                      placeholder="John Doe"
+                      placeholder={t("namePlaceholder")}
                       className="border-2 border-charcoal font-mono text-sm"
                       style={{ borderRadius: "2px" }}
                       aria-invalid={!!errors.recipientName}
@@ -786,7 +788,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70 flex items-center gap-1.5"
                   >
                     <AtSign className="h-3 w-3" strokeWidth={2} />
-                    {recipientType === "myself" ? "Your Email" : "Their Email"}
+                    {recipientType === "myself" ? t("yourEmail") : t("theirEmail")}
                   </label>
                   <Input
                     id="email"
@@ -796,7 +798,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                       setRecipientEmail(e.target.value)
                       if (errors.recipientEmail) setErrors({ ...errors, recipientEmail: undefined })
                     }}
-                    placeholder={recipientType === "myself" ? "your@email.com" : "their@email.com"}
+                    placeholder={recipientType === "myself" ? t("yourEmailPlaceholder") : t("theirEmailPlaceholder")}
                     className="border-2 border-charcoal font-mono text-sm"
                     style={{ borderRadius: "2px" }}
                     aria-invalid={!!errors.recipientEmail}
@@ -814,10 +816,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
               <div className="space-y-3">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
                   <Truck className="h-3.5 w-3.5" strokeWidth={2} />
-                  Delivery Method
+                  {t("deliveryMethodLabel")}
                 </label>
                 <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider -mt-1">
-                  How should we deliver your letter?
+                  {t("deliveryMethodHint")}
                 </p>
                 <DeliveryTypeV3
                   value={deliveryChannels}
@@ -836,10 +838,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                   <div className="space-y-3">
                     <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
                       <MapPin className="h-3.5 w-3.5" strokeWidth={2} />
-                      Shipping Address
+                      {t("shippingAddressLabel")}
                     </label>
                     <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider -mt-1">
-                      Where should we mail your letter?
+                      {t("shippingAddressHint")}
                     </p>
                     <AddressSelectorV3
                       value={selectedAddressId}
@@ -857,10 +859,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                       <div className="space-y-3">
                         <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
                           <Printer className="h-3.5 w-3.5" strokeWidth={2} />
-                          Print Options
+                          {t("printOptionsLabel")}
                         </label>
                         <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider -mt-1">
-                          Customize how your letter is printed
+                          {t("printOptionsHint")}
                         </p>
                         <PrintOptionsV3
                           value={printOptions}
@@ -880,7 +882,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
               <div className="space-y-3">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
                   <Calendar className="h-3.5 w-3.5" strokeWidth={2} />
-                  When to Deliver
+                  {t("whenToDeliver")}
                 </label>
 
                 {/* Date Preset Buttons - 2 column grid */}
@@ -901,7 +903,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                         )}
                         style={{ borderRadius: "2px" }}
                       >
-                        {preset.label}
+                        {t(`datePresets.${preset.key}`)}
                       </button>
                     )
                   })}
@@ -920,7 +922,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     )}
                     style={{ borderRadius: "2px" }}
                   >
-                    Custom Date
+                    {t("customDate")}
                   </button>
                 </div>
 
@@ -930,7 +932,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     <DatePicker
                       date={deliveryDate}
                       onSelect={handleDateSelect}
-                      placeholder="Pick a date"
+                      placeholder={t("pickDate")}
                       minDate={new Date()}
                     />
                   </div>
@@ -945,7 +947,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     <Clock className="h-4 w-4 text-duck-blue flex-shrink-0" strokeWidth={2} />
                     <div className="min-w-0">
                       <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal">
-                        Scheduled for
+                        {t("scheduledFor")}
                       </p>
                       <p className="font-mono text-xs text-charcoal truncate">
                         {deliveryDate.toLocaleDateString("en-US", {
@@ -971,10 +973,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
               <div className="space-y-3">
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
                   <Sparkles className="h-3.5 w-3.5" strokeWidth={2} />
-                  Templates
+                  {t("templatesLabel")}
                 </label>
                 <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider -mt-1">
-                  Need inspiration? Start with a prompt
+                  {t("templatesHint")}
                 </p>
                 <TemplateSelectorV3 onSelect={handleTemplateSelect} />
               </div>
@@ -1006,15 +1008,15 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 )}
               >
                 <Stamp className="h-4 w-4" strokeWidth={2} />
-                {isPending ? "Sealing..." : "Seal & Schedule Letter"}
+                {isPending ? t("sealing") : t("sealAndSchedule")}
               </Button>
 
               {/* Helpful message when button is disabled */}
               {!canScheduleSelectedChannels && !hasInsufficientCredits && (
                 <p className="font-mono text-[10px] text-center text-charcoal/50 uppercase tracking-wider">
                   {!currentEligibility.hasActiveSubscription
-                    ? "Subscribe to schedule letters"
-                    : "Select a delivery channel to continue"}
+                    ? t("subscribeToSchedule")
+                    : t("selectChannelToContinue")}
                 </p>
               )}
 
@@ -1029,7 +1031,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                       className="gap-2 h-10 text-charcoal/60 hover:text-coral hover:bg-coral/5"
                     >
                       <Trash2 className="h-4 w-4" strokeWidth={2} />
-                      Clear
+                      {t("clearButton")}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent
@@ -1041,10 +1043,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                   >
                     <AlertDialogHeader>
                       <AlertDialogTitle className="font-mono text-xl uppercase tracking-wide text-charcoal">
-                        Clear Letter?
+                        {t("clearDialog.title")}
                       </AlertDialogTitle>
                       <AlertDialogDescription className="font-mono text-sm text-charcoal/60">
-                        This will clear all your progress. This action cannot be undone.
+                        {t("clearDialog.description")}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="gap-3">
@@ -1052,14 +1054,14 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                         className="border-2 border-charcoal bg-white hover:bg-off-white font-mono uppercase"
                         style={{ borderRadius: "2px" }}
                       >
-                        Cancel
+                        {t("clearDialog.cancel")}
                       </AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleClearForm}
                         className="border-2 border-charcoal bg-coral hover:bg-coral/90 text-white font-mono uppercase"
                         style={{ borderRadius: "2px" }}
                       >
-                        Clear
+                        {t("clearDialog.confirm")}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

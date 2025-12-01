@@ -53,7 +53,30 @@ interface AccountContentProps {
   user: NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
   entitlements: Awaited<ReturnType<typeof getEntitlements>>
   translations: {
-    account: Record<string, string>
+    account: {
+      title: string
+      email: string
+      displayName: string
+      timezone: string
+      notSet: string
+      status: string
+      plan: string
+      displayNamePlaceholder: string
+      displayNameSuccess: string
+      displayNameError: string
+      timezoneSuccess: string
+      timezoneError: string
+      planLabel: {
+        DIGITAL_CAPSULE: string
+        PAPER_PIXELS: string
+        none: string
+      }
+    }
+    notifications: {
+      title: string
+      body: string
+      badge: string
+    }
   }
 }
 
@@ -92,14 +115,14 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
       {/* Account Info */}
       <SettingsCardV3
         icon={<User className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Account"
+        title={translations.account.title}
         badgeBg="bg-duck-yellow"
         badgeText="text-charcoal"
       >
         {/* Email */}
         <div className="space-y-1">
           <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-            Email
+            {translations.account.email}
           </label>
           <p className="font-mono text-sm text-charcoal">{user.email}</p>
         </div>
@@ -109,14 +132,14 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
           displayName={user.profile?.displayName ?? null}
           timezone={user.profile?.timezone ?? null}
           translations={{
-            displayNameLabel: translations.account.displayName || "Display Name",
-            timezoneLabel: translations.account.timezone || "Timezone",
-            notSet: translations.account.notSet || "Not set",
-            displayNamePlaceholder: "Enter your name",
-            displayNameSuccess: "Display name updated",
-            displayNameError: "Failed to update display name",
-            timezoneSuccess: "Timezone updated",
-            timezoneError: "Failed to update timezone",
+            displayNameLabel: translations.account.displayName,
+            timezoneLabel: translations.account.timezone,
+            notSet: translations.account.notSet,
+            displayNamePlaceholder: translations.account.displayNamePlaceholder,
+            displayNameSuccess: translations.account.displayNameSuccess,
+            displayNameError: translations.account.displayNameError,
+            timezoneSuccess: translations.account.timezoneSuccess,
+            timezoneError: translations.account.timezoneError,
           }}
         />
 
@@ -124,7 +147,7 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
             <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-              Status
+              {translations.account.status}
             </label>
             <div
               className={cn(
@@ -140,7 +163,7 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
           </div>
           <div className="flex items-center gap-2">
             <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-              Plan
+              {translations.account.plan}
             </label>
             <div
               className="inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider bg-duck-blue text-charcoal"
@@ -148,10 +171,10 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
             >
               <span>
                 {entitlements.plan === "DIGITAL_CAPSULE"
-                  ? "Digital Capsule"
+                  ? translations.account.planLabel.DIGITAL_CAPSULE
                   : entitlements.plan === "PAPER_PIXELS"
-                    ? "Paper & Pixels"
-                    : "Free"}
+                    ? translations.account.planLabel.PAPER_PIXELS
+                    : translations.account.planLabel.none}
               </span>
             </div>
           </div>
@@ -161,19 +184,19 @@ function AccountContent({ user, entitlements, translations }: AccountContentProp
       {/* Notifications - Coming Soon */}
       <SettingsCardV3
         icon={<Bell className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Notifications"
+        title={translations.notifications.title}
         badgeBg="bg-teal-primary"
         badgeText="text-white"
       >
         <p className="font-mono text-xs text-charcoal/60">
-          Get notified when your letters are delivered.
+          {translations.notifications.body}
         </p>
         <div
           className="inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider bg-charcoal/10 text-charcoal/50"
           style={{ borderRadius: "2px" }}
         >
           <Clock className="h-3.5 w-3.5" strokeWidth={2} />
-          <span>Coming Soon</span>
+          <span>{translations.notifications.badge}</span>
         </div>
       </SettingsCardV3>
     </>
@@ -196,15 +219,49 @@ interface BillingContentProps {
     metadata: unknown
   }>
   locale: string
+  translations: {
+    subscription: {
+      title: string
+      plan: string
+      status: string
+      renews: string
+      unknown: string
+      freePlanMessage: string
+      statusLabel: Record<string, string>
+    }
+    usage: {
+      title: string
+      emailCredits: string
+      physicalLetterCredits: string
+      remaining: string
+      allCreditsUsed: string
+    }
+    invoices: {
+      title: string
+      noInvoices: string
+    }
+    paymentStatus: Record<string, string>
+    addons: {
+      title: string
+      description: string
+      emailCredits: string
+      mailCredits: string
+    }
+    planLabel: {
+      DIGITAL_CAPSULE: string
+      PAPER_PIXELS: string
+      none: string
+    }
+  }
 }
 
-function BillingContent({ subscription, entitlements, payments, locale }: BillingContentProps) {
+function BillingContent({ subscription, entitlements, payments, locale, translations }: BillingContentProps) {
   return (
     <>
       {/* Subscription Status */}
       <SettingsCardV3
         icon={<CreditCard className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Subscription"
+        title={translations.subscription.title}
         badgeBg="bg-duck-blue"
         badgeText="text-charcoal"
         actions={<ManageSubscriptionButton hasSubscription={!!subscription} />}
@@ -212,17 +269,17 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
         {subscription ? (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-charcoal/60">Plan</span>
+              <span className="font-mono text-xs text-charcoal/60">{translations.subscription.plan}</span>
               <span className="font-mono text-sm font-bold text-charcoal">
                 {subscription.plan === "DIGITAL_CAPSULE"
-                  ? "Digital Capsule"
+                  ? translations.planLabel.DIGITAL_CAPSULE
                   : subscription.plan === "PAPER_PIXELS"
-                    ? "Paper & Pixels"
-                    : "Unknown"}
+                    ? translations.planLabel.PAPER_PIXELS
+                    : translations.subscription.unknown}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-charcoal/60">Status</span>
+              <span className="font-mono text-xs text-charcoal/60">{translations.subscription.status}</span>
               <div
                 className={cn(
                   "inline-flex items-center gap-1.5 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider",
@@ -235,12 +292,12 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
                 ) : (
                   <Clock className="h-3.5 w-3.5" strokeWidth={2} />
                 )}
-                <span>{subscription.status}</span>
+                <span>{translations.subscription.statusLabel[subscription.status] || subscription.status}</span>
               </div>
             </div>
             {subscription.currentPeriodEnd && (
               <div className="flex items-center justify-between">
-                <span className="font-mono text-xs text-charcoal/60">Renews</span>
+                <span className="font-mono text-xs text-charcoal/60">{translations.subscription.renews}</span>
                 <span className="font-mono text-sm text-charcoal">
                   {new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(subscription.currentPeriodEnd)}
                 </span>
@@ -250,7 +307,7 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
         ) : (
           <div className="space-y-3">
             <p className="font-mono text-sm text-charcoal/60">
-              You&apos;re on the free plan. Upgrade to unlock more features.
+              {translations.subscription.freePlanMessage}
             </p>
           </div>
         )}
@@ -259,7 +316,7 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
       {/* Usage */}
       <SettingsCardV3
         icon={<BarChart3 className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Usage"
+        title={translations.usage.title}
         badgeBg="bg-teal-primary"
         badgeText="text-white"
       >
@@ -267,9 +324,9 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
           {/* Email Deliveries */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-charcoal/60">Email Credits</span>
+              <span className="font-mono text-xs text-charcoal/60">{translations.usage.emailCredits}</span>
               <span className="font-mono text-xs font-bold text-charcoal">
-                {entitlements.features.emailDeliveriesIncluded} remaining
+                {entitlements.features.emailDeliveriesIncluded} {translations.usage.remaining}
               </span>
             </div>
             <div className="h-2 w-full border-2 border-charcoal bg-white" style={{ borderRadius: "2px" }}>
@@ -284,16 +341,16 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
               />
             </div>
             {entitlements.limits.emailsReached && (
-              <p className="font-mono text-[10px] text-coral">All credits used</p>
+              <p className="font-mono text-[10px] text-coral">{translations.usage.allCreditsUsed}</p>
             )}
           </div>
 
           {/* Mail Credits */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-charcoal/60">Physical Letter Credits</span>
+              <span className="font-mono text-xs text-charcoal/60">{translations.usage.physicalLetterCredits}</span>
               <span className="font-mono text-xs font-bold text-charcoal">
-                {entitlements.usage.mailCreditsRemaining} remaining
+                {entitlements.usage.mailCreditsRemaining} {translations.usage.remaining}
               </span>
             </div>
             <div className="h-2 w-full border-2 border-charcoal bg-white" style={{ borderRadius: "2px" }}>
@@ -308,7 +365,7 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
               />
             </div>
             {entitlements.limits.mailCreditsExhausted && (
-              <p className="font-mono text-[10px] text-coral">All credits used</p>
+              <p className="font-mono text-[10px] text-coral">{translations.usage.allCreditsUsed}</p>
             )}
           </div>
         </div>
@@ -317,7 +374,7 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
       {/* Invoices */}
       <SettingsCardV3
         icon={<Receipt className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Invoices"
+        title={translations.invoices.title}
         badgeBg="bg-charcoal"
         badgeText="text-white"
       >
@@ -331,36 +388,36 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
               >
                 <div>
                   <p className="font-mono text-xs font-bold text-charcoal">
-                    {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(payment.createdAt)}
+                    {new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", { dateStyle: "medium" }).format(payment.createdAt)}
                   </p>
                   <p className="font-mono text-[10px] text-charcoal/50 uppercase">
-                    {payment.status}
+                    {translations.paymentStatus[payment.status] || payment.status}
                   </p>
                 </div>
                 <span className="font-mono text-sm font-bold text-charcoal">
-                  {new Intl.NumberFormat(locale, { style: "currency", currency: payment.currency }).format(payment.amountCents / 100)}
+                  {new Intl.NumberFormat(locale === "tr" ? "tr-TR" : "en-US", { style: "currency", currency: payment.currency }).format(payment.amountCents / 100)}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="font-mono text-xs text-charcoal/60">No invoices yet.</p>
+          <p className="font-mono text-xs text-charcoal/60">{translations.invoices.noInvoices}</p>
         )}
       </SettingsCardV3>
 
       {/* Add-ons */}
       <SettingsCardV3
         icon={<Plus className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Add-ons"
+        title={translations.addons.title}
         badgeBg="bg-duck-yellow"
         badgeText="text-charcoal"
       >
         <p className="font-mono text-xs text-charcoal/60">
-          Need more deliveries? Purchase additional credits.
+          {translations.addons.description}
         </p>
         <div className="flex flex-wrap gap-3">
-          <AddOnPurchase type="email" label="+ Email Credits" />
-          <AddOnPurchase type="physical" label="+ Mail Credits" />
+          <AddOnPurchase type="email" label={translations.addons.emailCredits} />
+          <AddOnPurchase type="physical" label={translations.addons.mailCredits} />
         </div>
       </SettingsCardV3>
     </>
@@ -371,32 +428,65 @@ function BillingContent({ subscription, entitlements, payments, locale }: Billin
 // PRIVACY TAB CONTENT
 // ============================================================================
 
-function PrivacyContent() {
+interface PrivacyContentProps {
+  translations: {
+    export: {
+      title: string
+      description: string
+      includesTitle: string
+      includes: {
+        profile: string
+        letters: string
+        deliveries: string
+        subscription: string
+        usage: string
+      }
+    }
+    legal: {
+      title: string
+      privacyPolicy: string
+      terms: string
+      gdpr: string
+    }
+    dangerZone: {
+      title: string
+      description: string
+      beforeDelete: string
+      warnings: {
+        export: string
+        cancel: string
+        signOut: string
+      }
+    }
+  }
+}
+
+function PrivacyContent({ translations }: PrivacyContentProps) {
   return (
     <>
       {/* Export Data */}
       <SettingsCardV3
         icon={<Download className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Export Data"
+        title={translations.export.title}
         badgeBg="bg-charcoal"
         badgeText="text-white"
       >
         <p className="font-mono text-xs text-charcoal/60">
-          Download all your data including letters, deliveries, and account information.
+          {translations.export.description}
         </p>
         <div
           className="border-2 border-dashed border-charcoal/20 bg-off-white p-4"
           style={{ borderRadius: "2px" }}
         >
           <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-2">
-            Includes
+            {translations.export.includesTitle}
           </p>
           <ul className="space-y-1 font-mono text-xs text-charcoal/60">
-            <li>Profile & account settings</li>
-            <li>All letters and drafts</li>
-            <li>Delivery history</li>
-            <li>Subscription & payments</li>
-            <li>Usage statistics</li>
+            <li>{translations.export.includes.profile}</li>
+            <li>{translations.export.includes.letters}</li>
+            <li>{translations.export.includes.deliveries}</li>
+            <li>{translations.export.includes.subscription}</li>
+            <li>{translations.export.includes.usage}</li>
           </ul>
         </div>
         <ExportDataButton />
@@ -405,7 +495,7 @@ function PrivacyContent() {
       {/* Legal Links */}
       <SettingsCardV3
         icon={<Shield className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Legal"
+        title={translations.legal.title}
         badgeBg="bg-duck-blue"
         badgeText="text-charcoal"
       >
@@ -414,21 +504,21 @@ function PrivacyContent() {
             href="/privacy"
             className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal hover:text-duck-blue transition-colors"
           >
-            Privacy Policy
+            {translations.legal.privacyPolicy}
           </a>
           <span className="text-charcoal/30">|</span>
           <a
             href="/terms"
             className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal hover:text-duck-blue transition-colors"
           >
-            Terms of Service
+            {translations.legal.terms}
           </a>
           <span className="text-charcoal/30">|</span>
           <a
             href="/gdpr"
             className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal hover:text-duck-blue transition-colors"
           >
-            GDPR Rights
+            {translations.legal.gdpr}
           </a>
         </div>
       </SettingsCardV3>
@@ -436,25 +526,25 @@ function PrivacyContent() {
       {/* Danger Zone */}
       <SettingsCardV3
         icon={<AlertTriangle className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Danger Zone"
+        title={translations.dangerZone.title}
         badgeBg="bg-coral"
         badgeText="text-white"
         className="border-coral/50"
       >
         <p className="font-mono text-xs text-charcoal/60">
-          Permanently delete your account and all associated data. This action cannot be undone.
+          {translations.dangerZone.description}
         </p>
         <div
           className="border-2 border-dashed border-coral/30 bg-coral/5 p-4"
           style={{ borderRadius: "2px" }}
         >
           <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-coral mb-2">
-            Before you delete
+            {translations.dangerZone.beforeDelete}
           </p>
           <ul className="space-y-1 font-mono text-xs text-coral/80">
-            <li>Export your data first</li>
-            <li>Cancel any active subscriptions</li>
-            <li>You will be signed out immediately</li>
+            <li>{translations.dangerZone.warnings.export}</li>
+            <li>{translations.dangerZone.warnings.cancel}</li>
+            <li>{translations.dangerZone.warnings.signOut}</li>
           </ul>
         </div>
         <DeleteDataButton />
@@ -484,20 +574,39 @@ interface ReferralsContentProps {
     convertedAt: Date | null
     rewardedAt: Date | null
   }>
+  locale: string
+  translations: {
+    yourCode: {
+      title: string
+      description: string
+    }
+    yourStats: {
+      title: string
+      clicks: string
+      signups: string
+      conversions: string
+      credits: string
+    }
+    history: {
+      title: string
+      referralPrefix: string
+      empty: string
+    }
+  }
 }
 
-function ReferralsContent({ referralCode, referralLink, stats, referrals }: ReferralsContentProps) {
+function ReferralsContent({ referralCode, referralLink, stats, referrals, locale, translations }: ReferralsContentProps) {
   return (
     <>
       {/* Referral Code */}
       <SettingsCardV3
         icon={<Gift className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Your Code"
+        title={translations.yourCode.title}
         badgeBg="bg-duck-yellow"
         badgeText="text-charcoal"
       >
         <p className="font-mono text-xs text-charcoal/60">
-          Share your referral code and earn credits when friends sign up.
+          {translations.yourCode.description}
         </p>
         <ReferralShareV3 code={referralCode.code} link={referralLink} />
       </SettingsCardV3>
@@ -505,16 +614,16 @@ function ReferralsContent({ referralCode, referralLink, stats, referrals }: Refe
       {/* Stats */}
       <SettingsCardV3
         icon={<BarChart3 className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="Your Stats"
+        title={translations.yourStats.title}
         badgeBg="bg-teal-primary"
         badgeText="text-white"
       >
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: "Clicks", value: stats.clicks },
-            { label: "Signups", value: stats.signups },
-            { label: "Conversions", value: stats.conversions },
-            { label: "Credits", value: `$${stats.creditsEarned}` },
+            { label: translations.yourStats.clicks, value: stats.clicks },
+            { label: translations.yourStats.signups, value: stats.signups },
+            { label: translations.yourStats.conversions, value: stats.conversions },
+            { label: translations.yourStats.credits, value: `$${stats.creditsEarned}` },
           ].map((stat) => (
             <div
               key={stat.label}
@@ -533,7 +642,7 @@ function ReferralsContent({ referralCode, referralLink, stats, referrals }: Refe
       {/* Referral History */}
       <SettingsCardV3
         icon={<Users className="h-3.5 w-3.5" strokeWidth={2} />}
-        title="History"
+        title={translations.history.title}
         badgeBg="bg-charcoal"
         badgeText="text-white"
       >
@@ -547,10 +656,10 @@ function ReferralsContent({ referralCode, referralLink, stats, referrals }: Refe
               >
                 <div>
                   <p className="font-mono text-xs font-bold text-charcoal">
-                    Referral #{referral.id.slice(0, 8)}
+                    {translations.history.referralPrefix}{referral.id.slice(0, 8)}
                   </p>
                   <p className="font-mono text-[10px] text-charcoal/50">
-                    {new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(referral.createdAt)}
+                    {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(referral.createdAt)}
                   </p>
                 </div>
                 <div
@@ -571,7 +680,7 @@ function ReferralsContent({ referralCode, referralLink, stats, referrals }: Refe
           </div>
         ) : (
           <p className="font-mono text-xs text-charcoal/60">
-            No referrals yet. Share your code to get started!
+            {translations.history.empty}
           </p>
         )}
       </SettingsCardV3>
@@ -631,12 +740,130 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
   // Build referral link from the code (no DB call needed)
   const referralLink = await buildReferralLink(referralCode.code)
 
-  // Build translations object
-  const translations = {
+  // Build translations objects for each content section
+  const accountTranslations = {
     account: {
+      title: t("account.title"),
+      email: t("account.email"),
       displayName: t("account.displayName"),
       timezone: t("account.timezone"),
       notSet: t("account.notSet"),
+      status: t("account.status"),
+      plan: t("account.plan"),
+      displayNamePlaceholder: t("account.displayNamePlaceholder"),
+      displayNameSuccess: t("account.displayNameSuccess"),
+      displayNameError: t("account.displayNameError"),
+      timezoneSuccess: t("account.timezoneSuccess"),
+      timezoneError: t("account.timezoneError"),
+      planLabel: {
+        DIGITAL_CAPSULE: t("account.planLabel.DIGITAL_CAPSULE"),
+        PAPER_PIXELS: t("account.planLabel.PAPER_PIXELS"),
+        none: t("account.planLabel.none"),
+      },
+    },
+    notifications: {
+      title: t("notifications.title"),
+      body: t("notifications.body"),
+      badge: t("notifications.badge"),
+    },
+  }
+
+  const billingTranslations = {
+    subscription: {
+      title: t("billing.subscription.title"),
+      plan: t("billing.subscription.plan"),
+      status: t("billing.subscription.status"),
+      renews: t("billing.subscription.renews"),
+      unknown: t("billing.subscription.unknown"),
+      freePlanMessage: t("billing.subscription.freePlanMessage"),
+      statusLabel: {
+        active: t("billing.subscription.statusLabel.active"),
+        trialing: t("billing.subscription.statusLabel.trialing"),
+        past_due: t("billing.subscription.statusLabel.past_due"),
+        canceled: t("billing.subscription.statusLabel.canceled"),
+        unpaid: t("billing.subscription.statusLabel.unpaid"),
+        incomplete: t("billing.subscription.statusLabel.incomplete"),
+      },
+    },
+    usage: {
+      title: t("billing.usage.title"),
+      emailCredits: t("billing.usage.emailCredits"),
+      physicalLetterCredits: t("billing.usage.physicalLetterCredits"),
+      remaining: t("billing.usage.remaining"),
+      allCreditsUsed: t("billing.usage.allCreditsUsed"),
+    },
+    invoices: {
+      title: t("billing.invoices.title"),
+      noInvoices: t("billing.invoices.noInvoices"),
+    },
+    paymentStatus: {
+      succeeded: t("billing.paymentStatus.succeeded"),
+      pending: t("billing.paymentStatus.pending"),
+      failed: t("billing.paymentStatus.failed"),
+      processing: t("billing.paymentStatus.processing"),
+      requires_action: t("billing.paymentStatus.requires_action"),
+      canceled: t("billing.paymentStatus.canceled"),
+    },
+    addons: {
+      title: t("billing.addons.title"),
+      description: t("billing.addons.description"),
+      emailCredits: t("billing.addons.emailCredits"),
+      mailCredits: t("billing.addons.mailCredits"),
+    },
+    planLabel: {
+      DIGITAL_CAPSULE: t("account.planLabel.DIGITAL_CAPSULE"),
+      PAPER_PIXELS: t("account.planLabel.PAPER_PIXELS"),
+      none: t("account.planLabel.none"),
+    },
+  }
+
+  const privacyTranslations = {
+    export: {
+      title: t("privacy.export.title"),
+      description: t("privacy.export.description"),
+      includesTitle: t("privacy.export.includesTitle"),
+      includes: {
+        profile: t("privacy.export.includes.profile"),
+        letters: t("privacy.export.includes.letters"),
+        deliveries: t("privacy.export.includes.deliveries"),
+        subscription: t("privacy.export.includes.subscription"),
+        usage: t("privacy.export.includes.usage"),
+      },
+    },
+    legal: {
+      title: t("privacy.legal.title"),
+      privacyPolicy: t("privacy.legal.privacyPolicy"),
+      terms: t("privacy.legal.terms"),
+      gdpr: t("privacy.legal.gdpr"),
+    },
+    dangerZone: {
+      title: t("privacy.dangerZone.title"),
+      description: t("privacy.dangerZone.description"),
+      beforeDelete: t("privacy.dangerZone.beforeDelete"),
+      warnings: {
+        export: t("privacy.dangerZone.warnings.export"),
+        cancel: t("privacy.dangerZone.warnings.cancel"),
+        signOut: t("privacy.dangerZone.warnings.signOut"),
+      },
+    },
+  }
+
+  const referralsTranslations = {
+    yourCode: {
+      title: t("referral.yourCode.title"),
+      description: t("referral.yourCode.description"),
+    },
+    yourStats: {
+      title: t("referral.yourStats.title"),
+      clicks: t("referral.yourStats.clicks"),
+      signups: t("referral.yourStats.signups"),
+      conversions: t("referral.yourStats.conversions"),
+      credits: t("referral.yourStats.credits"),
+    },
+    history: {
+      title: t("referral.history.title"),
+      referralPrefix: t("referral.history.referralPrefix"),
+      empty: t("referral.history.empty"),
     },
   }
 
@@ -657,7 +884,7 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
               <AccountContent
                 user={user}
                 entitlements={entitlements}
-                translations={translations}
+                translations={accountTranslations}
               />
             }
             billingContent={
@@ -666,6 +893,7 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
                 entitlements={entitlements}
                 payments={payments}
                 locale={locale}
+                translations={billingTranslations}
               />
             }
             addressesContent={
@@ -685,7 +913,7 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
                 }))}
               />
             }
-            privacyContent={<PrivacyContent />}
+            privacyContent={<PrivacyContent translations={privacyTranslations} />}
             referralsContent={
               <ReferralsContent
                 referralCode={referralCode}
@@ -699,6 +927,8 @@ export default async function SettingsV3Page({ searchParams }: SettingsPageProps
                   }
                 }
                 referrals={referralStats?.referrals ?? []}
+                locale={locale}
+                translations={referralsTranslations}
               />
             }
           />

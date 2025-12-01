@@ -3,6 +3,7 @@
 import { motion } from "framer-motion"
 import { ArrowRight, Sparkles, Mail, Star, Clock, Users } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
@@ -11,13 +12,11 @@ interface HeroV2Props {
   isSignedIn: boolean
 }
 
-const STATS = [
-  { value: "10,847", label: "Letters Delivered", icon: Mail },
-  { value: "99.9%", label: "On-Time Delivery", icon: Clock },
-  { value: "4.9★", label: "From 2,400+ Writers", icon: Star },
-]
+const STAT_ICONS = [Mail, Clock, Star]
 
 export function HeroV2({ isSignedIn }: HeroV2Props) {
+  const t = useTranslations("marketing.heroV2")
+  const stats = t.raw("stats") as Array<{ value: string; label: string }>
   const containerRef = useRef<HTMLDivElement>(null)
 
   return (
@@ -61,7 +60,7 @@ export function HeroV2({ isSignedIn }: HeroV2Props) {
               style={{ borderRadius: "2px" }}
             >
               <Sparkles className="h-4 w-4" strokeWidth={2} />
-              Write Letters to Your Future Self
+              {t("badge")}
             </span>
           </motion.div>
 
@@ -73,9 +72,9 @@ export function HeroV2({ isSignedIn }: HeroV2Props) {
             className="text-center"
           >
             <h1 className="font-mono text-4xl font-bold uppercase leading-none tracking-wide text-charcoal sm:text-5xl md:text-6xl lg:text-7xl">
-              <span className="block">Send a Message</span>
+              <span className="block">{t("titleLine1")}</span>
               <span className="relative inline-block mt-2">
-                <span className="relative z-10">Through Time</span>
+                <span className="relative z-10">{t("titleLine2")}</span>
                 <motion.span
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
@@ -94,11 +93,11 @@ export function HeroV2({ isSignedIn }: HeroV2Props) {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="mx-auto mt-6 max-w-2xl text-center font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg md:text-xl"
           >
-            Write letters that arrive in <span className="font-bold text-charcoal">1 year</span>,{" "}
-            <span className="font-bold text-charcoal">5 years</span>, or{" "}
-            <span className="font-bold text-charcoal">25 years</span>.
-            <br className="hidden sm:block" />
-            Digital or physical mail — your words, waiting exactly when you need them.
+            {t.rich("description", {
+              years1: () => <span className="font-bold text-charcoal">{t("years1")}</span>,
+              years5: () => <span className="font-bold text-charcoal">{t("years5")}</span>,
+              years25: () => <span className="font-bold text-charcoal">{t("years25")}</span>,
+            })}
           </motion.p>
 
           {/* Single Primary CTA */}
@@ -111,14 +110,14 @@ export function HeroV2({ isSignedIn }: HeroV2Props) {
             {isSignedIn ? (
               <Link href="/dashboard">
                 <Button size="lg" className="group gap-3 text-lg shadow-md hover:shadow-lg px-8">
-                  Go to Dashboard
+                  {t("goToDashboard")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
             ) : (
               <Link href="/#try-demo">
                 <Button size="lg" className="group gap-3 text-lg shadow-md hover:shadow-lg px-8">
-                  Start Writing Free
+                  {t("startWritingFree")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -137,30 +136,33 @@ export function HeroV2({ isSignedIn }: HeroV2Props) {
               style={{ borderRadius: "2px" }}
             >
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-0 sm:divide-x-2 sm:divide-charcoal/20">
-                {STATS.map((stat, i) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 1.2 + i * 0.1 }}
-                    className="flex items-center justify-center gap-3 px-4 py-2"
-                  >
-                    <div
-                      className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-duck-yellow"
-                      style={{ borderRadius: "2px" }}
+                {stats.map((stat, i) => {
+                  const Icon = STAT_ICONS[i] ?? Mail
+                  return (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 1.2 + i * 0.1 }}
+                      className="flex items-center justify-center gap-3 px-4 py-2"
                     >
-                      <stat.icon className="h-5 w-5 text-charcoal" strokeWidth={2} />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-mono text-xl font-bold text-charcoal sm:text-2xl">
-                        {stat.value}
-                      </p>
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-charcoal/60">
-                        {stat.label}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div
+                        className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-duck-yellow"
+                        style={{ borderRadius: "2px" }}
+                      >
+                        <Icon className="h-5 w-5 text-charcoal" strokeWidth={2} />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-mono text-xl font-bold text-charcoal sm:text-2xl">
+                          {stat.value}
+                        </p>
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-charcoal/60">
+                          {stat.label}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )
+                })}
               </div>
             </div>
           </motion.div>
@@ -178,7 +180,7 @@ export function HeroV2({ isSignedIn }: HeroV2Props) {
               className="flex flex-col items-center gap-2"
             >
               <span className="font-mono text-xs uppercase tracking-wider text-charcoal/50">
-                Try it below
+                {t("tryItBelow")}
               </span>
               <div
                 className="h-10 w-6 border-2 border-charcoal/30 flex items-start justify-center pt-2"

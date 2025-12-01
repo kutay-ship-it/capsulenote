@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Copy, Check } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 interface ReferralShareV3Props {
   code: string
@@ -14,16 +15,17 @@ interface ReferralShareV3Props {
  * Displays the referral code with copy functionality
  */
 export function ReferralShareV3({ code, link }: ReferralShareV3Props) {
+  const t = useTranslations("settings.referral.share")
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(link)
       setCopied(true)
-      toast.success("Link copied to clipboard!")
+      toast.success(t("copied"))
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
-      toast.error("Failed to copy link")
+      toast.error(t("copyFailed"))
     }
   }
 
@@ -43,12 +45,12 @@ export function ReferralShareV3({ code, link }: ReferralShareV3Props) {
         {copied ? (
           <>
             <Check className="h-3.5 w-3.5" strokeWidth={2} />
-            Copied!
+            {t("copiedButton")}
           </>
         ) : (
           <>
             <Copy className="h-3.5 w-3.5" strokeWidth={2} />
-            Copy Link
+            {t("copyButton")}
           </>
         )}
       </button>

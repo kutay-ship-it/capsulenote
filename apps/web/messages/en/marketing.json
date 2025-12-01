@@ -1,4 +1,11 @@
 {
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "signIn": "Sign In",
+    "getStarted": "Get Started",
+    "letters": "Letters"
+  },
   "hero": {
     "badge": "Time Capsule for the Soul",
     "titleLine1": "Write to your",
@@ -6,6 +13,23 @@
     "description": "Letters delivered exactly when they should arrive. No apps to check. No reminders to dismiss. Just your words, waiting.",
     "primaryCta": "Start writing",
     "secondaryCta": "See how it works"
+  },
+  "heroV3": {
+    "badge": "Write letters to your future self",
+    "titlePart1": "Send a",
+    "titlePart2": "Message",
+    "titlePart3": "Through",
+    "titlePart4": "Time",
+    "description": "Write letters that arrive when you need them most. Digital delivery or real physical mail — your words, waiting in the future.",
+    "goToLetters": "Go to Letters",
+    "startWriting": "Start Writing Free",
+    "signIn": "Sign In",
+    "scrollIndicator": "Try it below",
+    "stats": [
+      { "value": "10,847", "label": "Letters Delivered" },
+      { "value": "99.9%", "label": "On-Time Delivery" },
+      { "value": "4.9★", "label": "From 2,400+ Writers" }
+    ]
   },
   "stats": [
     {
@@ -92,6 +116,127 @@
       "Inngest ensures 99.97% on-time arrival"
     ]
   },
+  "ctaSection": {
+    "badge": "Built for Time Travel",
+    "title": "Start Your First Letter Today",
+    "description": "It takes just 5 minutes to plant a seed that will bloom in your future.",
+    "question": "What will you tell yourself?",
+    "cta": "Write Your First Letter",
+    "stats": [
+      { "value": "10K+", "label": "Letters Sent" },
+      { "value": "5 min", "label": "To Write" },
+      { "value": "50 yrs", "label": "Max Schedule" }
+    ]
+  },
+  "featuresSection": {
+    "badge": "Features",
+    "title": "Everything You Need to",
+    "titleHighlight": "Connect with Tomorrow",
+    "description": "Write letters that matter. Schedule them for any moment in the future. Let your past self speak to who you'll become.",
+    "featureBadge": "Feature",
+    "features": [
+      {
+        "title": "Rich Text Editor",
+        "description": "Write your thoughts with a beautiful, distraction-free editor. Format your letters exactly how you want them."
+      },
+      {
+        "title": "Schedule Delivery",
+        "description": "Choose any date in the future. Your letter will arrive exactly when you need it — days, months, or years from now."
+      },
+      {
+        "title": "End-to-End Encryption",
+        "description": "Your words are encrypted the moment you write them. Only you can read your letters when they arrive."
+      },
+      {
+        "title": "Email & Physical Mail",
+        "description": "Receive your letters digitally via email, or opt for real physical mail delivered to your door."
+      },
+      {
+        "title": "Locked Until Arrival",
+        "description": "Your letters remain sealed and unreadable until their delivery date. True anticipation, true surprise."
+      },
+      {
+        "title": "Writing Prompts",
+        "description": "Need inspiration? Choose from thoughtful prompts designed for reflection, goals, and gratitude."
+      }
+    ]
+  },
+  "howItWorksSteps": {
+    "badge": "Simple Process",
+    "title": "How It Works",
+    "description": "Four simple steps to send a message to your future self. It's like having a time machine for your thoughts.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Write Your Letter",
+        "description": "Pour your thoughts, dreams, advice, or reflections into a letter. Take your time — there's no rush."
+      },
+      {
+        "number": "02",
+        "title": "Choose a Date",
+        "description": "Select when your letter should arrive. Tomorrow, next month, or years from now — you decide."
+      },
+      {
+        "number": "03",
+        "title": "Seal & Encrypt",
+        "description": "Your letter is encrypted and sealed. Even you can't read it until the delivery date arrives."
+      },
+      {
+        "number": "04",
+        "title": "Receive Your Message",
+        "description": "On the scheduled date, your letter arrives — a gift from your past self, exactly when you need it."
+      }
+    ]
+  },
+  "testimonialsSection": {
+    "badge": "Stories",
+    "title": "Messages That",
+    "titleHighlight": "Mattered",
+    "testimonials": [
+      {
+        "quote": "I wrote myself a letter before starting my business. Reading it two years later, on the day I hit my first major milestone, brought me to tears. Past-me knew exactly what I needed to hear.",
+        "author": "Sarah K.",
+        "role": "Entrepreneur",
+        "highlight": "brought me to tears"
+      },
+      {
+        "quote": "Every year on my birthday, I receive a letter from myself. It's become my favorite tradition — a conversation with who I was, reminding me how far I've come.",
+        "author": "Michael T.",
+        "role": "Software Developer",
+        "highlight": "my favorite tradition"
+      },
+      {
+        "quote": "I sent letters to my kids to open on their 18th birthdays. The physical mail option made it feel like a real gift from the past. They'll treasure these forever.",
+        "author": "Jennifer L.",
+        "role": "Parent",
+        "highlight": "a real gift from the past"
+      },
+      {
+        "quote": "During a difficult time, I wrote myself a letter of encouragement scheduled for six months later. When it arrived, it was exactly the reminder I needed that things would get better.",
+        "author": "David R.",
+        "role": "Teacher",
+        "highlight": "exactly the reminder I needed"
+      }
+    ]
+  },
+  "footer": {
+    "tagline": "Write letters to your future self. Encrypted, scheduled, delivered when you need them most.",
+    "product": "Product",
+    "company": "Company",
+    "legal": "Legal",
+    "links": {
+      "features": "Features",
+      "howItWorks": "How It Works",
+      "about": "About",
+      "blog": "Blog",
+      "contact": "Contact",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "security": "Security"
+    },
+    "copyright": "Capsule Note. All rights reserved.",
+    "madeWith": "Made with care for future-you."
+  },
   "howItWorks": {
     "badge": "How it works",
     "title": "A calm ritual in three beats",
@@ -141,5 +286,320 @@
         ]
       }
     }
+  },
+  "heroV2": {
+    "badge": "Write Letters to Your Future Self",
+    "titleLine1": "Send a Message",
+    "titleLine2": "Through Time",
+    "description": "Write letters that arrive in {years1}, {years5}, or {years25}. Digital or physical mail — your words, waiting exactly when you need them.",
+    "years1": "1 year",
+    "years5": "5 years",
+    "years25": "25 years",
+    "goToDashboard": "Go to Dashboard",
+    "startWritingFree": "Start Writing Free",
+    "tryItBelow": "Try it below",
+    "stats": [
+      { "value": "10,847", "label": "Letters Delivered" },
+      { "value": "99.9%", "label": "On-Time Delivery" },
+      { "value": "4.9★", "label": "From 2,400+ Writers" }
+    ]
+  },
+  "socialProofV2": {
+    "badge": "Real Stories",
+    "title": "Messages That",
+    "titleHighlight": "Changed Lives",
+    "writersCount": "{count} writers share their time-traveling moments.",
+    "rating": "<score>4.9</score> from 2,400+ writers",
+    "testimonials": [
+      {
+        "quote": "I wrote myself a letter before starting my business. Reading it two years later, on the day I hit my first major milestone, brought me to tears. Past-me knew exactly what I needed to hear.",
+        "author": "Sarah K.",
+        "role": "Startup Founder",
+        "context": "Received after 2 years"
+      },
+      {
+        "quote": "Every year on my birthday, I receive a letter from myself. It's become my favorite tradition — a conversation with who I was, reminding me how far I've come.",
+        "author": "Michael T.",
+        "role": "Software Engineer",
+        "context": "Annual birthday tradition"
+      },
+      {
+        "quote": "I sent letters to my kids to open on their 18th birthdays. The physical mail option made it feel like a real gift from the past. They'll treasure these forever.",
+        "author": "Jennifer L.",
+        "role": "Mother of 3",
+        "context": "Letters for kids' 18th birthdays"
+      },
+      {
+        "quote": "During a difficult time, I wrote myself a letter of encouragement scheduled for six months later. When it arrived, it was exactly the reminder I needed that things would get better.",
+        "author": "David R.",
+        "role": "High School Teacher",
+        "context": "Encouragement during hard times"
+      },
+      {
+        "quote": "I wrote a letter the day I started my PhD. Opening it on graduation day was surreal — reading my fears, hopes, and naive excitement. I wish I could hug past-me.",
+        "author": "Emma W.",
+        "role": "Neuroscience Researcher",
+        "context": "PhD journey letter"
+      },
+      {
+        "quote": "At 60, I started writing letters to myself for each decade ahead. The letter I received at 65 reminded me to travel more. I've now visited 12 new countries.",
+        "author": "James H.",
+        "role": "Retired Architect",
+        "context": "Decade milestone letters"
+      },
+      {
+        "quote": "I wrote a 'victory letter' to myself during chemo. Reading it cancer-free two years later was the most powerful moment of my life. Keep writing to yourself. It matters.",
+        "author": "Lisa M.",
+        "role": "Cancer Survivor",
+        "context": "Victory over illness"
+      },
+      {
+        "quote": "As a digital nomad, I write a letter from each country I visit. Opening letters from past adventures while in new places creates this beautiful tapestry of my journey.",
+        "author": "Alex P.",
+        "role": "Travel Writer",
+        "context": "Time capsule from each country"
+      }
+    ]
+  },
+  "howItWorksV2": {
+    "badge": "Simple Process",
+    "title": "How It Works",
+    "description": "Three simple steps to send a message to your future self.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Write",
+        "subtitle": "Pour your thoughts into a letter",
+        "description": "Use our beautiful editor to write to your future self. No rush — take your time."
+      },
+      {
+        "number": "02",
+        "title": "Schedule",
+        "subtitle": "Pick any date in the future",
+        "description": "Tomorrow, next year, or decades from now. Your letter waits patiently."
+      },
+      {
+        "number": "03",
+        "title": "Receive",
+        "subtitle": "Get your letter when it arrives",
+        "description": "Email or physical mail — a gift from your past self, exactly when you need it."
+      }
+    ]
+  },
+  "trustSection": {
+    "badge": "Security First",
+    "title": "Your Words,",
+    "titleHighlight": "Protected",
+    "description": "Bank-grade encryption ensures your letters stay private until delivery day. No one — not even us — can read your messages.",
+    "comparisonNote": "Unlike regular email, your letters are encrypted and locked until delivery.",
+    "tableHeaders": {
+      "feature": "Feature",
+      "capsuleNote": "Capsule Note",
+      "regularEmail": "Regular Email"
+    },
+    "trustPoints": [
+      {
+        "title": "AES-256-GCM Encryption",
+        "description": "Military-grade encryption protects your letters from the moment you write them."
+      },
+      {
+        "title": "Zero-Knowledge Architecture",
+        "description": "We can't read your letters. Only you can decrypt them when they arrive."
+      },
+      {
+        "title": "99.9% Delivery Guarantee",
+        "description": "Your letters arrive on time, every time. Backed by our delivery SLO."
+      },
+      {
+        "title": "GDPR Compliant",
+        "description": "Full data export and deletion rights. Your data, your control."
+      }
+    ],
+    "comparison": [
+      { "feature": "End-to-end encryption" },
+      { "feature": "Guaranteed future delivery" },
+      { "feature": "Physical mail option" },
+      { "feature": "Can't be accidentally opened early" },
+      { "feature": "Survives account changes" }
+    ]
+  },
+  "featuresV2": {
+    "badge": "Features",
+    "title": "Built for",
+    "titleHighlight": "Time Travel",
+    "description": "Everything you need to send meaningful messages to your future self.",
+    "features": [
+      {
+        "title": "Encrypted & Sealed",
+        "description": "AES-256 encryption protects your letters. Even we can't read them until delivery."
+      },
+      {
+        "title": "Arrives On Time",
+        "description": "99.9% delivery guarantee. Your letters arrive exactly when scheduled — no exceptions."
+      },
+      {
+        "title": "Email or Paper",
+        "description": "Digital delivery to your inbox, or real physical mail delivered to your door."
+      },
+      {
+        "title": "Never Lost",
+        "description": "Redundant backups across multiple data centers. Your letters survive anything."
+      }
+    ]
+  },
+  "ctaV2": {
+    "badge": "Your Future Self is Waiting",
+    "title": "Start Your First Letter Today",
+    "description": "It takes just 5 minutes to plant a seed that will bloom in your future.",
+    "question": "What will you tell yourself?",
+    "writeNewLetter": "Write a New Letter",
+    "startWritingFree": "Start Writing Free",
+    "noCreditCard": "No credit card required. Cancel anytime.",
+    "stats": [
+      { "value": "Free", "label": "First Letter" },
+      { "value": "5 min", "label": "To Write" },
+      { "value": "50 yrs", "label": "Max Schedule" }
+    ]
+  },
+  "faqSection": {
+    "badge": "FAQ",
+    "title": "Questions?",
+    "titleHighlight": "Answers",
+    "description": "Everything you need to know about sending letters through time.",
+    "contactCta": "Still have questions?",
+    "contactLink": "Contact us",
+    "items": [
+      {
+        "question": "What happens if I forget my account?",
+        "answer": "Your letters are tied to your email address. If you forget your password, you can reset it anytime. Your letters will still be delivered to the email address you specified, even if you never log in again. We also send reminder emails before delivery."
+      },
+      {
+        "question": "How do you guarantee delivery?",
+        "answer": "We use multiple redundant systems to ensure 99.9% on-time delivery. Letters are stored with military-grade encryption and backed up across multiple data centers. We also have a reconciliation system that catches any delayed deliveries and expedites them."
+      },
+      {
+        "question": "Can anyone else read my letters?",
+        "answer": "No. Your letters are encrypted using AES-256-GCM encryption the moment you write them. We use a zero-knowledge architecture, meaning not even our team can read your letters. Only you can decrypt them when they're delivered."
+      },
+      {
+        "question": "What if I change my email address?",
+        "answer": "You can update your delivery email address anytime before the delivery date. Simply log in, find the letter, and update the recipient email. The letter will be delivered to your new address."
+      },
+      {
+        "question": "Can I cancel or edit a scheduled letter?",
+        "answer": "Yes! You can edit or cancel any letter up until its delivery date. However, once a letter is delivered, it cannot be undelivered. For physical mail, cancellation must be done at least 7 days before the delivery date."
+      },
+      {
+        "question": "How does physical mail work?",
+        "answer": "With our Premium plan, we print your letter on high-quality paper and mail it to any address worldwide. You can choose 'send on date' (mailed on a specific date) or 'arrive by date' (we calculate transit time to ensure arrival). Physical letters are printed from our secure facility and your content is never stored in plain text."
+      },
+      {
+        "question": "Is there a refund policy?",
+        "answer": "Yes. If you're not satisfied within 30 days of your Premium purchase, we'll refund you in full — no questions asked. For annual subscriptions, you can cancel anytime and continue using Premium features until your billing period ends."
+      },
+      {
+        "question": "How far in the future can I schedule?",
+        "answer": "Free users can schedule up to 5 years ahead. Premium users can schedule up to 50 years ahead. Yes, you can write a letter to yourself 50 years from now. We're committed to being around to deliver it."
+      }
+    ]
+  },
+  "footerV2": {
+    "tagline": "Write letters to your future self. Encrypted, scheduled, delivered exactly when you need them most.",
+    "product": "Product",
+    "legal": "Legal",
+    "links": {
+      "pricing": "Pricing",
+      "signUp": "Sign Up",
+      "signIn": "Sign In",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    },
+    "copyright": "Capsule Note. All rights reserved.",
+    "madeWith": "Made with {heart} for future-you"
+  },
+  "pricingPreview": {
+    "badge": "Simple Pricing",
+    "title": "Start Free,",
+    "titleHighlight": "Upgrade Anytime",
+    "description": "Your first letter is always free. No credit card required.",
+    "mostPopular": "Most Popular",
+    "seeFullPricing": "See full pricing details",
+    "tiers": [
+      {
+        "name": "Free",
+        "price": "$0",
+        "period": "forever",
+        "description": "Perfect for your first letter",
+        "cta": "Start Free",
+        "features": [
+          "1 free letter",
+          "Email delivery",
+          "Basic encryption",
+          "Schedule up to 5 years ahead"
+        ]
+      },
+      {
+        "name": "Premium",
+        "price": "$5",
+        "period": "/year",
+        "description": "Unlimited letters, physical mail",
+        "cta": "Go Premium",
+        "features": [
+          "Unlimited letters",
+          "Email + physical mail",
+          "Advanced encryption",
+          "Schedule up to 50 years ahead",
+          "Priority delivery",
+          "Writing prompts"
+        ]
+      }
+    ]
+  },
+  "letterDemo": {
+    "badge": "Try It Now",
+    "title": "Write Your First Letter",
+    "description": "Experience the magic of writing to your future self. Your draft will be saved when you sign up.",
+    "letterBadge": "Your First Letter",
+    "settingsBadge": "Settings",
+    "labels": {
+      "letterTitle": "Letter Title",
+      "yourMessage": "Your Message",
+      "recipient": "Recipient",
+      "yourEmail": "Your Email",
+      "whenToDeliver": "When to Deliver",
+      "customDate": "Custom Date",
+      "scheduledFor": "Scheduled for"
+    },
+    "placeholders": {
+      "title": "A letter to my future self...",
+      "message": "Dear future me, I'm writing this to remind you...",
+      "email": "your@email.com",
+      "pickDate": "Pick a date"
+    },
+    "buttons": {
+      "myself": "Myself",
+      "someoneElse": "Someone Else",
+      "continueWriting": "Continue Writing",
+      "sealSchedule": "Seal & Schedule",
+      "sealing": "Sealing...",
+      "sealed": "Sealed!"
+    },
+    "datePresets": [
+      { "label": "6 Months", "key": "6mo" },
+      { "label": "1 Year", "key": "1yr" },
+      { "label": "3 Years", "key": "3yr" },
+      { "label": "5 Years", "key": "5yr" }
+    ],
+    "errors": {
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email",
+      "dateRequired": "Pick when to deliver your letter",
+      "messageRequired": "Write a message to your future self"
+    },
+    "tooltip": {
+      "someoneElseDisabled": "Your first letter should be to yourself — future you deserves it first! ✨"
+    },
+    "wordCount": "{count} words",
+    "charCount": "{count} chars"
   }
 }

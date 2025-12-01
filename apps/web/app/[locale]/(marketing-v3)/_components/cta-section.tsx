@@ -3,6 +3,7 @@
 import { motion, useInView } from "framer-motion"
 import { ArrowRight, Heart } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
@@ -12,6 +13,8 @@ interface CTASectionProps {
 }
 
 export function CTASection({ isSignedIn }: CTASectionProps) {
+  const t = useTranslations("marketing.ctaSection")
+  const stats = t.raw("stats") as Array<{ value: string; label: string }>
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
@@ -46,29 +49,25 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
                 style={{ borderRadius: "2px" }}
               >
                 <Heart className="h-4 w-4 fill-coral text-coral" strokeWidth={2} />
-                Built for Time Travel
+                {t("badge")}
               </div>
             </div>
 
             {/* Content */}
             <div className="text-center pt-4">
               <h2 className="mb-4 font-mono text-2xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-3xl md:text-4xl lg:text-5xl">
-                Start Your First Letter Today
+                {t("title")}
               </h2>
 
               <p className="mx-auto mb-8 max-w-xl font-mono text-base leading-relaxed text-charcoal/80 sm:text-lg">
-                It takes just 5 minutes to plant a seed that will bloom in your future.
+                {t("description")}
                 <br className="hidden sm:block" />
-                What will you tell yourself?
+                {t("question")}
               </p>
 
               {/* Stats */}
               <div className="mb-8 flex flex-wrap justify-center gap-4 sm:gap-8">
-                {[
-                  { value: "10K+", label: "Letters Sent" },
-                  { value: "5 min", label: "To Write" },
-                  { value: "50 yrs", label: "Max Schedule" },
-                ].map((stat) => (
+                {stats.map((stat) => (
                   <div
                     key={stat.label}
                     className="border-2 border-charcoal bg-white px-4 py-3 sm:px-6 sm:py-4"
@@ -92,7 +91,7 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
                     size="lg"
                     className="group gap-3 text-lg shadow-md hover:shadow-lg"
                   >
-                    Write Your First Letter
+                    {t("cta")}
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>

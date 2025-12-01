@@ -8,6 +8,16 @@
   "accessibility": {
     "dismissAlert": "Uyariyi kapat"
   },
+  "settingsMenu": {
+    "settings": "Ayarlar",
+    "manageAccount": "Hesabı Yönet",
+    "signOut": "Çıkış Yap",
+    "plans": {
+      "digitalCapsule": "Dijital Kapsül",
+      "paperPixels": "Kağıt & Piksel",
+      "free": "Ücretsiz"
+    }
+  },
   "actions": {
     "dashboard": "Panel",
     "signIn": "Giriş Yap",

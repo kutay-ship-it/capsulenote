@@ -72,7 +72,7 @@ export default async function AppV3Layout({
                 href="/journey"
                 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal hover:opacity-70 transition-opacity"
               >
-                Journey
+                {t("nav.journey")}
               </Link>
               <Link
                 href="/letters"

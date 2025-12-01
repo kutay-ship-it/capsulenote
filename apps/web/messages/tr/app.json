@@ -2,9 +2,75 @@
   "nav": {
     "brand": "Capsule Note",
     "dashboard": "Panel",
+    "journey": "Yolculuk",
     "letters": "Mektuplar",
     "deliveries": "Teslimatlar",
     "settings": "Ayarlar",
     "openMenu": "Menüyü aç"
+  },
+  "journey": {
+    "title": "Yolculuğun",
+    "description": "Zamanda yolculuk eden mektuplar, seni bulmak için bekliyor.",
+    "hero": {
+      "arrived": {
+        "title": "Mektubun ulaştı!",
+        "subtitle": "Geçmişten gelen bir mesaj için gelen kutunu kontrol et",
+        "openButton": "Zaman Kapsülünü Aç"
+      },
+      "countdown": {
+        "badge": "Gelen Mesaj",
+        "from": "kimden",
+        "you": "Sen",
+        "to": "kime",
+        "futureYou": "Gelecekteki Sen",
+        "writtenOn": "{date} tarihinde yazıldı",
+        "days": "Gün",
+        "hours": "Saat",
+        "mins": "Dk",
+        "secs": "Sn",
+        "previewButton": "Mektubu Önizle",
+        "rescheduleButton": "Yeniden Planla"
+      },
+      "empty": {
+        "title": "İlk mektubun yazılmayı bekliyor",
+        "writeButton": "İlk Mektubunu Yaz",
+        "prompts": {
+          "0": "Bir yıl sonraki kendine ne söylerdin?",
+          "1": "Bugünden neyi hatırlamak istersin?",
+          "2": "Gelecekteki sana hangi tavsiye yardımcı olur?",
+          "3": "Şu an neye minnettarsın?",
+          "4": "Şu an hangi hayallerin peşindesin?"
+        }
+      },
+      "writeBanner": {
+        "writeButton": "Mektup Yaz",
+        "prompts": {
+          "0": "Gelecekteki senin şu an neyi duyması gerekiyor?",
+          "1": "5 yıl sonraki kendine ne söylerdin?",
+          "2": "Hangi anı sonsuza dek hatırlamak istersin?",
+          "3": "Bugün neyle gurur duyuyorsun?",
+          "4": "Gelecek yıl sana hangi tavsiye yardımcı olur?"
+        }
+      }
+    },
+    "timeline": {
+      "sectionTitle": "Yolculuğun",
+      "emptyTitle": "Duygusal Yolculuğun",
+      "emptySubtitle": "Zaman çizelgeni oluşturmaya başlamak için ilk mektubunu yaz",
+      "legend": {
+        "delivered": "Teslim Edildi",
+        "waiting": "Bekliyor"
+      },
+      "now": "Şimdi",
+      "tomorrow": "Yarın!",
+      "daysShort": "{days}g",
+      "untitledLetter": "Başlıksız Mektup",
+      "card": {
+        "deliveredDescription": "Bu anı açıldı ve teslim edildi.",
+        "scheduledDescription": "Doğru anı bekleyerek bir zaman kapsülünde güvenle mühürlendi.",
+        "statusDelivered": "Teslim Edildi",
+        "statusScheduled": "Planlandı"
+      }
+    }
   }
 }

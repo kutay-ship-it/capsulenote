@@ -1,5 +1,8 @@
+"use client"
+
 import { format, differenceInDays } from "date-fns"
 import { Mail, Clock, FileEdit, AlertCircle, ArrowRight, Lock } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
@@ -24,13 +27,15 @@ type StatusConfig = {
   icon: React.ReactNode
 }
 
-function getStatusConfig(letter: LetterWithPreview): StatusConfig {
+type TranslationFunction = ReturnType<typeof useTranslations>
+
+function getStatusConfig(letter: LetterWithPreview, t: TranslationFunction): StatusConfig {
   // Draft (no delivery)
   if (!letter.delivery) {
     return {
       borderColor: "border-duck-yellow",
       bgColor: "bg-white",
-      badgeText: "Draft",
+      badgeText: t("card.status.draft"),
       badgeBg: "bg-duck-yellow",
       badgeText2: "text-charcoal",
       icon: <FileEdit className="h-4 w-4" strokeWidth={2} />,
@@ -44,7 +49,7 @@ function getStatusConfig(letter: LetterWithPreview): StatusConfig {
     return {
       borderColor: "border-teal-primary",
       bgColor: "bg-white",
-      badgeText: "Delivered",
+      badgeText: t("card.status.delivered"),
       badgeBg: "bg-teal-primary",
       badgeText2: "text-white",
       icon: <Mail className="h-4 w-4" strokeWidth={2} />,
@@ -56,7 +61,7 @@ function getStatusConfig(letter: LetterWithPreview): StatusConfig {
     return {
       borderColor: "border-coral",
       bgColor: "bg-white",
-      badgeText: "Failed",
+      badgeText: t("card.status.failed"),
       badgeBg: "bg-coral",
       badgeText2: "text-white",
       icon: <AlertCircle className="h-4 w-4" strokeWidth={2} />,
@@ -67,10 +72,10 @@ function getStatusConfig(letter: LetterWithPreview): StatusConfig {
   const daysUntil = differenceInDays(new Date(deliverAt), new Date())
   const daysText =
     daysUntil <= 0
-      ? "Today"
+      ? t("card.status.today")
       : daysUntil === 1
-        ? "Tomorrow"
-        : `${daysUntil} days`
+        ? t("card.status.tomorrow")
+        : t("card.status.days", { count: daysUntil })
 
   return {
     borderColor: "border-duck-blue",
@@ -83,9 +88,12 @@ function getStatusConfig(letter: LetterWithPreview): StatusConfig {
 }
 
 export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
-  const statusConfig = getStatusConfig(letter)
+  const t = useTranslations("letters")
+  const statusConfig = getStatusConfig(letter, t)
   const formattedDate = format(new Date(letter.createdAt), "MMM d, yyyy")
   const isSent = letter.delivery?.status === "sent"
+  const untitledText = t("card.untitled")
+  const noContentText = t("card.noContent")
 
   // List view - horizontal layout
   if (viewMode === "list") {
@@ -120,10 +128,10 @@ export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
           {/* Content - flexible width */}
           <div className="flex-1 min-w-0">
             <h3 className="line-clamp-1 font-mono text-sm font-bold text-charcoal group-hover:text-duck-blue transition-colors">
-              {letter.title || "Untitled Letter"}
+              {letter.title || untitledText}
             </h3>
             <p className="line-clamp-1 font-mono text-xs text-charcoal/60 mt-0.5">
-              {letter.bodyPreview || "No content yet..."}
+              {letter.bodyPreview || noContentText}
             </p>
           </div>
 
@@ -186,12 +194,12 @@ export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
 
         {/* Title */}
         <h3 className="mt-2 mb-2 line-clamp-1 font-mono text-base font-bold text-charcoal group-hover:text-duck-blue transition-colors">
-          {letter.title || "Untitled Letter"}
+          {letter.title || untitledText}
         </h3>
 
         {/* Preview text - 2 lines with truncation, fixed height for alignment */}
         <p className="mb-4 line-clamp-2 min-h-[2.5rem] font-mono text-xs text-charcoal/60 leading-relaxed">
-          {letter.bodyPreview || "No content yet..."}
+          {letter.bodyPreview || noContentText}
         </p>
 
         {/* Dashed separator */}

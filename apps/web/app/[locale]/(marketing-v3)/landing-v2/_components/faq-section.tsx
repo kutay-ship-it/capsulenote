@@ -1,61 +1,24 @@
 "use client"
 
 import { motion, useInView, AnimatePresence } from "framer-motion"
-import { HelpCircle, ChevronDown, Plus, Minus } from "lucide-react"
+import { HelpCircle, Plus, Minus } from "lucide-react"
 import { useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 
-const FAQ_ITEMS = [
-  {
-    question: "What happens if I forget my account?",
-    answer:
-      "Your letters are tied to your email address. If you forget your password, you can reset it anytime. Your letters will still be delivered to the email address you specified, even if you never log in again. We also send reminder emails before delivery.",
-  },
-  {
-    question: "How do you guarantee delivery?",
-    answer:
-      "We use multiple redundant systems to ensure 99.9% on-time delivery. Letters are stored with military-grade encryption and backed up across multiple data centers. We also have a reconciliation system that catches any delayed deliveries and expedites them.",
-  },
-  {
-    question: "Can anyone else read my letters?",
-    answer:
-      "No. Your letters are encrypted using AES-256-GCM encryption the moment you write them. We use a zero-knowledge architecture, meaning not even our team can read your letters. Only you can decrypt them when they're delivered.",
-  },
-  {
-    question: "What if I change my email address?",
-    answer:
-      "You can update your delivery email address anytime before the delivery date. Simply log in, find the letter, and update the recipient email. The letter will be delivered to your new address.",
-  },
-  {
-    question: "Can I cancel or edit a scheduled letter?",
-    answer:
-      "Yes! You can edit or cancel any letter up until its delivery date. However, once a letter is delivered, it cannot be undelivered. For physical mail, cancellation must be done at least 7 days before the delivery date.",
-  },
-  {
-    question: "How does physical mail work?",
-    answer:
-      "With our Premium plan, we print your letter on high-quality paper and mail it to any address worldwide. You can choose 'send on date' (mailed on a specific date) or 'arrive by date' (we calculate transit time to ensure arrival). Physical letters are printed from our secure facility and your content is never stored in plain text.",
-  },
-  {
-    question: "Is there a refund policy?",
-    answer:
-      "Yes. If you're not satisfied within 30 days of your Premium purchase, we'll refund you in full — no questions asked. For annual subscriptions, you can cancel anytime and continue using Premium features until your billing period ends.",
-  },
-  {
-    question: "How far in the future can I schedule?",
-    answer:
-      "Free users can schedule up to 5 years ahead. Premium users can schedule up to 50 years ahead. Yes, you can write a letter to yourself 50 years from now. We're committed to being around to deliver it.",
-  },
-]
+interface FAQItem {
+  question: string
+  answer: string
+}
 
-function FAQItem({
+function FAQItemComponent({
   item,
   isOpen,
   onToggle,
   index,
 }: {
-  item: (typeof FAQ_ITEMS)[0]
+  item: FAQItem
   isOpen: boolean
   onToggle: () => void
   index: number
@@ -115,6 +78,8 @@ function FAQItem({
 }
 
 export function FAQSection() {
+  const t = useTranslations("marketing.faqSection")
+  const faqItems = t.raw("items") as FAQItem[]
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
   const [openIndex, setOpenIndex] = useState<number | null>(0)
@@ -134,13 +99,13 @@ export function FAQSection() {
             style={{ borderRadius: "2px" }}
           >
             <HelpCircle className="h-4 w-4" strokeWidth={2} />
-            FAQ
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-4xl md:text-5xl">
-            Questions?{" "}
+            {t("title")}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10">Answers</span>
+              <span className="relative z-10">{t("titleHighlight")}</span>
               <span
                 className="absolute bottom-1 left-0 right-0 h-3 bg-duck-yellow -z-0 sm:h-4"
                 style={{ borderRadius: "2px" }}
@@ -149,14 +114,14 @@ export function FAQSection() {
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            Everything you need to know about sending letters through time.
+            {t("subtitle")}
           </p>
         </motion.div>
 
         {/* FAQ Items */}
         <div className="mx-auto max-w-2xl space-y-3">
-          {FAQ_ITEMS.map((item, index) => (
-            <FAQItem
+          {faqItems.map((item, index) => (
+            <FAQItemComponent
               key={item.question}
               item={item}
               index={index}
@@ -174,13 +139,16 @@ export function FAQSection() {
           className="mt-12 text-center"
         >
           <p className="font-mono text-sm text-charcoal/60">
-            Still have questions?{" "}
-            <a
-              href="mailto:hello@capsulenote.com"
-              className="font-bold text-charcoal hover:text-teal-primary transition-colors underline underline-offset-2"
-            >
-              Contact us
-            </a>
+            {t.rich("contactCta", {
+              link: (chunks) => (
+                <a
+                  href="mailto:hello@capsulenote.com"
+                  className="font-bold text-charcoal hover:text-teal-primary transition-colors underline underline-offset-2"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
           </p>
         </motion.div>
       </div>

@@ -1,6 +1,13 @@
 {
   "heading": "Ayarlar",
   "subtitle": "Hesabını ve tercihlerini yönet",
+  "tabs": {
+    "account": "Hesap",
+    "billing": "Faturalandırma",
+    "addresses": "Adresler",
+    "privacy": "Gizlilik",
+    "referrals": "Davetler"
+  },
   "profile": {
     "title": "Profil",
     "description": "Hesap bilgilerin",
@@ -108,7 +115,48 @@
     "body": "Abonelik durumunu gör, kullanımı takip et, ödeme yöntemlerini yönet ve faturalarına eriş.",
     "badge": "Faturalandırma ayarlarını gör →",
     "viewFull": "Faturalandırma Ayarlarını Gör",
-    "manageSubscription": "Aboneliği Yönet"
+    "manageSubscription": "Aboneliği Yönet",
+    "subscription": {
+      "title": "Abonelik",
+      "plan": "Plan",
+      "status": "Durum",
+      "renews": "Yenileme",
+      "unknown": "Bilinmiyor",
+      "freePlanMessage": "Ücretsiz plandayken. Daha fazla özellik için yükselt.",
+      "statusLabel": {
+        "active": "Aktif",
+        "trialing": "Deneme",
+        "past_due": "Vadesi Geçmiş",
+        "canceled": "İptal Edildi",
+        "unpaid": "Ödenmemiş",
+        "incomplete": "Eksik"
+      }
+    },
+    "usage": {
+      "title": "Kullanım",
+      "emailCredits": "E-posta Kredisi",
+      "physicalLetterCredits": "Fiziksel Mektup Kredisi",
+      "remaining": "kalan",
+      "allCreditsUsed": "Tüm krediler kullanıldı"
+    },
+    "invoices": {
+      "title": "Faturalar",
+      "noInvoices": "Henüz fatura yok."
+    },
+    "paymentStatus": {
+      "succeeded": "Başarılı",
+      "pending": "Beklemede",
+      "failed": "Başarısız",
+      "processing": "İşleniyor",
+      "requires_action": "İşlem Gerekli",
+      "canceled": "İptal Edildi"
+    },
+    "addons": {
+      "title": "Ek Paketler",
+      "description": "Daha fazla teslimat mı gerekiyor? Ek kredi satın al.",
+      "emailCredits": "+ E-posta Kredisi",
+      "mailCredits": "+ Posta Kredisi"
+    }
   },
   "privacy": {
     "title": "Gizlilik ve veriler",
@@ -117,7 +165,35 @@
     "badge": "Gizlilik kontrolleri yakında",
     "viewFull": "Gizlilik Ayarlarını Gör",
     "exportData": "Verileri Dışa Aktar",
-    "deleteAccount": "Hesabı Sil"
+    "deleteAccount": "Hesabı Sil",
+    "export": {
+      "title": "Verileri Dışa Aktar",
+      "description": "Mektuplar, teslimatlar ve hesap bilgileri dahil tüm verilerini indir.",
+      "includesTitle": "İçerir",
+      "includes": {
+        "profile": "Profil ve hesap ayarları",
+        "letters": "Tüm mektuplar ve taslaklar",
+        "deliveries": "Teslimat geçmişi",
+        "subscription": "Abonelik ve ödemeler",
+        "usage": "Kullanım istatistikleri"
+      }
+    },
+    "legal": {
+      "title": "Yasal",
+      "privacyPolicy": "Gizlilik Politikası",
+      "terms": "Hizmet Şartları",
+      "gdpr": "GDPR Hakları"
+    },
+    "dangerZone": {
+      "title": "Tehlike Bölgesi",
+      "description": "Hesabını ve tüm ilişkili verilerini kalıcı olarak sil. Bu işlem geri alınamaz.",
+      "beforeDelete": "Silmeden önce",
+      "warnings": {
+        "export": "Önce verilerini dışa aktar",
+        "cancel": "Aktif abonelikleri iptal et",
+        "signOut": "Hemen çıkış yapılacak"
+      }
+    }
   },
   "danger": {
     "title": "Tehlike bölgesi",
@@ -125,12 +201,122 @@
     "body": "Hesabını ve tüm verilerini kalıcı olarak sil. Bu işlem geri alınamaz.",
     "badge": "Hesap silme yakında"
   },
+  "addresses": {
+    "title": "Kayıtlı Adresler",
+    "addButton": "Adres Ekle",
+    "newAddress": "Yeni Adres",
+    "editAddress": "Adresi Düzenle",
+    "saveButton": "Adresi Kaydet",
+    "updateButton": "Adresi Güncelle",
+    "cancelButton": "İptal",
+    "empty": {
+      "title": "Henüz kayıtlı adres yok",
+      "description": "Fiziksel mektup teslimatları için bir adres ekle"
+    },
+    "verified": "Doğrulandı",
+    "toasts": {
+      "saved": "Adres başarıyla kaydedildi",
+      "updated": "Adres başarıyla güncellendi",
+      "deleted": "Adres silindi"
+    },
+    "verification": {
+      "title": "Adres Doğrulama",
+      "description": "Fiziksel mektuplarının başarılı bir şekilde teslim edilmesini sağlamak için adresleri doğruluyoruz. Doğrulanmış adresler yeşil onay işareti gösterir.",
+      "supportedTitle": "Desteklenen Ülkeler",
+      "supportedDescription": "Şu anda Amerika Birleşik Devletleri, Kanada, Birleşik Krallık ve Avustralya'ya fiziksel posta teslimatını destekliyoruz. Yakında daha fazla ülke!"
+    },
+    "form": {
+      "country": "Ülke",
+      "recipientName": "Alıcı Adı",
+      "recipientNamePlaceholder": "Ahmet Yılmaz",
+      "streetAddress": "Sokak Adresi",
+      "streetAddressPlaceholder": "Atatürk Cad. No: 123",
+      "aptSuite": "Daire, Kat (İsteğe bağlı)",
+      "aptSuitePlaceholder": "Daire 4B",
+      "city": "Şehir",
+      "cityPlaceholder": "İstanbul",
+      "state": "İl",
+      "stateOptional": "(İsteğe bağlı)",
+      "statePlaceholder": "İl/Eyalet",
+      "stateLabels": {
+        "State": "Eyalet",
+        "Province": "İl",
+        "County": "İlçe",
+        "Canton": "Kanton",
+        "Prefecture": "Vilayet",
+        "District": "Bölge",
+        "Region": "Bölge",
+        "Department": "Bölüm",
+        "Island": "Ada",
+        "Parish": "Mahalle",
+        "Oblast": "Eyalet",
+        "Governorate": "Valilik",
+        "Emirate": "Emirlik",
+        "State/Region": "Eyalet/Bölge",
+        "County/City": "İlçe/Şehir"
+      },
+      "postalCode": "Posta Kodu",
+      "postalCodeExample": "örn. {example}",
+      "verify": "Doğrula",
+      "verifying": "Doğrulanıyor...",
+      "saving": "Kaydediliyor...",
+      "cancel": "İptal",
+      "errors": {
+        "nameRequired": "İsim gerekli",
+        "addressRequired": "Adres gerekli",
+        "cityRequired": "Şehir gerekli",
+        "stateRequired": "{label} gerekli",
+        "postalRequired": "{label} gerekli",
+        "postalInvalid": "Geçersiz {label} formatı"
+      },
+      "verificationStatus": {
+        "verified": "Adres Doğrulandı",
+        "deliverable": "Bu adrese teslimat yapılabilir",
+        "issue": "Adres Sorunu",
+        "notDeliverable": "Bu adrese teslimat yapılamayabilir"
+      },
+      "suggestion": {
+        "title": "Önerilen Adres Formatı",
+        "useSuggested": "Öneriyi Kullan",
+        "keepOriginal": "Orijinali Koru",
+        "updated": "Adres öneriyle güncellendi"
+      },
+      "toasts": {
+        "verifySuccess": "Adres başarıyla doğrulandı!",
+        "verifyError": "Bu adrese teslimat yapılamayabilir",
+        "verifyFailed": "Doğrulama başarısız",
+        "verifyErrorGeneric": "Lütfen daha sonra tekrar deneyin."
+      }
+    }
+  },
   "referral": {
     "title": "Arkadaşını Davet Et",
     "description": "Arkadaşlarını davet ederek kredi kazan",
     "body": "Benzersiz davet linkini arkadaşlarınla paylaş. Abone olduklarında ikiniz de 1 e-posta kredisi kazanırsınız.",
     "viewFull": "Davet Panelini Gör",
     "statsSignups": "Kayıtlar",
-    "statsCredits": "Kazanılan Kredi"
+    "statsCredits": "Kazanılan Kredi",
+    "yourCode": {
+      "title": "Davet Kodun",
+      "description": "Davet kodunu paylaş ve arkadaşların kaydolduğunda kredi kazan."
+    },
+    "yourStats": {
+      "title": "İstatistiklerin",
+      "clicks": "Tıklamalar",
+      "signups": "Kayıtlar",
+      "conversions": "Dönüşümler",
+      "credits": "Krediler"
+    },
+    "history": {
+      "title": "Geçmiş",
+      "referralPrefix": "Davet #",
+      "empty": "Henüz davet yok. Başlamak için kodunu paylaş!"
+    },
+    "share": {
+      "copied": "Link panoya kopyalandı!",
+      "copyFailed": "Link kopyalanamadı",
+      "copiedButton": "Kopyalandı!",
+      "copyButton": "Linki Kopyala"
+    }
   }
 }

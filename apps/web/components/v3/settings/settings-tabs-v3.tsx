@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { User, CreditCard, Shield, Gift, MapPin } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
@@ -9,36 +10,30 @@ import { cn } from "@/lib/utils"
 export type SettingsTab = "account" | "billing" | "addresses" | "privacy" | "referrals"
 
 /**
- * Tab configuration with icons and labels
+ * Tab configuration with icons (labels come from translations)
  */
 const TAB_CONFIG: {
   value: SettingsTab
-  label: string
   icon: React.ReactNode
 }[] = [
   {
     value: "account",
-    label: "Account",
     icon: <User className="h-4 w-4" strokeWidth={2} />,
   },
   {
     value: "billing",
-    label: "Billing",
     icon: <CreditCard className="h-4 w-4" strokeWidth={2} />,
   },
   {
     value: "addresses",
-    label: "Addresses",
     icon: <MapPin className="h-4 w-4" strokeWidth={2} />,
   },
   {
     value: "privacy",
-    label: "Privacy",
     icon: <Shield className="h-4 w-4" strokeWidth={2} />,
   },
   {
     value: "referrals",
-    label: "Referrals",
     icon: <Gift className="h-4 w-4" strokeWidth={2} />,
   },
 ]
@@ -65,6 +60,7 @@ export function SettingsTabsV3({
   privacyContent,
   referralsContent,
 }: SettingsTabsV3Props) {
+  const t = useTranslations("settings.tabs")
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab)
 
   const handleTabChange = (tab: string) => {
@@ -105,7 +101,7 @@ export function SettingsTabsV3({
             style={{ borderRadius: "0" }}
           >
             {tab.icon}
-            <span className="hidden sm:inline">{tab.label}</span>
+            <span className="hidden sm:inline">{t(tab.value)}</span>
           </TabsTrigger>
         ))}
       </TabsList>

@@ -1,27 +1,35 @@
 "use client"
 
 import { Mail, Github, Twitter } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 
 export function Footer() {
+  const t = useTranslations("marketing.footer")
   const currentYear = new Date().getFullYear()
 
   const links = {
     product: [
-      { label: "Features", href: "#features" },
-      { label: "How It Works", href: "#how-it-works" },
+      { label: t("links.features"), href: "#features" },
+      { label: t("links.howItWorks"), href: "#how-it-works" },
     ],
     company: [
-      { label: "About", href: "#" },
-      { label: "Blog", href: "#" },
-      { label: "Contact", href: "#" },
+      { label: t("links.about"), href: "#" },
+      { label: t("links.blog"), href: "#" },
+      { label: t("links.contact"), href: "#" },
     ],
     legal: [
-      { label: "Privacy", href: "/privacy" },
-      { label: "Terms", href: "/terms" },
-      { label: "Security", href: "#" },
+      { label: t("links.privacy"), href: "/privacy" },
+      { label: t("links.terms"), href: "/terms" },
+      { label: t("links.security"), href: "#" },
     ],
+  }
+
+  const categoryLabels: Record<string, string> = {
+    product: t("product"),
+    company: t("company"),
+    legal: t("legal"),
   }
 
   return (
@@ -37,7 +45,7 @@ export function Footer() {
               </span>
             </div>
             <p className="mb-6 max-w-xs font-mono text-sm leading-relaxed text-charcoal/70">
-              Write letters to your future self. Encrypted, scheduled, delivered when you need them most.
+              {t("tagline")}
             </p>
             <div className="flex gap-3">
               {[
@@ -62,7 +70,7 @@ export function Footer() {
           {Object.entries(links).map(([category, categoryLinks]) => (
             <div key={category}>
               <h4 className="mb-4 font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
-                {category}
+                {categoryLabels[category]}
               </h4>
               <ul className="space-y-3">
                 {categoryLinks.map((link) => (
@@ -86,10 +94,10 @@ export function Footer() {
         <div className="container px-4 sm:px-6">
           <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
             <p className="font-mono text-xs text-charcoal/60">
-              {currentYear} Capsule Note. All rights reserved.
+              {currentYear} {t("copyright")}
             </p>
             <p className="font-mono text-xs text-charcoal/60">
-              Made with care for future-you.
+              {t("madeWith")}
             </p>
           </div>
         </div>

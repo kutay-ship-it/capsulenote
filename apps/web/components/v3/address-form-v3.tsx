@@ -4,6 +4,7 @@ import * as React from "react"
 import { CheckCircle2, AlertTriangle, Loader2, MapPin } from "lucide-react"
 import { toast } from "sonner"
 import { postcodeValidator } from "postcode-validator"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -43,8 +44,11 @@ export function AddressFormV3({
   onCancel,
   isSubmitting = false,
   showNameField = true,
-  submitLabel = "Save Address",
+  submitLabel,
 }: AddressFormV3Props) {
+  const t = useTranslations("settings.addresses.form")
+  const effectiveSubmitLabel = submitLabel || t("saving")
+
   // Form state
   const [name, setName] = React.useState(initialData?.name || "")
   const [country, setCountry] = React.useState(initialData?.country || DEFAULT_COUNTRY)
@@ -59,6 +63,16 @@ export function AddressFormV3({
   const stateOptions = React.useMemo(() => getStatesForCountry(country), [country])
   const showStateDropdown = hasStateDropdown(country)
   const showStateField = countryConfig?.stateLabel !== null
+
+  // Get translated state label (e.g., "Province" -> "İl" in Turkish)
+  const getTranslatedStateLabel = React.useCallback(() => {
+    const stateLabel = countryConfig?.stateLabel
+    if (!stateLabel) return t("state")
+    // Try to get translated label, fall back to English or generic "state"
+    const translated = t(`stateLabels.${stateLabel}` as Parameters<typeof t>[0])
+    // If translation key doesn't exist, next-intl returns the key itself
+    return translated.startsWith("stateLabels.") ? stateLabel : translated
+  }, [countryConfig?.stateLabel, t])
 
   // Verification state
   const [isVerifying, setIsVerifying] = React.useState(false)
@@ -85,28 +99,28 @@ export function AddressFormV3({
     const config = getCountryConfig(country)
 
     if (showNameField && !name.trim()) {
-      newErrors.name = "Name is required"
+      newErrors.name = t("errors.nameRequired")
     }
     if (!line1.trim()) {
-      newErrors.line1 = "Address is required"
+      newErrors.line1 = t("errors.addressRequired")
     }
     if (!city.trim()) {
-      newErrors.city = "City is required"
+      newErrors.city = t("errors.cityRequired")
     }
 
     // State validation - only if required for this country
     if (config?.requiresState && !state.trim()) {
-      newErrors.state = `${config.stateLabel || "State"} is required`
+      newErrors.state = t("errors.stateRequired", { label: getTranslatedStateLabel() })
     }
 
     // Postal code validation using postcode-validator
     if (!postalCode.trim()) {
-      newErrors.postalCode = `${config?.postalLabel || "Postal code"} is required`
+      newErrors.postalCode = t("errors.postalRequired", { label: config?.postalLabel || t("postalCode") })
     } else {
       try {
         const isValidPostal = postcodeValidator(postalCode, country)
         if (!isValidPostal) {
-          newErrors.postalCode = `Invalid ${config?.postalLabel || "postal code"} format`
+          newErrors.postalCode = t("errors.postalInvalid", { label: config?.postalLabel || t("postalCode") })
         }
       } catch {
         // If postcode-validator doesn't support the country, accept any format
@@ -151,24 +165,24 @@ export function AddressFormV3({
             if (hasDifference) {
               setShowSuggestion(true)
             } else {
-              toast.success("Address verified successfully!")
+              toast.success(t("toasts.verifySuccess"))
             }
           } else {
-            toast.success("Address verified successfully!")
+            toast.success(t("toasts.verifySuccess"))
           }
         } else {
-          toast.error("Address may not be deliverable", {
-            description: result.data.error || "Please check the address and try again.",
+          toast.error(t("toasts.verifyError"), {
+            description: result.data.error || t("toasts.verifyErrorGeneric"),
           })
         }
       } else {
-        toast.error("Verification failed", {
+        toast.error(t("toasts.verifyFailed"), {
           description: result.error.message,
         })
       }
-    } catch (error) {
-      toast.error("Verification error", {
-        description: "Please try again later.",
+    } catch {
+      toast.error(t("toasts.verifyFailed"), {
+        description: t("toasts.verifyErrorGeneric"),
       })
     } finally {
       setIsVerifying(false)
@@ -184,7 +198,7 @@ export function AddressFormV3({
       if (suggested.state) setState(suggested.state)
       setPostalCode(suggested.postalCode)
       setShowSuggestion(false)
-      toast.success("Address updated with suggestion")
+      toast.success(t("suggestion.updated"))
     }
   }
 
@@ -223,7 +237,7 @@ export function AddressFormV3({
           htmlFor="address-country"
           className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
         >
-          Country
+          {t("country")}
         </label>
         <CountrySelectorV3
           value={country}
@@ -239,7 +253,7 @@ export function AddressFormV3({
             htmlFor="address-name"
             className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
           >
-            Recipient Name
+            {t("recipientName")}
           </label>
           <Input
             id="address-name"
@@ -248,7 +262,7 @@ export function AddressFormV3({
               setName(e.target.value)
               clearField("name")
             }}
-            placeholder="John Doe"
+            placeholder={t("recipientNamePlaceholder")}
             className="border-2 border-charcoal font-mono text-sm"
             style={{ borderRadius: "2px" }}
             aria-invalid={!!errors.name}
@@ -266,7 +280,7 @@ export function AddressFormV3({
           htmlFor="address-line1"
           className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
         >
-          Street Address
+          {t("streetAddress")}
         </label>
         <Input
           id="address-line1"
@@ -275,7 +289,7 @@ export function AddressFormV3({
             setLine1(e.target.value)
             clearField("line1")
           }}
-          placeholder="123 Main Street"
+          placeholder={t("streetAddressPlaceholder")}
           className="border-2 border-charcoal font-mono text-sm"
           style={{ borderRadius: "2px" }}
           aria-invalid={!!errors.line1}
@@ -292,7 +306,7 @@ export function AddressFormV3({
           htmlFor="address-line2"
           className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
         >
-          Apt, Suite, Unit (Optional)
+          {t("aptSuite")}
         </label>
         <Input
           id="address-line2"
@@ -301,7 +315,7 @@ export function AddressFormV3({
             setLine2(e.target.value)
             clearField("line2")
           }}
-          placeholder="Apt 4B"
+          placeholder={t("aptSuitePlaceholder")}
           className="border-2 border-charcoal font-mono text-sm"
           style={{ borderRadius: "2px" }}
           disabled={isSubmitting}
@@ -315,7 +329,7 @@ export function AddressFormV3({
             htmlFor="address-city"
             className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
           >
-            City
+            {t("city")}
           </label>
           <Input
             id="address-city"
@@ -324,7 +338,7 @@ export function AddressFormV3({
               setCity(e.target.value)
               clearField("city")
             }}
-            placeholder="San Francisco"
+            placeholder={t("cityPlaceholder")}
             className="border-2 border-charcoal font-mono text-sm"
             style={{ borderRadius: "2px" }}
             aria-invalid={!!errors.city}
@@ -342,9 +356,9 @@ export function AddressFormV3({
               htmlFor="address-state"
               className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
             >
-              {countryConfig?.stateLabel || "State"}
+              {getTranslatedStateLabel()}
               {!countryConfig?.requiresState && (
-                <span className="text-charcoal/40 ml-1">(Optional)</span>
+                <span className="text-charcoal/40 ml-1">{t("stateOptional")}</span>
               )}
             </label>
 
@@ -366,7 +380,7 @@ export function AddressFormV3({
                   )}
                   style={{ borderRadius: "2px" }}
                 >
-                  <SelectValue placeholder="Select" />
+                  <SelectValue placeholder={t("statePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent
                   className="border-2 border-charcoal bg-white font-mono max-h-[240px]"
@@ -388,7 +402,7 @@ export function AddressFormV3({
                   setState(e.target.value)
                   clearField("state")
                 }}
-                placeholder={countryConfig?.stateLabel || "State/Province"}
+                placeholder={getTranslatedStateLabel()}
                 className={cn(
                   "border-2 border-charcoal font-mono text-sm",
                   errors.state && "border-coral"
@@ -411,7 +425,7 @@ export function AddressFormV3({
           htmlFor="address-postal"
           className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70"
         >
-          {countryConfig?.postalLabel || "Postal Code"}
+          {countryConfig?.postalLabel || t("postalCode")}
         </label>
         <div className="flex items-center gap-3">
           <Input
@@ -433,7 +447,7 @@ export function AddressFormV3({
           {/* Format hint */}
           {countryConfig?.postalPlaceholder && (
             <span className="font-mono text-[10px] text-charcoal/40">
-              e.g., {countryConfig.postalPlaceholder}
+              {t("postalCodeExample", { example: countryConfig.postalPlaceholder })}
             </span>
           )}
         </div>
@@ -460,12 +474,12 @@ export function AddressFormV3({
           )}
           <div className="flex-1 min-w-0">
             <p className="font-mono text-xs font-bold text-charcoal">
-              {verification.isValid ? "Address Verified" : "Address Issue"}
+              {verification.isValid ? t("verificationStatus.verified") : t("verificationStatus.issue")}
             </p>
             <p className="font-mono text-[10px] text-charcoal/70">
               {verification.isValid
-                ? "This address is deliverable"
-                : verification.error || "Address may not be deliverable"}
+                ? t("verificationStatus.deliverable")
+                : verification.error || t("verificationStatus.notDeliverable")}
             </p>
           </div>
         </div>
@@ -481,7 +495,7 @@ export function AddressFormV3({
             <MapPin className="h-4 w-4 text-charcoal flex-shrink-0 mt-0.5" strokeWidth={2} />
             <div className="flex-1 min-w-0">
               <p className="font-mono text-xs font-bold text-charcoal">
-                Suggested Address Format
+                {t("suggestion.title")}
               </p>
               <p className="font-mono text-[10px] text-charcoal/70 mt-1">
                 {verification.suggestedAddress.line1}
@@ -505,7 +519,7 @@ export function AddressFormV3({
               className="h-8 text-[10px] bg-duck-yellow hover:bg-duck-yellow/80 text-charcoal border-2 border-charcoal"
               style={{ borderRadius: "2px" }}
             >
-              Use Suggested
+              {t("suggestion.useSuggested")}
             </Button>
             <Button
               type="button"
@@ -515,7 +529,7 @@ export function AddressFormV3({
               className="h-8 text-[10px] border-2 border-charcoal"
               style={{ borderRadius: "2px" }}
             >
-              Keep Original
+              {t("suggestion.keepOriginal")}
             </Button>
           </div>
         </div>
@@ -534,12 +548,12 @@ export function AddressFormV3({
           {isVerifying ? (
             <>
               <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-              Verifying...
+              {t("verifying")}
             </>
           ) : (
             <>
               <CheckCircle2 className="h-3.5 w-3.5" strokeWidth={2} />
-              Verify
+              {t("verify")}
             </>
           )}
         </Button>
@@ -554,10 +568,10 @@ export function AddressFormV3({
           {isSubmitting ? (
             <>
               <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-              Saving...
+              {t("saving")}
             </>
           ) : (
-            submitLabel
+            effectiveSubmitLabel
           )}
         </Button>
 
@@ -569,7 +583,7 @@ export function AddressFormV3({
             disabled={isSubmitting}
             className="h-10 font-mono text-[10px] uppercase tracking-wider text-charcoal/60 hover:text-charcoal"
           >
-            Cancel
+            {t("cancel")}
           </Button>
         )}
       </div>

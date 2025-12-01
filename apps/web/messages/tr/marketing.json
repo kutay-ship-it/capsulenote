@@ -1,4 +1,11 @@
 {
+  "nav": {
+    "features": "Özellikler",
+    "howItWorks": "Nasıl Çalışır",
+    "signIn": "Giriş Yap",
+    "getStarted": "Başla",
+    "letters": "Mektuplar"
+  },
   "hero": {
     "badge": "Ruh için zaman kapsülü",
     "titleLine1": "Kendine yaz",
@@ -6,6 +13,23 @@
     "description": "Mektuplar tam olması gereken anda teslim edilir. Kontrol etmen gereken uygulama yok. Kapatılacak hatırlatmalar yok. Sadece bekleyen sözlerin.",
     "primaryCta": "Yazmaya başla",
     "secondaryCta": "Nasıl çalıştığını gör"
+  },
+  "heroV3": {
+    "badge": "Gelecekteki kendine mektup yaz",
+    "titlePart1": "Zamanda",
+    "titlePart2": "Bir",
+    "titlePart3": "Mesaj",
+    "titlePart4": "Gönder",
+    "description": "En çok ihtiyacın olduğunda ulaşan mektuplar yaz. Dijital teslimat veya gerçek fiziksel posta — sözlerin, gelecekte bekliyor.",
+    "goToLetters": "Mektuplara Git",
+    "startWriting": "Ücretsiz Yazmaya Başla",
+    "signIn": "Giriş Yap",
+    "scrollIndicator": "Aşağıda dene",
+    "stats": [
+      { "value": "10.847", "label": "Teslim Edilen Mektup" },
+      { "value": "%99,9", "label": "Zamanında Teslimat" },
+      { "value": "4,9★", "label": "2.400+ Yazardan" }
+    ]
   },
   "stats": [
     {
@@ -92,6 +116,127 @@
       "Inngest ile %99,97 zamanında teslimat"
     ]
   },
+  "ctaSection": {
+    "badge": "Zaman Yolculuğu İçin Tasarlandı",
+    "title": "İlk Mektubunu Bugün Yaz",
+    "description": "Gelecekte çiçek açacak bir tohum ekmek sadece 5 dakika sürer.",
+    "question": "Kendine ne söyleyeceksin?",
+    "cta": "İlk Mektubunu Yaz",
+    "stats": [
+      { "value": "10K+", "label": "Gönderilen Mektup" },
+      { "value": "5 dk", "label": "Yazma Süresi" },
+      { "value": "50 yıl", "label": "Maks Planlama" }
+    ]
+  },
+  "featuresSection": {
+    "badge": "Özellikler",
+    "title": "İhtiyacın Olan Her Şey",
+    "titleHighlight": "Yarınla Bağlan",
+    "description": "Önemli mektuplar yaz. Geleceğin herhangi bir anı için planla. Geçmişteki kendin, olacağın kişiye konuşsun.",
+    "featureBadge": "Özellik",
+    "features": [
+      {
+        "title": "Zengin Metin Editörü",
+        "description": "Düşüncelerini güzel, dikkat dağıtmayan bir editörle yaz. Mektuplarını tam istediğin gibi biçimlendir."
+      },
+      {
+        "title": "Teslimat Planla",
+        "description": "Gelecekte herhangi bir tarih seç. Mektubun tam ihtiyacın olduğunda ulaşır — günler, aylar veya yıllar sonra."
+      },
+      {
+        "title": "Uçtan Uca Şifreleme",
+        "description": "Sözlerin yazdığın anda şifrelenir. Sadece sen mektuplarını ulaştığında okuyabilirsin."
+      },
+      {
+        "title": "E-posta ve Fiziksel Posta",
+        "description": "Mektuplarını dijital olarak e-posta ile al veya kapına teslim edilen gerçek fiziksel postayı tercih et."
+      },
+      {
+        "title": "Varışa Kadar Kilitli",
+        "description": "Mektupların teslimat tarihine kadar mühürlü ve okunamaz kalır. Gerçek beklenti, gerçek sürpriz."
+      },
+      {
+        "title": "Yazı Yönlendirmeleri",
+        "description": "İlhama mı ihtiyacın var? Düşünce, hedefler ve şükran için tasarlanmış düşünceli yönlendirmelerden seç."
+      }
+    ]
+  },
+  "howItWorksSteps": {
+    "badge": "Basit Süreç",
+    "title": "Nasıl Çalışır",
+    "description": "Gelecekteki kendine mesaj göndermek için dört basit adım. Düşünceler için bir zaman makinesi gibi.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Mektubunu Yaz",
+        "description": "Düşüncelerini, hayallerini, tavsiyelerini veya yansımalarını bir mektuba dök. Acele etme — zamanın var."
+      },
+      {
+        "number": "02",
+        "title": "Bir Tarih Seç",
+        "description": "Mektubunun ne zaman ulaşacağını seç. Yarın, gelecek ay veya yıllar sonra — sen karar ver."
+      },
+      {
+        "number": "03",
+        "title": "Mühürle ve Şifrele",
+        "description": "Mektubun şifrelenir ve mühürlenir. Teslimat tarihi gelene kadar sen bile okuyamazsın."
+      },
+      {
+        "number": "04",
+        "title": "Mesajını Al",
+        "description": "Planlanan tarihte mektubun gelir — geçmişteki kendinden bir hediye, tam ihtiyacın olduğunda."
+      }
+    ]
+  },
+  "testimonialsSection": {
+    "badge": "Hikayeler",
+    "title": "Önemli Olan",
+    "titleHighlight": "Mesajlar",
+    "testimonials": [
+      {
+        "quote": "İşimi kurmadan önce kendime bir mektup yazdım. İki yıl sonra, ilk büyük kilometre taşıma ulaştığım gün okumak beni ağlattı. Geçmişteki ben tam olarak neyi duymam gerektiğini biliyordu.",
+        "author": "Ayşe K.",
+        "role": "Girişimci",
+        "highlight": "beni ağlattı"
+      },
+      {
+        "quote": "Her yıl doğum günümde kendimden bir mektup alıyorum. En sevdiğim gelenek oldu — eskiden kim olduğumla bir sohbet, ne kadar yol kat ettiğimi hatırlatan.",
+        "author": "Mehmet T.",
+        "role": "Yazılım Geliştirici",
+        "highlight": "en sevdiğim gelenek"
+      },
+      {
+        "quote": "Çocuklarımın 18. doğum günlerinde açmaları için mektuplar gönderdim. Fiziksel posta seçeneği onu geçmişten gerçek bir hediye gibi hissettirdi. Bunu sonsuza dek saklayacaklar.",
+        "author": "Zeynep L.",
+        "role": "Ebeveyn",
+        "highlight": "geçmişten gerçek bir hediye"
+      },
+      {
+        "quote": "Zor bir dönemde kendime altı ay sonrası için planlanmış bir cesaret mektubu yazdım. Ulaştığında, işlerin düzeleceğine dair tam da ihtiyacım olan hatırlatmaydı.",
+        "author": "Davut R.",
+        "role": "Öğretmen",
+        "highlight": "tam da ihtiyacım olan hatırlatma"
+      }
+    ]
+  },
+  "footer": {
+    "tagline": "Gelecekteki kendine mektup yaz. Şifreli, planlanmış, en çok ihtiyacın olduğunda teslim edilir.",
+    "product": "Ürün",
+    "company": "Şirket",
+    "legal": "Yasal",
+    "links": {
+      "features": "Özellikler",
+      "howItWorks": "Nasıl Çalışır",
+      "about": "Hakkımızda",
+      "blog": "Blog",
+      "contact": "İletişim",
+      "privacy": "Gizlilik",
+      "terms": "Şartlar",
+      "security": "Güvenlik"
+    },
+    "copyright": "Capsule Note. Tüm hakları saklıdır.",
+    "madeWith": "Gelecekteki sen için özenle yapıldı."
+  },
   "howItWorks": {
     "badge": "Nasıl çalışıyor",
     "title": "Üç vuruşluk sakin ritüel",
@@ -141,5 +286,320 @@
         ]
       }
     }
+  },
+  "heroV2": {
+    "badge": "Gelecekteki Kendine Mektup Yaz",
+    "titleLine1": "Zamanda Bir",
+    "titleLine2": "Mesaj Gönder",
+    "description": "{years1}, {years5} veya {years25} sonra ulaşan mektuplar yaz. Dijital veya fiziksel posta — sözlerin, tam ihtiyacın olduğunda bekliyor.",
+    "years1": "1 yıl",
+    "years5": "5 yıl",
+    "years25": "25 yıl",
+    "goToDashboard": "Panoya Git",
+    "startWritingFree": "Ücretsiz Yazmaya Başla",
+    "tryItBelow": "Aşağıda dene",
+    "stats": [
+      { "value": "10.847", "label": "Teslim Edilen Mektup" },
+      { "value": "%99,9", "label": "Zamanında Teslimat" },
+      { "value": "4,9★", "label": "2.400+ Yazardan" }
+    ]
+  },
+  "socialProofV2": {
+    "badge": "Gerçek Hikayeler",
+    "title": "Hayat",
+    "titleHighlight": "Değiştiren Mesajlar",
+    "writersCount": "{count} yazar zaman yolculuğu anlarını paylaşıyor.",
+    "rating": "2.400+ yazardan <score>4,9</score>",
+    "testimonials": [
+      {
+        "quote": "İşimi kurmadan önce kendime bir mektup yazdım. İki yıl sonra, ilk büyük kilometre taşıma ulaştığım gün okumak beni ağlattı. Geçmişteki ben tam olarak neyi duymam gerektiğini biliyordu.",
+        "author": "Ayşe K.",
+        "role": "Startup Kurucusu",
+        "context": "2 yıl sonra alındı"
+      },
+      {
+        "quote": "Her yıl doğum günümde kendimden bir mektup alıyorum. En sevdiğim gelenek oldu — eskiden kim olduğumla bir sohbet, ne kadar yol kat ettiğimi hatırlatan.",
+        "author": "Mehmet T.",
+        "role": "Yazılım Mühendisi",
+        "context": "Yıllık doğum günü geleneği"
+      },
+      {
+        "quote": "Çocuklarımın 18. doğum günlerinde açmaları için mektuplar gönderdim. Fiziksel posta seçeneği onu geçmişten gerçek bir hediye gibi hissettirdi. Bunu sonsuza dek saklayacaklar.",
+        "author": "Zeynep L.",
+        "role": "3 Çocuk Annesi",
+        "context": "Çocukların 18. doğum günü için mektuplar"
+      },
+      {
+        "quote": "Zor bir dönemde kendime altı ay sonrası için planlanmış bir cesaret mektubu yazdım. Ulaştığında, işlerin düzeleceğine dair tam da ihtiyacım olan hatırlatmaydı.",
+        "author": "Davut R.",
+        "role": "Lise Öğretmeni",
+        "context": "Zor zamanlarda cesaret"
+      },
+      {
+        "quote": "Doktorama başladığım gün bir mektup yazdım. Mezuniyet gününde açmak gerçek dışıydı — korkularımı, umutlarımı ve saf heyecanımı okumak. Keşke geçmişteki bana sarılabilsem.",
+        "author": "Elif W.",
+        "role": "Nörobilim Araştırmacısı",
+        "context": "Doktora yolculuğu mektubu"
+      },
+      {
+        "quote": "60 yaşında, ilerideki her on yıl için kendime mektuplar yazmaya başladım. 65 yaşında aldığım mektup bana daha çok seyahat etmemi hatırlattı. Şimdiye kadar 12 yeni ülke gezdim.",
+        "author": "Hasan H.",
+        "role": "Emekli Mimar",
+        "context": "On yıllık dönüm noktası mektupları"
+      },
+      {
+        "quote": "Kemoterapi sırasında kendime bir 'zafer mektubu' yazdım. İki yıl sonra kanserden arınmış olarak okumak hayatımın en güçlü anıydı. Kendinize yazmaya devam edin. Önemli.",
+        "author": "Lale M.",
+        "role": "Kanserden Kurtulan",
+        "context": "Hastalığa karşı zafer"
+      },
+      {
+        "quote": "Dijital göçebe olarak, gezdiğim her ülkeden bir mektup yazıyorum. Yeni yerlerdeyken geçmiş maceralardan gelen mektupları açmak, yolculuğumun güzel bir örgüsünü oluşturuyor.",
+        "author": "Ali P.",
+        "role": "Seyahat Yazarı",
+        "context": "Her ülkeden zaman kapsülü"
+      }
+    ]
+  },
+  "howItWorksV2": {
+    "badge": "Basit Süreç",
+    "title": "Nasıl Çalışır",
+    "description": "Gelecekteki kendine mesaj göndermek için üç basit adım.",
+    "steps": [
+      {
+        "number": "01",
+        "title": "Yaz",
+        "subtitle": "Düşüncelerini bir mektuba dök",
+        "description": "Güzel editörümüzü kullanarak gelecekteki kendine yaz. Acele yok — zamanını al."
+      },
+      {
+        "number": "02",
+        "title": "Planla",
+        "subtitle": "Gelecekte herhangi bir tarih seç",
+        "description": "Yarın, gelecek yıl veya on yıllar sonra. Mektubun sabırla bekliyor."
+      },
+      {
+        "number": "03",
+        "title": "Al",
+        "subtitle": "Ulaştığında mektubunu al",
+        "description": "E-posta veya fiziksel posta — geçmişteki kendinden bir hediye, tam ihtiyacın olduğunda."
+      }
+    ]
+  },
+  "trustSection": {
+    "badge": "Önce Güvenlik",
+    "title": "Sözlerin,",
+    "titleHighlight": "Korumalı",
+    "description": "Banka düzeyinde şifreleme, mektuplarının teslimat gününe kadar gizli kalmasını sağlar. Kimse — biz bile — mesajlarını okuyamaz.",
+    "comparisonNote": "Normal e-postanın aksine, mektupların teslimata kadar şifreli ve kilitli kalır.",
+    "tableHeaders": {
+      "feature": "Özellik",
+      "capsuleNote": "Capsule Note",
+      "regularEmail": "Normal E-posta"
+    },
+    "trustPoints": [
+      {
+        "title": "AES-256-GCM Şifreleme",
+        "description": "Askeri düzeyde şifreleme, mektuplarını yazdığın andan itibaren korur."
+      },
+      {
+        "title": "Sıfır Bilgi Mimarisi",
+        "description": "Mektuplarını okuyamayız. Sadece sen ulaştığında şifresini çözebilirsin."
+      },
+      {
+        "title": "%99,9 Teslimat Garantisi",
+        "description": "Mektupların her zaman zamanında ulaşır. Teslimat SLO'muz ile desteklenir."
+      },
+      {
+        "title": "GDPR Uyumlu",
+        "description": "Tam veri dışa aktarma ve silme hakları. Verin, senin kontrolünde."
+      }
+    ],
+    "comparison": [
+      { "feature": "Uçtan uca şifreleme" },
+      { "feature": "Garantili gelecek teslimatı" },
+      { "feature": "Fiziksel posta seçeneği" },
+      { "feature": "Yanlışlıkla erken açılamaz" },
+      { "feature": "Hesap değişikliklerinden etkilenmez" }
+    ]
+  },
+  "featuresV2": {
+    "badge": "Özellikler",
+    "title": "İçin",
+    "titleHighlight": "Zaman Yolculuğu",
+    "description": "Gelecekteki kendine anlamlı mesajlar göndermek için ihtiyacın olan her şey.",
+    "features": [
+      {
+        "title": "Şifreli ve Mühürlü",
+        "description": "AES-256 şifreleme mektuplarını korur. Biz bile teslimata kadar okuyamayız."
+      },
+      {
+        "title": "Zamanında Ulaşır",
+        "description": "%99,9 teslimat garantisi. Mektupların tam planlandığı gibi ulaşır — istisna yok."
+      },
+      {
+        "title": "E-posta veya Kağıt",
+        "description": "Gelen kutuna dijital teslimat veya kapına teslim edilen gerçek fiziksel posta."
+      },
+      {
+        "title": "Asla Kaybolmaz",
+        "description": "Birden fazla veri merkezinde yedekli kopya. Mektupların her şeye dayanır."
+      }
+    ]
+  },
+  "ctaV2": {
+    "badge": "Gelecekteki Kendin Bekliyor",
+    "title": "İlk Mektubunu Bugün Yaz",
+    "description": "Gelecekte çiçek açacak bir tohum ekmek sadece 5 dakika sürer.",
+    "question": "Kendine ne söyleyeceksin?",
+    "writeNewLetter": "Yeni Mektup Yaz",
+    "startWritingFree": "Ücretsiz Yazmaya Başla",
+    "noCreditCard": "Kredi kartı gerekmez. İstediğin zaman iptal et.",
+    "stats": [
+      { "value": "Ücretsiz", "label": "İlk Mektup" },
+      { "value": "5 dk", "label": "Yazma Süresi" },
+      { "value": "50 yıl", "label": "Maks Planlama" }
+    ]
+  },
+  "faqSection": {
+    "badge": "SSS",
+    "title": "Soruların mı var?",
+    "titleHighlight": "Cevaplar",
+    "description": "Zamanda mektup göndermek hakkında bilmeniz gereken her şey.",
+    "contactCta": "Hâlâ soruların mı var?",
+    "contactLink": "Bize ulaş",
+    "items": [
+      {
+        "question": "Hesabımı unutursam ne olur?",
+        "answer": "Mektupların e-posta adresine bağlı. Şifreni unutursan istediğin zaman sıfırlayabilirsin. Mektupların, bir daha giriş yapmasan bile belirlediğin e-posta adresine teslim edilir. Teslimat öncesi hatırlatma e-postaları da göndeririz."
+      },
+      {
+        "question": "Teslimatı nasıl garanti ediyorsunuz?",
+        "answer": "%99,9 zamanında teslimat sağlamak için birden fazla yedekli sistem kullanıyoruz. Mektuplar askeri düzeyde şifreleme ile saklanır ve birden fazla veri merkezinde yedeklenir. Ayrıca geciken teslimatları yakalayan ve hızlandıran bir mutabakat sistemimiz var."
+      },
+      {
+        "question": "Mektuplarımı başkası okuyabilir mi?",
+        "answer": "Hayır. Mektupların yazdığın anda AES-256-GCM şifreleme ile şifrelenir. Sıfır bilgi mimarisi kullanıyoruz, yani ekibimiz bile mektuplarını okuyamaz. Sadece sen teslim edildiğinde şifresini çözebilirsin."
+      },
+      {
+        "question": "E-posta adresimi değiştirirsem ne olur?",
+        "answer": "Teslimat tarihinden önce istediğin zaman teslimat e-posta adresini güncelleyebilirsin. Sadece giriş yap, mektubu bul ve alıcı e-postasını güncelle. Mektup yeni adresine teslim edilir."
+      },
+      {
+        "question": "Planlanmış bir mektubu iptal edebilir veya düzenleyebilir miyim?",
+        "answer": "Evet! Teslimat tarihine kadar herhangi bir mektubu düzenleyebilir veya iptal edebilirsin. Ancak mektup teslim edildikten sonra geri alınamaz. Fiziksel posta için iptal, teslimat tarihinden en az 7 gün önce yapılmalıdır."
+      },
+      {
+        "question": "Fiziksel posta nasıl çalışıyor?",
+        "answer": "Premium planımızla mektubunu yüksek kaliteli kağıda basıyor ve dünya çapında herhangi bir adrese postalıyoruz. 'Tarihte gönder' (belirli bir tarihte postalanır) veya 'tarihte ulaşsın' (varış için transit süresini hesaplarız) seçeneklerinden birini tercih edebilirsin. Fiziksel mektuplar güvenli tesisimizden basılır ve içeriğin asla düz metin olarak saklanmaz."
+      },
+      {
+        "question": "İade politikası var mı?",
+        "answer": "Evet. Premium satın alımınızdan sonraki 30 gün içinde memnun kalmazsan, soru sormadan tam iade yaparız. Yıllık abonelikler için istediğin zaman iptal edebilir ve fatura dönemin bitene kadar Premium özelliklerini kullanmaya devam edebilirsin."
+      },
+      {
+        "question": "Geleceğe ne kadar ileri planlayabilirim?",
+        "answer": "Ücretsiz kullanıcılar 5 yıl öncesine kadar planlayabilir. Premium kullanıcılar 50 yıl öncesine kadar planlayabilir. Evet, 50 yıl sonraki kendine bir mektup yazabilirsin. Teslim etmek için burada olmaya kararlıyız."
+      }
+    ]
+  },
+  "footerV2": {
+    "tagline": "Gelecekteki kendine mektup yaz. Şifreli, planlanmış, en çok ihtiyacın olduğunda teslim edilir.",
+    "product": "Ürün",
+    "legal": "Yasal",
+    "links": {
+      "pricing": "Fiyatlandırma",
+      "signUp": "Kayıt Ol",
+      "signIn": "Giriş Yap",
+      "privacy": "Gizlilik Politikası",
+      "terms": "Kullanım Şartları"
+    },
+    "copyright": "Capsule Note. Tüm hakları saklıdır.",
+    "madeWith": "Gelecekteki sen için {heart} ile yapıldı"
+  },
+  "pricingPreview": {
+    "badge": "Basit Fiyatlandırma",
+    "title": "Ücretsiz Başla,",
+    "titleHighlight": "İstediğin Zaman Yükselt",
+    "description": "İlk mektubun her zaman ücretsiz. Kredi kartı gerekmez.",
+    "mostPopular": "En Popüler",
+    "seeFullPricing": "Tüm fiyatlandırma detaylarını gör",
+    "tiers": [
+      {
+        "name": "Ücretsiz",
+        "price": "₺0",
+        "period": "sonsuza dek",
+        "description": "İlk mektubun için mükemmel",
+        "cta": "Ücretsiz Başla",
+        "features": [
+          "1 ücretsiz mektup",
+          "E-posta teslimatı",
+          "Temel şifreleme",
+          "5 yıl öncesine kadar planla"
+        ]
+      },
+      {
+        "name": "Premium",
+        "price": "₺150",
+        "period": "/yıl",
+        "description": "Sınırsız mektup, fiziksel posta",
+        "cta": "Premium'a Geç",
+        "features": [
+          "Sınırsız mektup",
+          "E-posta + fiziksel posta",
+          "Gelişmiş şifreleme",
+          "50 yıl öncesine kadar planla",
+          "Öncelikli teslimat",
+          "Yazı yönlendirmeleri"
+        ]
+      }
+    ]
+  },
+  "letterDemo": {
+    "badge": "Hemen Dene",
+    "title": "İlk Mektubunu Yaz",
+    "description": "Gelecekteki kendine yazmanın büyüsünü keşfet. Taslağın kayıt olduğunda kaydedilecek.",
+    "letterBadge": "İlk Mektubun",
+    "settingsBadge": "Ayarlar",
+    "labels": {
+      "letterTitle": "Mektup Başlığı",
+      "yourMessage": "Mesajın",
+      "recipient": "Alıcı",
+      "yourEmail": "E-postan",
+      "whenToDeliver": "Ne Zaman Teslim Edilsin",
+      "customDate": "Özel Tarih",
+      "scheduledFor": "Planlandığı tarih"
+    },
+    "placeholders": {
+      "title": "Gelecekteki kendime bir mektup...",
+      "message": "Sevgili gelecekteki ben, bunu sana hatırlatmak için yazıyorum...",
+      "email": "email@adresin.com",
+      "pickDate": "Bir tarih seç"
+    },
+    "buttons": {
+      "myself": "Kendime",
+      "someoneElse": "Başka Birine",
+      "continueWriting": "Yazmaya Devam Et",
+      "sealSchedule": "Mühürle ve Planla",
+      "sealing": "Mühürleniyor...",
+      "sealed": "Mühürlendi!"
+    },
+    "datePresets": [
+      { "label": "6 Ay", "key": "6mo" },
+      { "label": "1 Yıl", "key": "1yr" },
+      { "label": "3 Yıl", "key": "3yr" },
+      { "label": "5 Yıl", "key": "5yr" }
+    ],
+    "errors": {
+      "emailRequired": "E-posta gerekli",
+      "emailInvalid": "Lütfen geçerli bir e-posta gir",
+      "dateRequired": "Mektubunun ne zaman teslim edileceğini seç",
+      "messageRequired": "Gelecekteki kendine bir mesaj yaz"
+    },
+    "tooltip": {
+      "someoneElseDisabled": "İlk mektubun kendine olmalı — gelecekteki sen bunu hak ediyor! ✨"
+    },
+    "wordCount": "{count} kelime",
+    "charCount": "{count} karakter"
   }
 }

@@ -18,6 +18,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { motion, useInView } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 import { cn, getUserTimezone } from "@/lib/utils"
 import { saveAnonymousDraft, getAnonymousDraft, getLetterAutosave } from "@/lib/localStorage-letter"
@@ -41,18 +42,19 @@ interface DemoFormErrors {
   bodyHtml?: string
 }
 
-const DATE_PRESETS = [
-  { label: "6 Months", months: 6, key: "6mo" },
-  { label: "1 Year", months: 12, key: "1yr" },
-  { label: "3 Years", months: 36, key: "3yr" },
-  { label: "5 Years", months: 60, key: "5yr" },
-]
+interface DatePreset {
+  label: string
+  months: number
+  key: string
+}
 
 interface LetterDemoProps {
   isSignedIn: boolean
 }
 
 export function LetterDemo({ isSignedIn }: LetterDemoProps) {
+  const t = useTranslations("marketing.letterDemo")
+  const datePresets = t.raw("datePresets") as DatePreset[]
   const router = useRouter()
   const containerRef = React.useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
@@ -124,19 +126,19 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
 
     // Email validation (required)
     if (!trimmedEmail) {
-      newErrors.recipientEmail = "Email is required"
+      newErrors.recipientEmail = t("errors.emailRequired")
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      newErrors.recipientEmail = "Please enter a valid email"
+      newErrors.recipientEmail = t("errors.emailInvalid")
     }
 
     // Delivery date validation (required)
     if (!deliveryDate) {
-      newErrors.deliveryDate = "Pick when to deliver your letter"
+      newErrors.deliveryDate = t("errors.dateRequired")
     }
 
     // Message content validation (required)
     if (!plainText) {
-      newErrors.bodyHtml = "Write a message to your future self"
+      newErrors.bodyHtml = t("errors.messageRequired")
     }
 
     setErrors(newErrors)
@@ -276,14 +278,13 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
             style={{ borderRadius: "2px" }}
           >
             <PenLine className="h-4 w-4" strokeWidth={2} />
-            Try It Now
+            {t("badge")}
           </span>
           <h2 className="font-mono text-3xl font-bold uppercase tracking-wide text-charcoal sm:text-4xl md:text-5xl">
-            Write Your First Letter
+            {t("title")}
           </h2>
           <p className="mx-auto mt-4 max-w-2xl font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            Experience the magic of writing to your future self.
-            Your draft will be saved when you sign up.
+            {t("description")}
           </p>
         </motion.div>
 
@@ -307,7 +308,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                 style={{ borderRadius: "2px" }}
               >
                 <PenLine className="h-3.5 w-3.5" strokeWidth={2} />
-                <span>Your First Letter</span>
+                <span>{t("letterBadge")}</span>
               </div>
 
               {/* Mail stamp */}
@@ -325,13 +326,13 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     htmlFor="demo-title"
                     className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal"
                   >
-                    Letter Title
+                    {t("labels.letterTitle")}
                   </label>
                   <Input
                     id="demo-title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="A letter to my future self..."
+                    placeholder={t("placeholders.title")}
                     className="border-2 border-charcoal font-mono"
                     style={{ borderRadius: "2px" }}
                     maxLength={100}
@@ -350,12 +351,12 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                         errors.bodyHtml ? "text-coral" : "text-charcoal"
                       )}
                     >
-                      Your Message
+                      {t("labels.yourMessage")}
                       <span className="text-coral">*</span>
                     </label>
                     <div className="flex gap-3 font-mono text-[10px] text-charcoal/50 uppercase tracking-wider">
-                      <span>{wordCount} words</span>
-                      <span>{characterCount} chars</span>
+                      <span>{t("wordCount", { count: wordCount })}</span>
+                      <span>{t("charCount", { count: characterCount })}</span>
                     </div>
                   </div>
                   <div
@@ -375,7 +376,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                           setErrors((prev) => ({ ...prev, bodyHtml: undefined }))
                         }
                       }}
-                      placeholder="Dear future me, I'm writing this to remind you..."
+                      placeholder={t("placeholders.message")}
                       className="flex-1 flex flex-col min-h-0"
                       minHeight="200px"
                     />
@@ -403,7 +404,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                   style={{ borderRadius: "2px" }}
                 >
                   <Settings className="h-3.5 w-3.5" strokeWidth={2} />
-                  <span>Settings</span>
+                  <span>{t("settingsBadge")}</span>
                 </div>
 
                 <div className="space-y-5 mt-4">
@@ -411,7 +412,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                   <div className="space-y-3">
                     <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
                       <User className="h-3.5 w-3.5" strokeWidth={2} />
-                      Recipient
+                      {t("labels.recipient")}
                     </label>
 
                     {/* Recipient Type Buttons */}
@@ -423,7 +424,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                           style={{ borderRadius: "2px" }}
                         >
                           <User className="h-3.5 w-3.5" strokeWidth={2} />
-                          Myself
+                          {t("buttons.myself")}
                         </button>
                         <Tooltip delayDuration={0}>
                           <TooltipTrigger asChild>
@@ -434,7 +435,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                               style={{ borderRadius: "2px" }}
                             >
                               <Users className="h-3.5 w-3.5" strokeWidth={2} />
-                              Someone Else
+                              {t("buttons.someoneElse")}
                             </button>
                           </TooltipTrigger>
                           <TooltipContent
@@ -442,7 +443,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                             className="max-w-[200px] border-2 border-charcoal bg-duck-cream font-mono text-xs text-charcoal"
                             style={{ borderRadius: "2px" }}
                           >
-                            <p>Your first letter should be to yourself — future you deserves it first! ✨</p>
+                            <p>{t("tooltip.someoneElseDisabled")}</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -458,7 +459,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                         )}
                       >
                         <AtSign className="h-3 w-3" strokeWidth={2} />
-                        Your Email
+                        {t("labels.yourEmail")}
                         <span className="text-coral">*</span>
                       </label>
                       <Input
@@ -472,7 +473,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                             setErrors((prev) => ({ ...prev, recipientEmail: undefined }))
                           }
                         }}
-                        placeholder="your@email.com"
+                        placeholder={t("placeholders.email")}
                         className={cn(
                           "border-2 font-mono text-sm",
                           errors.recipientEmail
@@ -507,13 +508,13 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                       )}
                     >
                       <Calendar className="h-3.5 w-3.5" strokeWidth={2} />
-                      When to Deliver
+                      {t("labels.whenToDeliver")}
                       <span className="text-coral">*</span>
                     </label>
 
                     {/* Date Preset Buttons */}
                     <div className="grid grid-cols-2 gap-2">
-                      {DATE_PRESETS.map((preset) => {
+                      {datePresets.map((preset) => {
                         const isSelected = selectedPreset === preset.key
                         return (
                           <button
@@ -548,7 +549,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                         )}
                         style={{ borderRadius: "2px" }}
                       >
-                        Custom Date
+                        {t("labels.customDate")}
                       </button>
                     </div>
 
@@ -558,7 +559,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                         <DatePicker
                           date={deliveryDate}
                           onSelect={handleDateSelect}
-                          placeholder="Pick a date"
+                          placeholder={t("placeholders.pickDate")}
                           minDate={new Date()}
                         />
                       </div>
@@ -573,7 +574,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                         <Clock className="h-4 w-4 text-duck-blue flex-shrink-0" strokeWidth={2} />
                         <div className="min-w-0">
                           <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal">
-                            Scheduled for
+                            {t("labels.scheduledFor")}
                           </p>
                           <p className="font-mono text-xs text-charcoal truncate">
                             {deliveryDate.toLocaleDateString("en-US", {
@@ -617,20 +618,20 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     {sealStage === "idle" && (
                       <>
                         <Stamp className="h-4 w-4" strokeWidth={2} />
-                        {isSignedIn ? "Continue Writing" : "Seal & Schedule"}
+                        {isSignedIn ? t("buttons.continueWriting") : t("buttons.sealSchedule")}
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </>
                     )}
                     {sealStage === "sealing" && (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
-                        Sealing...
+                        {t("buttons.sealing")}
                       </>
                     )}
                     {sealStage === "sealed" && (
                       <>
                         <Check className="h-4 w-4" strokeWidth={2.5} />
-                        Sealed!
+                        {t("buttons.sealed")}
                       </>
                     )}
                   </Button>

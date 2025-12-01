@@ -1,7 +1,9 @@
 import { Suspense } from "react"
 import { PenLine, Mail, ArrowRight } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 
 import { Link } from "@/i18n/routing"
+import type { Locale } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
 import {
   LettersListV3,
@@ -16,20 +18,21 @@ import { getLetterCounts } from "@/server/actions/letter-filters"
 export const dynamic = "force-dynamic"
 
 interface LettersV3PageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{ filter?: string }>
+}
+
+interface EmptyStateTranslations {
+  title: string
+  cta: string
+  prompts: string[]
 }
 
 /**
  * Empty state hero for when user has no letters at all
  */
-function EmptyStateHeroV3() {
-  const prompts = [
-    "What would you tell yourself one year from now?",
-    "What do you want to remember about today?",
-    "What advice would help future-you?",
-    "What are you grateful for right now?",
-    "What dreams are you chasing right now?",
-  ]
+function EmptyStateHeroV3({ translations }: { translations: EmptyStateTranslations }) {
+  const prompts = translations.prompts
 
   // Use day of year for consistent prompt per day
   const dayOfYear = Math.floor(
@@ -54,7 +57,7 @@ function EmptyStateHeroV3() {
         {/* Message */}
         <div className="space-y-4 max-w-lg">
           <h2 className="font-mono text-xl md:text-2xl font-bold uppercase tracking-wide text-charcoal">
-            Your letter collection starts here
+            {translations.title}
           </h2>
           <p className="font-mono text-sm text-charcoal/70 italic">
             &ldquo;{prompts[promptIndex]}&rdquo;
@@ -64,7 +67,7 @@ function EmptyStateHeroV3() {
         {/* CTA */}
         <Link href="/letters/new">
           <Button className="gap-2">
-            Write Your First Letter
+            {translations.cta}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>
@@ -77,7 +80,13 @@ function EmptyStateHeroV3() {
  * Async component for letters list with ALL data prefetched
  * This enables instant tab switching without server roundtrips
  */
-async function LettersListSection({ initialFilter }: { initialFilter: LetterFilter }) {
+async function LettersListSection({
+  initialFilter,
+  emptyStateTranslations
+}: {
+  initialFilter: LetterFilter
+  emptyStateTranslations: EmptyStateTranslations
+}) {
   // Fetch ALL filter data in parallel for instant tab switching
   const [allLetters, drafts, scheduled, delivered, counts] = await Promise.all([
     getLettersWithPreview("all"),
@@ -89,7 +98,7 @@ async function LettersListSection({ initialFilter }: { initialFilter: LetterFilt
 
   // If no letters at all, show empty state hero
   if (counts.all === 0) {
-    return <EmptyStateHeroV3 />
+    return <EmptyStateHeroV3 translations={emptyStateTranslations} />
   }
 
   // Group all letters by filter for client-side instant switching
@@ -110,10 +119,21 @@ async function LettersListSection({ initialFilter }: { initialFilter: LetterFilt
 }
 
 export default async function LettersV3Page({
+  params,
   searchParams,
 }: LettersV3PageProps) {
-  const params = await searchParams
-  const initialFilter = (params.filter || "all") as LetterFilter
+  const { locale } = await params
+  const searchParamsResolved = await searchParams
+  const initialFilter = (searchParamsResolved.filter || "all") as LetterFilter
+
+  const t = await getTranslations({ locale, namespace: "letters" })
+
+  // Build translations for empty state
+  const emptyStateTranslations: EmptyStateTranslations = {
+    title: t("emptyHero.title"),
+    cta: t("emptyHero.cta"),
+    prompts: t.raw("emptyHero.prompts") as string[],
+  }
 
   return (
     <div className="space-y-0">
@@ -122,10 +142,10 @@ export default async function LettersV3Page({
         <header className="flex flex-col gap-4 py-12 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
             <h1 className="font-mono text-3xl font-bold uppercase tracking-wide text-charcoal">
-              Your Letters
+              {t("page.title")}
             </h1>
             <p className="font-mono text-sm text-charcoal/70">
-              Messages to your future self, organized and waiting.
+              {t("page.description")}
             </p>
           </div>
 
@@ -133,7 +153,7 @@ export default async function LettersV3Page({
           <Link href="/letters/new" className="hidden sm:block">
             <Button size="sm" className="gap-2">
               <PenLine className="h-4 w-4" />
-              Write New Letter
+              {t("newButton")}
             </Button>
           </Link>
         </header>
@@ -141,7 +161,10 @@ export default async function LettersV3Page({
         {/* Letters List with Tabs - All data prefetched for instant switching */}
         <section className="pb-12">
           <Suspense fallback={<LettersListV3Skeleton />}>
-            <LettersListSection initialFilter={initialFilter} />
+            <LettersListSection
+              initialFilter={initialFilter}
+              emptyStateTranslations={emptyStateTranslations}
+            />
           </Suspense>
         </section>
       </div>

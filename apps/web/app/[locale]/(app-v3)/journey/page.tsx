@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server"
+
 import {
   getNextDeliveryForHero,
   getDeliveryTimeline,
@@ -8,11 +10,18 @@ import {
   WritePromptBannerV3,
 } from "@/components/v3/countdown-hero"
 import { EmotionalJourneyV2 } from "@/components/v3/emotional-journey-v2"
+import type { Locale } from "@/i18n/routing"
 
 // Force dynamic rendering for real-time countdown
 export const dynamic = "force-dynamic"
 
-export default async function JourneyV3Page() {
+export default async function JourneyV3Page({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "app" })
   // Fetch data in parallel (auth handled by layout)
   const [nextDelivery, deliveryTimeline] = await Promise.all([
     getNextDeliveryForHero(),
@@ -26,10 +35,10 @@ export default async function JourneyV3Page() {
         <div className="container">
           <header className="space-y-2 py-12">
             <h1 className="font-mono text-3xl font-bold uppercase tracking-wide text-charcoal">
-              Your Journey
+              {t("journey.title")}
             </h1>
             <p className="font-mono text-sm text-charcoal/70">
-              Letters traveling through time, waiting to find you.
+              {t("journey.description")}
             </p>
           </header>
 

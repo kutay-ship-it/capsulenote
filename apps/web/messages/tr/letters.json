@@ -14,6 +14,46 @@
     "scheduled": "Planlandı",
     "delivered": "Teslim edildi"
   },
+  "tabs": {
+    "all": "Tümü",
+    "drafts": "Taslaklar",
+    "scheduled": "Planlandı",
+    "delivered": "Teslim Edildi"
+  },
+  "emptyStates": {
+    "all": {
+      "title": "Henüz mektup yok",
+      "description": "Gelecekteki kendine ilk mektubunu yazmaya başla."
+    },
+    "drafts": {
+      "title": "Taslak yok",
+      "description": "Üzerinde çalıştığın mektuplar burada görünecek."
+    },
+    "scheduled": {
+      "title": "Planlanmış mektup yok",
+      "description": "Teslim edilmeyi bekleyen mektuplar burada görünecek."
+    },
+    "delivered": {
+      "title": "Teslim edilen mektup yok",
+      "description": "Teslim edilen mektuplar burada görünecek."
+    }
+  },
+  "accessibility": {
+    "gridView": "Izgara görünümü",
+    "listView": "Liste görünümü"
+  },
+  "card": {
+    "untitled": "Başlıksız Mektup",
+    "noContent": "Henüz içerik yok...",
+    "status": {
+      "draft": "Taslak",
+      "delivered": "Teslim Edildi",
+      "failed": "Başarısız",
+      "today": "Bugün",
+      "tomorrow": "Yarın",
+      "days": "{count} gün"
+    }
+  },
   "drafts": {
     "heading": "Taslak mektuplar",
     "subtitle": "Planlanmamış mektuplar • 30 gün sonra otomatik silinir",
@@ -46,6 +86,21 @@
     "title": "Henüz mektup yok",
     "description": "Gelecekteki kendine ilk mektubunu yazarak başla.",
     "cta": "İlk mektubunu oluştur"
+  },
+  "page": {
+    "title": "Mektupların",
+    "description": "Gelecekteki kendine mesajlar, düzenli ve bekliyor."
+  },
+  "emptyHero": {
+    "title": "Mektup koleksiyonun burada başlıyor",
+    "cta": "İlk Mektubunu Yaz",
+    "prompts": [
+      "Bir yıl sonraki kendine ne söylerdin?",
+      "Bugünle ilgili neyi hatırlamak istersin?",
+      "Gelecekteki sana hangi tavsiye yardımcı olurdu?",
+      "Şu an neye minnettarsın?",
+      "Şu an hangi hayallerin peşindesin?"
+    ]
   },
   "status": {
     "draft": "Taslak",
@@ -131,5 +186,154 @@
     "tagOverflow": "+{count}"
   },
   "createdOn": "Oluşturuldu {date}",
-  "viewAll": "Tümünü gör"
+  "viewAll": "Tümünü gör",
+  "deliveryType": {
+    "email": "E-posta",
+    "physical": "Fiziksel",
+    "credits": "kredi",
+    "digitalDelivery": "Dijital teslimat",
+    "realLetter": "Gerçek mektup",
+    "doubleDelivery": {
+      "title": "Çift Teslimat",
+      "description": "Mektubunuz hem dijital olarak e-posta kutularına hem de fiziksel mektup olarak posta kutularına ulaşacak."
+    },
+    "hints": {
+      "addPhysical": "Basılı mektup eklemek için Fiziksel'e dokun",
+      "addEmail": "Dijital olarak da göndermek için E-posta'ya dokun"
+    }
+  },
+  "seal": {
+    "dialogTitle": "Mektubunu mühürle onayı",
+    "badge": "Son İnceleme",
+    "title": "Mektubunu Mühürle",
+    "subtitle": "Mühürlemeden önce detayları incele",
+    "yourLetter": "Mektubun",
+    "recipient": "Alıcı",
+    "futureYou": "Gelecekteki Sen",
+    "deliveryMethod": "Teslimat Yöntemi",
+    "methods": {
+      "both": "E-posta + Fiziksel Mektup",
+      "emailOnly": "Sadece E-posta",
+      "physicalOnly": "Sadece Fiziksel Mektup"
+    },
+    "arrivesIn": "Ulaşma Tarihi",
+    "timing": {
+      "tomorrow": "Yarın",
+      "daysFromNow": "{count} gün sonra"
+    },
+    "shippingTo": "Gönderilecek Adres",
+    "printOptions": {
+      "color": "Renkli",
+      "doubleSided": "Çift taraflı"
+    },
+    "creditUsage": "Kredi Kullanımı",
+    "emailDelivery": "E-posta teslimi",
+    "physicalMail": "Fiziksel posta",
+    "creditCost": "1 kredi ({from} → {to})",
+    "warning": "Mühürlendikten sonra mektubun teslimat tarihine kadar <bold>kilitli ve şifreli</bold> olacak. Okuyamaz veya düzenleyemezsin.",
+    "goBack": "Geri Dön",
+    "sealing": "Mühürleniyor...",
+    "sealAndSchedule": "Mühürle ve Planla"
+  },
+  "templates": {
+    "browseButton": "Şablonlara Göz At",
+    "preview": "Önizleme",
+    "templateContent": "Şablon İçeriği",
+    "back": "Geri",
+    "applyTemplate": "Şablonu Uygula",
+    "badge": "Şablonlar",
+    "title": "Bir Şablon Seç",
+    "subtitle": "Mektubuna ilham verecek bir kalıpla başla",
+    "categories": "Kategoriler",
+    "noTemplates": "Bu kategoride henüz şablon yok",
+    "clickToPreview": "Önizlemek için tıkla",
+    "categoryLabels": {
+      "reflection": "Yansıma",
+      "goals": "Hedefler",
+      "gratitude": "Şükran",
+      "futureSelf": "Gelecekteki Ben"
+    }
+  },
+  "editor": {
+    "badge": "Yeni Mektup",
+    "titleLabel": "Mektup Başlığı",
+    "titlePlaceholder": "Gelecekteki kendime bir mektup...",
+    "messageLabel": "Mesajın",
+    "words": "kelime",
+    "chars": "karakter",
+    "messagePlaceholder": "Sevgili gelecekteki ben...",
+    "settingsBadge": "Ayarlar",
+    "recipientLabel": "Alıcı",
+    "myself": "Kendime",
+    "someoneElse": "Başka Birine",
+    "theirName": "Adı",
+    "namePlaceholder": "Ahmet Yılmaz",
+    "yourEmail": "E-postan",
+    "theirEmail": "E-postası",
+    "yourEmailPlaceholder": "senin@eposta.com",
+    "theirEmailPlaceholder": "onun@eposta.com",
+    "deliveryMethodLabel": "Teslimat Yöntemi",
+    "deliveryMethodHint": "Mektubunu nasıl teslim edelim?",
+    "shippingAddressLabel": "Teslimat Adresi",
+    "shippingAddressHint": "Mektubunu nereye postalayalım?",
+    "printOptionsLabel": "Baskı Seçenekleri",
+    "printOptionsHint": "Mektubunun nasıl basılacağını özelleştir",
+    "whenToDeliver": "Ne Zaman Teslim Edilsin",
+    "customDate": "Özel Tarih",
+    "pickDate": "Tarih seç",
+    "scheduledFor": "Planlandı",
+    "templatesLabel": "Şablonlar",
+    "templatesHint": "İlhama ihtiyacın var mı? Bir kalıpla başla",
+    "sealing": "Mühürleniyor...",
+    "sealAndSchedule": "Mühürle ve Planla",
+    "subscribeToSchedule": "Planlamak için abone ol",
+    "selectChannelToContinue": "Devam etmek için teslimat yöntemi seç",
+    "clearButton": "Temizle",
+    "clearDialog": {
+      "title": "Mektup Temizlensin mi?",
+      "description": "Tüm ilerlemeniz silinecek. Bu işlem geri alınamaz.",
+      "cancel": "İptal",
+      "confirm": "Temizle"
+    },
+    "datePresets": {
+      "6mo": "6 Ay",
+      "1yr": "1 Yıl",
+      "3yr": "3 Yıl",
+      "5yr": "5 Yıl",
+      "10yr": "10 Yıl"
+    },
+    "validation": {
+      "titleRequired": "Başlık gerekli",
+      "contentRequired": "Mektup içeriği gerekli",
+      "recipientNameRequired": "Alıcı adı gerekli",
+      "emailRequired": "E-posta gerekli",
+      "emailInvalid": "Geçersiz e-posta formatı",
+      "dateRequired": "Teslimat tarihi gerekli",
+      "dateMustBeFuture": "Teslimat tarihi gelecekte olmalı"
+    },
+    "toasts": {
+      "creditsAdded": "Krediler eklendi!",
+      "creditsRefreshed": "Kredilerin güncellendi. Artık mektubunu planlayabilirsin.",
+      "creditsRefreshFailed": "Krediler güncellenemedi",
+      "pleaseRefreshPage": "Lütfen sayfayı manuel olarak yenile.",
+      "creditsUpdated": "Krediler güncellendi!",
+      "purchaseSuccessful": "Satın alman başarılı. Artık mektubunu planlayabilirsin.",
+      "draftRestored": "Taslak geri yüklendi",
+      "lastSaved": "Son kayıt {time}",
+      "draftCleared": "Taslak temizlendi",
+      "welcomeDraftRestored": "Hoş geldin! Mektup taslağın geri yüklendi",
+      "continueWriting": "Kaldığın yerden devam et ({wordCount} kelime)",
+      "partialDelivery": "Mektup kaydedildi ancak teslimat kısmen başarısız",
+      "retryFromPage": "Mektup sayfasından tekrar deneyebilirsin.",
+      "deliveryFailed": "Mektup kaydedildi ancak teslimat planlanamadı",
+      "quotaExceeded": "Kota aşıldı",
+      "upgrade": "Yükselt",
+      "createFailed": "Mektup oluşturulamadı",
+      "somethingWentWrong": "Bir şeyler ters gitti",
+      "tryAgainLater": "Lütfen daha sonra tekrar dene.",
+      "unknownError": "Bilinmeyen hata",
+      "physicalMail": "Fiziksel posta",
+      "email": "E-posta"
+    }
+  }
 }

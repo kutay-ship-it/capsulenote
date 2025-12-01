@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { Mail, FileText, Check, Sparkles, AlertTriangle } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import type { DeliveryEligibility } from "@/server/actions/entitlements"
 
@@ -22,6 +23,7 @@ export function DeliveryTypeV3({
   eligibility,
   isRefreshing = false,
 }: DeliveryTypeV3Props) {
+  const t = useTranslations("letters.deliveryType")
   const isEmailSelected = value.includes("email")
   const isPhysicalSelected = value.includes("physical")
   const isBothSelected = isEmailSelected && isPhysicalSelected
@@ -81,7 +83,7 @@ export function DeliveryTypeV3({
           >
             <Mail className="h-5 w-5" strokeWidth={2} />
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider">Email</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">{t("email")}</span>
 
           {/* Credit indicator */}
           {eligibility && (
@@ -104,7 +106,7 @@ export function DeliveryTypeV3({
                   <span className="text-[9px] font-bold tabular-nums">
                     {emailCredits}
                   </span>
-                  <span className="text-[8px] uppercase">credits</span>
+                  <span className="text-[8px] uppercase">{t("credits")}</span>
                 </>
               )}
             </div>
@@ -112,7 +114,7 @@ export function DeliveryTypeV3({
 
           {!eligibility && (
             <span className="text-[9px] text-charcoal/50 uppercase tracking-wider -mt-1">
-              Digital delivery
+              {t("digitalDelivery")}
             </span>
           )}
         </button>
@@ -153,7 +155,7 @@ export function DeliveryTypeV3({
           >
             <FileText className="h-5 w-5" strokeWidth={2} />
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider">Physical</span>
+          <span className="text-[10px] font-bold uppercase tracking-wider">{t("physical")}</span>
 
           {/* Credit indicator */}
           {eligibility && (
@@ -185,7 +187,7 @@ export function DeliveryTypeV3({
                   <span className="text-[9px] font-bold tabular-nums">
                     {physicalCredits}
                   </span>
-                  <span className="text-[8px] uppercase">credits</span>
+                  <span className="text-[8px] uppercase">{t("credits")}</span>
                 </>
               )}
             </div>
@@ -198,7 +200,7 @@ export function DeliveryTypeV3({
                 isPhysicalSelected ? "text-white/70" : "text-charcoal/50"
               )}
             >
-              Real letter
+              {t("realLetter")}
             </span>
           )}
         </button>
@@ -218,10 +220,10 @@ export function DeliveryTypeV3({
           </div>
           <div className="min-w-0">
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal">
-              Double Delivery
+              {t("doubleDelivery.title")}
             </p>
             <p className="font-mono text-[10px] text-charcoal/70 leading-relaxed">
-              Your letter will arrive digitally in their inbox and as a physical letter in their mailbox.
+              {t("doubleDelivery.description")}
             </p>
           </div>
         </div>
@@ -230,12 +232,12 @@ export function DeliveryTypeV3({
       {/* Single selection info */}
       {!isBothSelected && isEmailSelected && (
         <p className="font-mono text-[9px] text-charcoal/40 uppercase tracking-wider text-center">
-          Tap Physical to add a printed letter
+          {t("hints.addPhysical")}
         </p>
       )}
       {!isBothSelected && isPhysicalSelected && (
         <p className="font-mono text-[9px] text-charcoal/40 uppercase tracking-wider text-center">
-          Tap Email to also send digitally
+          {t("hints.addEmail")}
         </p>
       )}
     </div>

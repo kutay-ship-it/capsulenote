@@ -5,7 +5,7 @@ import { usePathname as useNextPathname } from "next/navigation"
 import { clsx } from "clsx"
 import { useAuth } from "@clerk/nextjs"
 
-import { Link, routing, type Locale } from "@/i18n/routing"
+import { routing, useRouter, type Locale } from "@/i18n/routing"
 
 interface LanguageSwitcherProps {
   className?: string
@@ -14,20 +14,9 @@ interface LanguageSwitcherProps {
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
   const currentLocale = useLocale()
   const pathname = useNextPathname() // Full pathname (e.g., "/tr" or "/tr/pricing" or "/pricing")
+  const router = useRouter()
   const t = useTranslations("common")
   const { isSignedIn } = useAuth()
-
-  // Fire-and-forget Clerk preference persistence (cross-device sync)
-  const persistPreference = (targetLocale: string) => {
-    if (!isSignedIn) return
-
-    fetch("/api/locale", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ locale: targetLocale }),
-      keepalive: true,
-    }).catch(() => {})
-  }
 
   // Get pathname without locale prefix
   const getPathnameWithoutLocale = (path: string): string => {
@@ -38,8 +27,25 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
     return path
   }
 
-  // Get the internal pathname for next-intl Link
+  // Get the internal pathname for next-intl router
   const internalPathname = getPathnameWithoutLocale(pathname)
+
+  // Handle locale change with proper navigation and refresh
+  const handleLocaleChange = (targetLocale: string) => {
+    // Fire-and-forget Clerk preference persistence (cross-device sync)
+    if (isSignedIn) {
+      fetch("/api/locale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale: targetLocale }),
+        keepalive: true,
+      }).catch(() => {})
+    }
+
+    // Navigate to the same page with new locale and refresh
+    router.replace(internalPathname as Parameters<typeof router.replace>[0], { locale: targetLocale })
+    router.refresh()
+  }
 
   return (
     <div className={clsx("flex items-center gap-2", className)}>
@@ -50,13 +56,11 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
           const isActive = loc === currentLocale
 
           return (
-            <Link
+            <button
               key={loc}
-              // @ts-expect-error -- Dynamic pathname from current route
-              href={internalPathname}
-              locale={loc}
+              type="button"
               aria-current={isActive ? "true" : "false"}
-              onClick={() => persistPreference(loc)}
+              onClick={() => handleLocaleChange(loc)}
               className={clsx(
                 "px-3 py-1 font-mono text-xs uppercase tracking-wide transition-colors border-2 border-charcoal",
                 isActive ? "bg-charcoal text-white" : "bg-white hover:bg-duck-yellow"
@@ -64,7 +68,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
               style={{ borderRadius: "2px" }}
             >
               {label}
-            </Link>
+            </button>
           )
         })}
       </div>

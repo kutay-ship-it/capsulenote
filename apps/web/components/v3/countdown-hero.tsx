@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { differenceInSeconds, format } from "date-fns"
 import { Mail, ArrowRight, Clock } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ interface CountdownHeroV3Props {
  * 2. Countdown expired (time <= 0): Shows "Your letter has arrived!" message
  */
 export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
+  const t = useTranslations("app.journey.hero")
   const [timeLeft, setTimeLeft] = useState<{
     days: number
     hours: number
@@ -79,17 +81,17 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
           {/* Message */}
           <div className="space-y-2">
             <h2 className="font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal">
-              Your letter has arrived!
+              {t("arrived.title")}
             </h2>
             <p className="font-mono text-sm text-charcoal/70 uppercase tracking-wide">
-              Check your inbox for a message from the past
+              {t("arrived.subtitle")}
             </p>
           </div>
 
           {/* CTA */}
           <Link href={{ pathname: "/unlock/[id]", params: { id: delivery.letter.id } }}>
             <Button className="gap-2">
-              Open Time Capsule
+              {t("arrived.openButton")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -114,32 +116,32 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
               style={{ borderRadius: "2px" }}
             >
               <span className="h-2 w-2 bg-duck-blue animate-pulse" style={{ borderRadius: "2px" }} />
-              Incoming Message
+              {t("countdown.badge")}
             </span>
           </div>
 
           {/* From/To */}
           <div className="space-y-1">
             <h2 className="font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal">
-              <span className="font-normal text-charcoal/60">from</span> You
+              <span className="font-normal text-charcoal/60">{t("countdown.from")}</span> {t("countdown.you")}
             </h2>
             <h2 className="font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal">
-              <span className="font-normal text-charcoal/60">to</span> Future You
+              <span className="font-normal text-charcoal/60">{t("countdown.to")}</span> {t("countdown.futureYou")}
             </h2>
           </div>
 
           {/* Written date */}
           <p className="font-mono text-sm text-charcoal/70">
-            Written on {format(new Date(delivery.letter.createdAt), "MMMM d, yyyy")}
+            {t("countdown.writtenOn", { date: format(new Date(delivery.letter.createdAt), "MMMM d, yyyy") })}
           </p>
         </div>
 
         {/* Right: Countdown boxes */}
         <div className="flex gap-3 md:gap-4">
-          <TimeUnitBox value={timeLeft.days} label="Days" />
-          <TimeUnitBox value={timeLeft.hours} label="Hours" />
-          <TimeUnitBox value={timeLeft.minutes} label="Mins" />
-          <TimeUnitBox value={timeLeft.seconds} label="Secs" />
+          <TimeUnitBox value={timeLeft.days} label={t("countdown.days")} />
+          <TimeUnitBox value={timeLeft.hours} label={t("countdown.hours")} />
+          <TimeUnitBox value={timeLeft.minutes} label={t("countdown.mins")} />
+          <TimeUnitBox value={timeLeft.seconds} label={t("countdown.secs")} />
         </div>
       </div>
 
@@ -147,12 +149,12 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
       <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
         <Link href={{ pathname: "/letters/[id]", params: { id: delivery.letter.id } }}>
           <Button variant="outline" size="sm">
-            Preview Letter
+            {t("countdown.previewButton")}
           </Button>
         </Link>
         <Link href={{ pathname: "/letters/[id]/schedule", params: { id: delivery.letter.id } }}>
           <Button variant="ghost" size="sm">
-            Reschedule
+            {t("countdown.rescheduleButton")}
           </Button>
         </Link>
       </div>
@@ -221,19 +223,13 @@ function CountdownHeroSkeleton() {
  * Use this at the page level when getNextDeliveryForHero returns null
  */
 export function EmptyStateHeroV3() {
-  const prompts = [
-    "What would you tell yourself one year from now?",
-    "What do you want to remember about today?",
-    "What advice would help future-you?",
-    "What are you grateful for right now?",
-    "What dreams are you chasing right now?",
-  ]
+  const t = useTranslations("app.journey.hero")
 
   // Use day of year for consistent prompt per day
   const dayOfYear = Math.floor(
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   )
-  const promptIndex = dayOfYear % prompts.length
+  const promptIndex = dayOfYear % 5
 
   return (
     <div
@@ -252,17 +248,17 @@ export function EmptyStateHeroV3() {
         {/* Message */}
         <div className="space-y-4 max-w-lg">
           <h2 className="font-mono text-xl md:text-2xl font-bold uppercase tracking-wide text-charcoal">
-            Your first letter is waiting to be written
+            {t("empty.title")}
           </h2>
           <p className="font-mono text-sm text-charcoal/70 italic">
-            &ldquo;{prompts[promptIndex]}&rdquo;
+            &ldquo;{t(`empty.prompts.${promptIndex}`)}&rdquo;
           </p>
         </div>
 
         {/* CTA */}
         <Link href="/letters/new">
           <Button className="gap-2">
-            Write Your First Letter
+            {t("empty.writeButton")}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>
@@ -276,18 +272,12 @@ export function EmptyStateHeroV3() {
  * Use when user has scheduled deliveries but you want to prompt more writing
  */
 export function WritePromptBannerV3() {
-  const prompts = [
-    "What does future-you need to hear right now?",
-    "What would you tell yourself in 5 years?",
-    "What moment do you want to remember forever?",
-    "What are you proud of today?",
-    "What advice would help you next year?",
-  ]
+  const t = useTranslations("app.journey.hero")
 
   const dayOfYear = Math.floor(
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   )
-  const promptIndex = dayOfYear % prompts.length
+  const promptIndex = dayOfYear % 5
 
   return (
     <div
@@ -296,7 +286,7 @@ export function WritePromptBannerV3() {
     >
       <div className="flex flex-col items-center justify-center text-center space-y-6">
         <p className="font-mono text-lg md:text-xl text-white/90 italic max-w-lg">
-          &ldquo;{prompts[promptIndex]}&rdquo;
+          &ldquo;{t(`writeBanner.prompts.${promptIndex}`)}&rdquo;
         </p>
 
         <Link href="/letters/new">
@@ -304,7 +294,7 @@ export function WritePromptBannerV3() {
             variant="outline"
             className="border-white bg-white text-charcoal hover:bg-off-white gap-2"
           >
-            Write a Letter
+            {t("writeBanner.writeButton")}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>

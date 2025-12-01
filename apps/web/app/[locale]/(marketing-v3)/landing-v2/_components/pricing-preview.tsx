@@ -1,52 +1,30 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { Sparkles, Check, ArrowRight, Gift, Crown } from "lucide-react"
+import { Sparkles, Check, ArrowRight, Gift, Crown, LucideIcon } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
 
-const TIERS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Perfect for your first letter",
-    icon: Gift,
-    color: "bg-duck-blue",
-    features: [
-      "1 free letter",
-      "Email delivery",
-      "Basic encryption",
-      "Schedule up to 5 years ahead",
-    ],
-    cta: "Start Free",
-    href: "/sign-up",
-    popular: false,
-  },
-  {
-    name: "Premium",
-    price: "$5",
-    period: "/year",
-    description: "Unlimited letters, physical mail",
-    icon: Crown,
-    color: "bg-duck-yellow",
-    features: [
-      "Unlimited letters",
-      "Email + physical mail",
-      "Advanced encryption",
-      "Schedule up to 50 years ahead",
-      "Priority delivery",
-      "Writing prompts",
-    ],
-    cta: "Go Premium",
-    href: "/pricing",
-    popular: true,
-  },
-]
+interface PricingTier {
+  name: string
+  price: string
+  period: string
+  description: string
+  features: string[]
+  cta: string
+  href: string
+  popular: boolean
+}
+
+const TIER_ICONS: LucideIcon[] = [Gift, Crown]
+const TIER_COLORS = ["bg-duck-blue", "bg-duck-yellow"]
 
 export function PricingPreview() {
+  const t = useTranslations("marketing.pricingPreview")
+  const tiers = t.raw("tiers") as PricingTier[]
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
@@ -65,13 +43,13 @@ export function PricingPreview() {
             style={{ borderRadius: "2px" }}
           >
             <Sparkles className="h-4 w-4" strokeWidth={2} />
-            Simple Pricing
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-4xl md:text-5xl">
-            Start Free,{" "}
+            {t("title")}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10">Upgrade Anytime</span>
+              <span className="relative z-10">{t("titleHighlight")}</span>
               <span
                 className="absolute bottom-1 left-0 right-0 h-3 bg-duck-blue -z-0 sm:h-4"
                 style={{ borderRadius: "2px" }}
@@ -80,14 +58,15 @@ export function PricingPreview() {
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            Your first letter is always free. No credit card required.
+            {t("subtitle")}
           </p>
         </motion.div>
 
         {/* Pricing Cards */}
         <div className="mx-auto max-w-3xl grid gap-6 md:grid-cols-2">
-          {TIERS.map((tier, index) => {
-            const Icon = tier.icon
+          {tiers.map((tier, index) => {
+            const Icon = TIER_ICONS[index] ?? Gift
+            const color = TIER_COLORS[index] ?? "bg-duck-blue"
             return (
               <motion.div
                 key={tier.name}
@@ -107,7 +86,7 @@ export function PricingPreview() {
                     className="absolute -top-3 left-1/2 -translate-x-1/2 bg-coral border-2 border-charcoal px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-white"
                     style={{ borderRadius: "2px" }}
                   >
-                    Most Popular
+                    {t("mostPopular")}
                   </div>
                 )}
 
@@ -115,7 +94,7 @@ export function PricingPreview() {
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <div
-                      className={`inline-flex h-10 w-10 items-center justify-center border-2 border-charcoal ${tier.color} mb-3`}
+                      className={`inline-flex h-10 w-10 items-center justify-center border-2 border-charcoal ${color} mb-3`}
                       style={{ borderRadius: "2px" }}
                     >
                       <Icon className="h-5 w-5 text-charcoal" strokeWidth={2} />
@@ -172,7 +151,7 @@ export function PricingPreview() {
             href="/pricing"
             className="inline-flex items-center gap-2 font-mono text-sm text-charcoal/60 hover:text-charcoal transition-colors"
           >
-            See full pricing details
+            {t("seeFullPricing")}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </motion.div>

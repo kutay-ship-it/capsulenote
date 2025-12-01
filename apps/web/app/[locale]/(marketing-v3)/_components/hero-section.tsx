@@ -3,23 +3,24 @@
 import { motion, useScroll, useTransform } from "framer-motion"
 import { ArrowRight, Mail, Clock, Star, Sparkles } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
-
-const STATS = [
-  { value: "10,847", label: "Letters Delivered", icon: Mail },
-  { value: "99.9%", label: "On-Time Delivery", icon: Clock },
-  { value: "4.9★", label: "From 2,400+ Writers", icon: Star },
-]
+import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
+
+const STAT_ICONS = [Mail, Clock, Star]
 
 interface HeroSectionProps {
   isSignedIn: boolean
 }
 
 export function HeroSection({ isSignedIn }: HeroSectionProps) {
+  const t = useTranslations("marketing.heroV3")
   const containerRef = useRef<HTMLDivElement>(null)
   const [isMounted, setIsMounted] = useState(false)
+
+  // Get stats from translations
+  const stats = t.raw("stats") as Array<{ value: string; label: string }>
 
   // Ensure component is mounted before using scroll animations
   // This prevents the "Target ref is defined but not hydrated" error
@@ -76,7 +77,7 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
               style={{ borderRadius: "2px" }}
             >
               <Sparkles className="h-4 w-4" strokeWidth={2} />
-              Write letters to your future self
+              {t("badge")}
             </span>
           </motion.div>
 
@@ -88,9 +89,9 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
             className="text-center"
           >
             <h1 className="font-mono text-4xl font-bold uppercase leading-none tracking-wide text-charcoal sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
-              <span className="block">Send a</span>
+              <span className="block">{t("titlePart1")}</span>
               <span className="relative inline-block mt-2">
-                <span className="relative z-10">Message</span>
+                <span className="relative z-10">{t("titlePart2")}</span>
                 <motion.span
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
@@ -100,9 +101,9 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
                 />
               </span>
               <span className="block mt-2">
-                Through{" "}
+                {t("titlePart3")}{" "}
                 <span className="relative inline-block">
-                  <span className="relative z-10 text-teal-primary">Time</span>
+                  <span className="relative z-10 text-teal-primary">{t("titlePart4")}</span>
                   <motion.span
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
@@ -122,8 +123,7 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="mx-auto mt-8 max-w-2xl text-center font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg md:text-xl"
           >
-            Write letters that arrive when you need them most.
-            Digital delivery or real physical mail — your words, waiting in the future.
+            {t("description")}
           </motion.p>
 
           {/* CTA Buttons */}
@@ -136,7 +136,7 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
             {isSignedIn ? (
               <Link href="/letters">
                 <Button size="lg" className="group gap-3 text-lg shadow-md hover:shadow-lg">
-                  Go to Letters
+                  {t("goToLetters")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -144,7 +144,7 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
               <>
                 <Link href="/sign-up">
                   <Button size="lg" className="group gap-3 text-lg shadow-md hover:shadow-lg">
-                    Start Writing Free
+                    {t("startWriting")}
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
@@ -154,7 +154,7 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
                     size="lg"
                     className="text-lg"
                   >
-                    Sign In
+                    {t("signIn")}
                   </Button>
                 </Link>
               </>
@@ -173,30 +173,33 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
               style={{ borderRadius: "2px" }}
             >
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-0 sm:divide-x-2 sm:divide-charcoal/20">
-                {STATS.map((stat, i) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 1.2 + i * 0.1 }}
-                    className="flex items-center justify-center gap-3 px-4 py-2"
-                  >
-                    <div
-                      className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-duck-yellow"
-                      style={{ borderRadius: "2px" }}
+                {stats.map((stat, i) => {
+                  const Icon = STAT_ICONS[i] ?? Mail
+                  return (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 1.2 + i * 0.1 }}
+                      className="flex items-center justify-center gap-3 px-4 py-2"
                     >
-                      <stat.icon className="h-5 w-5 text-charcoal" strokeWidth={2} />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-mono text-xl font-bold text-charcoal sm:text-2xl">
-                        {stat.value}
-                      </p>
-                      <p className="font-mono text-[10px] uppercase tracking-wider text-charcoal/60">
-                        {stat.label}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
+                      <div
+                        className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-duck-yellow"
+                        style={{ borderRadius: "2px" }}
+                      >
+                        <Icon className="h-5 w-5 text-charcoal" strokeWidth={2} />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-mono text-xl font-bold text-charcoal sm:text-2xl">
+                          {stat.value}
+                        </p>
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-charcoal/60">
+                          {stat.label}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )
+                })}
               </div>
             </div>
           </motion.div>
@@ -216,7 +219,7 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
           className="flex flex-col items-center gap-2"
         >
           <span className="font-mono text-xs uppercase tracking-wider text-charcoal/50">
-            Try it below
+            {t("scrollIndicator")}
           </span>
           <div
             className="h-10 w-6 border-2 border-charcoal/30 flex items-start justify-center pt-2"

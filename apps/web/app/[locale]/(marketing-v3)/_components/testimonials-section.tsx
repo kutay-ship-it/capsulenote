@@ -3,35 +3,18 @@
 import { motion, useInView, AnimatePresence } from "framer-motion"
 import { Quote, ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
+import { useTranslations } from "next-intl"
 
-const testimonials = [
-  {
-    quote: "I wrote myself a letter before starting my business. Reading it two years later, on the day I hit my first major milestone, brought me to tears. Past-me knew exactly what I needed to hear.",
-    author: "Sarah K.",
-    role: "Entrepreneur",
-    highlight: "brought me to tears",
-  },
-  {
-    quote: "Every year on my birthday, I receive a letter from myself. It's become my favorite tradition — a conversation with who I was, reminding me how far I've come.",
-    author: "Michael T.",
-    role: "Software Developer",
-    highlight: "my favorite tradition",
-  },
-  {
-    quote: "I sent letters to my kids to open on their 18th birthdays. The physical mail option made it feel like a real gift from the past. They'll treasure these forever.",
-    author: "Jennifer L.",
-    role: "Parent",
-    highlight: "a real gift from the past",
-  },
-  {
-    quote: "During a difficult time, I wrote myself a letter of encouragement scheduled for six months later. When it arrived, it was exactly the reminder I needed that things would get better.",
-    author: "David R.",
-    role: "Teacher",
-    highlight: "exactly the reminder I needed",
-  },
-]
+interface Testimonial {
+  quote: string
+  author: string
+  role: string
+  highlight: string
+}
 
 export function TestimonialsSection() {
+  const t = useTranslations("marketing.testimonialsSection")
+  const testimonials = t.raw("testimonials") as Testimonial[]
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const headerRef = useRef(null)
@@ -69,13 +52,13 @@ export function TestimonialsSection() {
             style={{ borderRadius: "2px" }}
           >
             <Star className="h-4 w-4 fill-duck-yellow text-duck-yellow" strokeWidth={2} />
-            Stories
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-white sm:text-4xl md:text-5xl">
-            Messages That{" "}
+            {t("title")}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10">Mattered</span>
+              <span className="relative z-10">{t("titleHighlight")}</span>
               <span
                 className="absolute bottom-1 left-0 right-0 h-3 bg-coral -z-0 sm:h-4"
                 style={{ borderRadius: "2px" }}

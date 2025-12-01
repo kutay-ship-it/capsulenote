@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react"
 import { toast } from "sonner"
+import { useLocale } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import {
@@ -130,22 +131,33 @@ const ALL_TIMEZONES = TIMEZONE_GROUPS.flatMap((group) =>
 // UTILITY FUNCTIONS
 // ============================================================================
 
-function formatTimeForTimezone(timezone: string): string {
+function formatTimeForTimezone(timezone: string, locale: string): string {
   try {
-    return new Intl.DateTimeFormat("en-US", {
+    const formatted = new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", {
       timeZone: timezone,
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     }).format(new Date())
+
+    // Turkish Intl doesn't properly translate AM/PM, so we do it manually
+    if (locale === "tr") {
+      return formatted
+        .replace(/\sAM$/i, " ÖÖ")
+        .replace(/\sPM$/i, " ÖS")
+        .replace(/^AM\s/i, "ÖÖ ")
+        .replace(/^PM\s/i, "ÖS ")
+    }
+
+    return formatted
   } catch {
     return "--:--"
   }
 }
 
-function formatDateForTimezone(timezone: string): string {
+function formatDateForTimezone(timezone: string, locale: string): string {
   try {
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : "en-US", {
       timeZone: timezone,
       weekday: "short",
       month: "short",
@@ -253,6 +265,7 @@ export function TimezoneSelectV3({
   const [selectedValue, setSelectedValue] = useState(value)
   const [isPending, startTransition] = useTransition()
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
+  const locale = useLocale()
 
   // Update current time every minute
   useEffect(() => {
@@ -328,14 +341,14 @@ export function TimezoneSelectV3({
   const timeCache = useMemo(() => {
     const cache: Record<string, string> = {}
     ALL_TIMEZONES.forEach((tz) => {
-      cache[tz.value] = formatTimeForTimezone(tz.value)
+      cache[tz.value] = formatTimeForTimezone(tz.value, locale)
     })
     return cache
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTime])
+  }, [currentTime, locale])
 
-  const selectedTimeDisplay = formatTimeForTimezone(selectedValue)
-  const selectedDateDisplay = formatDateForTimezone(selectedValue)
+  const selectedTimeDisplay = formatTimeForTimezone(selectedValue, locale)
+  const selectedDateDisplay = formatDateForTimezone(selectedValue, locale)
   const selectedOffset = getUTCOffsetString(selectedValue)
   const selectedAbbr = getTimezoneAbbreviation(selectedValue)
   const selectedHasDST = observesDST(selectedValue)

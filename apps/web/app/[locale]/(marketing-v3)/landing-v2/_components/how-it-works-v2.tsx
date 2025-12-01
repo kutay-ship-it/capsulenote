@@ -1,37 +1,23 @@
 "use client"
 
 import { motion, useInView } from "framer-motion"
-import { PenLine, Calendar, Mail, ArrowRight } from "lucide-react"
+import { PenLine, Calendar, Mail, ArrowRight, LucideIcon } from "lucide-react"
 import { useRef } from "react"
+import { useTranslations } from "next-intl"
 
-const STEPS = [
-  {
-    number: "01",
-    icon: PenLine,
-    title: "Write",
-    subtitle: "Pour your thoughts into a letter",
-    description: "Use our beautiful editor to write to your future self. No rush — take your time.",
-    color: "bg-duck-yellow",
-  },
-  {
-    number: "02",
-    icon: Calendar,
-    title: "Schedule",
-    subtitle: "Pick any date in the future",
-    description: "Tomorrow, next year, or decades from now. Your letter waits patiently.",
-    color: "bg-duck-blue",
-  },
-  {
-    number: "03",
-    icon: Mail,
-    title: "Receive",
-    subtitle: "Get your letter when it arrives",
-    description: "Email or physical mail — a gift from your past self, exactly when you need it.",
-    color: "bg-teal-primary",
-  },
-]
+interface Step {
+  number: string
+  title: string
+  subtitle: string
+  description: string
+}
+
+const STEP_ICONS: LucideIcon[] = [PenLine, Calendar, Mail]
+const STEP_COLORS = ["bg-duck-yellow", "bg-duck-blue", "bg-teal-primary"]
 
 export function HowItWorksV2() {
+  const t = useTranslations("marketing.howItWorksV2")
+  const steps = t.raw("steps") as Step[]
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: "-100px" })
 
@@ -49,15 +35,15 @@ export function HowItWorksV2() {
             className="mb-6 inline-flex items-center gap-2 border-2 border-charcoal bg-duck-blue px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
             style={{ borderRadius: "2px" }}
           >
-            Simple Process
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-charcoal sm:text-4xl md:text-5xl">
-            How It Works
+            {t("title")}
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            Three simple steps to send a message to your future self.
+            {t("description")}
           </p>
         </motion.div>
 
@@ -68,9 +54,10 @@ export function HowItWorksV2() {
 
           {/* Steps Grid */}
           <div className="grid gap-8 lg:grid-cols-3 lg:gap-6">
-            {STEPS.map((step, index) => {
-              const Icon = step.icon
-              const isLast = index === STEPS.length - 1
+            {steps.map((step, index) => {
+              const Icon = STEP_ICONS[index] ?? PenLine
+              const color = STEP_COLORS[index] ?? "bg-duck-yellow"
+              const isLast = index === steps.length - 1
 
               return (
                 <motion.div
@@ -82,7 +69,7 @@ export function HowItWorksV2() {
                 >
                   {/* Step Number Badge */}
                   <div
-                    className={`relative z-10 mb-6 flex h-[120px] w-[120px] items-center justify-center border-4 border-charcoal ${step.color} shadow-[6px_6px_0_theme(colors.charcoal)]`}
+                    className={`relative z-10 mb-6 flex h-[120px] w-[120px] items-center justify-center border-4 border-charcoal ${color} shadow-[6px_6px_0_theme(colors.charcoal)]`}
                     style={{ borderRadius: "2px" }}
                   >
                     <div className="text-center">

@@ -2,7 +2,16 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import { Mail, FileText, Plus, Loader2, Sparkles } from "lucide-react"
+import {
+  Mail,
+  FileText,
+  Plus,
+  Minus,
+  Loader2,
+  AlertTriangle,
+  Zap,
+  Check,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
 import {
@@ -12,6 +21,12 @@ import {
 } from "@/components/ui/popover"
 import { createAddOnCheckoutSession } from "@/server/actions/addons"
 import { toast } from "sonner"
+import {
+  type CreditAddonType,
+  CREDIT_ADDON_BASE_PRICES,
+  calculateCreditAddonPrice,
+  getCreditAddonDiscount,
+} from "@/lib/pricing-constants"
 
 // ============================================================================
 // TYPES
@@ -35,29 +50,17 @@ const CREDIT_CONFIG: Record<
     icon: typeof Mail
     label: string
     singularLabel: string
-    addLabel: string
-    description: string
-    emptyMessage: string
-    lowMessage: string
   }
 > = {
   email: {
     icon: Mail,
     label: "Email Credits",
     singularLabel: "Email Credit",
-    addLabel: "Add Email Credits",
-    description: "Send letters via email",
-    emptyMessage: "No email credits remaining",
-    lowMessage: "Running low on email credits",
   },
   mail: {
     icon: FileText,
     label: "Mail Credits",
     singularLabel: "Mail Credit",
-    addLabel: "Add Mail Credits",
-    description: "Send physical letters",
-    emptyMessage: "No mail credits remaining",
-    lowMessage: "Running low on mail credits",
   },
 }
 
@@ -71,72 +74,118 @@ function getCreditStatus(count: number) {
   return "good"
 }
 
-function getStatusColors(status: "empty" | "low" | "good") {
-  switch (status) {
-    case "empty":
-      return {
-        bg: "bg-coral",
-        text: "text-white",
-        border: "border-coral",
-        iconColor: "text-white",
-      }
-    case "low":
-      return {
-        bg: "bg-duck-yellow",
-        text: "text-charcoal",
-        border: "border-charcoal",
-        iconColor: "text-charcoal",
-      }
-    case "good":
-      return {
-        bg: "bg-teal-primary",
-        text: "text-white",
-        border: "border-teal-primary",
-        iconColor: "text-white",
-      }
-  }
+/**
+ * Map UI credit type to addon type for pricing
+ */
+function toAddonType(type: CreditType): CreditAddonType {
+  return type === "mail" ? "physical" : "email"
+}
+
+/**
+ * Calculate price using centralized Stripe-synced pricing tiers
+ * @see lib/pricing-constants.ts - MUST match Stripe Dashboard volume pricing
+ */
+function calculatePrice(quantity: number, type: CreditType): number {
+  const addonType = toAddonType(type)
+  return calculateCreditAddonPrice(addonType, quantity).total
+}
+
+/**
+ * Get discount percentage using centralized pricing tiers
+ */
+function getDiscountPercent(quantity: number, type: CreditType): number {
+  const addonType = toAddonType(type)
+  return getCreditAddonDiscount(addonType, quantity)
+}
+
+/**
+ * Get base price for a credit type
+ */
+function getBasePrice(type: CreditType): number {
+  const addonType = toAddonType(type)
+  return CREDIT_ADDON_BASE_PRICES[addonType]
 }
 
 // ============================================================================
-// CREDIT INDICATOR COMPONENT
-// Minimal trigger (Style A) + Full detailed popover (Style D)
+// SMART ADAPTIVE PANEL (Variation 6)
+// Combines urgency awareness with full quantity control
 // ============================================================================
 
-export function CreditIndicatorV3({
-  type,
-  count,
-  className,
-}: CreditIndicatorV3Props) {
-  const [open, setOpen] = useState(false)
+interface SmartAdaptivePanelProps {
+  type: CreditType
+  currentCredits: number
+  onClose: () => void
+}
+
+function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePanelProps) {
+  const [quantity, setQuantity] = useState(25)
   const [isPending, startTransition] = useTransition()
+  const [isExpanded, setIsExpanded] = useState(false)
 
-  const config = CREDIT_CONFIG[type]
-  const status = getCreditStatus(count)
-  const colors = getStatusColors(status)
-  const Icon = config.icon
-  const isEmpty = status === "empty"
-  const isLow = status === "low"
+  const Icon = type === "email" ? Mail : FileText
+  const status = getCreditStatus(currentCredits)
+  const price = calculatePrice(quantity, type)
+  const discount = getDiscountPercent(quantity, type)
+  const basePrice = getBasePrice(type)
+  const perUnit = (price / quantity).toFixed(2)
+  const savings = Number((quantity * basePrice - price).toFixed(2))
 
-  const handleAddCredits = () => {
+  // Quick select options based on urgency
+  const quickOptions = status === "empty"
+    ? [10, 25, 50]
+    : status === "low"
+    ? [5, 10, 25]
+    : [10, 25, 50]
+
+  const statusConfig = {
+    empty: {
+      borderColor: "border-coral",
+      headerBg: "bg-coral",
+      headerText: "text-white",
+      badgeIcon: AlertTriangle,
+      badgeText: "No Credits",
+      message: "You need credits to schedule deliveries",
+    },
+    low: {
+      borderColor: "border-duck-yellow",
+      headerBg: "bg-duck-yellow",
+      headerText: "text-charcoal",
+      badgeIcon: Zap,
+      badgeText: "Running Low",
+      message: `Only ${currentCredits} credit${currentCredits === 1 ? "" : "s"} left`,
+    },
+    good: {
+      borderColor: "border-teal-primary",
+      headerBg: "bg-teal-primary",
+      headerText: "text-white",
+      badgeIcon: Check,
+      badgeText: `${currentCredits} Available`,
+      message: "Add more credits anytime",
+    },
+  }
+
+  const config = statusConfig[status]
+  const StatusIcon = config.badgeIcon
+
+  const handlePurchase = () => {
     startTransition(async () => {
       const addonType = type === "email" ? "email" : "physical"
-      // Return to dedicated success page that broadcasts to other tabs
       const successUrl = typeof window !== "undefined"
         ? `${window.location.origin}/credits/success`
         : undefined
 
       const result = await createAddOnCheckoutSession({
         type: addonType,
+        quantity,
         successUrl,
       })
 
       if (result.success) {
-        // Open in new tab so user doesn't lose their current work
         window.open(result.data.url, "_blank")
         toast.info("Checkout opened in new tab", {
           description: "Complete your purchase to add credits.",
         })
-        setOpen(false)
+        onClose()
       } else {
         toast.error("Failed to start checkout", {
           description: result.error.message || "Please try again",
@@ -146,8 +195,200 @@ export function CreditIndicatorV3({
   }
 
   return (
+    <div className="w-full">
+      {/* Status Header Bar */}
+      <div className={cn("flex items-center justify-between px-4 py-2 border-b-2 border-charcoal", config.headerBg)}>
+        <div className="flex items-center gap-2">
+          <StatusIcon className={cn("h-4 w-4", config.headerText)} strokeWidth={2.5} />
+          <span className={cn("font-mono text-xs font-bold uppercase tracking-wider", config.headerText)}>
+            {config.badgeText}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Icon className={cn("h-3.5 w-3.5", config.headerText)} strokeWidth={2} />
+          <span className={cn("font-mono text-[10px] uppercase", config.headerText)}>
+            {type === "email" ? "Email" : "Mail"}
+          </span>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="p-4 space-y-4">
+        {/* Message */}
+        <p className="font-mono text-xs text-charcoal/70">{config.message}</p>
+
+        {/* Quick Select Options */}
+        <div className="space-y-2">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal/50">
+            Quick Add
+          </span>
+          <div className="grid grid-cols-3 gap-2">
+            {quickOptions.map((q) => {
+              const qPrice = calculatePrice(q, type)
+              const qDiscount = getDiscountPercent(q, type)
+              const isSelected = quantity === q
+              return (
+                <button
+                  key={q}
+                  onClick={() => {
+                    setQuantity(q)
+                    setIsExpanded(true)
+                  }}
+                  className={cn(
+                    "relative flex flex-col items-center p-2.5 border-2 transition-all",
+                    "hover:-translate-y-0.5 hover:shadow-[2px_2px_0_theme(colors.charcoal)]",
+                    isSelected
+                      ? "border-charcoal bg-duck-yellow shadow-[2px_2px_0_theme(colors.charcoal)]"
+                      : "border-charcoal/40 bg-white hover:border-charcoal"
+                  )}
+                  style={{ borderRadius: "2px" }}
+                >
+                  <span className="font-mono text-lg font-bold text-charcoal">+{q}</span>
+                  <span className="font-mono text-[10px] font-bold text-charcoal">${qPrice.toFixed(2)}</span>
+                  {qDiscount > 0 && (
+                    <span className="mt-0.5 px-1 py-0.5 bg-teal-primary/10 font-mono text-[8px] font-bold text-teal-primary">
+                      {qDiscount}% OFF
+                    </span>
+                  )}
+                  {isSelected && (
+                    <div className="absolute -top-1.5 -right-1.5 h-4 w-4 bg-charcoal flex items-center justify-center">
+                      <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+                    </div>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Expandable Custom Quantity Section */}
+        <div className="border-t-2 border-dashed border-charcoal/10 pt-3">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="flex items-center justify-between w-full group"
+          >
+            <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal/50 group-hover:text-charcoal">
+              Custom Quantity
+            </span>
+            <div
+              className={cn(
+                "flex h-5 w-5 items-center justify-center border border-charcoal/30 transition-transform",
+                isExpanded && "rotate-180"
+              )}
+              style={{ borderRadius: "2px" }}
+            >
+              <svg className="h-3 w-3 text-charcoal/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </button>
+
+          {isExpanded && (
+            <div className="mt-3 space-y-3">
+              {/* Stepper Control */}
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="flex h-9 w-9 items-center justify-center border-2 border-charcoal bg-off-white hover:bg-charcoal/5 active:shadow-none transition-all shadow-[1px_1px_0_theme(colors.charcoal)]"
+                  style={{ borderRadius: "2px" }}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="h-3.5 w-3.5 text-charcoal" strokeWidth={2.5} />
+                </button>
+
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, Math.min(100, parseInt(e.target.value) || 1)))}
+                  className="h-10 w-16 border-2 border-charcoal bg-duck-yellow font-mono text-lg font-bold text-center text-charcoal focus:outline-none focus:ring-2 focus:ring-duck-blue"
+                  style={{ borderRadius: "2px" }}
+                  min={1}
+                  max={100}
+                />
+
+                <button
+                  onClick={() => setQuantity(Math.min(100, quantity + 1))}
+                  className="flex h-9 w-9 items-center justify-center border-2 border-charcoal bg-off-white hover:bg-charcoal/5 active:shadow-none transition-all shadow-[1px_1px_0_theme(colors.charcoal)]"
+                  style={{ borderRadius: "2px" }}
+                  disabled={quantity >= 100}
+                >
+                  <Plus className="h-3.5 w-3.5 text-charcoal" strokeWidth={2.5} />
+                </button>
+              </div>
+
+              {/* Price Breakdown */}
+              <div className="bg-off-white p-2.5 space-y-1.5" style={{ borderRadius: "2px" }}>
+                <div className="flex justify-between">
+                  <span className="font-mono text-[10px] text-charcoal/60">{quantity}× @ ${perUnit}</span>
+                  <span className="font-mono text-[10px] text-charcoal">${(quantity * basePrice).toFixed(2)}</span>
+                </div>
+                {discount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="font-mono text-[10px] font-bold text-teal-primary">Discount ({discount}%)</span>
+                    <span className="font-mono text-[10px] font-bold text-teal-primary">-${savings.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="border-t border-charcoal/10 pt-1.5 flex justify-between">
+                  <span className="font-mono text-xs font-bold text-charcoal">Total</span>
+                  <span className="font-mono text-base font-bold text-charcoal">${price.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Purchase Button */}
+        <button
+          onClick={handlePurchase}
+          disabled={isPending}
+          className={cn(
+            "flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-3",
+            "font-mono text-xs font-bold uppercase tracking-wider",
+            "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0",
+            status === "empty" ? "bg-coral text-white" : "bg-duck-yellow text-charcoal"
+          )}
+          style={{ borderRadius: "2px" }}
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Add {quantity} — ${price.toFixed(2)}
+              {discount > 0 && <span className="text-teal-primary ml-1">({discount}%)</span>}
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// CREDIT INDICATOR COMPONENT
+// Minimal trigger + Smart Adaptive Panel popover
+// ============================================================================
+
+export function CreditIndicatorV3({
+  type,
+  count,
+  className,
+}: CreditIndicatorV3Props) {
+  const [open, setOpen] = useState(false)
+
+  const config = CREDIT_CONFIG[type]
+  const status = getCreditStatus(count)
+  const Icon = config.icon
+  const isEmpty = status === "empty"
+  const isLow = status === "low"
+
+  return (
     <Popover open={open} onOpenChange={setOpen}>
-      {/* Minimal Trigger (Style A) */}
+      {/* Minimal Trigger */}
       <PopoverTrigger asChild>
         <button
           className={cn(
@@ -162,80 +403,18 @@ export function CreditIndicatorV3({
         </button>
       </PopoverTrigger>
 
-      {/* Full Detailed Popover (Style D) */}
+      {/* Smart Adaptive Panel Popover */}
       <PopoverContent
-        className="w-64 border-2 border-charcoal bg-white p-0 shadow-[4px_4px_0_theme(colors.charcoal)]"
+        className="w-80 border-2 border-charcoal bg-white p-0 shadow-[4px_4px_0_theme(colors.charcoal)]"
         style={{ borderRadius: "2px" }}
         align="end"
         sideOffset={8}
       >
-        {/* Header */}
-        <div
-          className={cn(
-            "flex items-center gap-2 border-b-2 border-charcoal px-4 py-3",
-            colors.bg
-          )}
-        >
-          <Icon className={cn("h-4 w-4", colors.iconColor)} strokeWidth={2} />
-          <span className={cn("font-mono text-xs font-bold uppercase tracking-wider", colors.text)}>
-            {config.label}
-          </span>
-        </div>
-
-        {/* Content */}
-        <div className="p-4 space-y-4">
-          {/* Credit Count Display */}
-          <div className="text-center">
-            <div className="font-mono text-4xl font-bold text-charcoal">{count}</div>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-charcoal/50">
-              {count === 1 ? config.singularLabel : config.label} remaining
-            </p>
-          </div>
-
-          {/* Status Message */}
-          {(isEmpty || isLow) && (
-            <div
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 font-mono text-[10px]",
-                isEmpty
-                  ? "bg-coral/10 text-coral"
-                  : "bg-duck-yellow/20 text-charcoal"
-              )}
-              style={{ borderRadius: "2px" }}
-            >
-              <Sparkles className="h-3 w-3" strokeWidth={2} />
-              <span>{isEmpty ? config.emptyMessage : config.lowMessage}</span>
-            </div>
-          )}
-
-          {/* Description */}
-          <p className="font-mono text-xs text-charcoal/60">{config.description}</p>
-
-          {/* Add Credits Button */}
-          <button
-            onClick={handleAddCredits}
-            disabled={isPending}
-            className={cn(
-              "flex w-full items-center justify-center gap-2 border-2 border-charcoal bg-duck-yellow px-4 py-2.5",
-              "font-mono text-xs font-bold uppercase tracking-wider text-charcoal",
-              "transition-all hover:-translate-y-0.5 hover:shadow-[2px_2px_0_theme(colors.charcoal)]",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
-            )}
-            style={{ borderRadius: "2px" }}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-                <span>Opening...</span>
-              </>
-            ) : (
-              <>
-                <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                <span>{config.addLabel}</span>
-              </>
-            )}
-          </button>
-        </div>
+        <SmartAdaptivePanel
+          type={type}
+          currentCredits={count}
+          onClose={() => setOpen(false)}
+        />
       </PopoverContent>
     </Popover>
   )

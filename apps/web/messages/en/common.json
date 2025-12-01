@@ -8,6 +8,16 @@
   "accessibility": {
     "dismissAlert": "Dismiss alert"
   },
+  "settingsMenu": {
+    "settings": "Settings",
+    "manageAccount": "Manage Account",
+    "signOut": "Sign Out",
+    "plans": {
+      "digitalCapsule": "Digital Capsule",
+      "paperPixels": "Paper & Pixels",
+      "free": "Free"
+    }
+  },
   "actions": {
     "dashboard": "Dashboard",
     "signIn": "Sign In",

@@ -3,96 +3,51 @@
 import { motion, useInView, AnimatePresence } from "framer-motion"
 import { Quote, ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
+import { useTranslations } from "next-intl"
 
-// Extended testimonials (8 instead of 4) with more specific roles
-const TESTIMONIALS = [
-  {
-    quote: "I wrote myself a letter before starting my business. Reading it two years later, on the day I hit my first major milestone, brought me to tears. Past-me knew exactly what I needed to hear.",
-    author: "Sarah K.",
-    role: "Startup Founder",
-    context: "Received after 2 years",
-    initials: "SK",
-    color: "bg-duck-yellow",
-  },
-  {
-    quote: "Every year on my birthday, I receive a letter from myself. It's become my favorite tradition — a conversation with who I was, reminding me how far I've come.",
-    author: "Michael T.",
-    role: "Software Engineer",
-    context: "Annual birthday tradition",
-    initials: "MT",
-    color: "bg-duck-blue",
-  },
-  {
-    quote: "I sent letters to my kids to open on their 18th birthdays. The physical mail option made it feel like a real gift from the past. They'll treasure these forever.",
-    author: "Jennifer L.",
-    role: "Mother of 3",
-    context: "Letters for kids' 18th birthdays",
-    initials: "JL",
-    color: "bg-teal-primary",
-  },
-  {
-    quote: "During a difficult time, I wrote myself a letter of encouragement scheduled for six months later. When it arrived, it was exactly the reminder I needed that things would get better.",
-    author: "David R.",
-    role: "High School Teacher",
-    context: "Encouragement during hard times",
-    initials: "DR",
-    color: "bg-coral",
-  },
-  {
-    quote: "I wrote a letter the day I started my PhD. Opening it on graduation day was surreal — reading my fears, hopes, and naive excitement. I wish I could hug past-me.",
-    author: "Emma W.",
-    role: "Neuroscience Researcher",
-    context: "PhD journey letter",
-    initials: "EW",
-    color: "bg-lavender",
-  },
-  {
-    quote: "At 60, I started writing letters to myself for each decade ahead. The letter I received at 65 reminded me to travel more. I've now visited 12 new countries.",
-    author: "James H.",
-    role: "Retired Architect",
-    context: "Decade milestone letters",
-    initials: "JH",
-    color: "bg-duck-yellow",
-  },
-  {
-    quote: "I wrote a 'victory letter' to myself during chemo. Reading it cancer-free two years later was the most powerful moment of my life. Keep writing to yourself. It matters.",
-    author: "Lisa M.",
-    role: "Cancer Survivor",
-    context: "Victory over illness",
-    initials: "LM",
-    color: "bg-teal-primary",
-  },
-  {
-    quote: "As a digital nomad, I write a letter from each country I visit. Opening letters from past adventures while in new places creates this beautiful tapestry of my journey.",
-    author: "Alex P.",
-    role: "Travel Writer",
-    context: "Time capsule from each country",
-    initials: "AP",
-    color: "bg-duck-blue",
-  },
+interface Testimonial {
+  quote: string
+  author: string
+  role: string
+  context: string
+}
+
+const TESTIMONIAL_COLORS = [
+  "bg-duck-yellow",
+  "bg-duck-blue",
+  "bg-teal-primary",
+  "bg-coral",
+  "bg-lavender",
+  "bg-duck-yellow",
+  "bg-teal-primary",
+  "bg-duck-blue",
 ]
 
 export function SocialProofV2() {
+  const t = useTranslations("marketing.socialProofV2")
+  const testimonials = t.raw("testimonials") as Testimonial[]
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const headerRef = useRef(null)
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-100px" })
 
   const next = () => {
-    setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length)
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length)
   }
 
   const prev = () => {
-    setCurrentIndex((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
   }
 
   useEffect(() => {
     if (!isAutoPlaying) return
     const interval = setInterval(next, 5000)
     return () => clearInterval(interval)
-  }, [isAutoPlaying])
+  }, [isAutoPlaying, testimonials.length])
 
-  const current = TESTIMONIALS[currentIndex]!
+  const current = testimonials[currentIndex]!
+  const currentColor = TESTIMONIAL_COLORS[currentIndex] ?? "bg-duck-yellow"
+  const currentInitials = current.author.split(" ").map(n => n[0]).join("")
 
   return (
     <section className="bg-charcoal py-20 md:py-32 overflow-hidden">
@@ -110,13 +65,13 @@ export function SocialProofV2() {
             style={{ borderRadius: "2px" }}
           >
             <Star className="h-4 w-4 fill-duck-yellow text-duck-yellow" strokeWidth={2} />
-            Real Stories
+            {t("badge")}
           </span>
 
           <h2 className="mt-6 font-mono text-3xl font-bold uppercase leading-tight tracking-wide text-white sm:text-4xl md:text-5xl">
-            Messages That{" "}
+            {t("title")}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10">Changed Lives</span>
+              <span className="relative z-10">{t("titleHighlight")}</span>
               <span
                 className="absolute bottom-1 left-0 right-0 h-3 bg-coral -z-0 sm:h-4"
                 style={{ borderRadius: "2px" }}
@@ -125,7 +80,7 @@ export function SocialProofV2() {
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-white/70 sm:text-lg">
-            {TESTIMONIALS.length} writers share their time-traveling moments.
+            {t("writersCount", { count: testimonials.length })}
           </p>
         </motion.div>
 
@@ -165,10 +120,10 @@ export function SocialProofV2() {
                 {/* Attribution */}
                 <div className="flex items-center gap-4">
                   <div
-                    className={`flex h-14 w-14 items-center justify-center border-2 border-charcoal ${current.color} font-mono text-lg font-bold text-charcoal`}
+                    className={`flex h-14 w-14 items-center justify-center border-2 border-charcoal ${currentColor} font-mono text-lg font-bold text-charcoal`}
                     style={{ borderRadius: "2px" }}
                   >
-                    {current.initials}
+                    {currentInitials}
                   </div>
                   <div>
                     <p className="font-mono text-base font-bold text-charcoal">
@@ -188,7 +143,7 @@ export function SocialProofV2() {
             {/* Navigation */}
             <div className="absolute bottom-8 right-8 flex items-center gap-2 sm:bottom-12 sm:right-12">
               <span className="font-mono text-xs text-charcoal/50 mr-2">
-                {currentIndex + 1} / {TESTIMONIALS.length}
+                {currentIndex + 1} / {testimonials.length}
               </span>
               <button
                 onClick={prev}
@@ -211,7 +166,7 @@ export function SocialProofV2() {
 
           {/* Dots Indicator */}
           <div className="mt-6 flex justify-center gap-2">
-            {TESTIMONIALS.map((_, i) => (
+            {testimonials.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentIndex(i)}
@@ -249,7 +204,9 @@ export function SocialProofV2() {
             </div>
             <div className="h-6 w-px bg-white/20" />
             <span className="font-mono text-sm text-white">
-              <span className="font-bold">4.9</span> from 2,400+ writers
+              {t.rich("rating", {
+                score: (chunks) => <span className="font-bold">{chunks}</span>,
+              })}
             </span>
           </div>
         </motion.div>
