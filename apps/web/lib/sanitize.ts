@@ -1,17 +1,21 @@
 /**
  * HTML Sanitization Utilities
  *
- * Uses isomorphic-dompurify for SSR-safe HTML sanitization to prevent XSS attacks.
+ * Uses sanitize-html for SSR-safe HTML sanitization to prevent XSS attacks.
  * This module provides consistent sanitization across Server and Client Components.
+ *
+ * Note: We use sanitize-html instead of isomorphic-dompurify because jsdom
+ * (required by isomorphic-dompurify) has ESM compatibility issues on Vercel's
+ * serverless runtime with parse5@8.0.0.
  */
-import DOMPurify, { type Config } from "isomorphic-dompurify"
+import sanitizeHtmlLib from "sanitize-html"
 
 /**
  * Allowed HTML tags for letter content
  * Restrictive allowlist to prevent XSS while preserving formatting
  */
-const LETTER_CONTENT_CONFIG: Config = {
-  ALLOWED_TAGS: [
+const LETTER_CONTENT_CONFIG: sanitizeHtmlLib.IOptions = {
+  allowedTags: [
     // Text formatting
     "p",
     "br",
@@ -42,24 +46,51 @@ const LETTER_CONTENT_CONFIG: Config = {
     "span",
     "a",
   ],
-  ALLOWED_ATTR: [
-    "class",
-    "href", // for links
-    "target", // for links
-    "rel", // for links
-  ],
-  // Ensure links open safely
-  ADD_ATTR: ["target", "rel"],
-  // Force all links to open in new tab with security attributes
-  FORBID_ATTR: ["style", "onclick", "onerror", "onload"],
+  allowedAttributes: {
+    a: ["href", "target", "rel", "class"],
+    span: ["class"],
+    p: ["class"],
+    h1: ["class"],
+    h2: ["class"],
+    h3: ["class"],
+    h4: ["class"],
+    h5: ["class"],
+    h6: ["class"],
+    blockquote: ["class"],
+    pre: ["class"],
+    code: ["class"],
+    ul: ["class"],
+    ol: ["class"],
+    li: ["class"],
+  },
+  // Transform links to be safe
+  transformTags: {
+    a: (tagName, attribs) => ({
+      tagName,
+      attribs: {
+        ...attribs,
+        target: "_blank",
+        rel: "noopener noreferrer",
+      },
+    }),
+  },
+  // Don't allow any inline styles
+  allowedStyles: {},
 }
 
 /**
  * Configuration for template content (more restrictive)
  */
-const TEMPLATE_CONTENT_CONFIG: Config = {
-  ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote"],
-  ALLOWED_ATTR: ["class"],
+const TEMPLATE_CONTENT_CONFIG: sanitizeHtmlLib.IOptions = {
+  allowedTags: ["p", "br", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote"],
+  allowedAttributes: {
+    p: ["class"],
+    blockquote: ["class"],
+    ul: ["class"],
+    ol: ["class"],
+    li: ["class"],
+  },
+  allowedStyles: {},
 }
 
 /**
@@ -75,7 +106,7 @@ const TEMPLATE_CONTENT_CONFIG: Config = {
  */
 export function sanitizeLetterHtml(html: string | null | undefined): string {
   if (!html) return ""
-  return DOMPurify.sanitize(html, LETTER_CONTENT_CONFIG) as string
+  return sanitizeHtmlLib(html, LETTER_CONTENT_CONFIG)
 }
 
 /**
@@ -87,21 +118,21 @@ export function sanitizeLetterHtml(html: string | null | undefined): string {
  */
 export function sanitizeTemplateHtml(html: string | null | undefined): string {
   if (!html) return ""
-  return DOMPurify.sanitize(html, TEMPLATE_CONTENT_CONFIG) as string
+  return sanitizeHtmlLib(html, TEMPLATE_CONTENT_CONFIG)
 }
 
 /**
- * Generic sanitize function with full DOMPurify config access
+ * Generic sanitize function with full sanitize-html config access
  * Use only when you need custom configuration
  *
  * @param html - Raw HTML string to sanitize
- * @param config - DOMPurify configuration options
+ * @param config - sanitize-html configuration options
  * @returns Sanitized HTML string
  */
 export function sanitizeHtml(
   html: string | null | undefined,
-  config?: Config
+  config?: sanitizeHtmlLib.IOptions
 ): string {
   if (!html) return ""
-  return DOMPurify.sanitize(html, config) as string
+  return sanitizeHtmlLib(html, config)
 }
