@@ -138,7 +138,7 @@ export function DeliveriesListClient({ deliveries, locale }: DeliveriesListClien
   }
 
   return (
-    <div className={cn("space-y-4 sm:space-y-6", isPending && "opacity-70")}>
+    <div className={cn("space-y-4 sm:space-y-6", isPending && "opacity-70 pointer-events-none")}>
       {optimisticDeliveries.map((delivery) => (
         <div key={delivery.id} className="space-y-3">
           <Link href={{ pathname: "/letters/[id]", params: { id: delivery.letterId } }}>

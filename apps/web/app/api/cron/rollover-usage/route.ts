@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { validateCronSecret } from "@/server/lib/crypto-utils"
+import { PlanType } from "@dearme/prisma"
 
 /**
  * Usage Period Rollover Cron Job
@@ -62,12 +63,12 @@ export async function GET(request: NextRequest) {
     // Calculate next period start (beginning of next month)
     const nextPeriod = getStartOfNextMonth(now)
 
-    // Mail credits per month by plan - MUST match PlanType enum values
+    // Mail credits per month by plan - type-safe against PlanType enum
     // DIGITAL_CAPSULE = email-only plan (no mail credits)
     // PAPER_PIXELS = physical mail plan (2 credits/month)
-    const mailCreditsMap: Record<string, number> = {
-      DIGITAL_CAPSULE: 0,
-      PAPER_PIXELS: 2,
+    const mailCreditsMap: Record<PlanType, number> = {
+      [PlanType.DIGITAL_CAPSULE]: 0,
+      [PlanType.PAPER_PIXELS]: 2,
     }
 
     const results = []

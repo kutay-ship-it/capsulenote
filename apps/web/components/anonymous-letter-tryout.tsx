@@ -42,6 +42,7 @@ export function AnonymousLetterTryout() {
   const [showSaveIndicator, setShowSaveIndicator] = useState(false)
   const [showSignUpPrompt, setShowSignUpPrompt] = useState(false)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const saveIndicatorTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load existing draft on mount
   useEffect(() => {
@@ -62,8 +63,11 @@ export function AnonymousLetterTryout() {
       setLastSaved(new Date().toISOString())
       setShowSaveIndicator(true)
 
-      // Hide save indicator after 2 seconds
-      setTimeout(() => setShowSaveIndicator(false), 2000)
+      // Hide save indicator after 2 seconds (with cleanup to prevent memory leak)
+      if (saveIndicatorTimerRef.current) {
+        clearTimeout(saveIndicatorTimerRef.current)
+      }
+      saveIndicatorTimerRef.current = setTimeout(() => setShowSaveIndicator(false), 2000)
 
       // Check if we should show sign-up prompt
       if (shouldShowSignUpPrompt() && !showSignUpPrompt) {
@@ -89,6 +93,9 @@ export function AnonymousLetterTryout() {
     return () => {
       if (autoSaveTimerRef.current) {
         clearTimeout(autoSaveTimerRef.current)
+      }
+      if (saveIndicatorTimerRef.current) {
+        clearTimeout(saveIndicatorTimerRef.current)
       }
     }
   }, [title, body, performAutoSave])

@@ -19,14 +19,18 @@ export async function triggerInngestEvent(eventName: string, data: Record<string
       data,
     })
 
-    // Inngest v3 returns { ids: string[] }, but older mocks can return a raw array
-    const ids = Array.isArray(result)
-      ? result
-      : Array.isArray((result as any)?.ids)
-      ? (result as any).ids
-      : []
+    // Inngest SDK returns { ids: string[] } for send()
+    // Type guard to handle SDK response properly
+    type InngestSendResult = { ids: string[] } | string[]
+    const typedResult = result as InngestSendResult
 
-    const eventId = ids.find((id: unknown) => typeof id === "string") ?? null
+    const ids: string[] = Array.isArray(typedResult)
+      ? typedResult
+      : Array.isArray(typedResult.ids)
+        ? typedResult.ids
+        : []
+
+    const eventId = ids[0] ?? null
 
     if (!eventId) {
       await logger.error("[Inngest] No event ID returned", undefined, { eventName, result, data })

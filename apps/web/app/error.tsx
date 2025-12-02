@@ -25,6 +25,7 @@ export default function Error({
   const searchParams = useSearchParams()
   const [retryCount, setRetryCount] = useState(0)
   const [isAutoRetrying, setIsAutoRetrying] = useState(false)
+  const [isSettling, setIsSettling] = useState(false) // Prevent retry overlap after reset
   const maxRetries = 3
 
   // Check if error is transient (network-related)
@@ -59,19 +60,23 @@ export default function Error({
     // })
 
     // Auto-retry for transient errors with exponential backoff
-    if (isTransientError && retryCount < maxRetries && !isAutoRetrying) {
+    // isSettling prevents overlap when reset() triggers re-render
+    if (isTransientError && retryCount < maxRetries && !isAutoRetrying && !isSettling) {
       setIsAutoRetrying(true)
       const backoffMs = 1000 * Math.pow(2, retryCount) // 1s, 2s, 4s
 
       const timer = setTimeout(() => {
         setRetryCount((prev) => prev + 1)
         setIsAutoRetrying(false)
+        setIsSettling(true)
         reset()
+        // Clear settling state after a short delay to allow re-render to complete
+        setTimeout(() => setIsSettling(false), 100)
       }, backoffMs)
 
       return () => clearTimeout(timer)
     }
-  }, [error, pathname, searchParams, retryCount, isTransientError, isAutoRetrying, reset])
+  }, [error, pathname, searchParams, retryCount, isTransientError, isAutoRetrying, isSettling, reset])
 
   return (
     <div className="container flex min-h-[600px] items-center justify-center px-4 py-16">

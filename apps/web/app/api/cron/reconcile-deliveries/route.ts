@@ -147,12 +147,22 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Calculate reconciliation rate for monitoring
-    const reconciliationRate = (stuckDeliveries.length / 100) * 100 // Assuming ~100 deliveries/period
+    // Calculate reconciliation rate against actual delivery volume (last 24h)
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    const totalDeliveries = await prisma.delivery.count({
+      where: {
+        deliverAt: { gte: oneDayAgo, lte: new Date() },
+      },
+    })
+
+    // Avoid division by zero; use stuck count as rate if no deliveries
+    const reconciliationRate = totalDeliveries > 0
+      ? (stuckDeliveries.length / totalDeliveries) * 100
+      : stuckDeliveries.length > 0 ? 100 : 0
 
     // Alert if reconciliation rate is > 0.1%
     if (reconciliationRate > 0.1) {
-      console.error(`❌ Reconciliation rate too high: ${reconciliationRate}% - SLO breach!`)
+      console.error(`❌ Reconciliation rate too high: ${reconciliationRate.toFixed(3)}% (${stuckDeliveries.length}/${totalDeliveries}) - SLO breach!`)
     }
 
     return NextResponse.json({
