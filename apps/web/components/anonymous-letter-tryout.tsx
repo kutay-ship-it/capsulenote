@@ -70,7 +70,7 @@ export function AnonymousLetterTryout() {
         setShowSignUpPrompt(true)
       }
     }
-  }, [title, body, showSignUpPrompt])
+  }, [title, body, email, showSignUpPrompt])
 
   // Set up auto-save timer
   useEffect(() => {

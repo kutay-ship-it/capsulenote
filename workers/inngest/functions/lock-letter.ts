@@ -10,10 +10,12 @@ export const lockLetterBeforeSend = inngest.createFunction(
   async ({ event, step }) => {
     const { deliveryId } = event.data
 
-    // Fetch delivery and letter
-    const delivery = await prisma.delivery.findUnique({
-      where: { id: deliveryId },
-      include: { letter: true },
+    // Fetch delivery and letter (wrapped in step.run for determinism)
+    const delivery = await step.run("fetch-delivery", async () => {
+      return prisma.delivery.findUnique({
+        where: { id: deliveryId },
+        include: { letter: true },
+      })
     })
 
     if (!delivery || !delivery.letter) {
@@ -21,16 +23,20 @@ export const lockLetterBeforeSend = inngest.createFunction(
     }
 
     const now = Date.now()
-    const lockAt = delivery.deliverAt.getTime() - LOCK_WINDOW_MS
+    // Note: Inngest step.run serializes dates to strings, so we need to convert
+    const deliverAtDate = new Date(delivery.deliverAt)
+    const lockAt = deliverAtDate.getTime() - LOCK_WINDOW_MS
 
     // If already within window, lock immediately
     if (lockAt <= now) {
-      await prisma.letter.update({
-        where: { id: delivery.letterId },
-        data: {
-          status: "LOCKED",
-          lockedAt: new Date(),
-        },
+      await step.run("lock-letter-immediate", async () => {
+        return prisma.letter.update({
+          where: { id: delivery.letterId },
+          data: {
+            status: "LOCKED",
+            lockedAt: new Date(),
+          },
+        })
       })
       return
     }
@@ -38,12 +44,14 @@ export const lockLetterBeforeSend = inngest.createFunction(
     // Sleep until lock time then lock
     await step.sleepUntil("wait-until-lock", new Date(lockAt))
 
-    await prisma.letter.update({
-      where: { id: delivery.letterId },
-      data: {
-        status: "LOCKED",
-        lockedAt: new Date(),
-      },
+    await step.run("lock-letter-scheduled", async () => {
+      return prisma.letter.update({
+        where: { id: delivery.letterId },
+        data: {
+          status: "LOCKED",
+          lockedAt: new Date(),
+        },
+      })
     })
   }
 )

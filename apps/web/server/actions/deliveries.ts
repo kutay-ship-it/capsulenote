@@ -397,6 +397,7 @@ export async function scheduleDelivery(
           const balanceBefore = balanceAfter + 1
 
           // Record audit trail
+          // Create credit transaction with a temporary source, will be updated after delivery creation
           await tx.creditTransaction.create({
             data: {
               userId: user.id,
@@ -405,7 +406,7 @@ export async function scheduleDelivery(
               amount: -1,
               balanceBefore,
               balanceAfter,
-              source: null, // Will be updated after delivery creation
+              source: `pending:${data.letterId}`, // Temporary, updated after delivery creation
               metadata: { letterId: data.letterId, channel: data.channel },
             },
           })
@@ -462,7 +463,7 @@ export async function scheduleDelivery(
               amount: -1,
               balanceBefore,
               balanceAfter,
-              source: null, // Will be updated after delivery creation
+              source: `pending:${data.letterId}`, // Temporary, updated after delivery creation
               metadata: {
                 letterId: data.letterId,
                 channel: data.channel,
@@ -490,11 +491,7 @@ export async function scheduleDelivery(
         await tx.creditTransaction.updateMany({
           where: {
             userId: user.id,
-            source: null,
-            metadata: {
-              path: ["letterId"],
-              equals: data.letterId,
-            },
+            source: `pending:${data.letterId}`,
           },
           data: {
             source: newDelivery.id,

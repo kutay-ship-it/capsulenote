@@ -60,19 +60,26 @@ export async function handleInvoicePaymentSucceeded(invoice: InvoiceWithExpanded
     ? invoice.subscription
     : invoice.subscription?.id ?? null
 
-  await prisma.payment.create({
-    data: {
+  // Use upsert with stripeInvoiceId for idempotency (prevents duplicates on webhook replay)
+  await prisma.payment.upsert({
+    where: { stripeInvoiceId: invoice.id },
+    create: {
       userId: user.id,
       type: "subscription",
       amountCents: invoice.amount_paid,
       currency: invoice.currency,
       stripePaymentIntentId: paymentIntentId,
+      stripeInvoiceId: invoice.id,
       status: "succeeded",
       metadata: {
-        invoiceId: invoice.id,
         invoiceNumber: invoice.number,
         subscriptionId: subscriptionId,
       },
+    },
+    update: {
+      status: "succeeded",
+      amountCents: invoice.amount_paid,
+      stripePaymentIntentId: paymentIntentId,
     },
   })
 
@@ -131,16 +138,27 @@ export async function handleInvoicePaymentFailed(invoice: InvoiceWithExpandedFie
     ? invoice.payment_intent
     : invoice.payment_intent?.id ?? null
 
-  await prisma.payment.create({
-    data: {
+  // Use upsert with stripeInvoiceId for idempotency (prevents duplicates on webhook replay)
+  // Note: Use amount_due for consistency with success handler (what was owed)
+  await prisma.payment.upsert({
+    where: { stripeInvoiceId: invoice.id },
+    create: {
       userId: user.id,
       type: "subscription",
       amountCents: invoice.amount_due,
       currency: invoice.currency,
       stripePaymentIntentId: failedPaymentIntentId,
+      stripeInvoiceId: invoice.id,
       status: "failed",
       metadata: {
-        invoiceId: invoice.id,
+        attemptCount: invoice.attempt_count,
+        nextPaymentAttempt: invoice.next_payment_attempt,
+      },
+    },
+    update: {
+      status: "failed",
+      stripePaymentIntentId: failedPaymentIntentId,
+      metadata: {
         attemptCount: invoice.attempt_count,
         nextPaymentAttempt: invoice.next_payment_attempt,
       },

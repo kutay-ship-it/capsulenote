@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useRef, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { Copy, Check, Gift, Users, CreditCard, Sparkles, Mail } from "lucide-react"
 
@@ -45,11 +45,26 @@ export function ReferralSection({
   const [inviteSuccess, setInviteSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  // Refs for timeout cleanup to prevent memory leaks
+  const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const inviteTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current)
+      if (inviteTimeoutRef.current) clearTimeout(inviteTimeoutRef.current)
+    }
+  }, [])
+
   const handleCopy = async () => {
+    // Clear any existing timeout
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current)
+
     try {
       await navigator.clipboard.writeText(referralLink)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
     } catch {
       // Fallback for older browsers
       const textArea = document.createElement("textarea")
@@ -59,13 +74,16 @@ export function ReferralSection({
       document.execCommand("copy")
       document.body.removeChild(textArea)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
     }
   }
 
   const handleInvite = async () => {
     setInviteError(null)
     setInviteSuccess(false)
+
+    // Clear any existing timeout
+    if (inviteTimeoutRef.current) clearTimeout(inviteTimeoutRef.current)
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -80,7 +98,7 @@ export function ReferralSection({
       if (result.success) {
         setInviteSuccess(true)
         setInviteEmail("")
-        setTimeout(() => setInviteSuccess(false), 3000)
+        inviteTimeoutRef.current = setTimeout(() => setInviteSuccess(false), 3000)
       } else {
         // Map error to translation key
         const errorKey = result.error?.includes("rate")

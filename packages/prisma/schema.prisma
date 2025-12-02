@@ -367,6 +367,7 @@ model Payment {
   amountCents            Int           @map("amount_cents")
   currency               String        @default("usd") @db.Char(3)
   stripePaymentIntentId  String?       @unique @map("stripe_payment_intent_id") // Unique for idempotency
+  stripeInvoiceId        String?       @unique @map("stripe_invoice_id") // Unique for invoice idempotency
   status                 PaymentStatus @default(pending)
   metadata               Json          @default("{}")
   createdAt              DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -700,7 +701,10 @@ model CreditTransaction {
   amount          Int                    // Positive for grants, negative for deductions
   balanceBefore   Int                    @map("balance_before")
   balanceAfter    Int                    @map("balance_after")
-  source          String?                // stripePaymentIntentId, subscriptionId, deliveryId, etc.
+  // Source ID for idempotency (stripePaymentIntentId, subscriptionId, deliveryId, etc.)
+  // Non-nullable to ensure unique constraint works (NULL != NULL in SQL)
+  // For transactions without external source, use format: "internal:{uuid}" or "admin:{timestamp}"
+  source          String                 @default(dbgenerated("gen_random_uuid()::text"))
   metadata        Json                   @default("{}")
   createdAt       DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
 
@@ -710,7 +714,6 @@ model CreditTransaction {
   @@index([source])
   @@index([transactionType])
   // Idempotency constraint: prevent duplicate transactions for same user/source/type
-  // Note: source can be null, and NULL values are treated as distinct in unique constraints
   @@unique([userId, source, transactionType], map: "credit_transactions_idempotency")
   @@map("credit_transactions")
 }

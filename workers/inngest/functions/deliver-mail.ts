@@ -11,6 +11,7 @@ import {
 } from "../lib/errors"
 import { createLogger } from "../lib/logger"
 import { assertRealBuffer } from "../lib/buffer-utils"
+import { adjustForDST } from "../../../apps/web/server/lib/dst-safety"
 
 // Create logger with service context
 const logger = createLogger({ service: "deliver-mail" })
@@ -361,11 +362,25 @@ export const deliverMail = inngest.createFunction(
     }
 
     // Wait until delivery time (sendDate for arrive-by, or deliverAt for send-on)
-    const scheduleDate =
+    // Apply DST safety adjustment to avoid scheduling during DST transitions
+    const rawScheduleDate =
       delivery.mailDelivery!.deliveryMode === "arrive_by" &&
       delivery.mailDelivery!.sendDate
         ? new Date(delivery.mailDelivery!.sendDate)
         : new Date(delivery.deliverAt)
+
+    // Adjust for DST transitions using the user's timezone
+    const timezone = delivery.timezoneAtCreation || "UTC"
+    const scheduleDate = adjustForDST(rawScheduleDate, timezone)
+
+    if (scheduleDate.getTime() !== rawScheduleDate.getTime()) {
+      logger.info("DST adjustment applied to mail delivery schedule", {
+        deliveryId,
+        originalDate: rawScheduleDate.toISOString(),
+        adjustedDate: scheduleDate.toISOString(),
+        timezone,
+      })
+    }
 
     await step.sleepUntil("wait-for-send-time", scheduleDate)
 

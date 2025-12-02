@@ -61,6 +61,31 @@ export const cleanupDeletedUser = inngest.createFunction(
 
                 // Delete in dependency order to respect foreign keys
 
+                // ======================================================
+                // REFERRAL SYSTEM (must delete Referral before ReferralCode)
+                // ======================================================
+                // Delete referrals where user is referrer OR referee
+                await tx.referral.deleteMany({
+                    where: {
+                        OR: [{ referrerId: userId }, { refereeUserId: userId }],
+                    },
+                })
+                // Delete user's referral code (has FK from Referral)
+                await tx.referralCode.deleteMany({ where: { userId } })
+
+                // ======================================================
+                // ADD-ON PURCHASES
+                // ======================================================
+                await tx.addOnPurchase.deleteMany({ where: { userId } })
+
+                // ======================================================
+                // PUSH NOTIFICATIONS
+                // ======================================================
+                await tx.pushSubscription.deleteMany({ where: { userId } })
+
+                // ======================================================
+                // LETTER & DELIVERY SYSTEM
+                // ======================================================
                 // Delete delivery attempts first (references letters directly)
                 if (letterIds.length > 0) {
                     await tx.deliveryAttempt.deleteMany({
@@ -82,6 +107,9 @@ export const cleanupDeletedUser = inngest.createFunction(
                 // Delete letters
                 await tx.letter.deleteMany({ where: { userId } })
 
+                // ======================================================
+                // BILLING & CREDITS
+                // ======================================================
                 // Delete credit transactions
                 await tx.creditTransaction.deleteMany({ where: { userId } })
 
@@ -100,6 +128,9 @@ export const cleanupDeletedUser = inngest.createFunction(
                 // Delete subscriptions
                 await tx.subscription.deleteMany({ where: { userId } })
 
+                // ======================================================
+                // AUDIT & PROFILE
+                // ======================================================
                 // Delete audit events
                 await tx.auditEvent.deleteMany({ where: { userId } })
 

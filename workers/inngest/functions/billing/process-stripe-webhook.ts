@@ -138,30 +138,40 @@ export const processStripeWebhook = inngest.createFunction(
     name: "Process Stripe Webhook",
     retries: 3, // Retry up to 3 times on failure
     onFailure: async ({ event, error }) => {
+      // Check if this is an idempotency deduplication (expected behavior, not a real failure)
+      // NonRetriableError for duplicates should NOT trigger DLQ or alerts
+      if (error.message?.includes("already processed - duplicate delivery detected")) {
+        console.log("[Webhook Processor] Duplicate delivery handled via idempotency", {
+          eventId: event.data?.event?.id,
+          message: error.message,
+        })
+        return // Exit early - this is expected behavior, not a failure
+      }
+
       // Cast through unknown as the event payload shape differs from Stripe.Event
       const stripeEvent = (event.data as unknown as { event: Stripe.Event }).event
 
       console.error("[Webhook Processor] Processing failed after 3 retries", {
-        eventId: stripeEvent.id,
-        eventType: stripeEvent.type,
+        eventId: stripeEvent?.id,
+        eventType: stripeEvent?.type,
         error: error.message,
         stack: error.stack,
       })
 
-      // Move to dead letter queue
+      // Move to dead letter queue (only for real failures)
       try {
         await prisma.failedWebhook.create({
           data: {
-            eventId: stripeEvent.id,
-            eventType: stripeEvent.type,
+            eventId: stripeEvent?.id ?? "unknown",
+            eventType: stripeEvent?.type ?? "unknown",
             payload: stripeEvent as any,
             error: `${error.message}\n\nStack:\n${error.stack}`,
           },
         })
 
         console.log("[Webhook Processor] Event moved to DLQ", {
-          eventId: stripeEvent.id,
-          eventType: stripeEvent.type,
+          eventId: stripeEvent?.id,
+          eventType: stripeEvent?.type,
         })
 
         // TODO: Alert engineering team via Slack/email
@@ -176,7 +186,7 @@ export const processStripeWebhook = inngest.createFunction(
         // })
       } catch (dlqError) {
         console.error("[Webhook Processor] Failed to write to DLQ", {
-          eventId: stripeEvent.id,
+          eventId: stripeEvent?.id,
           dlqError: dlqError instanceof Error ? dlqError.message : String(dlqError),
         })
       }
