@@ -222,9 +222,15 @@ export async function POST(req: Request) {
           return new Response("No email found", { status: 400 })
         }
 
-        await prisma.user.update({
+        // Use upsert to handle race condition where user.updated arrives before user.created
+        await prisma.user.upsert({
           where: { clerkUserId: id },
-          data: { email },
+          update: { email },
+          create: {
+            clerkUserId: id,
+            email,
+            profile: { create: { timezone: "UTC" } },
+          },
         })
 
         console.log(`User updated: ${id}`)

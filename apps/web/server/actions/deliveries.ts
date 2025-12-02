@@ -385,7 +385,7 @@ export async function scheduleDelivery(
               where: { id: user.id },
               select: { emailCredits: true },
             })
-            throw new QuotaExceededError("email_credits", current?.emailCredits ?? 0, 1)
+            throw new QuotaExceededError("email_credits", 1, current?.emailCredits ?? 0)
           }
 
           // Get balance AFTER update for accurate audit
@@ -426,7 +426,7 @@ export async function scheduleDelivery(
               where: { id: user.id },
               select: { physicalCredits: true },
             })
-            throw new QuotaExceededError("physical_credits", current?.physicalCredits ?? 0, 1)
+            throw new QuotaExceededError("physical_credits", 1, current?.physicalCredits ?? 0)
           }
 
           // Get updated user data for audit and trial logic

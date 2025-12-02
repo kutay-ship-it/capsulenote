@@ -52,7 +52,7 @@ export async function POST(req: Request) {
       error: error.message,
       signature: signature.substring(0, 20) + "...", // Log partial signature for debugging
     })
-    return new Response(`Invalid signature: ${error.message}`, { status: 400 })
+    return new Response("Invalid signature", { status: 400 })
   }
 
   // Validate event age (prevent replay attacks)

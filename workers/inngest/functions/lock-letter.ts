@@ -30,8 +30,12 @@ export const lockLetterBeforeSend = inngest.createFunction(
     // If already within window, lock immediately
     if (lockAt <= now) {
       await step.run("lock-letter-immediate", async () => {
-        return prisma.letter.update({
-          where: { id: delivery.letterId },
+        // Atomic update: only lock if not already locked (prevents TOCTOU race)
+        return prisma.letter.updateMany({
+          where: {
+            id: delivery.letterId,
+            status: { not: "LOCKED" },
+          },
           data: {
             status: "LOCKED",
             lockedAt: new Date(),
@@ -45,8 +49,12 @@ export const lockLetterBeforeSend = inngest.createFunction(
     await step.sleepUntil("wait-until-lock", new Date(lockAt))
 
     await step.run("lock-letter-scheduled", async () => {
-      return prisma.letter.update({
-        where: { id: delivery.letterId },
+      // Atomic update: only lock if not already locked (prevents TOCTOU race)
+      return prisma.letter.updateMany({
+        where: {
+          id: delivery.letterId,
+          status: { not: "LOCKED" },
+        },
         data: {
           status: "LOCKED",
           lockedAt: new Date(),
