@@ -26,6 +26,7 @@ import {
   type MailType,
 } from "@/server/lib/mail-delivery-calculator"
 import { ratelimit } from "@/server/lib/redis"
+import { validateDeliveryTime } from "@/server/lib/dst-safety"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
 const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
@@ -100,6 +101,20 @@ export async function scheduleDelivery(
           message: "Delivery cannot be more than 100 years in the future",
         },
       }
+    }
+
+    // DST safety check - validate delivery time doesn't fall in DST transition window
+    const dstValidation = validateDeliveryTime(data.deliverAt, data.timezone)
+    // Use adjusted date if DST transition detected, otherwise use original
+    const safeDeliverAt = dstValidation.adjustedDate
+    if (dstValidation.warning) {
+      await logger.info("[Delivery] DST transition detected, adjusting delivery time", {
+        userId: user.id,
+        originalTime: data.deliverAt.toISOString(),
+        adjustedTime: safeDeliverAt.toISOString(),
+        timezone: data.timezone,
+        warning: dstValidation.warning,
+      })
     }
 
     // Check subscription entitlements
@@ -207,7 +222,7 @@ export async function scheduleDelivery(
 
     // For physical mail, check credits and handle arrive-by mode
     let mailDeliveryMode: "send_on" | "arrive_by" = "send_on"
-    let actualDeliverAt = data.deliverAt
+    let actualDeliverAt = safeDeliverAt // Use DST-safe delivery time
     let mailTransitDays: number | null = null
     let mailTargetDate: Date | null = null
     let mailSendDate: Date | null = null
@@ -216,7 +231,7 @@ export async function scheduleDelivery(
       // 30-day minimum lead time validation for physical mail
       const millisecondsPerDay = 1000 * 60 * 60 * 24
       const daysUntilDelivery = Math.floor(
-        (data.deliverAt.getTime() - Date.now()) / millisecondsPerDay
+        (safeDeliverAt.getTime() - Date.now()) / millisecondsPerDay
       )
 
       if (daysUntilDelivery < MIN_PHYSICAL_MAIL_LEAD_DAYS) {
