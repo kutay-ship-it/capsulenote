@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import {
   FileText,
   Mail,
@@ -32,7 +31,6 @@ export function PhysicalMailTrialModal({
   onOpenChange,
 }: PhysicalMailTrialModalProps) {
   const t = useTranslations("letters.physicalMailTrial")
-  const router = useRouter()
   const [isLoading, setIsLoading] = React.useState(false)
 
   const handlePurchase = async () => {
@@ -40,7 +38,12 @@ export function PhysicalMailTrialModal({
     try {
       const result = await createTrialPhysicalCheckoutSession()
       if (result.success && result.data?.url) {
-        router.push(result.data.url)
+        // Open in new tab like other credit purchases (preserves current page state)
+        window.open(result.data.url, "_blank")
+        toast.info(t("checkoutOpened") ?? "Checkout opened in new tab", {
+          description: t("checkoutOpenedDescription") ?? "Complete your purchase. This page will refresh when you return.",
+        })
+        onOpenChange(false)
       } else if (!result.success) {
         toast.error(t("errors.checkoutFailed"), {
           description: result.error?.message || t("errors.tryAgainLater"),

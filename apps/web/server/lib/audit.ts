@@ -94,6 +94,11 @@ export const AuditEventType = {
   SYSTEM_RECONCILER_HIGH_VOLUME: "system.reconciler_high_volume",
   SYSTEM_ROLLOVER_SLOW: "system.rollover_slow",
   SYSTEM_ROLLOVER_HIGH_ERROR_RATE: "system.rollover_high_error_rate",
+  SYSTEM_WEBHOOK_RECONCILER_HIGH_VOLUME: "system.webhook_reconciler_high_volume",
+  SYSTEM_WEBHOOK_MAX_RETRIES_EXCEEDED: "system.webhook_max_retries_exceeded",
+
+  // Webhook events
+  WEBHOOK_RECONCILED: "webhook.reconciled",
 
   // Subscription usage events
   SUBSCRIPTION_USAGE_ROLLOVER: "subscription.usage_rollover",

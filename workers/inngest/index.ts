@@ -10,6 +10,7 @@ export * from "./functions/lock-letter"
 
 // Billing & payment functions
 export * from "./functions/billing/process-stripe-webhook"
+export * from "./functions/billing/retry-stripe-webhook"
 export * from "./functions/billing/send-billing-notification"
 export * from "./functions/billing/handle-dunning"
 

@@ -223,6 +223,8 @@
     "notNow": "Not Now",
     "processing": "Processing...",
     "tryPhysicalMail": "Try Physical Mail",
+    "checkoutOpened": "Checkout opened in new tab",
+    "checkoutOpenedDescription": "Complete your purchase. This page will refresh when you return.",
     "errors": {
       "checkoutFailed": "Failed to start checkout",
       "tryAgainLater": "Please try again later."

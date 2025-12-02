@@ -223,6 +223,8 @@
     "notNow": "Şimdi Değil",
     "processing": "İşleniyor...",
     "tryPhysicalMail": "Fiziksel Postayı Dene",
+    "checkoutOpened": "Ödeme yeni sekmede açıldı",
+    "checkoutOpenedDescription": "Satın almayı tamamlayın. Geri döndüğünüzde bu sayfa güncellenecek.",
     "errors": {
       "checkoutFailed": "Ödeme başlatılamadı",
       "tryAgainLater": "Lütfen daha sonra tekrar deneyin."

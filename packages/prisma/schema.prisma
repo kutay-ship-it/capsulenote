@@ -448,14 +448,26 @@ model SubscriptionUsage {
 // WEBHOOK EVENT TRACKING
 // ============================================================================
 
+// Webhook processing status for completion tracking
+enum WebhookStatus {
+  CLAIMED   // Idempotency claimed, processing started
+  COMPLETED // Successfully processed
+  FAILED    // Processing failed after retries exhausted
+}
+
 model WebhookEvent {
-  id          String   @id // Use Stripe event.id for natural idempotency
-  type        String   // event.type
-  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz(3)
-  data        Json     @default("{}") // Full event payload for debugging
+  id          String        @id // Use Stripe event.id for natural idempotency
+  type        String        // event.type
+  data        Json          @default("{}") // Full event payload for debugging
+  status      WebhookStatus @default(CLAIMED) // Processing state
+  claimedAt   DateTime      @default(now()) @map("claimed_at") @db.Timestamptz(3) // When idempotency claimed
+  processedAt DateTime?     @map("processed_at") @db.Timestamptz(3) // When processing completed (nullable)
+  error       String?       // Error message if failed
+  retryCount  Int           @default(0) @map("retry_count") // Backstop retry attempts
 
   @@index([type])
   @@index([processedAt])
+  @@index([status, claimedAt]) // For backstop reconciler queries
   @@map("webhook_events")
 }
 

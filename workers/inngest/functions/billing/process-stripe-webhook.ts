@@ -38,9 +38,11 @@ import {
 /**
  * Route webhook event to appropriate handler
  *
+ * Exported for use by retry-stripe-webhook.ts
+ *
  * @param event - Stripe Event object
  */
-async function routeWebhookEvent(event: Stripe.Event): Promise<void> {
+export async function routeWebhookEvent(event: Stripe.Event): Promise<void> {
   console.log("[Webhook Processor] Routing event", {
     eventId: event.id,
     eventType: event.type,
@@ -140,8 +142,11 @@ export const processStripeWebhook = inngest.createFunction(
     onFailure: async ({ event, error }) => {
       // Check if this is an idempotency deduplication (expected behavior, not a real failure)
       // NonRetriableError for duplicates should NOT trigger DLQ or alerts
-      if (error.message?.includes("already processed - duplicate delivery detected")) {
-        console.log("[Webhook Processor] Duplicate delivery handled via idempotency", {
+      if (
+        error.message?.includes("already processed - duplicate delivery detected") ||
+        error.message?.includes("backstop will retry")
+      ) {
+        console.log("[Webhook Processor] Expected deduplication, not a real failure", {
           eventId: event.data?.event?.id,
           message: error.message,
         })
@@ -157,6 +162,25 @@ export const processStripeWebhook = inngest.createFunction(
         error: error.message,
         stack: error.stack,
       })
+
+      // Mark webhook event as FAILED in the database
+      try {
+        await prisma.webhookEvent.updateMany({
+          where: {
+            id: stripeEvent?.id,
+            status: "CLAIMED",
+          },
+          data: {
+            status: "FAILED",
+            error: `${error.message}\n\nStack:\n${error.stack}`,
+          },
+        })
+      } catch (updateError) {
+        console.error("[Webhook Processor] Failed to mark webhook as FAILED", {
+          eventId: stripeEvent?.id,
+          error: updateError instanceof Error ? updateError.message : String(updateError),
+        })
+      }
 
       // Move to dead letter queue (only for real failures)
       try {
@@ -214,17 +238,17 @@ export const processStripeWebhook = inngest.createFunction(
     /**
      * Step 1: Claim idempotency (create record FIRST to prevent race condition)
      *
-     * Enterprise idempotency pattern:
+     * Enterprise idempotency pattern with completion tracking:
      * - Use webhook_events table as distributed lock
-     * - P2002 (unique constraint) = already processed by another delivery
+     * - Create with status=CLAIMED, processedAt=null
+     * - P2002 (unique constraint) = check if already COMPLETED or just CLAIMED
      * - NonRetriableError prevents Inngest from retrying duplicate events
-     * - Graceful deduplication without polluting retry queue or DLQ
+     * - Backstop reconciler can detect CLAIMED but not COMPLETED events
      *
-     * Why NonRetriableError?
-     * - Duplicate webhooks are expected behavior (network retries, load balancers)
-     * - Retry would fail again with same P2002 error
-     * - Avoids unnecessary retry attempts and DLQ pollution
-     * - Maintains clean observability in Inngest dashboard
+     * Why this pattern?
+     * - If process-event fails, event stays CLAIMED (not COMPLETED)
+     * - Backstop reconciler detects stuck events and re-queues them
+     * - Prevents the "stuck forever" scenario from the original bug
      */
     await step.run("claim-idempotency", async () => {
       try {
@@ -233,6 +257,9 @@ export const processStripeWebhook = inngest.createFunction(
             id: stripeEvent.id,
             type: stripeEvent.type,
             data: stripeEvent as any,
+            status: "CLAIMED",
+            claimedAt: new Date(),
+            processedAt: null, // Will be set on completion
           },
         })
 
@@ -241,15 +268,45 @@ export const processStripeWebhook = inngest.createFunction(
         })
       } catch (error: any) {
         // Check if it's a unique constraint violation (Prisma error code P2002)
-        if (error?.code === 'P2002') {
-          // Already processed by another webhook delivery - this is EXPECTED behavior
-          console.log("[Webhook Processor] Event already processed (idempotency)", {
+        if (error?.code === "P2002") {
+          // Check existing record status
+          const existing = await prisma.webhookEvent.findUnique({
+            where: { id: stripeEvent.id },
+            select: { status: true, claimedAt: true },
+          })
+
+          if (existing?.status === "COMPLETED") {
+            // Truly a duplicate - already fully processed
+            console.log("[Webhook Processor] Event already completed (idempotency)", {
+              eventId: stripeEvent.id,
+              eventType: stripeEvent.type,
+            })
+            throw new NonRetriableError(
+              `Event ${stripeEvent.id} already processed - duplicate delivery detected`
+            )
+          }
+
+          if (existing?.status === "FAILED") {
+            // Previously failed - check DLQ for manual resolution
+            console.log("[Webhook Processor] Event previously failed", {
+              eventId: stripeEvent.id,
+              eventType: stripeEvent.type,
+            })
+            throw new NonRetriableError(
+              `Event ${stripeEvent.id} previously failed - check DLQ`
+            )
+          }
+
+          // Status is CLAIMED but not completed
+          // Could be: (a) still processing, (b) stuck
+          // Let backstop reconciler handle stuck events
+          console.log("[Webhook Processor] Event claimed but not completed", {
             eventId: stripeEvent.id,
             eventType: stripeEvent.type,
+            claimedAt: existing?.claimedAt,
           })
-          // Use NonRetriableError to exit gracefully without retries
           throw new NonRetriableError(
-            `Event ${stripeEvent.id} already processed - duplicate delivery detected`
+            `Event ${stripeEvent.id} claimed but not completed - backstop will retry if stuck`
           )
         }
         // Other errors should be retried
@@ -261,9 +318,24 @@ export const processStripeWebhook = inngest.createFunction(
     await step.run("process-event", async () => {
       await routeWebhookEvent(stripeEvent)
 
-      console.log("[Webhook Processor] Event processed successfully", {
+      console.log("[Webhook Processor] Event processed", {
         eventId: stripeEvent.id,
         eventType: stripeEvent.type,
+      })
+    })
+
+    // Step 3: Mark complete (critical - separates claimed from completed)
+    await step.run("mark-complete", async () => {
+      await prisma.webhookEvent.update({
+        where: { id: stripeEvent.id },
+        data: {
+          status: "COMPLETED",
+          processedAt: new Date(),
+        },
+      })
+
+      console.log("[Webhook Processor] Event marked complete", {
+        eventId: stripeEvent.id,
       })
     })
 
