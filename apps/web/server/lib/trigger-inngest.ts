@@ -1,3 +1,5 @@
+import { logger } from "./logger"
+
 /**
  * Helper to trigger Inngest events from Server Actions
  *
@@ -27,15 +29,15 @@ export async function triggerInngestEvent(eventName: string, data: Record<string
     const eventId = ids.find((id: unknown) => typeof id === "string") ?? null
 
     if (!eventId) {
-      console.error(`Inngest send() returned no event ID for: ${eventName}`, { result, data })
+      await logger.error("[Inngest] No event ID returned", undefined, { eventName, result, data })
       throw new Error("Inngest did not return an event ID")
     }
 
-    console.log(`Inngest event sent: ${eventName}`, { eventId, data })
+    await logger.info("[Inngest] Event sent", { eventName, eventId })
     // Return event ID (not run ID - run ID is assigned when function executes)
     return eventId
   } catch (error) {
-    console.error("Failed to trigger Inngest event:", error)
+    await logger.error("[Inngest] Failed to trigger event", error, { eventName })
     throw error
   }
 }
@@ -60,10 +62,10 @@ export async function cancelInngestRun(runId: string): Promise<boolean> {
       data: { runId },
     })
 
-    console.log(`Inngest run cancellation requested: ${runId}`)
+    await logger.info("[Inngest] Run cancellation requested", { runId })
     return true
   } catch (error) {
-    console.error(`Failed to cancel Inngest run ${runId}:`, error)
+    await logger.error("[Inngest] Failed to cancel run", error, { runId })
     return false
   }
 }

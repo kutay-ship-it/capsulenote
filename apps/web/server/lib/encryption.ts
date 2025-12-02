@@ -1,5 +1,6 @@
 import { env } from "@/env.mjs"
 import { webcrypto } from "crypto"
+import { logger } from "./logger"
 
 const crypto = webcrypto as unknown as Crypto
 
@@ -153,9 +154,7 @@ export async function encrypt(plaintext: string, _keyVersion?: number): Promise<
     }
   } catch (error) {
     // Log error metadata only (no sensitive data)
-    console.error("Encryption error:", {
-      errorType: error instanceof Error ? error.name : typeof error,
-      errorMessage: error instanceof Error ? error.message : "Unknown error",
+    await logger.error("[Encryption] Failed to encrypt data", error, {
       keyVersion: currentVersion,
     })
     throw new Error("Failed to encrypt data")
@@ -204,9 +203,7 @@ export async function decrypt(
     return new TextDecoder().decode(plaintextBuffer)
   } catch (error) {
     // Log error metadata only (no sensitive data)
-    console.error("Decryption error:", {
-      errorType: error instanceof Error ? error.name : typeof error,
-      errorMessage: error instanceof Error ? error.message : "Unknown error",
+    await logger.error("[Encryption] Failed to decrypt data", error, {
       keyVersion,
       ciphertextLength: ciphertext.length,
       nonceLength: nonce.length,

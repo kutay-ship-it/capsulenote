@@ -1,9 +1,9 @@
 import { auth as clerkAuth } from "@clerk/nextjs/server"
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { prisma } from "./db"
 import { getClerkClient } from "./clerk"
 import { env } from "@/env.mjs"
 import { getDetectedTimezoneFromMetadata, isValidTimezone } from "@dearme/types"
+import { logger } from "./logger"
 
 /**
  * Get current user with auto-sync fallback
@@ -24,12 +24,11 @@ export async function getCurrentUser() {
     const authResult = await clerkAuth()
     clerkUserId = authResult.userId
   } catch (error) {
-    console.error("[Auth] Failed to read Clerk auth state", error)
+    await logger.error("[Auth] Failed to read Clerk auth state", error)
     return null
   }
 
   if (!clerkUserId) {
-    console.debug("[Auth] No active Clerk session found")
     return null
   }
 
@@ -45,11 +44,11 @@ export async function getCurrentUser() {
 
   if (!user) {
     if (!autoProvisionEnabled) {
-      console.warn(`[Auth] Auto-provision disabled; user ${clerkUserId} missing locally`)
+      await logger.warn("[Auth] Auto-provision disabled; user missing locally", { clerkUserId })
       return null
     }
 
-    console.log(`[Auth] User ${clerkUserId} not found in DB, auto-syncing...`)
+    await logger.info("[Auth] User not found in DB, auto-syncing...", { clerkUserId })
 
     try {
       // Fetch user details from Clerk
@@ -61,7 +60,7 @@ export async function getCurrentUser() {
       )?.emailAddress
 
       if (!email) {
-        console.error(`[Auth] No email found for Clerk user ${clerkUserId}`)
+        await logger.error("[Auth] No email found for Clerk user", undefined, { clerkUserId })
         return null
       }
 
@@ -72,74 +71,35 @@ export async function getCurrentUser() {
           ? detectedTimezone
           : "UTC" // Fallback only if detection failed
 
-      console.log(`[Auth] Auto-provisioning user with timezone: ${timezone}`, {
-        detected: detectedTimezone,
+      await logger.info("[Auth] Auto-provisioning user", {
+        clerkUserId,
+        timezone,
+        detected: detectedTimezone || "none",
         usingFallback: !detectedTimezone,
       })
 
-      // Use findFirst + create pattern with retry to handle race conditions
-      // This is more reliable than instanceof checks across module boundaries
-      let attempts = 0
-      const maxAttempts = 3
-
-      while (attempts < maxAttempts) {
-        try {
-          // Try to create user
-          user = await prisma.user.create({
-            data: {
-              clerkUserId,
-              email,
-              profile: {
-                create: {
-                  // Use detected timezone or UTC fallback
-                  timezone,
-                },
-              },
+      // Use upsert to atomically handle race conditions
+      // This is cleaner than retry loops and handles concurrent requests safely
+      user = await prisma.user.upsert({
+        where: { clerkUserId },
+        create: {
+          clerkUserId,
+          email,
+          profile: {
+            create: {
+              timezone,
             },
-            include: {
-              profile: true,
-            },
-          })
+          },
+        },
+        update: {}, // No-op if user already exists (created by concurrent request)
+        include: {
+          profile: true,
+        },
+      })
 
-          console.log(`[Auth] ✅ Auto-synced user: ${email}`)
-          break
-        } catch (createError: any) {
-          // Check if it's a unique constraint violation
-          if (createError?.code === 'P2002') {
-            attempts++
-            console.log(`[Auth] 🔄 Race condition detected (attempt ${attempts}/${maxAttempts}), retrying...`)
-
-            // Small delay to ensure the other transaction committed
-            await new Promise(resolve => setTimeout(resolve, 50 * attempts))
-
-            // Try to fetch the user that was created by another request
-            user = await prisma.user.findUnique({
-              where: { clerkUserId },
-              include: {
-                profile: true,
-              },
-            })
-
-            if (user) {
-              console.log(`[Auth] ✅ Found user created by concurrent request: ${user.email}`)
-              break
-            }
-
-            // If still not found and we have attempts left, try again
-            if (attempts < maxAttempts) {
-              continue
-            } else {
-              console.error(`[Auth] ❌ Failed to create or find user after ${maxAttempts} attempts`)
-              return null
-            }
-          } else {
-            // Different error, not a race condition
-            throw createError
-          }
-        }
-      }
+      await logger.info("[Auth] Auto-synced user", { email, userId: user.id })
     } catch (error) {
-      console.error(`[Auth] ❌ Failed to auto-sync user ${clerkUserId}:`, error)
+      await logger.error("[Auth] Failed to auto-sync user", error, { clerkUserId })
       return null
     }
   }
@@ -159,28 +119,40 @@ export async function getCurrentUser() {
     })
 
     if (pending) {
-      console.log(`[Auth] 🔗 Found pending subscription for ${user.email}, auto-linking...`)
+      const currentUserId = user.id // Capture before potential reassignment
+      await logger.info("[Auth] Found pending subscription, auto-linking...", {
+        email: user.email,
+        pendingId: pending.id,
+      })
 
       try {
         // Import the linking function dynamically to avoid circular dependencies
         const { linkPendingSubscription } = await import("../../app/[locale]/subscribe/actions")
-        const result = await linkPendingSubscription(user.id)
+        const result = await linkPendingSubscription(currentUserId)
 
         if (result.success) {
-          console.log(`[Auth] ✅ Successfully auto-linked subscription: ${result.subscriptionId}`)
+          await logger.info("[Auth] Successfully auto-linked subscription", {
+            subscriptionId: result.subscriptionId,
+            userId: currentUserId,
+          })
 
           // Refresh user data to include the new subscription
           user = await prisma.user.findUnique({
-            where: { id: user.id },
+            where: { id: currentUserId },
             include: {
               profile: true,
             },
           })
         } else {
-          console.error(`[Auth] ❌ Failed to auto-link subscription:`, result.error)
+          await logger.error("[Auth] Failed to auto-link subscription", undefined, {
+            error: result.error,
+            userId: currentUserId,
+          })
         }
       } catch (linkError) {
-        console.error(`[Auth] ❌ Error during subscription auto-linking:`, linkError)
+        await logger.error("[Auth] Error during subscription auto-linking", linkError, {
+          userId: currentUserId,
+        })
       }
     }
   }
