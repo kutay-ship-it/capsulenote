@@ -29,13 +29,13 @@ export async function generateMetadata() {
 }
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     type?: string
     userId?: string
     startDate?: string
     endDate?: string
     page?: string
-  }
+  }>
 }
 
 export default async function AdminAuditPage({ searchParams }: PageProps) {
@@ -61,25 +61,27 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
 
   const t = await getTranslations("admin.audit")
 
-  const page = parseInt(searchParams.page || "1", 10)
+  // Await searchParams (Next.js 15 async params)
+  const resolvedSearchParams = await searchParams
+  const page = parseInt(resolvedSearchParams.page || "1", 10)
   const limit = 50
   const offset = (page - 1) * limit
 
   // Build filter conditions
   const where: any = {}
-  if (searchParams.type) {
-    where.type = searchParams.type
+  if (resolvedSearchParams.type) {
+    where.type = resolvedSearchParams.type
   }
-  if (searchParams.userId) {
-    where.userId = searchParams.userId
+  if (resolvedSearchParams.userId) {
+    where.userId = resolvedSearchParams.userId
   }
-  if (searchParams.startDate || searchParams.endDate) {
+  if (resolvedSearchParams.startDate || resolvedSearchParams.endDate) {
     where.createdAt = {}
-    if (searchParams.startDate) {
-      where.createdAt.gte = new Date(searchParams.startDate)
+    if (resolvedSearchParams.startDate) {
+      where.createdAt.gte = new Date(resolvedSearchParams.startDate)
     }
-    if (searchParams.endDate) {
-      where.createdAt.lte = new Date(searchParams.endDate)
+    if (resolvedSearchParams.endDate) {
+      where.createdAt.lte = new Date(resolvedSearchParams.endDate)
     }
   }
 
@@ -136,7 +138,7 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">{t("stats.filtersActive")}</p>
               <p className="text-2xl font-bold">
-                {Object.keys(searchParams).filter((k) => k !== "page").length}
+                {Object.keys(resolvedSearchParams).filter((k) => k !== "page").length}
               </p>
             </div>
             <div className="space-y-1">

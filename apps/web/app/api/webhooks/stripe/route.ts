@@ -20,10 +20,20 @@ import Stripe from "stripe"
 import { stripe } from "@/server/providers/stripe/client"
 import { env } from "@/env.mjs"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
+import { ratelimit } from "@/server/lib/redis"
 
 export async function POST(req: Request) {
-  const body = await req.text()
+  // Rate limit by IP
   const headerPayload = await headers()
+  const ip = headerPayload.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+  const { success: rateLimitOk } = await ratelimit.webhook.stripe.limit(ip)
+
+  if (!rateLimitOk) {
+    console.warn("[Stripe Webhook] Rate limit exceeded", { ip })
+    return new Response("Rate limit exceeded", { status: 429 })
+  }
+
+  const body = await req.text()
   const signature = headerPayload.get("stripe-signature")
 
   if (!signature) {

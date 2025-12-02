@@ -191,26 +191,27 @@ async function handleCreditAddonCheckout(
     amountTotal: session.amount_total,
   })
 
-  // IDEMPOTENCY CHECK: Check if payment already recorded
-  // The payment_intent from the session is our idempotency key
   const paymentIntentId = session.payment_intent as string
-  if (paymentIntentId) {
-    const existingPayment = await prisma.payment.findUnique({
-      where: { stripePaymentIntentId: paymentIntentId },
-    })
 
-    if (existingPayment?.status === "succeeded") {
-      console.log("[Checkout Handler] Credit addon already fulfilled (idempotent)", {
-        sessionId: session.id,
-        paymentIntentId,
-        existingPaymentId: existingPayment.id,
+  // ATOMIC TRANSACTION: Idempotency check + fulfillment in single transaction
+  // This prevents race conditions where two requests pass check simultaneously
+  const result = await prisma.$transaction(async (tx) => {
+    // IDEMPOTENCY CHECK: Inside transaction to prevent race conditions
+    if (paymentIntentId) {
+      const existingPayment = await tx.payment.findUnique({
+        where: { stripePaymentIntentId: paymentIntentId },
       })
-      return true // Already handled, skip
-    }
-  }
 
-  // ATOMIC TRANSACTION: All operations succeed or none do
-  await prisma.$transaction(async (tx) => {
+      if (existingPayment?.status === "succeeded") {
+        console.log("[Checkout Handler] Credit addon already fulfilled (idempotent)", {
+          sessionId: session.id,
+          paymentIntentId,
+          existingPaymentId: existingPayment.id,
+        })
+        return { alreadyFulfilled: true } // Already handled, skip
+      }
+    }
+
     // 1. Record payment (if not exists)
     if (paymentIntentId) {
       await tx.payment.upsert({
@@ -277,7 +278,14 @@ async function handleCreditAddonCheckout(
         [addonField]: { increment: quantity },
       },
     })
+
+    return { alreadyFulfilled: false }
   })
+
+  // Short-circuit if already fulfilled (idempotent)
+  if (result.alreadyFulfilled) {
+    return true
+  }
 
   // 5. Invalidate cache and record audit
   await invalidateEntitlementsCache(userId)

@@ -36,4 +36,42 @@ export const ratelimit = {
     limiter: Ratelimit.slidingWindow(5, "1 h"),
     analytics: true,
   }),
+
+  // Webhook rate limits (per IP)
+  webhook: {
+    stripe: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(200, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:webhook:stripe",
+    }),
+    clerk: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(200, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:webhook:clerk",
+    }),
+    resend: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(500, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:webhook:resend",
+    }),
+  },
+
+  // Cron job rate limit: 20 per hour (prevents abuse)
+  cron: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(20, "1 h"),
+    analytics: true,
+    prefix: "ratelimit:cron",
+  }),
+
+  // Share token access: 20 per hour per token
+  shareToken: new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(20, "1 h"),
+    analytics: true,
+    prefix: "ratelimit:share",
+  }),
 }

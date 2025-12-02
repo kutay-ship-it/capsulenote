@@ -185,7 +185,9 @@ model Letter {
   scheduledFor    DateTime?        @map("scheduled_for") @db.Timestamptz(3)
   timezone        String           @default("UTC")
   lockedAt        DateTime?        @map("locked_at") @db.Timestamptz(3)
-  shareLinkToken  String           @unique @default(uuid()) @map("share_link_token")
+  shareLinkToken  String?          @unique @map("share_link_token") // Secure 256-bit token for sharing
+  shareExpiresAt  DateTime?        @map("share_expires_at") @db.Timestamptz(3) // Optional expiration for share links
+  shareAccessCount Int             @default(0) @map("share_access_count") // Track number of times share link accessed
   firstOpenedAt   DateTime?        @map("first_opened_at") @db.Timestamptz(3) // When user first opened the delivered letter (for unlock ceremony)
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -248,6 +250,7 @@ model Delivery {
   @@index([status])
   @@index([deliverAt])
   @@index([status, deliverAt])
+  @@index([userId, status])  // Optimize user delivery queries
   @@map("deliveries")
 }
 
@@ -706,5 +709,8 @@ model CreditTransaction {
   @@index([userId, createdAt])
   @@index([source])
   @@index([transactionType])
+  // Idempotency constraint: prevent duplicate transactions for same user/source/type
+  // Note: source can be null, and NULL values are treated as distinct in unique constraints
+  @@unique([userId, source, transactionType], map: "credit_transactions_idempotency")
   @@map("credit_transactions")
 }

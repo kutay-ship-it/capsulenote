@@ -2,8 +2,13 @@ import { getLetterById } from "@/server/actions/letters"
 import { LetterUnlocker } from "@/components/v2/letter-unlocker"
 import { notFound } from "next/navigation"
 
-export default async function UnlockPage({ params }: { params: { id: string } }) {
-    const letter = await getLetterById(params.id)
+export default async function UnlockPage({
+    params,
+}: {
+    params: Promise<{ id: string }>
+}) {
+    const { id } = await params
+    const letter = await getLetterById(id)
 
     if (!letter) {
         notFound()

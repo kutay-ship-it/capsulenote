@@ -102,6 +102,12 @@ export const AuditEventType = {
   CREDITS_ADDED: "credits.added",
   CREDITS_DEDUCTED: "credits.deducted",
   ENTITLEMENTS_UPDATED: "entitlements.updated",
+
+  // GDPR events
+  GDPR_EXPORT_DECRYPTION_FAILED: "gdpr.export.decryption_failed",
+  GDPR_EXPORT_COMPLETED: "gdpr.export.completed",
+  GDPR_DELETE_REQUESTED: "gdpr.delete.requested",
+  GDPR_DELETE_COMPLETED: "gdpr.delete.completed",
 } as const
 
 export type AuditEventTypeValue =

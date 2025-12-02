@@ -79,6 +79,8 @@ export function DeliveryTypeV3({
           type="button"
           onClick={() => handleToggle("email")}
           disabled={disabled}
+          aria-label={`${t("email.title")}. ${emailCredits} ${t("credits.available")}`}
+          aria-pressed={isEmailSelected}
           className={cn(
             "relative flex flex-col items-center gap-2 border-2 border-charcoal px-3 py-4 font-mono transition-all duration-150",
             "hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]",
@@ -149,6 +151,8 @@ export function DeliveryTypeV3({
           type="button"
           onClick={() => handleToggle("physical")}
           disabled={disabled}
+          aria-label={`${t("physical")}. ${isPhysicalLocked ? t("upgradeRequired") : canShowTrialOffer ? t("tryFor499") : `${physicalCredits} ${t("credits")}`}`}
+          aria-pressed={isPhysicalSelected}
           className={cn(
             "relative flex flex-col items-center gap-2 border-2 border-charcoal px-3 py-4 font-mono transition-all duration-150",
             "hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]",

@@ -411,7 +411,79 @@ export const deliverMail = inngest.createFunction(
       throw new NonRetriableError("Delivery was canceled")
     }
 
-    delivery = refreshed
+    // Check if delivery was rescheduled while waiting
+    const currentSendDate =
+      refreshed.mailDelivery?.sendDate || refreshed.deliverAt
+    const originalSendDate =
+      delivery.mailDelivery?.sendDate || delivery.deliverAt
+
+    if (
+      new Date(currentSendDate).getTime() !==
+      new Date(originalSendDate).getTime()
+    ) {
+      logger.info("Mail delivery was rescheduled while waiting", {
+        deliveryId,
+        originalDate: originalSendDate,
+        newDate: currentSendDate,
+      })
+
+      // If new date is in future, sleep again until the new date
+      if (new Date(currentSendDate) > new Date()) {
+        await step.sleepUntil(
+          "wait-for-rescheduled-date",
+          new Date(currentSendDate)
+        )
+
+        // Refresh again after second wait
+        const rescheduledRefresh = await step.run(
+          "refresh-delivery-after-reschedule",
+          async () => {
+            const current = await prisma.delivery.findUnique({
+              where: { id: deliveryId },
+              include: {
+                letter: {
+                  select: {
+                    id: true,
+                    title: true,
+                    shareLinkToken: true,
+                    keyVersion: true,
+                    userId: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    visibility: true,
+                    tags: true,
+                    bodyFormat: true,
+                  },
+                },
+                mailDelivery: {
+                  include: {
+                    shippingAddress: true,
+                  },
+                },
+                user: {
+                  include: { profile: true },
+                },
+              },
+            })
+
+            if (!current) {
+              throw new NonRetriableError("Delivery no longer exists after reschedule")
+            }
+
+            return current
+          }
+        )
+
+        if (rescheduledRefresh.status === "canceled") {
+          logger.warn("Delivery canceled after reschedule", { deliveryId })
+          throw new NonRetriableError("Delivery was canceled")
+        }
+
+        delivery = rescheduledRefresh
+      }
+    } else {
+      delivery = refreshed
+    }
 
     // Update status to processing and store Inngest event ID for tracking/reconciliation
     await step.run("update-status-processing", async () => {

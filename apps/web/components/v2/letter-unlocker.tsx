@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useMemo, useRef, useEffect, useCallback } from "react"
+import { motion, AnimatePresence, type PanInfo } from "framer-motion"
 import { Lock, Key, Sparkles, MailOpen } from "lucide-react"
-import DOMPurify from "dompurify"
+import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { cn } from "@/lib/utils"
 
 interface LetterUnlockerProps {
@@ -22,21 +22,45 @@ export function LetterUnlocker({
     const [status, setStatus] = useState<"locked" | "unlocking" | "revealed">("locked")
     const [dragProgress, setDragProgress] = useState(0)
 
-    const handleDragEnd = (_: any, info: any) => {
-        if (info.offset.x > 150) {
-            setStatus("unlocking")
-            setTimeout(() => {
-                setStatus("revealed")
-                onUnlockComplete?.()
-            }, 2000)
-        } else {
-            setDragProgress(0)
-        }
-    }
+    // Ref for timeout cleanup to prevent memory leaks
+    const unlockTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-    const handleDrag = (_: any, info: any) => {
-        setDragProgress(Math.min(Math.max(info.offset.x, 0), 200))
-    }
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (unlockTimeoutRef.current) {
+                clearTimeout(unlockTimeoutRef.current)
+            }
+        }
+    }, [])
+
+    // Sanitize HTML content for XSS protection (isomorphic - works on server and client)
+    const sanitizedContent = useMemo(
+        () => sanitizeLetterHtml(letterContent || ""),
+        [letterContent]
+    )
+
+    const handleDragEnd = useCallback(
+        (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+            if (info.offset.x > 150) {
+                setStatus("unlocking")
+                unlockTimeoutRef.current = setTimeout(() => {
+                    setStatus("revealed")
+                    onUnlockComplete?.()
+                }, 2000)
+            } else {
+                setDragProgress(0)
+            }
+        },
+        [onUnlockComplete]
+    )
+
+    const handleDrag = useCallback(
+        (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+            setDragProgress(Math.min(Math.max(info.offset.x, 0), 200))
+        },
+        []
+    )
 
     return (
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-4">
@@ -160,7 +184,7 @@ export function LetterUnlocker({
                         {/* Content */}
                         <div
                             className="prose prose-lg font-serif text-charcoal leading-relaxed max-w-none"
-                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(letterContent) }}
+                            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                         />
 
                         {/* Footer */}

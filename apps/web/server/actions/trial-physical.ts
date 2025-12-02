@@ -142,54 +142,63 @@ export async function fulfillTrialPhysicalCredit(
   stripeSessionId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Grant credit and mark purchased in transaction with idempotency check inside
+    // Grant credit and mark purchased in transaction with atomic check
     // This prevents race conditions where concurrent webhook calls could grant duplicate credits
     const result = await prisma.$transaction(async (tx) => {
-      // Idempotency check INSIDE transaction with row lock
-      const user = await tx.user.findUnique({
-        where: { id: userId },
-        select: {
-          physicalMailTrialPurchasedAt: true,
-          physicalCredits: true,
+      // Atomic check-and-update to prevent race conditions
+      // Only update if physicalMailTrialPurchasedAt is null (not already fulfilled)
+      const updateResult = await tx.user.updateMany({
+        where: {
+          id: userId,
+          physicalMailTrialPurchasedAt: null, // Only if not already purchased
         },
-      })
-
-      if (!user) {
-        return { status: "user_not_found" as const }
-      }
-
-      // Already fulfilled - idempotent success
-      if (user.physicalMailTrialPurchasedAt) {
-        return {
-          status: "already_fulfilled" as const,
-          purchasedAt: user.physicalMailTrialPurchasedAt,
-        }
-      }
-
-      // Record credit transaction with current balance
-      await tx.creditTransaction.create({
-        data: {
-          userId,
-          creditType: "physical",
-          transactionType: "grant_trial",
-          amount: 1,
-          balanceBefore: user.physicalCredits,
-          balanceAfter: user.physicalCredits + 1,
-          source: stripeSessionId,
-          metadata: { type: "physical_mail_trial" },
-        },
-      })
-
-      // Grant credit and mark purchased
-      await tx.user.update({
-        where: { id: userId },
         data: {
           physicalCredits: { increment: 1 },
           physicalMailTrialPurchasedAt: new Date(),
         },
       })
 
-      return { status: "granted" as const, newCredits: user.physicalCredits + 1 }
+      if (updateResult.count === 0) {
+        // Either user not found or already fulfilled - check which
+        const user = await tx.user.findUnique({
+          where: { id: userId },
+          select: { physicalMailTrialPurchasedAt: true },
+        })
+
+        if (!user) {
+          return { status: "user_not_found" as const }
+        }
+
+        // Already fulfilled - idempotent success
+        return {
+          status: "already_fulfilled" as const,
+          purchasedAt: user.physicalMailTrialPurchasedAt,
+        }
+      }
+
+      // Get updated balance for audit trail
+      const updated = await tx.user.findUnique({
+        where: { id: userId },
+        select: { physicalCredits: true },
+      })
+      const balanceAfter = updated!.physicalCredits
+      const balanceBefore = balanceAfter - 1
+
+      // Record credit transaction with accurate balances
+      await tx.creditTransaction.create({
+        data: {
+          userId,
+          creditType: "physical",
+          transactionType: "grant_trial",
+          amount: 1,
+          balanceBefore,
+          balanceAfter,
+          source: stripeSessionId,
+          metadata: { type: "physical_mail_trial" },
+        },
+      })
+
+      return { status: "granted" as const, newCredits: balanceAfter }
     })
 
     // Handle transaction results

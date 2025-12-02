@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { format, differenceInDays } from "date-fns"
 import { Mail, Clock, FileEdit, AlertCircle, ArrowRight, Lock } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -87,9 +88,18 @@ function getStatusConfig(letter: LetterWithPreview, t: TranslationFunction): Sta
   }
 }
 
-export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
+export const LetterCardV3 = React.memo(function LetterCardV3({
+  letter,
+  viewMode = "grid",
+}: LetterCardV3Props) {
   const t = useTranslations("letters")
-  const statusConfig = getStatusConfig(letter, t)
+
+  // Memoize status config to avoid recalculation on every render
+  const statusConfig = React.useMemo(
+    () => getStatusConfig(letter, t),
+    [letter.delivery?.status, letter.delivery?.deliverAt, t]
+  )
+
   const formattedDate = format(new Date(letter.createdAt), "MMM d, yyyy")
   const isSent = letter.delivery?.status === "sent"
   const untitledText = t("card.untitled")
@@ -221,7 +231,7 @@ export function LetterCardV3({ letter, viewMode = "grid" }: LetterCardV3Props) {
       </article>
     </Link>
   )
-}
+})
 
 /**
  * Skeleton loader for letter card

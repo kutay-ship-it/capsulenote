@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { prisma } from "@/server/lib/db"
 import { decryptLetter } from "@/server/lib/encryption"
 import { sanitizeLetterHtml } from "@/lib/sanitize"
+import { ratelimit } from "@/server/lib/redis"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,13 +30,35 @@ interface ViewLetterPageProps {
 export default async function ViewLetterPage({ params }: ViewLetterPageProps) {
   const { token } = await params
 
+  // Rate limiting to prevent brute force attacks on share tokens
+  const { success: rateLimitOk } = await ratelimit.shareToken.limit(token)
+  if (!rateLimitOk) {
+    // Don't reveal rate limit - just show not found
+    notFound()
+  }
+
+  // Security: Only return letters that are:
+  // - Not deleted
+  // - Have visibility set to "link" (explicitly shareable)
+  // - Not expired (if expiration is set)
   const letter = await prisma.letter.findFirst({
     where: {
       shareLinkToken: token,
       deletedAt: null,
+      visibility: "link", // Must be explicitly shareable
+      OR: [
+        { shareExpiresAt: null }, // No expiration set
+        { shareExpiresAt: { gt: new Date() } }, // Not expired
+      ],
     },
-    include: {
-      deliveries: true,
+    // Only select necessary fields - don't include sensitive data like deliveries
+    select: {
+      id: true,
+      title: true,
+      bodyCiphertext: true,
+      bodyNonce: true,
+      keyVersion: true,
+      createdAt: true,
     },
   })
 
@@ -43,7 +66,19 @@ export default async function ViewLetterPage({ params }: ViewLetterPageProps) {
     notFound()
   }
 
-  const decrypted = await decryptLetter(letter.bodyCiphertext, letter.bodyNonce, letter.keyVersion)
+  // Increment access count for analytics (non-blocking, don't fail view)
+  prisma.letter
+    .update({
+      where: { id: letter.id },
+      data: { shareAccessCount: { increment: 1 } },
+    })
+    .catch(() => {}) // Silent failure - don't break the view
+
+  const decrypted = await decryptLetter(
+    letter.bodyCiphertext,
+    letter.bodyNonce,
+    letter.keyVersion
+  )
 
   return (
     <div className="min-h-screen bg-cream py-12 px-4">

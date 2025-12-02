@@ -4,6 +4,13 @@ import { webcrypto } from "crypto"
 const crypto = webcrypto as unknown as Crypto
 
 /**
+ * Module-level counter for nonce generation
+ * Combined with random bytes to ensure uniqueness within process lifetime
+ * This provides defense-in-depth against nonce reuse
+ */
+let nonceCounter = 0n
+
+/**
  * Get the current (latest) key version for new encryptions
  * Defaults to 1 if not configured
  */
@@ -64,9 +71,39 @@ function getMasterKey(keyVersion?: number): Uint8Array {
   return keyBuffer
 }
 
-// Generate a random nonce
+/**
+ * Generate a nonce for AES-GCM encryption
+ * Uses counter + random bytes hybrid approach for nonce uniqueness:
+ * - First 8 bytes: incrementing counter (ensures uniqueness within process)
+ * - Last 4 bytes: random (adds entropy and uniqueness across processes)
+ *
+ * This provides defense-in-depth against nonce reuse:
+ * - Counter prevents collision within same process
+ * - Random bytes add protection across process restarts
+ */
 function generateNonce(): Uint8Array {
-  return crypto.getRandomValues(new Uint8Array(12)) // 96-bit nonce for AES-GCM
+  const nonce = new Uint8Array(12) // 96-bit nonce for AES-GCM
+
+  // First 8 bytes: incrementing counter (big-endian)
+  const counter = nonceCounter++
+  const view = new DataView(nonce.buffer)
+  view.setBigUint64(0, counter, false)
+
+  // Last 4 bytes: random for additional entropy
+  const randomPart = crypto.getRandomValues(new Uint8Array(4))
+  nonce.set(randomPart, 8)
+
+  return nonce
+}
+
+/**
+ * Validate nonce for security requirements
+ * @throws Error if nonce is invalid
+ */
+export function validateNonce(nonce: Uint8Array | Buffer): void {
+  if (nonce.length !== 12) {
+    throw new Error(`Invalid nonce length: ${nonce.length} bytes. Must be 12 bytes for AES-GCM.`)
+  }
 }
 
 /**

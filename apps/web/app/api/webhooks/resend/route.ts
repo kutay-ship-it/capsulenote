@@ -26,6 +26,7 @@ import { headers } from "next/headers"
 import { Webhook } from "svix"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
+import { ratelimit } from "@/server/lib/redis"
 
 /**
  * Resend webhook event structure
@@ -52,6 +53,16 @@ export async function POST(req: Request) {
   try {
     // 1. Extract signature headers
     const headerPayload = await headers()
+
+    // Rate limit by IP
+    const ip = headerPayload.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const { success: rateLimitOk } = await ratelimit.webhook.resend.limit(ip)
+
+    if (!rateLimitOk) {
+      console.warn("[Resend Webhook] Rate limit exceeded", { ip })
+      return new Response("Rate limit exceeded", { status: 429 })
+    }
+
     const svix_id = headerPayload.get("svix-id")
     const svix_timestamp = headerPayload.get("svix-timestamp")
     const svix_signature = headerPayload.get("svix-signature")

@@ -14,9 +14,9 @@ import { CheckoutSuccess } from "./_components/checkout-success"
 import { CheckoutProcessing } from "./_components/checkout-processing"
 
 interface CheckoutSuccessPageProps {
-  searchParams: {
+  searchParams: Promise<{
     session_id?: string
-  }
+  }>
 }
 
 /**
@@ -34,8 +34,11 @@ export default async function CheckoutSuccessPage({
 }: CheckoutSuccessPageProps) {
   const user = await requireUser()
 
+  // Await searchParams (Next.js 15 async params)
+  const resolvedSearchParams = await searchParams
+
   // Require session_id parameter
-  if (!searchParams.session_id) {
+  if (!resolvedSearchParams.session_id) {
     redirect("/journey")
   }
 
@@ -67,7 +70,7 @@ export default async function CheckoutSuccessPage({
 
   // If subscription not found after polling, show loading state with client-side fallback
   if (!subscription) {
-    return <CheckoutProcessing sessionId={searchParams.session_id} />
+    return <CheckoutProcessing sessionId={resolvedSearchParams.session_id} />
   }
 
   // Success! Show subscription details

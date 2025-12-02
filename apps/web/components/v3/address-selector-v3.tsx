@@ -44,18 +44,54 @@ export function AddressSelectorV3({
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [deletingId, setDeletingId] = React.useState<string | null>(null)
 
-  // Load addresses on mount
-  React.useEffect(() => {
-    loadAddresses()
-  }, [])
+  // Ref to track component mount status for cleanup (prevents memory leaks)
+  const isMountedRef = React.useRef(true)
 
-  const loadAddresses = async () => {
+  // Load addresses on mount with proper cleanup
+  React.useEffect(() => {
+    isMountedRef.current = true
+
+    const loadAddresses = async () => {
+      setIsLoading(true)
+      try {
+        const result = await listShippingAddresses()
+        // Only update state if component is still mounted
+        if (isMountedRef.current && result.success) {
+          setAddresses(result.data)
+          // If we had a selection and it no longer exists, clear it
+          if (value && !result.data.find((a) => a.id === value)) {
+            onChange(null)
+          }
+        } else if (isMountedRef.current && !result.success) {
+          toast.error("Failed to load addresses", {
+            description: result.error.message,
+          })
+        }
+      } catch (error) {
+        if (isMountedRef.current) {
+          toast.error("Failed to load addresses")
+        }
+      } finally {
+        if (isMountedRef.current) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadAddresses()
+
+    return () => {
+      isMountedRef.current = false
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reusable function for reloading addresses (after add/delete)
+  const reloadAddresses = async () => {
     setIsLoading(true)
     try {
       const result = await listShippingAddresses()
       if (result.success) {
         setAddresses(result.data)
-        // If we had a selection and it no longer exists, clear it
         if (value && !result.data.find((a) => a.id === value)) {
           onChange(null)
         }

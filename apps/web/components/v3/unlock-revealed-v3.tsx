@@ -1,8 +1,9 @@
 "use client"
 
+import { useMemo } from "react"
 import { motion } from "framer-motion"
 import { format } from "date-fns"
-import DOMPurify from "dompurify"
+import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { MailOpen, Calendar, RotateCcw, ArrowLeft, PenLine, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
@@ -29,11 +30,11 @@ export function UnlockRevealedV3({
     ? format(new Date(firstOpenedAt), "MMMM d, yyyy 'at' h:mm a")
     : null
 
-  // Sanitize HTML content for XSS protection
-  const sanitizedContent =
-    typeof window !== "undefined" && letterContent
-      ? DOMPurify.sanitize(letterContent)
-      : letterContent || ""
+  // Sanitize HTML content for XSS protection (isomorphic - works on server and client)
+  const sanitizedContent = useMemo(
+    () => sanitizeLetterHtml(letterContent || ""),
+    [letterContent]
+  )
 
   return (
     <motion.div

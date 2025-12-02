@@ -170,22 +170,35 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     }
   }, [searchParams, onRefreshEligibility])
 
+  // Ref to track in-flight eligibility refresh requests (prevents race conditions)
+  const refreshInFlightRef = React.useRef(false)
+
   // Update currentEligibility when prop changes (after refresh)
+  // Only update if no refresh is in-flight to prevent stale data overwriting fresh data
   React.useEffect(() => {
-    setCurrentEligibility(eligibility)
+    if (!refreshInFlightRef.current) {
+      setCurrentEligibility(eligibility)
+    }
   }, [eligibility])
 
   // Listen for credit updates from other tabs (e.g., after Stripe checkout in new tab)
   useCreditsUpdateListener(
     React.useCallback(() => {
+      // Prevent overlapping refresh requests
+      if (refreshInFlightRef.current) return
+
+      refreshInFlightRef.current = true
       onRefreshEligibility?.()
         .then(() => {
           toast.success(t("toasts.creditsUpdated"), {
             description: t("toasts.purchaseSuccessful"),
           })
         })
-        .catch(() => {
-          // Silent fail - user can manually refresh if needed
+        .catch((error) => {
+          console.error("[LetterEditor] Failed to refresh eligibility", error)
+        })
+        .finally(() => {
+          refreshInFlightRef.current = false
         })
     }, [onRefreshEligibility, t])
   )

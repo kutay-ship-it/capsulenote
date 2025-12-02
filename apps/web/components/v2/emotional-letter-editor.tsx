@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
 import CharacterCount from "@tiptap/extension-character-count"
 import Link from "@tiptap/extension-link"
 import { format } from "date-fns"
-import { Send, Sparkles } from "lucide-react"
+import { Send, AlertCircle, RefreshCw, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,7 @@ export function EmotionalLetterEditor({
     const [title, setTitle] = useState(initialData?.title || "")
     const [wordCount, setWordCount] = useState(0)
     const [isWizardOpen, setIsWizardOpen] = useState(false)
+    const [editorReady, setEditorReady] = useState(false)
 
     const editor = useEditor({
         extensions: [
@@ -52,7 +53,51 @@ export function EmotionalLetterEditor({
         onUpdate: ({ editor }) => {
             setWordCount(editor.storage.characterCount.words())
         },
+        onCreate: () => {
+            setEditorReady(true)
+        },
     })
+
+    // Track editor initialization timeout for error state
+    const [editorFailed, setEditorFailed] = useState(false)
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            if (!editor && !editorReady) {
+                setEditorFailed(true)
+            }
+        }, 5000) // 5 second timeout for editor initialization
+        return () => clearTimeout(timeout)
+    }, [editor, editorReady])
+
+    // Show error state if editor failed to initialize
+    if (editorFailed && !editor) {
+        return (
+            <div className="p-6 border-2 border-coral bg-coral/5 rounded-lg text-center">
+                <AlertCircle className="h-8 w-8 text-coral mx-auto mb-3" />
+                <p className="font-medium text-coral">Editor failed to load</p>
+                <p className="text-sm text-charcoal/60 mt-2">
+                    Please refresh the page. Your work is automatically saved.
+                </p>
+                <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                    className="mt-4"
+                >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Page
+                </Button>
+            </div>
+        )
+    }
+
+    // Show loading state while editor initializes
+    if (!editor) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="h-8 w-8 animate-spin text-charcoal/40" />
+            </div>
+        )
+    }
 
     const handleSealClick = () => {
         if (!editor || !title.trim()) return

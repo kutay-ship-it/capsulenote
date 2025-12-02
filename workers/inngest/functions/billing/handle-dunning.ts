@@ -167,31 +167,96 @@ export const handleDunning = inngest.createFunction(
       // Cancel in Stripe
       await stripe.subscriptions.cancel(subscription.stripeSubscriptionId)
 
-      // Update local database
-      await prisma.subscription.update({
-        where: { id: subscription.id },
-        data: { status: "canceled" },
+      // Atomic transaction: clear credits with audit trail and cancel subscription
+      await prisma.$transaction(async (tx) => {
+        const user = await tx.user.findUnique({
+          where: { id: userId },
+          select: {
+            emailCredits: true,
+            physicalCredits: true,
+            emailAddonCredits: true,
+            physicalAddonCredits: true,
+          },
+        })
+
+        if (!user) return
+
+        // Record credit removal transactions for audit trail
+        // Note: CreditType enum only has 'email' and 'physical' - addon credits are tracked separately
+        const creditTypes = [
+          { type: "email" as const, balance: user.emailCredits + user.emailAddonCredits },
+          { type: "physical" as const, balance: user.physicalCredits + user.physicalAddonCredits },
+        ]
+
+        for (const { type, balance } of creditTypes) {
+          if (balance > 0) {
+            await tx.creditTransaction.create({
+              data: {
+                userId,
+                creditType: type,
+                transactionType: "deduct_cancel",
+                amount: -balance,
+                balanceBefore: balance,
+                balanceAfter: 0,
+                source: subscription.stripeSubscriptionId,
+                metadata: {
+                  reason: "dunning_cancellation",
+                  invoiceId,
+                  daysOverdue: 10,
+                  // Track addon credits separately in metadata
+                  addonCreditsCleared: type === "email"
+                    ? user.emailAddonCredits
+                    : user.physicalAddonCredits,
+                },
+              },
+            })
+          }
+        }
+
+        // Clear all credits
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            emailCredits: 0,
+            physicalCredits: 0,
+            emailAddonCredits: 0,
+            physicalAddonCredits: 0,
+            creditExpiresAt: null,
+          },
+        })
+
+        // Update subscription status
+        await tx.subscription.update({
+          where: { id: subscription.id },
+          data: { status: "canceled" },
+        })
+
+        // Record audit event within transaction
+        await tx.auditEvent.create({
+          data: {
+            userId,
+            type: "subscription.canceled.dunning",
+            data: {
+              subscriptionId: subscription.stripeSubscriptionId,
+              invoiceId,
+              daysOverdue: 10,
+              creditsCleared: {
+                email: user.emailCredits,
+                physical: user.physicalCredits,
+                emailAddon: user.emailAddonCredits,
+                physicalAddon: user.physicalAddonCredits,
+              },
+            },
+          },
+        })
       })
 
-      // Send cancellation email
+      // Send cancellation email (outside transaction, non-critical)
       await sendBillingEmail("subscription-canceled", userId, email, {
         subscriptionId: subscription.stripeSubscriptionId,
         canceledAt: new Date().toISOString(),
         reason: "payment-failure",
         daysOverdue: 10,
-      })
-
-      // Record audit event
-      await prisma.auditEvent.create({
-        data: {
-          userId,
-          type: "subscription.canceled.dunning",
-          data: {
-            subscriptionId: subscription.stripeSubscriptionId,
-            invoiceId,
-            daysOverdue: 10,
-          },
-        },
       })
 
       console.log("[Dunning] Subscription canceled due to non-payment", {

@@ -355,20 +355,31 @@ export async function scheduleDelivery(
       delivery = await prisma.$transaction(async (tx) => {
         // 1. Check and deduct credits atomically within transaction
         if (data.channel === "email") {
-          const userCredits = await tx.user.findUnique({
+          // Atomic check-and-decrement to prevent race conditions
+          const result = await tx.user.updateMany({
+            where: {
+              id: user.id,
+              emailCredits: { gte: 1 }, // Only deduct if credits available
+            },
+            data: { emailCredits: { decrement: 1 } },
+          })
+
+          if (result.count === 0) {
+            // Either user doesn't exist or insufficient credits
+            const current = await tx.user.findUnique({
+              where: { id: user.id },
+              select: { emailCredits: true },
+            })
+            throw new QuotaExceededError("email_credits", current?.emailCredits ?? 0, 1)
+          }
+
+          // Get balance AFTER update for accurate audit
+          const updated = await tx.user.findUnique({
             where: { id: user.id },
             select: { emailCredits: true },
           })
-
-          if (!userCredits || userCredits.emailCredits <= 0) {
-            throw new QuotaExceededError("email_credits", 0, 0)
-          }
-
-          // Deduct credit
-          await tx.user.update({
-            where: { id: user.id },
-            data: { emailCredits: { decrement: 1 } },
-          })
+          const balanceAfter = updated!.emailCredits
+          const balanceBefore = balanceAfter + 1
 
           // Record audit trail
           await tx.creditTransaction.create({
@@ -377,14 +388,33 @@ export async function scheduleDelivery(
               creditType: "email",
               transactionType: "deduct_delivery",
               amount: -1,
-              balanceBefore: userCredits.emailCredits,
-              balanceAfter: userCredits.emailCredits - 1,
+              balanceBefore,
+              balanceAfter,
               source: null, // Will be updated after delivery creation
               metadata: { letterId: data.letterId, channel: data.channel },
             },
           })
         } else if (data.channel === "mail") {
-          const userCredits = await tx.user.findUnique({
+          // Atomic check-and-decrement to prevent race conditions
+          const result = await tx.user.updateMany({
+            where: {
+              id: user.id,
+              physicalCredits: { gte: 1 }, // Only deduct if credits available
+            },
+            data: { physicalCredits: { decrement: 1 } },
+          })
+
+          if (result.count === 0) {
+            // Either user doesn't exist or insufficient credits
+            const current = await tx.user.findUnique({
+              where: { id: user.id },
+              select: { physicalCredits: true },
+            })
+            throw new QuotaExceededError("physical_credits", current?.physicalCredits ?? 0, 1)
+          }
+
+          // Get updated user data for audit and trial logic
+          const updated = await tx.user.findUnique({
             where: { id: user.id },
             select: {
               physicalCredits: true,
@@ -392,24 +422,21 @@ export async function scheduleDelivery(
               physicalMailTrialUsed: true,
             },
           })
-
-          if (!userCredits || userCredits.physicalCredits <= 0) {
-            throw new QuotaExceededError("physical_credits", 0, 0)
-          }
+          const balanceAfter = updated!.physicalCredits
+          const balanceBefore = balanceAfter + 1
 
           // Check if user is using their trial credit (Digital Capsule user with unused trial)
           const isUsingTrialCredit =
-            userCredits.planType === "DIGITAL_CAPSULE" &&
-            userCredits.physicalMailTrialUsed !== true
+            updated!.planType === "DIGITAL_CAPSULE" &&
+            updated!.physicalMailTrialUsed !== true
 
-          // Deduct credit and mark trial used if applicable
-          await tx.user.update({
-            where: { id: user.id },
-            data: {
-              physicalCredits: { decrement: 1 },
-              ...(isUsingTrialCredit && { physicalMailTrialUsed: true }),
-            },
-          })
+          // Mark trial as used if applicable (separate update after atomic credit deduction)
+          if (isUsingTrialCredit) {
+            await tx.user.update({
+              where: { id: user.id },
+              data: { physicalMailTrialUsed: true },
+            })
+          }
 
           // Record audit trail
           await tx.creditTransaction.create({
@@ -418,8 +445,8 @@ export async function scheduleDelivery(
               creditType: "physical",
               transactionType: "deduct_delivery",
               amount: -1,
-              balanceBefore: userCredits.physicalCredits,
-              balanceAfter: userCredits.physicalCredits - 1,
+              balanceBefore,
+              balanceAfter,
               source: null, // Will be updated after delivery creation
               metadata: {
                 letterId: data.letterId,

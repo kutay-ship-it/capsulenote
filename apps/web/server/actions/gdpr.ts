@@ -152,13 +152,29 @@ export async function exportUserData(): Promise<
             deletedAt: letter.deletedAt,
           }
         } catch (error) {
-          console.error(
-            `[GDPR Export] Failed to decrypt letter ${letter.id}:`,
-            error
-          )
+          const errorMessage = error instanceof Error ? error.message : String(error)
+
+          // Structured logging for investigation
+          console.error("[GDPR Export] Letter decryption failed", {
+            letterId: letter.id,
+            keyVersion: letter.keyVersion,
+            error: errorMessage,
+          })
+
+          // Create audit event for investigation (non-blocking)
+          await createAuditEvent({
+            userId: user.id,
+            type: AuditEventType.GDPR_EXPORT_DECRYPTION_FAILED,
+            data: {
+              letterId: letter.id,
+              keyVersion: letter.keyVersion,
+              errorType: error instanceof Error ? error.name : typeof error,
+            },
+          }).catch(() => {}) // Don't fail export for audit failure
+
           decryptionErrors.push({
             letterId: letter.id,
-            error: error instanceof Error ? error.message : String(error),
+            error: errorMessage,
           })
           // Return placeholder - will be caught by validation below
           return {

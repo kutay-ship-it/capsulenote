@@ -8,7 +8,7 @@ import { prisma } from "@/server/lib/db"
 import { createAuditEvent } from "@/server/lib/audit"
 import { encryptLetter, decryptLetter } from "@/server/lib/encryption"
 import { logger } from "@/server/lib/logger"
-import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
+import { triggerInngestEvent, cancelInngestRun } from "@/server/lib/trigger-inngest"
 import { trackLetterCreation } from "@/server/lib/entitlements"
 import { ratelimit } from "@/server/lib/redis"
 
@@ -397,6 +397,32 @@ export async function deleteLetter(
           where: { id: letterId },
           data: { deletedAt: new Date() },
         })
+
+        // Find deliveries with Inngest jobs to cancel
+        const deliveriesWithJobs = await tx.delivery.findMany({
+          where: {
+            letterId,
+            status: { in: ["scheduled", "failed"] },
+            inngestRunId: { not: null },
+          },
+          select: { id: true, inngestRunId: true },
+        })
+
+        // Cancel Inngest jobs before updating delivery status
+        for (const delivery of deliveriesWithJobs) {
+          if (delivery.inngestRunId) {
+            try {
+              await cancelInngestRun(delivery.inngestRunId)
+            } catch (cancelError) {
+              // Log but don't fail the deletion - delivery will be marked canceled anyway
+              await logger.warn("Failed to cancel Inngest job for delivery", {
+                deliveryId: delivery.id,
+                inngestRunId: delivery.inngestRunId,
+                error: cancelError,
+              })
+            }
+          }
+        }
 
         // Cancel all scheduled/failed deliveries for this letter
         await tx.delivery.updateMany({

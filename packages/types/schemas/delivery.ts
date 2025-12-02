@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { isValidTimezone } from "./clerk-metadata"
 
 export const deliveryChannelSchema = z.enum(["email", "mail"])
 export const deliveryStatusSchema = z.enum([
@@ -11,11 +12,17 @@ export const deliveryStatusSchema = z.enum([
 export const mailDeliveryModeSchema = z.enum(["send_on", "arrive_by"])
 export const mailTypeSchema = z.enum(["usps_first_class", "usps_standard"])
 
+// Timezone validation schema with IANA validation
+const timezoneSchema = z.string().refine(
+  (tz) => isValidTimezone(tz),
+  { message: "Invalid IANA timezone identifier" }
+)
+
 export const scheduleDeliverySchema = z.object({
   letterId: z.string().uuid(),
   channel: deliveryChannelSchema,
   deliverAt: z.date(),
-  timezone: z.string(), // IANA timezone
+  timezone: timezoneSchema, // IANA timezone with validation
   toEmail: z.string().email().optional(),
   shippingAddressId: z.string().uuid().optional(),
   printOptions: z
@@ -32,7 +39,7 @@ export const scheduleDeliverySchema = z.object({
 export const updateDeliverySchema = z.object({
   deliveryId: z.string().uuid(),
   deliverAt: z.date().optional(),
-  timezone: z.string().optional(),
+  timezone: timezoneSchema.optional(),
 })
 
 export const cancelDeliverySchema = z.object({

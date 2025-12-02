@@ -8,16 +8,27 @@ import { getClerkClient } from "@/server/lib/clerk"
 import { triggerInngestEvent } from "@/server/lib/trigger-inngest"
 import { getDetectedTimezoneFromMetadata, isValidTimezone } from "@dearme/types"
 import { createReferralCodeForUser } from "@/server/actions/referral-codes"
+import { ratelimit } from "@/server/lib/redis"
 
 export async function POST(req: Request) {
+  // Get headers (Next.js 15 requires await)
+  const headerPayload = await headers()
+
+  // Rate limit by IP
+  const ip = headerPayload.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+  const { success: rateLimitOk } = await ratelimit.webhook.clerk.limit(ip)
+
+  if (!rateLimitOk) {
+    console.warn("[Clerk Webhook] Rate limit exceeded", { ip })
+    return new Response("Rate limit exceeded", { status: 429 })
+  }
+
   const WEBHOOK_SECRET = env.CLERK_WEBHOOK_SECRET
 
   if (!WEBHOOK_SECRET) {
     throw new Error("Missing CLERK_WEBHOOK_SECRET")
   }
 
-  // Get headers (Next.js 15 requires await)
-  const headerPayload = await headers()
   const svix_id = headerPayload.get("svix-id")
   const svix_timestamp = headerPayload.get("svix-timestamp")
   const svix_signature = headerPayload.get("svix-signature")

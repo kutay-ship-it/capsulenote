@@ -61,16 +61,26 @@ export function LettersListV3({
 
   // Load saved view preference from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY)
-    if (saved === "grid" || saved === "list") {
-      setViewMode(saved)
+    try {
+      const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY)
+      if (saved === "grid" || saved === "list") {
+        setViewMode(saved)
+      }
+    } catch {
+      // localStorage not available (private browsing, SSR, etc.)
+      // Default to grid view - no action needed
     }
   }, [])
 
   const handleViewModeChange = (value: string) => {
     if (value === "grid" || value === "list") {
       setViewMode(value)
-      localStorage.setItem(VIEW_MODE_STORAGE_KEY, value)
+      try {
+        localStorage.setItem(VIEW_MODE_STORAGE_KEY, value)
+      } catch {
+        // localStorage not available - preference won't persist
+        // but UI will still work for this session
+      }
     }
   }
 
