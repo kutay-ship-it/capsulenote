@@ -1,0 +1,376 @@
+"use client"
+
+import * as React from "react"
+import { format, subDays } from "date-fns"
+import { Calendar, Truck, Palette, BookOpen, AlertTriangle, Info } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { motion, AnimatePresence } from "framer-motion"
+import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
+import type { ShippingAddress } from "@/server/actions/addresses"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+export type MailDeliveryMode = "send_on" | "arrive_by"
+
+export interface PrintOptions {
+  color: boolean
+  doubleSided: boolean
+}
+
+interface MailConfigV3Props {
+  deliveryDate: Date
+  deliveryMode: MailDeliveryMode
+  onDeliveryModeChange: (mode: MailDeliveryMode) => void
+  selectedAddressId: string | null
+  onAddressChange: (addressId: string | null, address?: ShippingAddress) => void
+  selectedAddress?: ShippingAddress | null
+  printOptions: PrintOptions
+  onPrintOptionsChange: (options: PrintOptions) => void
+  transitDays?: number
+  colorCreditCost?: number
+  disabled?: boolean
+}
+
+// Calculate estimated send date for arrive-by mode
+function calculateSendDate(targetArrivalDate: Date, transitDays: number, bufferDays: number = 3): Date {
+  const totalLeadDays = transitDays + bufferDays // Transit + print/processing time
+  return subDays(targetArrivalDate, totalLeadDays)
+}
+
+export function MailConfigV3({
+  deliveryDate,
+  deliveryMode,
+  onDeliveryModeChange,
+  selectedAddressId,
+  onAddressChange,
+  selectedAddress,
+  printOptions,
+  onPrintOptionsChange,
+  transitDays = 5,
+  colorCreditCost = 1,
+  disabled = false,
+}: MailConfigV3Props) {
+  const bufferDays = 3 // Print + processing buffer
+  const estimatedSendDate = calculateSendDate(deliveryDate, transitDays, bufferDays)
+  const isArriveByTooSoon = estimatedSendDate < new Date()
+
+  const handleDeliveryModeChange = (mode: MailDeliveryMode) => {
+    if (disabled) return
+    onDeliveryModeChange(mode)
+  }
+
+  const handleColorToggle = () => {
+    if (disabled) return
+    onPrintOptionsChange({
+      ...printOptions,
+      color: !printOptions.color,
+    })
+  }
+
+  const handleDoubleSidedToggle = () => {
+    if (disabled) return
+    onPrintOptionsChange({
+      ...printOptions,
+      doubleSided: !printOptions.doubleSided,
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div>
+        <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
+          Physical Mail Settings
+        </h3>
+        <p className="mt-1 font-mono text-[10px] text-charcoal/60 uppercase tracking-wider">
+          Configure your physical letter delivery
+        </p>
+      </div>
+
+      {/* Delivery Mode Selection */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
+            Delivery Mode
+          </p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="text-charcoal/40 hover:text-charcoal transition-colors"
+                >
+                  <Info className="h-3.5 w-3.5" strokeWidth={2} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                className="max-w-xs border-2 border-charcoal bg-white p-3 font-mono"
+                style={{
+                  borderRadius: "2px",
+                  boxShadow: "-4px 4px 0px 0px rgb(56, 56, 56)",
+                }}
+              >
+                <p className="text-xs text-charcoal">
+                  <span className="font-bold">Send On:</span> Your letter ships on the selected date.
+                </p>
+                <p className="mt-2 text-xs text-charcoal">
+                  <span className="font-bold">Arrive By:</span> We calculate when to ship so your letter arrives by the selected date.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          {/* Send On Mode */}
+          <button
+            type="button"
+            onClick={() => handleDeliveryModeChange("send_on")}
+            disabled={disabled}
+            className={cn(
+              "relative flex flex-col items-center gap-2 border-2 border-charcoal p-4 font-mono transition-all duration-150",
+              "hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+              deliveryMode === "send_on"
+                ? "bg-duck-blue text-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] -translate-y-0.5"
+                : "bg-white shadow-[2px_2px_0_theme(colors.charcoal)] hover:bg-duck-blue/20",
+              disabled && "opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-[2px_2px_0_theme(colors.charcoal)]"
+            )}
+            style={{ borderRadius: "2px" }}
+          >
+            <div
+              className={cn(
+                "flex h-5 w-5 items-center justify-center border-2 border-charcoal",
+                deliveryMode === "send_on" ? "bg-charcoal" : "bg-white"
+              )}
+              style={{ borderRadius: "50%" }}
+            >
+              {deliveryMode === "send_on" && (
+                <div className="h-2 w-2 bg-white" style={{ borderRadius: "50%" }} />
+              )}
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider">Send On Date</span>
+            <span className="text-[10px] text-charcoal/60 text-center">
+              Mailed on your chosen date
+            </span>
+          </button>
+
+          {/* Arrive By Mode */}
+          <button
+            type="button"
+            onClick={() => handleDeliveryModeChange("arrive_by")}
+            disabled={disabled}
+            className={cn(
+              "relative flex flex-col items-center gap-2 border-2 border-charcoal p-4 font-mono transition-all duration-150",
+              "hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+              deliveryMode === "arrive_by"
+                ? "bg-teal-primary text-white shadow-[4px_4px_0_theme(colors.charcoal)] -translate-y-0.5"
+                : "bg-white shadow-[2px_2px_0_theme(colors.charcoal)] hover:bg-teal-primary/20",
+              disabled && "opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-[2px_2px_0_theme(colors.charcoal)]"
+            )}
+            style={{ borderRadius: "2px" }}
+          >
+            <div
+              className={cn(
+                "flex h-5 w-5 items-center justify-center border-2",
+                deliveryMode === "arrive_by"
+                  ? "border-white bg-white"
+                  : "border-charcoal bg-white"
+              )}
+              style={{ borderRadius: "50%" }}
+            >
+              {deliveryMode === "arrive_by" && (
+                <div className="h-2 w-2 bg-teal-primary" style={{ borderRadius: "50%" }} />
+              )}
+            </div>
+            <span className={cn(
+              "text-xs font-bold uppercase tracking-wider",
+              deliveryMode === "arrive_by" && "text-white"
+            )}>
+              Arrive By Date
+            </span>
+            <span className={cn(
+              "text-[10px] text-center",
+              deliveryMode === "arrive_by" ? "text-white/70" : "text-charcoal/60"
+            )}>
+              Arrives by your date
+            </span>
+          </button>
+        </div>
+
+        {/* Arrive By Calculation Info */}
+        <AnimatePresence>
+          {deliveryMode === "arrive_by" && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div
+                className={cn(
+                  "flex items-start gap-3 p-3 border-2",
+                  isArriveByTooSoon
+                    ? "border-coral bg-coral/10"
+                    : "border-teal-primary/30 bg-teal-primary/10"
+                )}
+                style={{ borderRadius: "2px" }}
+              >
+                {isArriveByTooSoon ? (
+                  <>
+                    <AlertTriangle className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" strokeWidth={2} />
+                    <div>
+                      <p className="font-mono text-[10px] font-bold text-coral uppercase tracking-wider">
+                        Arrival Date Too Soon
+                      </p>
+                      <p className="font-mono text-[10px] text-charcoal/70 mt-1">
+                        We need at least {transitDays + bufferDays} days lead time for printing and shipping. Please choose a later arrival date.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center border-2 border-teal-primary/50 bg-teal-primary/20"
+                      style={{ borderRadius: "2px" }}
+                    >
+                      <Calendar className="h-4 w-4 text-teal-primary" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <p className="font-mono text-[10px] font-bold text-charcoal uppercase tracking-wider">
+                        Estimated Mail Date
+                      </p>
+                      <p className="font-mono text-xs font-bold text-teal-primary mt-0.5">
+                        {format(estimatedSendDate, "MMMM d, yyyy")}
+                      </p>
+                      <p className="font-mono text-[10px] text-charcoal/60 mt-0.5">
+                        ~{transitDays} business days transit time
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Shipping Address */}
+      <div className="space-y-3">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
+          Shipping Address <span className="text-coral">*</span>
+        </p>
+        <AddressSelectorV3
+          value={selectedAddressId}
+          onChange={onAddressChange}
+          disabled={disabled}
+        />
+      </div>
+
+      {/* Print Options */}
+      <div className="space-y-3">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
+          Print Options
+        </p>
+        <div className="space-y-2">
+          {/* Color Printing */}
+          <button
+            type="button"
+            onClick={handleColorToggle}
+            disabled={disabled}
+            className={cn(
+              "flex w-full items-center gap-3 border-2 border-charcoal p-3 font-mono transition-all duration-150",
+              "hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+              printOptions.color
+                ? "bg-duck-yellow text-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] -translate-y-0.5"
+                : "bg-white shadow-[2px_2px_0_theme(colors.charcoal)]",
+              disabled && "opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-[2px_2px_0_theme(colors.charcoal)]"
+            )}
+            style={{ borderRadius: "2px" }}
+          >
+            <div
+              className={cn(
+                "flex h-6 w-6 items-center justify-center border-2 border-charcoal transition-colors",
+                printOptions.color ? "bg-charcoal" : "bg-white"
+              )}
+              style={{ borderRadius: "2px" }}
+            >
+              {printOptions.color && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  className="h-4 w-4 text-white"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Palette className="h-4 w-4" strokeWidth={2} />
+                <span className="text-xs font-bold uppercase tracking-wider">Color Printing</span>
+              </div>
+              <span className="text-[10px] text-charcoal/60">+{colorCreditCost} credit</span>
+            </div>
+          </button>
+
+          {/* Double-Sided */}
+          <button
+            type="button"
+            onClick={handleDoubleSidedToggle}
+            disabled={disabled}
+            className={cn(
+              "flex w-full items-center gap-3 border-2 border-charcoal p-3 font-mono transition-all duration-150",
+              "hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+              printOptions.doubleSided
+                ? "bg-duck-blue text-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] -translate-y-0.5"
+                : "bg-white shadow-[2px_2px_0_theme(colors.charcoal)]",
+              disabled && "opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-[2px_2px_0_theme(colors.charcoal)]"
+            )}
+            style={{ borderRadius: "2px" }}
+          >
+            <div
+              className={cn(
+                "flex h-6 w-6 items-center justify-center border-2 border-charcoal transition-colors",
+                printOptions.doubleSided ? "bg-charcoal" : "bg-white"
+              )}
+              style={{ borderRadius: "2px" }}
+            >
+              {printOptions.doubleSided && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  className="h-4 w-4 text-white"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1 flex items-center gap-2">
+              <BookOpen className="h-4 w-4" strokeWidth={2} />
+              <span className="text-xs font-bold uppercase tracking-wider">Double-Sided</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Transit Time Info */}
+      <div
+        className="flex items-center gap-2 border-2 border-dashed border-charcoal/20 bg-off-white p-2"
+        style={{ borderRadius: "2px" }}
+      >
+        <Truck className="h-4 w-4 text-charcoal/40" strokeWidth={2} />
+        <p className="font-mono text-[10px] text-charcoal/50">
+          USPS First Class Mail: <span className="font-bold text-charcoal/70">{transitDays} business days</span> typical transit
+        </p>
+      </div>
+    </div>
+  )
+}
