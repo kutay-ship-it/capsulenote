@@ -9,14 +9,12 @@ import {
   Calendar,
   Clock,
   AtSign,
-  Trash2,
   PenLine,
   Settings,
   User,
   Users,
   Sparkles,
   Truck,
-  Stamp,
   MapPin,
   Printer,
 } from "lucide-react"
@@ -25,14 +23,9 @@ import { fromZonedTime } from "date-fns-tz"
 
 import { cn } from "@/lib/utils"
 import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
-import {
-  saveLetterAutosave,
-  getLetterAutosave,
-  clearLetterAutosave,
-  formatLastSaved,
-  getAnonymousDraft,
-  clearAnonymousDraft,
-} from "@/lib/localStorage-letter"
+import { useLetterAutosave } from "@/hooks/use-letter-autosave"
+import { useDraftRestoration, emptyFormState } from "@/hooks/use-draft-restoration"
+import { clearLetterAutosave } from "@/lib/localStorage-letter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LetterEditor } from "@/components/letter-editor"
@@ -40,25 +33,10 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { createLetter } from "@/server/actions/letters"
 import { scheduleDelivery } from "@/server/actions/deliveries"
 import { getUserTimezone } from "@/lib/utils"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { TemplateSelectorV3 } from "@/components/v3/template-selector-v3"
 import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-type-v3"
-import { SealConfirmationV3 } from "@/components/v3/seal-confirmation-v3"
-import { SealCelebrationV3 } from "@/components/v3/seal-celebration-v3"
-import { PhysicalMailTrialModal } from "@/components/v3/physical-mail-trial-modal"
-import { PhysicalMailUpgradeModal } from "@/components/v3/physical-mail-upgrade-modal"
-import { CreditWarningBanner } from "@/components/v3/credit-warning-banner"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
+import { LetterModals, LetterFormActions } from "@/components/v3/letter-editor"
 import { PrintOptionsV3, type PrintOptions } from "@/components/v3/print-options-v3"
 import type { LetterTemplate } from "@/server/actions/templates"
 import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
@@ -84,6 +62,178 @@ const DATE_PRESETS = [
   { months: 120, key: "10yr" },
 ] as const
 
+// ============================================================================
+// State Types & Reducers (TICKET-015: Reduce 21 useState to 4 useReducer)
+// ============================================================================
+
+interface FormState {
+  title: string
+  bodyRich: Record<string, unknown> | null
+  bodyHtml: string
+  recipientType: RecipientType
+  recipientName: string
+  recipientEmail: string
+  deliveryChannels: DeliveryChannel[]
+  deliveryDate: Date | undefined
+  selectedPreset: string | null
+}
+
+interface PhysicalMailState {
+  selectedAddressId: string | null
+  selectedAddress: ShippingAddress | null
+  printOptions: PrintOptions
+}
+
+interface ModalState {
+  showCustomDate: boolean
+  showSealConfirmation: boolean
+  showCelebration: boolean
+  showTrialModal: boolean
+  showUpgradeModal: boolean
+}
+
+interface UIState {
+  errors: Partial<Record<keyof LetterFormData, string>>
+  restoredFromDraft: boolean
+  sealedLetterId: string | null
+}
+
+type FormAction =
+  | { type: "SET_TITLE"; payload: string }
+  | { type: "SET_BODY"; payload: { rich: Record<string, unknown> | null; html: string } }
+  | { type: "SET_RECIPIENT_TYPE"; payload: RecipientType }
+  | { type: "SET_RECIPIENT_NAME"; payload: string }
+  | { type: "SET_RECIPIENT_EMAIL"; payload: string }
+  | { type: "SET_DELIVERY_CHANNELS"; payload: DeliveryChannel[] }
+  | { type: "SET_DELIVERY_DATE"; payload: { date: Date | undefined; preset: string | null } }
+  | { type: "RESTORE_DRAFT"; payload: Partial<FormState> }
+  | { type: "CLEAR_FORM" }
+
+type PhysicalMailAction =
+  | { type: "SET_ADDRESS"; payload: { id: string | null; address: ShippingAddress | null } }
+  | { type: "SET_PRINT_OPTIONS"; payload: PrintOptions }
+  | { type: "CLEAR" }
+
+type ModalAction =
+  | { type: "SET_CUSTOM_DATE"; payload: boolean }
+  | { type: "SET_SEAL_CONFIRMATION"; payload: boolean }
+  | { type: "SET_CELEBRATION"; payload: boolean }
+  | { type: "SET_TRIAL_MODAL"; payload: boolean }
+  | { type: "SET_UPGRADE_MODAL"; payload: boolean }
+
+type UIAction =
+  | { type: "SET_ERROR"; payload: { field: keyof LetterFormData; message: string | undefined } }
+  | { type: "SET_ERRORS"; payload: Partial<Record<keyof LetterFormData, string>> }
+  | { type: "SET_RESTORED"; payload: boolean }
+  | { type: "SET_SEALED_LETTER_ID"; payload: string | null }
+  | { type: "CLEAR_ERRORS" }
+
+const initialFormState: FormState = {
+  title: "",
+  bodyRich: null,
+  bodyHtml: "",
+  recipientType: "myself",
+  recipientName: "",
+  recipientEmail: "",
+  deliveryChannels: ["email"],
+  deliveryDate: undefined,
+  selectedPreset: null,
+}
+
+const initialPhysicalMailState: PhysicalMailState = {
+  selectedAddressId: null,
+  selectedAddress: null,
+  printOptions: { color: false, doubleSided: false },
+}
+
+const initialModalState: ModalState = {
+  showCustomDate: false,
+  showSealConfirmation: false,
+  showCelebration: false,
+  showTrialModal: false,
+  showUpgradeModal: false,
+}
+
+const initialUIState: UIState = {
+  errors: {},
+  restoredFromDraft: false,
+  sealedLetterId: null,
+}
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case "SET_TITLE":
+      return { ...state, title: action.payload }
+    case "SET_BODY":
+      return { ...state, bodyRich: action.payload.rich, bodyHtml: action.payload.html }
+    case "SET_RECIPIENT_TYPE":
+      return { ...state, recipientType: action.payload }
+    case "SET_RECIPIENT_NAME":
+      return { ...state, recipientName: action.payload }
+    case "SET_RECIPIENT_EMAIL":
+      return { ...state, recipientEmail: action.payload }
+    case "SET_DELIVERY_CHANNELS":
+      return { ...state, deliveryChannels: action.payload }
+    case "SET_DELIVERY_DATE":
+      return { ...state, deliveryDate: action.payload.date, selectedPreset: action.payload.preset }
+    case "RESTORE_DRAFT":
+      return { ...state, ...action.payload }
+    case "CLEAR_FORM":
+      return initialFormState
+    default:
+      return state
+  }
+}
+
+function physicalMailReducer(state: PhysicalMailState, action: PhysicalMailAction): PhysicalMailState {
+  switch (action.type) {
+    case "SET_ADDRESS":
+      return { ...state, selectedAddressId: action.payload.id, selectedAddress: action.payload.address }
+    case "SET_PRINT_OPTIONS":
+      return { ...state, printOptions: action.payload }
+    case "CLEAR":
+      return initialPhysicalMailState
+    default:
+      return state
+  }
+}
+
+function modalReducer(state: ModalState, action: ModalAction): ModalState {
+  switch (action.type) {
+    case "SET_CUSTOM_DATE":
+      return { ...state, showCustomDate: action.payload }
+    case "SET_SEAL_CONFIRMATION":
+      return { ...state, showSealConfirmation: action.payload }
+    case "SET_CELEBRATION":
+      return { ...state, showCelebration: action.payload }
+    case "SET_TRIAL_MODAL":
+      return { ...state, showTrialModal: action.payload }
+    case "SET_UPGRADE_MODAL":
+      return { ...state, showUpgradeModal: action.payload }
+    default:
+      return state
+  }
+}
+
+function uiReducer(state: UIState, action: UIAction): UIState {
+  switch (action.type) {
+    case "SET_ERROR":
+      return { ...state, errors: { ...state.errors, [action.payload.field]: action.payload.message } }
+    case "SET_ERRORS":
+      return { ...state, errors: action.payload }
+    case "SET_RESTORED":
+      return { ...state, restoredFromDraft: action.payload }
+    case "SET_SEALED_LETTER_ID":
+      return { ...state, sealedLetterId: action.payload }
+    case "CLEAR_ERRORS":
+      return { ...state, errors: {} }
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+
 interface LetterEditorV3Props {
   eligibility: DeliveryEligibility
   onRefreshEligibility?: () => Promise<void>
@@ -97,29 +247,83 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const timezone = getUserTimezone()
   const [currentEligibility, setCurrentEligibility] = React.useState(eligibility)
 
-  // Form state
-  const [title, setTitle] = React.useState("")
-  const [bodyRich, setBodyRich] = React.useState<Record<string, unknown> | null>(null)
-  const [bodyHtml, setBodyHtml] = React.useState("")
-  const [recipientType, setRecipientType] = React.useState<RecipientType>("myself")
-  const [recipientName, setRecipientName] = React.useState("")
-  const [recipientEmail, setRecipientEmail] = React.useState("")
-  const [deliveryChannels, setDeliveryChannels] = React.useState<DeliveryChannel[]>(["email"])
-  const [deliveryDate, setDeliveryDate] = React.useState<Date | undefined>(undefined)
-  const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
-  // Physical mail state
-  const [selectedAddressId, setSelectedAddressId] = React.useState<string | null>(null)
-  const [selectedAddress, setSelectedAddress] = React.useState<ShippingAddress | null>(null)
-  const [printOptions, setPrintOptions] = React.useState<PrintOptions>({ color: false, doubleSided: false })
-  const [showCustomDate, setShowCustomDate] = React.useState(false)
-  const [showSealConfirmation, setShowSealConfirmation] = React.useState(false)
-  const [showCelebration, setShowCelebration] = React.useState(false)
-  // Physical mail upsell modals
-  const [showTrialModal, setShowTrialModal] = React.useState(false)
-  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false)
-  const [sealedLetterId, setSealedLetterId] = React.useState<string | null>(null)
-  const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
-  const [restoredFromDraft, setRestoredFromDraft] = React.useState(false)
+  // Reducer-based state management (TICKET-015: 21 useState → 4 useReducer)
+  const [formState, dispatchForm] = React.useReducer(formReducer, initialFormState)
+  const [physicalMailState, dispatchPhysicalMail] = React.useReducer(physicalMailReducer, initialPhysicalMailState)
+  const [modalState, dispatchModal] = React.useReducer(modalReducer, initialModalState)
+  const [uiState, dispatchUI] = React.useReducer(uiReducer, initialUIState)
+
+  // Destructure for convenient access (maintains API compatibility)
+  const { title, bodyRich, bodyHtml, recipientType, recipientName, recipientEmail, deliveryChannels, deliveryDate, selectedPreset } = formState
+  const { selectedAddressId, selectedAddress, printOptions } = physicalMailState
+  const { showCustomDate, showSealConfirmation, showCelebration, showTrialModal, showUpgradeModal } = modalState
+  const { errors, restoredFromDraft, sealedLetterId } = uiState
+
+  // Draft restoration hook - handles loading drafts from localStorage
+  const { draft, toastMessage, clearDraft } = useDraftRestoration()
+
+  // Auto-save hook - saves form state to localStorage
+  const { save: saveCurrentDraft, clear: clearAutosave } = useLetterAutosave(
+    {
+      title,
+      bodyRich,
+      bodyHtml,
+      recipientType,
+      recipientName,
+      recipientEmail,
+      deliveryChannels,
+      deliveryDate: deliveryDate ?? null,
+      selectedPreset,
+      selectedAddressId,
+      printOptions,
+    },
+    { enabled: !showCelebration }
+  )
+
+  // Apply restored draft to form state
+  React.useEffect(() => {
+    if (draft) {
+      dispatchForm({
+        type: "RESTORE_DRAFT",
+        payload: {
+          title: draft.title,
+          bodyRich: draft.bodyRich as Record<string, unknown> | null,
+          bodyHtml: draft.bodyHtml,
+          recipientType: draft.recipientType,
+          recipientName: draft.recipientName,
+          recipientEmail: draft.recipientEmail,
+          deliveryChannels: draft.deliveryChannels,
+          deliveryDate: draft.deliveryDate ?? undefined,
+          selectedPreset: draft.selectedPreset,
+        },
+      })
+      dispatchPhysicalMail({ type: "SET_ADDRESS", payload: { id: draft.selectedAddressId, address: null } })
+      dispatchPhysicalMail({ type: "SET_PRINT_OPTIONS", payload: draft.printOptions })
+      dispatchUI({ type: "SET_RESTORED", payload: true })
+    }
+  }, [draft])
+
+  // Show toast when draft is restored
+  React.useEffect(() => {
+    if (toastMessage) {
+      toast.info(toastMessage.title, {
+        description: toastMessage.description,
+        action: {
+          label: t("clearButton"),
+          onClick: () => {
+            clearDraft()
+            clearAutosave()
+            // Reset all state to initial values
+            dispatchForm({ type: "CLEAR_FORM" })
+            dispatchPhysicalMail({ type: "CLEAR" })
+            dispatchUI({ type: "SET_RESTORED", payload: false })
+            dispatchUI({ type: "CLEAR_ERRORS" })
+            toast.success(t("toasts.draftCleared"))
+          },
+        },
+      })
+    }
+  }, [toastMessage, clearDraft, clearAutosave, t])
 
   // Word/char count (moved up for dependency ordering)
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
@@ -168,7 +372,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           })
         })
     }
-  }, [searchParams, onRefreshEligibility])
+  }, [searchParams, onRefreshEligibility, t])
 
   // Ref to track in-flight eligibility refresh requests (prevents race conditions)
   const refreshInFlightRef = React.useRef(false)
@@ -203,190 +407,6 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     }, [onRefreshEligibility, t])
   )
 
-  // Helper to safely parse a date string and return undefined if invalid
-  const parseDateSafe = (dateString: string | null | undefined): Date | undefined => {
-    if (!dateString) return undefined
-    const date = new Date(dateString)
-    // Check if the date is valid (Invalid Date returns NaN for getTime())
-    if (isNaN(date.getTime())) return undefined
-    return date
-  }
-
-  // Load autosaved draft on mount (only for new letters)
-  // Priority: Anonymous draft (from homepage before signup) > Authenticated draft
-  React.useEffect(() => {
-    // First, check for anonymous draft from homepage (pre-signup flow)
-    const anonymousDraft = getAnonymousDraft()
-    if (anonymousDraft) {
-      // Restore fields from anonymous draft (simpler structure)
-      setTitle(anonymousDraft.title || "")
-      setBodyHtml(anonymousDraft.body || "")
-      setBodyRich(null) // Anonymous drafts don't have rich content
-      setRecipientType(anonymousDraft.recipientType === "other" ? "someone-else" : "myself")
-      setRecipientName(anonymousDraft.recipientName || "")
-      setRecipientEmail(anonymousDraft.recipientEmail || "")
-      setDeliveryChannels(
-        anonymousDraft.deliveryType === "physical" ? ["physical"] : ["email"]
-      )
-      const parsedDate = parseDateSafe(anonymousDraft.deliveryDate)
-      if (parsedDate) {
-        setDeliveryDate(parsedDate)
-      }
-      if (anonymousDraft.selectedPreset) {
-        setSelectedPreset(anonymousDraft.selectedPreset)
-      }
-      setRestoredFromDraft(true)
-
-      // Show toast for anonymous draft recovery
-      toast.success(t("toasts.welcomeDraftRestored"), {
-        description: t("toasts.continueWriting", { wordCount: anonymousDraft.wordCount }),
-        action: {
-          label: t("clearButton"),
-          onClick: () => {
-            clearAnonymousDraft()
-            // Clear the form
-            setTitle("")
-            setBodyRich(null)
-            setBodyHtml("")
-            setRecipientType("myself")
-            setRecipientName("")
-            setRecipientEmail("")
-            setDeliveryChannels(["email"])
-            setDeliveryDate(undefined)
-            setSelectedPreset(null)
-            setSelectedAddressId(null)
-            setPrintOptions({ color: false, doubleSided: false })
-            setRestoredFromDraft(false)
-            toast.success(t("toasts.draftCleared"))
-          },
-        },
-      })
-
-      // Clear anonymous draft after loading (migrate to authenticated flow)
-      // The autosave will now save as authenticated user format
-      clearAnonymousDraft()
-      return
-    }
-
-    // Fall back to authenticated user draft
-    const savedDraft = getLetterAutosave()
-    if (savedDraft) {
-      // Restore all fields from the saved draft
-      setTitle(savedDraft.title)
-      setBodyRich(savedDraft.bodyRich as Record<string, unknown> | null)
-      setBodyHtml(savedDraft.bodyHtml)
-      setRecipientType(savedDraft.recipientType === "self" ? "myself" : "someone-else")
-      setRecipientName(savedDraft.recipientName)
-      setRecipientEmail(savedDraft.recipientEmail)
-      setDeliveryChannels(savedDraft.deliveryChannels)
-      const savedParsedDate = parseDateSafe(savedDraft.deliveryDate)
-      if (savedParsedDate) {
-        setDeliveryDate(savedParsedDate)
-      }
-      setSelectedPreset(savedDraft.selectedPreset)
-      setSelectedAddressId(savedDraft.selectedAddressId)
-      if (savedDraft.printOptions) {
-        setPrintOptions(savedDraft.printOptions)
-      }
-      setRestoredFromDraft(true)
-
-      // Show toast with last saved time
-      toast.info(t("toasts.draftRestored"), {
-        description: t("toasts.lastSaved", { time: formatLastSaved(savedDraft.lastSaved) }),
-        action: {
-          label: t("clearButton"),
-          onClick: () => {
-            clearLetterAutosave()
-            // Clear the form
-            setTitle("")
-            setBodyRich(null)
-            setBodyHtml("")
-            setRecipientType("myself")
-            setRecipientName("")
-            setRecipientEmail("")
-            setDeliveryChannels(["email"])
-            setDeliveryDate(undefined)
-            setSelectedPreset(null)
-            setSelectedAddressId(null)
-            setPrintOptions({ color: false, doubleSided: false })
-            setRestoredFromDraft(false)
-            toast.success(t("toasts.draftCleared"))
-          },
-        },
-      })
-    }
-  }, []) // Run once on mount
-
-  // Auto-save draft every 30 seconds when there are unsaved changes
-  React.useEffect(() => {
-    if (!hasUnsavedChanges || showCelebration) return
-
-    const saveToLocalStorage = () => {
-      saveLetterAutosave({
-        title,
-        bodyRich,
-        bodyHtml,
-        recipientType: recipientType === "myself" ? "self" : "other",
-        recipientName,
-        recipientEmail,
-        deliveryChannels,
-        deliveryDate: deliveryDate?.toISOString() ?? null,
-        selectedPreset,
-        selectedAddressId,
-        printOptions,
-      })
-    }
-
-    // Save immediately on first change, then every 30 seconds
-    saveToLocalStorage()
-
-    const interval = setInterval(saveToLocalStorage, 30000)
-    return () => clearInterval(interval)
-  }, [
-    hasUnsavedChanges,
-    showCelebration,
-    title,
-    bodyRich,
-    bodyHtml,
-    recipientType,
-    recipientName,
-    recipientEmail,
-    deliveryChannels,
-    deliveryDate,
-    selectedPreset,
-    selectedAddressId,
-    printOptions,
-  ])
-
-  // Save current draft immediately (used before checkout)
-  const saveCurrentDraft = React.useCallback(() => {
-    saveLetterAutosave({
-      title,
-      bodyRich,
-      bodyHtml,
-      recipientType: recipientType === "myself" ? "self" : "other",
-      recipientName,
-      recipientEmail,
-      deliveryChannels,
-      deliveryDate: deliveryDate?.toISOString() ?? null,
-      selectedPreset,
-      selectedAddressId,
-      printOptions,
-    })
-  }, [
-    title,
-    bodyRich,
-    bodyHtml,
-    recipientType,
-    recipientName,
-    recipientEmail,
-    deliveryChannels,
-    deliveryDate,
-    selectedPreset,
-    selectedAddressId,
-    printOptions,
-  ])
-
   // Track if physical delivery is selected
   const hasPhysicalSelected = deliveryChannels.includes("physical")
 
@@ -420,82 +440,67 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const handlePresetDate = (months: number, key: string) => {
     const today = new Date()
     const futureDate = new Date(today.setMonth(today.getMonth() + months))
-    setDeliveryDate(futureDate)
-    setSelectedPreset(key)
-    setShowCustomDate(false)
+    dispatchForm({ type: "SET_DELIVERY_DATE", payload: { date: futureDate, preset: key } })
+    dispatchModal({ type: "SET_CUSTOM_DATE", payload: false })
     if (errors.deliveryDate) {
-      setErrors({ ...errors, deliveryDate: undefined })
+      dispatchUI({ type: "SET_ERROR", payload: { field: "deliveryDate", message: undefined } })
     }
   }
 
   const handleDateSelect = (date: Date | undefined) => {
-    setDeliveryDate(date)
-    setSelectedPreset(null)
+    dispatchForm({ type: "SET_DELIVERY_DATE", payload: { date, preset: null } })
     if (errors.deliveryDate) {
-      setErrors({ ...errors, deliveryDate: undefined })
+      dispatchUI({ type: "SET_ERROR", payload: { field: "deliveryDate", message: undefined } })
     }
   }
 
   const handleRecipientTypeChange = (type: RecipientType) => {
-    setRecipientType(type)
+    dispatchForm({ type: "SET_RECIPIENT_TYPE", payload: type })
     // Clear recipient fields when switching
     if (type === "myself") {
-      setRecipientName("")
+      dispatchForm({ type: "SET_RECIPIENT_NAME", payload: "" })
     }
-    setRecipientEmail("")
-    setErrors({ ...errors, recipientName: undefined, recipientEmail: undefined })
+    dispatchForm({ type: "SET_RECIPIENT_EMAIL", payload: "" })
+    dispatchUI({ type: "SET_ERRORS", payload: { ...errors, recipientName: undefined, recipientEmail: undefined } })
   }
 
   const handleClearForm = () => {
-    setTitle("")
-    setBodyRich(null)
-    setBodyHtml("")
-    setRecipientType("myself")
-    setRecipientName("")
-    setRecipientEmail("")
-    setDeliveryChannels(["email"])
-    setDeliveryDate(undefined)
-    setSelectedPreset(null)
-    setShowCustomDate(false)
-    // Reset physical mail state
-    setSelectedAddressId(null)
-    setSelectedAddress(null)
-    setPrintOptions({ color: false, doubleSided: false })
-    setErrors({})
+    dispatchForm({ type: "CLEAR_FORM" })
+    dispatchModal({ type: "SET_CUSTOM_DATE", payload: false })
+    dispatchPhysicalMail({ type: "CLEAR" })
+    dispatchUI({ type: "CLEAR_ERRORS" })
   }
 
   const handleAddressChange = (addressId: string | null, address?: ShippingAddress) => {
-    setSelectedAddressId(addressId)
-    setSelectedAddress(address || null)
+    dispatchPhysicalMail({ type: "SET_ADDRESS", payload: { id: addressId, address: address || null } })
   }
 
   // Handler for physical mail upsell - decides which modal to show
   const handlePhysicalUpsellTriggered = React.useCallback(() => {
     // If user can purchase trial, show trial modal
     if (currentEligibility.canPurchasePhysicalTrial) {
-      setShowTrialModal(true)
+      dispatchModal({ type: "SET_TRIAL_MODAL", payload: true })
       return
     }
     // If user has used trial but no credits (needs upgrade), show upgrade modal
     if (currentEligibility.hasUsedPhysicalTrial && currentEligibility.physicalCredits <= 0) {
-      setShowUpgradeModal(true)
+      dispatchModal({ type: "SET_UPGRADE_MODAL", payload: true })
       return
     }
     // Fallback: show upgrade modal
-    setShowUpgradeModal(true)
+    dispatchModal({ type: "SET_UPGRADE_MODAL", payload: true })
   }, [currentEligibility])
 
   const handleTemplateSelect = (template: LetterTemplate) => {
     // Apply template content to the editor
-    setBodyHtml(template.promptText)
-    setBodyRich(null) // Clear rich content, editor will parse HTML
+    dispatchForm({ type: "SET_BODY", payload: { rich: null, html: template.promptText } })
     // Set title if empty
     if (!title.trim()) {
-      setTitle(template.title)
+      dispatchForm({ type: "SET_TITLE", payload: template.title })
     }
     // Clear any content errors
     if (errors.bodyHtml) {
-      setErrors({ ...errors, bodyHtml: undefined })
+      dispatchUI({ type: "SET_ERROR", payload: { field: "bodyHtml", message: undefined } })
     }
   }
 
@@ -531,7 +536,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       }
     }
 
-    setErrors(newErrors)
+    dispatchUI({ type: "SET_ERRORS", payload: newErrors })
     return Object.keys(newErrors).length === 0
   }
 
@@ -542,7 +547,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     if (!validateForm() || !deliveryDate || isPending) return
 
     // Open confirmation modal instead of submitting directly
-    setShowSealConfirmation(true)
+    dispatchModal({ type: "SET_SEAL_CONFIRMATION", payload: true })
   }
 
   // Actual submission after user confirms
@@ -589,13 +594,13 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           const failures = deliveryResults.filter(({ result }) => !result.success)
           const successes = deliveryResults.filter(({ result }) => result.success)
 
-          setShowSealConfirmation(false)
+          dispatchModal({ type: "SET_SEAL_CONFIRMATION", payload: false })
 
           if (failures.length === 0) {
             // All deliveries scheduled successfully - clear autosaved draft
             clearLetterAutosave()
-            setSealedLetterId(letterId)
-            setShowCelebration(true)
+            dispatchUI({ type: "SET_SEALED_LETTER_ID", payload: letterId })
+            dispatchModal({ type: "SET_CELEBRATION", payload: true })
           } else if (successes.length > 0) {
             // Partial success - some deliveries failed but letter was saved
             clearLetterAutosave()
@@ -607,8 +612,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             toast.warning(t("toasts.partialDelivery"), {
               description: failedDetails.join(". ") + ". " + t("toasts.retryFromPage"),
             })
-            setSealedLetterId(letterId)
-            setShowCelebration(true)
+            dispatchUI({ type: "SET_SEALED_LETTER_ID", payload: letterId })
+            dispatchModal({ type: "SET_CELEBRATION", payload: true })
           } else {
             // All deliveries failed but letter was saved
             clearLetterAutosave()
@@ -622,7 +627,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             router.push(`/letters/${letterId}`)
           }
         } else {
-          setShowSealConfirmation(false)
+          dispatchModal({ type: "SET_SEAL_CONFIRMATION", payload: false })
           if (result.error.code === "QUOTA_EXCEEDED") {
             toast.error(t("toasts.quotaExceeded"), {
               description: result.error.message,
@@ -639,7 +644,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
         }
       } catch (error) {
         console.error("Letter creation error:", error)
-        setShowSealConfirmation(false)
+        dispatchModal({ type: "SET_SEAL_CONFIRMATION", payload: false })
         toast.error(t("toasts.somethingWentWrong"), {
           description: t("toasts.tryAgainLater"),
         })
@@ -648,7 +653,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   }
 
   const handleCelebrationComplete = React.useCallback(() => {
-    setShowCelebration(false)
+    dispatchModal({ type: "SET_CELEBRATION", payload: false })
     if (sealedLetterId) {
       router.push(`/letters/${sealedLetterId}`)
     }
@@ -693,8 +698,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 id="title"
                 value={title}
                 onChange={(e) => {
-                  setTitle(e.target.value)
-                  if (errors.title) setErrors({ ...errors, title: undefined })
+                  dispatchForm({ type: "SET_TITLE", payload: e.target.value })
+                  if (errors.title) dispatchUI({ type: "SET_ERROR", payload: { field: "title", message: undefined } })
                 }}
                 placeholder={t("titlePlaceholder")}
                 className="border-2 border-charcoal font-mono"
@@ -725,9 +730,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 <LetterEditor
                   content={bodyRich || bodyHtml}
                   onChange={(json, html) => {
-                    setBodyRich(json)
-                    setBodyHtml(html)
-                    if (errors.bodyHtml) setErrors({ ...errors, bodyHtml: undefined })
+                    dispatchForm({ type: "SET_BODY", payload: { rich: json, html } })
+                    if (errors.bodyHtml) dispatchUI({ type: "SET_ERROR", payload: { field: "bodyHtml", message: undefined } })
                   }}
                   placeholder={t("messagePlaceholder")}
                   className="flex-1 flex flex-col min-h-0"
@@ -812,8 +816,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                       type="text"
                       value={recipientName}
                       onChange={(e) => {
-                        setRecipientName(e.target.value)
-                        if (errors.recipientName) setErrors({ ...errors, recipientName: undefined })
+                        dispatchForm({ type: "SET_RECIPIENT_NAME", payload: e.target.value })
+                        if (errors.recipientName) dispatchUI({ type: "SET_ERROR", payload: { field: "recipientName", message: undefined } })
                       }}
                       placeholder={t("namePlaceholder")}
                       className="border-2 border-charcoal font-mono text-sm"
@@ -840,8 +844,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     type="email"
                     value={recipientEmail}
                     onChange={(e) => {
-                      setRecipientEmail(e.target.value)
-                      if (errors.recipientEmail) setErrors({ ...errors, recipientEmail: undefined })
+                      dispatchForm({ type: "SET_RECIPIENT_EMAIL", payload: e.target.value })
+                      if (errors.recipientEmail) dispatchUI({ type: "SET_ERROR", payload: { field: "recipientEmail", message: undefined } })
                     }}
                     placeholder={recipientType === "myself" ? t("yourEmailPlaceholder") : t("theirEmailPlaceholder")}
                     className="border-2 border-charcoal font-mono text-sm"
@@ -868,7 +872,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 </p>
                 <DeliveryTypeV3
                   value={deliveryChannels}
-                  onChange={setDeliveryChannels}
+                  onChange={(channels) => dispatchForm({ type: "SET_DELIVERY_CHANNELS", payload: channels })}
                   eligibility={currentEligibility}
                   onPhysicalUpsellTriggered={handlePhysicalUpsellTriggered}
                 />
@@ -912,7 +916,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                         </p>
                         <PrintOptionsV3
                           value={printOptions}
-                          onChange={setPrintOptions}
+                          onChange={(options) => dispatchPhysicalMail({ type: "SET_PRINT_OPTIONS", payload: options })}
                           disabled={isPending}
                         />
                       </div>
@@ -956,8 +960,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                   <button
                     type="button"
                     onClick={() => {
-                      setShowCustomDate(!showCustomDate)
-                      if (!showCustomDate) setSelectedPreset(null)
+                      dispatchModal({ type: "SET_CUSTOM_DATE", payload: !showCustomDate })
+                      if (!showCustomDate) dispatchForm({ type: "SET_DELIVERY_DATE", payload: { date: deliveryDate, preset: null } })
                     }}
                     className={cn(
                       "col-span-2 border-2 border-charcoal px-3 py-2 font-mono text-[10px] uppercase tracking-wider transition-all duration-150",
@@ -1030,135 +1034,40 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
           </div>
 
           {/* Actions Card */}
-          <div
-            className="border-2 border-charcoal bg-duck-cream p-6 shadow-[2px_2px_0_theme(colors.charcoal)]"
-            style={{ borderRadius: "2px" }}
-          >
-            <div className="space-y-3">
-              {/* Credit Warning Banner - shown when insufficient credits */}
-              {hasInsufficientCredits && (
-                <CreditWarningBanner
-                  eligibility={currentEligibility}
-                  selectedChannels={deliveryChannels}
-                  onBeforeCheckout={saveCurrentDraft}
-                />
-              )}
-
-              {/* Submit Button - Full width, disabled when no credits */}
-              <Button
-                type="submit"
-                disabled={isPending || !canScheduleSelectedChannels}
-                className={cn(
-                  "w-full gap-2 h-12",
-                  !canScheduleSelectedChannels && "opacity-50 cursor-not-allowed"
-                )}
-              >
-                <Stamp className="h-4 w-4" strokeWidth={2} />
-                {isPending ? t("sealing") : t("sealAndSchedule")}
-              </Button>
-
-              {/* Helpful message when button is disabled */}
-              {!canScheduleSelectedChannels && !hasInsufficientCredits && (
-                <p className="font-mono text-[10px] text-center text-charcoal/50 uppercase tracking-wider">
-                  {!currentEligibility.hasActiveSubscription
-                    ? t("subscribeToSchedule")
-                    : t("selectChannelToContinue")}
-                </p>
-              )}
-
-              {/* Secondary actions row */}
-              <div className="flex gap-2">
-                {/* Clear Button */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="gap-2 h-10 text-charcoal/60 hover:text-coral hover:bg-coral/5"
-                    >
-                      <Trash2 className="h-4 w-4" strokeWidth={2} />
-                      {t("clearButton")}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent
-                    className="border-2 border-charcoal bg-white font-mono"
-                    style={{
-                      borderRadius: "2px",
-                      boxShadow: "8px 8px 0px 0px rgb(56, 56, 56)",
-                    }}
-                  >
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="font-mono text-xl uppercase tracking-wide text-charcoal">
-                        {t("clearDialog.title")}
-                      </AlertDialogTitle>
-                      <AlertDialogDescription className="font-mono text-sm text-charcoal/60">
-                        {t("clearDialog.description")}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="gap-3">
-                      <AlertDialogCancel
-                        className="border-2 border-charcoal bg-white hover:bg-off-white font-mono uppercase"
-                        style={{ borderRadius: "2px" }}
-                      >
-                        {t("clearDialog.cancel")}
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleClearForm}
-                        className="border-2 border-charcoal bg-coral hover:bg-coral/90 text-white font-mono uppercase"
-                        style={{ borderRadius: "2px" }}
-                      >
-                        {t("clearDialog.confirm")}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-          </div>
+          <LetterFormActions
+            isPending={isPending}
+            canScheduleSelectedChannels={canScheduleSelectedChannels}
+            hasInsufficientCredits={hasInsufficientCredits}
+            eligibility={currentEligibility}
+            deliveryChannels={deliveryChannels}
+            onSaveBeforeCheckout={saveCurrentDraft}
+            onClear={handleClearForm}
+          />
         </div>
       </div>
 
-      {/* Seal Confirmation Modal */}
-      {deliveryDate && (
-        <SealConfirmationV3
-          open={showSealConfirmation}
-          onOpenChange={setShowSealConfirmation}
-          onConfirm={handleConfirmSeal}
-          isSubmitting={isPending}
-          letterTitle={title}
-          recipientType={recipientType}
-          recipientName={recipientName}
-          recipientEmail={recipientEmail}
-          deliveryChannels={deliveryChannels}
-          deliveryDate={deliveryDate}
-          eligibility={currentEligibility}
-          shippingAddress={selectedAddress}
-          printOptions={hasPhysicalSelected ? printOptions : undefined}
-        />
-      )}
-
-      {/* Seal Celebration Modal */}
-      {deliveryDate && (
-        <SealCelebrationV3
-          open={showCelebration}
-          onOpenChange={setShowCelebration}
-          letterTitle={title || "Untitled Letter"}
-          deliveryDate={deliveryDate}
-          recipientEmail={recipientEmail}
-          onComplete={handleCelebrationComplete}
-        />
-      )}
-
-      {/* Physical Mail Trial Modal */}
-      <PhysicalMailTrialModal
-        open={showTrialModal}
-        onOpenChange={setShowTrialModal}
-      />
-
-      {/* Physical Mail Upgrade Modal */}
-      <PhysicalMailUpgradeModal
-        open={showUpgradeModal}
-        onOpenChange={setShowUpgradeModal}
+      {/* All Modals */}
+      <LetterModals
+        showSealConfirmation={showSealConfirmation}
+        onSealConfirmationChange={(open) => dispatchModal({ type: "SET_SEAL_CONFIRMATION", payload: open })}
+        onConfirmSeal={handleConfirmSeal}
+        isSubmitting={isPending}
+        letterTitle={title}
+        recipientType={recipientType}
+        recipientName={recipientName}
+        recipientEmail={recipientEmail}
+        deliveryChannels={deliveryChannels}
+        deliveryDate={deliveryDate}
+        eligibility={currentEligibility}
+        shippingAddress={selectedAddress}
+        printOptions={printOptions}
+        showCelebration={showCelebration}
+        onCelebrationChange={(open) => dispatchModal({ type: "SET_CELEBRATION", payload: open })}
+        onCelebrationComplete={handleCelebrationComplete}
+        showTrialModal={showTrialModal}
+        onTrialModalChange={(open) => dispatchModal({ type: "SET_TRIAL_MODAL", payload: open })}
+        showUpgradeModal={showUpgradeModal}
+        onUpgradeModalChange={(open) => dispatchModal({ type: "SET_UPGRADE_MODAL", payload: open })}
       />
     </form>
   )
