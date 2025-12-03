@@ -391,6 +391,11 @@
       "unknownError": "Bilinmeyen hata",
       "physicalMail": "Fiziksel posta",
       "email": "E-posta"
+    },
+    "draftBanner": {
+      "title": "Taslağın hazır!",
+      "description": "Daha önce yazdıklarını kaydettik. Göndermeden önce mektubunu gözden geçir ve istediğin değişiklikleri yap.",
+      "dismiss": "Kapat"
     }
   }
 }

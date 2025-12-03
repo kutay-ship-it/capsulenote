@@ -391,6 +391,11 @@
       "unknownError": "Unknown error",
       "physicalMail": "Physical mail",
       "email": "Email"
+    },
+    "draftBanner": {
+      "title": "Your draft is ready!",
+      "description": "We saved what you wrote earlier. Review your letter and make any changes before scheduling delivery.",
+      "dismiss": "Dismiss"
     }
   }
 }

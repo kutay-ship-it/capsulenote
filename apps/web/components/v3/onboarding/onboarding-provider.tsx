@@ -53,33 +53,31 @@ export function OnboardingProvider({
     }
   }, [shouldShowOnboarding, isOnboardingComplete])
 
-  const handleComplete = useCallback(async () => {
-    try {
-      const result = await completeOnboarding()
+  const handleComplete = useCallback(() => {
+    // Close modal and update state immediately (optimistic)
+    setIsModalOpen(false)
+    setIsOnboardingComplete(true)
 
-      if (result.success) {
-        setIsModalOpen(false)
-        setIsOnboardingComplete(true)
-        toast.success(t("toast.success.title"), {
-          description: t("toast.success.description"),
-        })
-      } else {
-        console.error("Failed to complete onboarding:", result.error)
-        // Still close the modal even if marking complete failed
-        setIsModalOpen(false)
-        setIsOnboardingComplete(true)
-      }
-    } catch (error) {
-      console.error("Error completing onboarding:", error)
-      // Still close the modal
-      setIsModalOpen(false)
-      setIsOnboardingComplete(true)
-    }
+    // Fire-and-forget: Complete onboarding in background (don't await)
+    // This prevents delay when user clicks "Start Writing"
+    completeOnboarding()
+      .then((result) => {
+        if (result.success) {
+          toast.success(t("toast.success.title"), {
+            description: t("toast.success.description"),
+          })
+        } else {
+          console.error("Failed to complete onboarding:", result.error)
+        }
+      })
+      .catch((error) => {
+        console.error("Error completing onboarding:", error)
+      })
   }, [t])
 
-  const handleClose = useCallback(async () => {
+  const handleClose = useCallback(() => {
     // Mark as complete when closing/skipping
-    await handleComplete()
+    handleComplete()
   }, [handleComplete])
 
   const showOnboarding = useCallback(() => {

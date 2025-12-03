@@ -85,7 +85,7 @@ export async function createTrialPhysicalCheckoutSession(input?: {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url:
         input?.successUrl ||
-        `${env.NEXT_PUBLIC_APP_URL}/settings?tab=billing&trial=success`,
+        `${env.NEXT_PUBLIC_APP_URL}/credits/success`,
       cancel_url:
         input?.cancelUrl || `${env.NEXT_PUBLIC_APP_URL}/settings?tab=billing`,
       metadata: {

@@ -17,6 +17,8 @@ import {
   Truck,
   MapPin,
   Printer,
+  FileEdit,
+  X,
 } from "lucide-react"
 import { toast } from "sonner"
 import { fromZonedTime } from "date-fns-tz"
@@ -260,7 +262,17 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const { errors, restoredFromDraft, sealedLetterId } = uiState
 
   // Draft restoration hook - handles loading drafts from localStorage
-  const { draft, toastMessage, clearDraft } = useDraftRestoration()
+  const { draft, source, toastMessage, clearDraft } = useDraftRestoration()
+
+  // State for first-time anonymous draft banner
+  const [showDraftBanner, setShowDraftBanner] = React.useState(false)
+
+  // Show banner for anonymous drafts (first-time users who wrote on homepage)
+  React.useEffect(() => {
+    if (source === "anonymous") {
+      setShowDraftBanner(true)
+    }
+  }, [source])
 
   // Auto-save hook - saves form state to localStorage
   const { save: saveCurrentDraft, clear: clearAutosave } = useLetterAutosave(
@@ -303,27 +315,15 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     }
   }, [draft])
 
-  // Show toast when draft is restored
+  // Show toast when draft is restored (without Clear button - users can use the form's Clear button)
   React.useEffect(() => {
     if (toastMessage) {
       toast.info(toastMessage.title, {
         description: toastMessage.description,
-        action: {
-          label: t("clearButton"),
-          onClick: () => {
-            clearDraft()
-            clearAutosave()
-            // Reset all state to initial values
-            dispatchForm({ type: "CLEAR_FORM" })
-            dispatchPhysicalMail({ type: "CLEAR" })
-            dispatchUI({ type: "SET_RESTORED", payload: false })
-            dispatchUI({ type: "CLEAR_ERRORS" })
-            toast.success(t("toasts.draftCleared"))
-          },
-        },
+        duration: 5000,
       })
     }
-  }, [toastMessage, clearDraft, clearAutosave, t])
+  }, [toastMessage])
 
   // Word/char count (moved up for dependency ordering)
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
@@ -661,6 +661,38 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* First-time user banner for anonymous drafts */}
+      {showDraftBanner && (
+        <div
+          className="mb-6 flex items-start gap-4 border-2 border-teal-primary bg-teal-primary/10 p-4 shadow-[2px_2px_0_theme(colors.teal.primary)]"
+          style={{ borderRadius: "2px" }}
+        >
+          <div
+            className="flex h-10 w-10 flex-shrink-0 items-center justify-center border-2 border-teal-primary bg-teal-primary/20"
+            style={{ borderRadius: "2px" }}
+          >
+            <FileEdit className="h-5 w-5 text-teal-primary" strokeWidth={2} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
+              {t("draftBanner.title")}
+            </h3>
+            <p className="font-mono text-xs text-charcoal/70 mt-1">
+              {t("draftBanner.description")}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowDraftBanner(false)}
+            className="flex-shrink-0 p-1 hover:bg-teal-primary/20 transition-colors"
+            style={{ borderRadius: "2px" }}
+            aria-label={t("draftBanner.dismiss")}
+          >
+            <X className="h-4 w-4 text-charcoal/50" />
+          </button>
+        </div>
+      )}
+
       {/* Grid Layout: Editor Left, Settings Right */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,380px] gap-6 items-start">
         {/* Left Column - Letter Editor */}

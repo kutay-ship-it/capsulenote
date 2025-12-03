@@ -184,8 +184,8 @@ function LocaleBanner({ isVisible, onSelectLocale, onDismiss }: LocaleBannerProp
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="fixed top-0 left-0 right-0 z-[100]"
         >
-          <div className="relative border-b-2 border-charcoal bg-cream">
-            {/* Floating Badge */}
+          <div className="relative border-b-2 border-charcoal bg-cream overflow-visible">
+            {/* Floating Badge - ensure visible with overflow-visible */}
             <V3FloatingBadge icon={<Globe className="h-3 w-3" />} label="Locale" variant="dark" />
 
             <div className="container py-6 pt-8">

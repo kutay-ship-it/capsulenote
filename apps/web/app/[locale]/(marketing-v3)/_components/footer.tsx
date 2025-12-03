@@ -106,10 +106,10 @@ export function Footer() {
               {currentYear} {t("copyright")}
             </p>
             <div className="flex items-center gap-4">
-              <FooterLanguageButton />
               <p className="font-mono text-xs text-charcoal/60">
                 {t("madeWith")}
               </p>
+              <FooterLanguageButton />
             </div>
           </div>
         </div>
