@@ -141,30 +141,19 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
                 </Button>
               </Link>
             ) : (
-              <>
-                <Button
-                  size="lg"
-                  className="group gap-3 text-lg shadow-md hover:shadow-lg"
-                  onClick={() => {
-                    document.getElementById("try-demo")?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start",
-                    })
-                  }}
-                >
-                  {t("startWriting")}
-                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                </Button>
-                <Link href="/sign-in">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="text-lg"
-                  >
-                    {t("signIn")}
-                  </Button>
-                </Link>
-              </>
+              <Button
+                size="lg"
+                className="group gap-3 text-lg shadow-md hover:shadow-lg"
+                onClick={() => {
+                  document.getElementById("try-demo")?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  })
+                }}
+              >
+                {t("startWriting")}
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Button>
             )}
           </motion.div>
 

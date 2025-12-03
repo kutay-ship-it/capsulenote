@@ -2,16 +2,25 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { useSignIn } from "@clerk/nextjs"
 import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PenLine } from "lucide-react"
 
 interface CustomSignInFormProps {
   prefillEmail?: string
 }
+
+// Clerk error codes for "user not found"
+const USER_NOT_FOUND_CODES = [
+  "form_identifier_not_found",
+  "identifier_not_found",
+  "form_param_nil",
+]
 
 export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
   const router = useRouter()
@@ -23,12 +32,14 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
   const [secondFactorCode, setSecondFactorCode] = useState("")
   const [needsSecondFactor, setNeedsSecondFactor] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showNoAccountCta, setShowNoAccountCta] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!isLoaded) return
     setError(null)
+    setShowNoAccountCta(false)
     setIsSubmitting(true)
 
     try {
@@ -47,7 +58,13 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
         setError(t("errors.additionalVerification"))
       }
     } catch (err: any) {
-      setError(err?.errors?.[0]?.message || t("errors.failed"))
+      const errorCode = err?.errors?.[0]?.code
+      if (USER_NOT_FOUND_CODES.includes(errorCode)) {
+        setShowNoAccountCta(true)
+        setError(null)
+      } else {
+        setError(err?.errors?.[0]?.message || t("errors.failed"))
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -85,6 +102,25 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
           <AlertTitle>{t("error")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+      )}
+      {showNoAccountCta && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-6 text-center">
+          <h3 className="text-lg font-semibold">{t("noAccount.title")}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("noAccount.message")}
+          </p>
+          <Button asChild className="mt-4 w-full" size="lg">
+            <Link href="/#try-demo">
+              <PenLine className="mr-2 h-4 w-4" />
+              {t("noAccount.cta")}
+            </Link>
+          </Button>
+          <p className="mt-3 text-sm text-muted-foreground">
+            <Link href="/sign-up" className="text-primary underline hover:no-underline">
+              {t("noAccount.signUpLink")}
+            </Link>
+          </p>
+        </div>
       )}
       {needsSecondFactor ? (
         <form onSubmit={handleSecondFactor} className="space-y-4">
@@ -133,9 +169,9 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
             </div>
 
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <a href="/reset-password" className="underline hover:text-primary">
+              <Link href="/reset-password" className="underline hover:text-primary">
                 {t("forgotPassword")}
-              </a>
+              </Link>
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting || !isLoaded}>
