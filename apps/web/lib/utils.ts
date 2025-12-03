@@ -5,6 +5,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * Type-safe route helper for Next.js Link href
+ * Casts string paths to Route type to avoid `as any` casts
+ *
+ * @example
+ * <Link href={typedHref(`/letters/${id}`)}>View Letter</Link>
+ */
+export function typedHref<T extends string>(path: T): T {
+  return path
+}
+
 export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date
   return new Intl.DateTimeFormat("en-US", {

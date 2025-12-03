@@ -54,7 +54,7 @@ export async function completeOnboarding(): Promise<ActionResult<{ success: true
       error: {
         code: 'ONBOARDING_COMPLETION_FAILED' as const,
         message: 'Failed to complete onboarding. Please try again.',
-        details: error,
+        // details removed - logged server-side
       },
     }
   }

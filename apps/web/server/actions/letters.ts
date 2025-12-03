@@ -76,7 +76,7 @@ export async function createLetter(
         error: {
           code: ErrorCodes.ENCRYPTION_FAILED,
           message: 'Failed to encrypt letter content. Please try again.',
-          details: error,
+          // details removed - logged server-side, not exposed to client
         },
       }
     }
@@ -106,7 +106,7 @@ export async function createLetter(
         error: {
           code: ErrorCodes.CREATION_FAILED,
           message: 'Failed to save letter. Please try again.',
-          details: error,
+          // details removed - logged server-side, not exposed to client
         },
       }
     }
@@ -171,7 +171,7 @@ export async function createLetter(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side, not exposed to client
       },
     }
   }
@@ -269,7 +269,7 @@ export async function updateLetter(
           error: {
             code: ErrorCodes.ENCRYPTION_FAILED,
             message: 'Failed to encrypt updated content. Please try again.',
-            details: error,
+            // details removed - logged server-side, not exposed to client
           },
         }
       }
@@ -292,7 +292,7 @@ export async function updateLetter(
         error: {
           code: ErrorCodes.UPDATE_FAILED,
           message: 'Failed to update letter. Please try again.',
-          details: error,
+          // details removed - logged server-side, not exposed to client
         },
       }
     }
@@ -324,7 +324,7 @@ export async function updateLetter(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side, not exposed to client
       },
     }
   }
@@ -449,7 +449,7 @@ export async function deleteLetter(
         error: {
           code: ErrorCodes.DELETE_FAILED,
           message: 'Failed to delete letter. Please try again.',
-          details: error,
+          // details removed - logged server-side, not exposed to client
         },
       }
     }
@@ -480,7 +480,7 @@ export async function deleteLetter(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side, not exposed to client
       },
     }
   }
@@ -665,7 +665,7 @@ export async function markLetterAsOpened(
         error: {
           code: ErrorCodes.UPDATE_FAILED,
           message: 'Failed to record letter opening. Please try again.',
-          details: error,
+          // details removed - logged server-side, not exposed to client
         },
       }
     }
@@ -699,7 +699,7 @@ export async function markLetterAsOpened(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side, not exposed to client
       },
     }
   }
@@ -818,7 +818,7 @@ export async function getLetterForUnlock(letterId: string): Promise<
         error: {
           code: ErrorCodes.ENCRYPTION_FAILED,
           message: 'Failed to decrypt letter content. Please try again.',
-          details: error,
+          // details removed - logged server-side, not exposed to client
         },
       }
     }
@@ -853,7 +853,7 @@ export async function getLetterForUnlock(letterId: string): Promise<
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side, not exposed to client
       },
     }
   }

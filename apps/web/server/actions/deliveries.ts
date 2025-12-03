@@ -561,7 +561,7 @@ export async function scheduleDelivery(
         error: {
           code: ErrorCodes.CREATION_FAILED,
           message: 'Failed to schedule delivery. Please try again.',
-          details: error,
+          // details removed - logged server-side
         },
       }
     }
@@ -580,11 +580,33 @@ export async function scheduleDelivery(
         throw new Error("Inngest did not return an event ID")
       }
 
-      // Store event ID for audit/debugging
-      await prisma.delivery.update({
-        where: { id: delivery.id },
-        data: { inngestRunId: eventId }
-      })
+      // Store event ID for audit/debugging with retry
+      // CRITICAL: Must succeed to enable backstop reconciler correlation
+      let updateAttempts = 0
+      const maxUpdateAttempts = 3
+      while (updateAttempts < maxUpdateAttempts) {
+        try {
+          await prisma.delivery.update({
+            where: { id: delivery.id },
+            data: { inngestRunId: eventId }
+          })
+          break // Success
+        } catch (updateError) {
+          updateAttempts++
+          if (updateAttempts >= maxUpdateAttempts) {
+            // Log but don't fail - backstop reconciler will handle orphan
+            await logger.warn('Failed to store inngestRunId after retries', {
+              deliveryId: delivery.id,
+              eventId,
+              attempts: updateAttempts,
+              error: updateError,
+            })
+          } else {
+            // Exponential backoff: 100ms, 200ms, 400ms
+            await new Promise(resolve => setTimeout(resolve, 100 * Math.pow(2, updateAttempts - 1)))
+          }
+        }
+      }
 
       await logger.info('Inngest event sent successfully', {
         deliveryId: delivery.id,
@@ -726,7 +748,7 @@ export async function scheduleDelivery(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -858,7 +880,7 @@ export async function updateDelivery(
         error: {
           code: ErrorCodes.UPDATE_FAILED,
           message: 'Failed to update delivery. Please try again.',
-          details: error,
+          // details removed - logged server-side
         },
       }
     }
@@ -889,7 +911,7 @@ export async function updateDelivery(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -1038,7 +1060,7 @@ export async function cancelDelivery(
         error: {
           code: ErrorCodes.UPDATE_FAILED,
           message: 'Failed to cancel delivery. Please try again.',
-          details: error,
+          // details removed - logged server-side
         },
       }
     }
@@ -1070,7 +1092,7 @@ export async function cancelDelivery(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -1131,7 +1153,7 @@ export async function retryDelivery(
         error: {
           code: ErrorCodes.UPDATE_FAILED,
           message: 'Failed to retry delivery. Please try again.',
-          details: error,
+          // details removed - logged server-side
         },
       }
     }
@@ -1193,7 +1215,7 @@ export async function retryDelivery(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: 'An unexpected error occurred. Please try again.',
-        details: error,
+        // details removed - logged server-side
       },
     }
   }

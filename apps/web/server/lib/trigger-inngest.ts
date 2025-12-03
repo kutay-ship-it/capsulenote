@@ -49,27 +49,21 @@ export async function triggerInngestEvent(eventName: string, data: Record<string
 /**
  * Cancel an Inngest run by its ID
  *
- * Used when canceling scheduled deliveries (e.g., letter deletion)
+ * @deprecated This function sends a cancellation event that is NOT currently handled.
+ * Actual delivery cancellation is done by updating the delivery status to "canceled"
+ * in the database, which the Inngest job checks after waking from sleep.
+ * See: workers/inngest/functions/deliver-email.ts (post-sleep validation)
  *
- * @param runId - The Inngest run ID to cancel
- * @returns true if cancellation was successful
+ * This function is kept for backwards compatibility but is effectively a no-op.
+ * The recommended approach is to update delivery.status = "canceled" directly.
+ *
+ * @param runId - The Inngest run ID (unused - event is not handled)
+ * @returns true (always - actual cancellation happens via DB status)
  */
 export async function cancelInngestRun(runId: string): Promise<boolean> {
-  try {
-    const { inngest } = await import("@dearme/inngest")
-
-    // Note: The Inngest SDK's cancel method works at the function level
-    // For run-level cancellation, we need to use the REST API or send a cancellation event
-    // For now, we'll send a cancellation event that the function can check
-    await inngest.send({
-      name: "delivery/cancel.requested",
-      data: { runId },
-    })
-
-    await logger.info("[Inngest] Run cancellation requested", { runId })
-    return true
-  } catch (error) {
-    await logger.error("[Inngest] Failed to cancel run", error, { runId })
-    return false
-  }
+  // Note: This event is not handled by any Inngest function.
+  // Cancellation is achieved by setting delivery.status = "canceled"
+  // which the Inngest job checks after sleep.
+  await logger.info("[Inngest] cancelInngestRun called (deprecated)", { runId })
+  return true
 }

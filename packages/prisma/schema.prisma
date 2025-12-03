@@ -251,6 +251,7 @@ model Delivery {
   @@index([deliverAt])
   @@index([status, deliverAt])
   @@index([userId, status])  // Optimize user delivery queries
+  @@index([inngestRunId])    // Enable backstop reconciler correlation
   @@map("deliveries")
 }
 
@@ -311,6 +312,8 @@ model DeliveryAttempt {
 
   @@index([letterId])
   @@index([status])
+  @@index([letterId, createdAt])  // Optimize queries for attempts by letter ordered by time
+  @@index([letterId, status])     // Optimize filtered queries by letter and status
   @@map("delivery_attempts")
 }
 
@@ -450,9 +453,10 @@ model SubscriptionUsage {
 
 // Webhook processing status for completion tracking
 enum WebhookStatus {
-  CLAIMED   // Idempotency claimed, processing started
-  COMPLETED // Successfully processed
-  FAILED    // Processing failed after retries exhausted
+  CLAIMED    // Idempotency claimed, waiting to process
+  PROCESSING // Actively being processed (handler running)
+  COMPLETED  // Successfully processed
+  FAILED     // Processing failed after retries exhausted
 }
 
 model WebhookEvent {

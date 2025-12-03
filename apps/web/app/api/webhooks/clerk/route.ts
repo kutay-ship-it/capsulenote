@@ -56,18 +56,19 @@ export async function POST(req: Request) {
     return new Response("Invalid signature", { status: 400 })
   }
 
-  // Validate event age (prevent replay attacks)
+  // Validate event age (prevent replay attacks - both past AND future timestamps)
   const svix_timestamp_ms = parseInt(svix_timestamp, 10) * 1000
-  const eventAge = Date.now() - svix_timestamp_ms
+  const eventAge = Math.abs(Date.now() - svix_timestamp_ms) // Absolute value catches future timestamps
   const MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
 
   if (eventAge > MAX_AGE_MS) {
-    console.warn("Clerk webhook too old, rejecting", {
+    console.warn("Clerk webhook timestamp invalid (too old or future), rejecting", {
       eventType: evt.type,
-      age: Math.floor(eventAge / 1000) + "s",
+      age: Math.floor((Date.now() - svix_timestamp_ms) / 1000) + "s",
       maxAge: "300s",
+      isFuture: svix_timestamp_ms > Date.now(),
     })
-    return new Response("Event too old", { status: 400 })
+    return new Response("Event timestamp invalid", { status: 400 })
   }
 
   // Handle the webhook
@@ -111,61 +112,22 @@ export async function POST(req: Request) {
         })
 
         // Create user and profile with detected or fallback timezone
-        // Handle race condition: concurrent webhook deliveries or retries
-        let user
-        let attempts = 0
-        const maxAttempts = 3
-
-        while (attempts < maxAttempts) {
-          try {
-            user = await prisma.user.create({
-              data: {
-                clerkUserId: id,
-                email: email,
-                profile: {
-                  create: {
-                    // Use detected timezone or UTC fallback
-                    timezone,
-                  },
-                },
+        // Use upsert pattern for atomic race condition handling
+        const user = await prisma.user.upsert({
+          where: { clerkUserId: id },
+          create: {
+            clerkUserId: id,
+            email: email,
+            profile: {
+              create: {
+                timezone,
               },
-            })
+            },
+          },
+          update: {}, // No-op if user already exists (concurrent webhook created it)
+        })
 
-            console.log(`[Clerk Webhook] ✅ User created: ${id}`)
-            break
-          } catch (error: any) {
-            // Handle race condition: another webhook delivery created the user
-            if (error?.code === 'P2002') {
-              attempts++
-              console.log(`[Clerk Webhook] 🔄 Race condition detected (attempt ${attempts}/${maxAttempts})`)
-
-              // Add jitter to prevent thundering herd
-              await new Promise(resolve => setTimeout(resolve, 20 * attempts + Math.random() * 10))
-
-              // Try to fetch the user that was created by concurrent request
-              user = await prisma.user.findUnique({
-                where: { clerkUserId: id },
-              })
-
-              if (user) {
-                console.log(`[Clerk Webhook] ✅ User already created by concurrent webhook`)
-                break
-              }
-
-              // If still not found and we have attempts left, try again
-              if (attempts >= maxAttempts) {
-                throw new Error(`Failed to create or find user after ${maxAttempts} attempts`)
-              }
-            } else {
-              // Different error, not a race condition
-              throw error
-            }
-          }
-        }
-
-        if (!user) {
-          throw new Error('Failed to get or create user')
-        }
+        console.log(`[Clerk Webhook] User created/found: ${id}`)
 
         // Check for pending subscription (anonymous checkout flow)
         const pendingSubscription = await prisma.pendingSubscription.findFirst({

@@ -325,6 +325,18 @@ export const deliverEmail = inngest.createFunction(
       throw new NonRetriableError("Delivery was canceled")
     }
 
+    // If letter was deleted while waiting, abort (orphan delivery scenario)
+    if (!refreshed.letter) {
+      logger.warn("Letter deleted while waiting", { deliveryId, letterId: delivery.letterId })
+      throw new NonRetriableError("Letter was deleted")
+    }
+
+    // If user was deleted while waiting, abort
+    if (!refreshed.user) {
+      logger.warn("User deleted while waiting", { deliveryId, userId: delivery.userId })
+      throw new NonRetriableError("User was deleted")
+    }
+
     // If rescheduled to a future date, wait until the new deliverAt
     // Convert to Date objects for comparison (Prisma may return string from serialization)
     const refreshedDeliverAt = new Date(refreshed.deliverAt)

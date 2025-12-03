@@ -84,7 +84,7 @@ export async function listShippingAddresses(): Promise<ActionResult<ShippingAddr
       error: {
         code: ErrorCodes.DATABASE_ERROR,
         message: "Failed to load addresses. Please try again.",
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -134,7 +134,7 @@ export async function getShippingAddress(id: string): Promise<ActionResult<Shipp
       error: {
         code: ErrorCodes.DATABASE_ERROR,
         message: "Failed to load address. Please try again.",
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -207,7 +207,7 @@ export async function createShippingAddress(
       error: {
         code: ErrorCodes.CREATION_FAILED,
         message: "Failed to save address. Please try again.",
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -295,7 +295,7 @@ export async function updateShippingAddress(
       error: {
         code: ErrorCodes.UPDATE_FAILED,
         message: "Failed to update address. Please try again.",
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -360,7 +360,7 @@ export async function deleteShippingAddress(
       error: {
         code: ErrorCodes.DELETE_FAILED,
         message: "Failed to delete address. Please try again.",
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -409,7 +409,7 @@ export async function verifyShippingAddress(
         error: {
           code: ErrorCodes.SERVICE_UNAVAILABLE,
           message: "Address verification service is unavailable. Please try again later.",
-          details: error,
+          // details removed - logged server-side
         },
       }
     }
@@ -441,7 +441,7 @@ export async function verifyShippingAddress(
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: "Failed to verify address. Please try again.",
-        details: error,
+        // details removed - logged server-side
       },
     }
   }
@@ -523,7 +523,7 @@ export async function createVerifiedShippingAddress(
       error: {
         code: ErrorCodes.CREATION_FAILED,
         message: "Failed to save address. Please try again.",
-        details: error,
+        // details removed - logged server-side
       },
     }
   }

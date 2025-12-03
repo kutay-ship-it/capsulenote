@@ -299,11 +299,35 @@ export const processStripeWebhook = inngest.createFunction(
 
           // Status is CLAIMED but not completed
           // Could be: (a) still processing, (b) stuck
-          // Let backstop reconciler handle stuck events
-          console.log("[Webhook Processor] Event claimed but not completed", {
+          // Check if stuck (claimed > 10 minutes ago) - allow retry
+          const STUCK_THRESHOLD_MS = 10 * 60 * 1000 // 10 minutes
+          const claimedAt = existing?.claimedAt
+          const isStuck = claimedAt && Date.now() - claimedAt.getTime() > STUCK_THRESHOLD_MS
+
+          if (isStuck) {
+            // Reset to allow this attempt to proceed
+            console.log("[Webhook Processor] Event stuck, resetting for retry", {
+              eventId: stripeEvent.id,
+              eventType: stripeEvent.type,
+              claimedAt,
+              stuckForMs: Date.now() - claimedAt.getTime(),
+            })
+            await prisma.webhookEvent.update({
+              where: { id: stripeEvent.id },
+              data: {
+                claimedAt: new Date(),
+                retryCount: { increment: 1 },
+              },
+            })
+            // Continue processing - don't throw
+            return
+          }
+
+          // Recently claimed - likely still processing
+          console.log("[Webhook Processor] Event recently claimed, skipping", {
             eventId: stripeEvent.id,
             eventType: stripeEvent.type,
-            claimedAt: existing?.claimedAt,
+            claimedAt,
           })
           throw new NonRetriableError(
             `Event ${stripeEvent.id} claimed but not completed - backstop will retry if stuck`
@@ -314,7 +338,19 @@ export const processStripeWebhook = inngest.createFunction(
       }
     })
 
-    // Step 2: Process event (now safe, idempotency guaranteed)
+    // Step 2: Mark as processing (distinguish from just claimed)
+    await step.run("mark-processing", async () => {
+      await prisma.webhookEvent.update({
+        where: { id: stripeEvent.id },
+        data: { status: "PROCESSING" },
+      })
+
+      console.log("[Webhook Processor] Event marked as processing", {
+        eventId: stripeEvent.id,
+      })
+    })
+
+    // Step 3: Process event (now safe, idempotency guaranteed)
     await step.run("process-event", async () => {
       await routeWebhookEvent(stripeEvent)
 

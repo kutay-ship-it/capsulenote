@@ -48,7 +48,27 @@ export const cleanupDeletedUser = inngest.createFunction(
             })
         }
 
-        // Step 2: Delete all user data from database
+        // Step 2: Cancel pending deliveries (so Inngest jobs abort gracefully)
+        await step.run("cancel-pending-deliveries", async () => {
+            const result = await prisma.delivery.updateMany({
+                where: {
+                    userId,
+                    status: "scheduled",
+                },
+                data: {
+                    status: "canceled",
+                },
+            })
+
+            if (result.count > 0) {
+                console.log("[User Cleanup] Canceled pending deliveries", {
+                    userId,
+                    canceledCount: result.count,
+                })
+            }
+        })
+
+        // Step 3: Delete all user data from database
         await step.run("delete-user-data", async () => {
             await prisma.$transaction(async (tx) => {
                 // Get all letter IDs for cascading deletes

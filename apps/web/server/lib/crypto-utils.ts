@@ -19,25 +19,31 @@ import { timingSafeEqual } from "crypto"
  * }
  */
 export function secureCompare(a: string, b: string): boolean {
-  // Handle null/undefined
+  // Handle null/undefined - still need constant-time behavior
   if (!a || !b) {
+    // Always perform some comparison to prevent timing leak on empty check
+    const dummy = Buffer.from("x")
+    timingSafeEqual(dummy, dummy)
     return false
   }
 
-  // timingSafeEqual requires buffers of equal length
-  // If lengths differ, pad the shorter one to prevent timing leak
   const aBuffer = Buffer.from(a)
   const bBuffer = Buffer.from(b)
 
-  // If lengths differ, we still need constant-time behavior
-  // We compare with a dummy to avoid timing leak on length
-  if (aBuffer.length !== bBuffer.length) {
-    // Compare with itself to take same time as real comparison
-    timingSafeEqual(aBuffer, aBuffer)
-    return false
-  }
+  // Constant-time comparison regardless of length difference
+  // Pad shorter buffer to match longer length for comparison
+  const maxLen = Math.max(aBuffer.length, bBuffer.length)
+  const aPadded = Buffer.alloc(maxLen)
+  const bPadded = Buffer.alloc(maxLen)
+  aBuffer.copy(aPadded)
+  bBuffer.copy(bPadded)
 
-  return timingSafeEqual(aBuffer, bBuffer)
+  // Always perform full comparison, then check length equality
+  // This ensures constant time regardless of length mismatch
+  const contentEqual = timingSafeEqual(aPadded, bPadded)
+  const lengthEqual = aBuffer.length === bBuffer.length
+
+  return contentEqual && lengthEqual
 }
 
 /**

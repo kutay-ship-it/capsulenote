@@ -127,7 +127,7 @@ export async function createAddOnCheckoutSession(input: {
       error: {
         code: ErrorCodes.INTERNAL_ERROR,
         message: "Failed to start add-on checkout",
-        details: error,
+        // details removed - logged server-side, not exposed to client
       },
     }
   }
