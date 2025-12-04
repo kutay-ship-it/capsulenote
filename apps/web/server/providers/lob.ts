@@ -9,6 +9,7 @@
  * - Test vs Live: Test API keys create mock mail (no actual delivery)
  * - Address verification: Validate addresses before sending to reduce bounce rates
  * - Webhooks: Track mail through USPS (in_transit, processed_for_delivery, delivered)
+ * - Templates: V3-branded letter templates with variable substitution
  *
  * @see https://docs.lob.com/ for full API documentation
  * @see scripts/test-lob-api.ts for proof of concept tests
@@ -16,6 +17,12 @@
 
 import Lob from "lob"
 import { env } from "@/env.mjs"
+import {
+  renderLetter,
+  getProductionSenderAddress,
+  getEnvelopeConfig,
+  type RenderLetterOptions,
+} from "@/server/templates/mail"
 
 const lobApiKey = env.LOB_API_KEY
 
@@ -66,21 +73,20 @@ export interface AddressVerificationResult {
   error?: string
 }
 
-// Capsule Note sender address - should be configured for production
-const SENDER_ADDRESS = {
-  name: "Capsule Note",
-  address_line1: "185 Berry Street", // Example address - configure for production
-  address_line2: "Suite 6100",
-  address_city: "San Francisco",
-  address_state: "CA",
-  address_zip: "94107",
-  address_country: "US",
+/**
+ * Get the sender address for Lob API calls
+ * Uses production overrides from env vars if configured
+ */
+function getSenderAddress() {
+  return getProductionSenderAddress()
 }
 
 export async function sendLetter(options: MailOptions): Promise<SendLetterResult> {
   if (!lob) {
     throw new Error("Lob API key not configured - set LOB_API_KEY environment variable")
   }
+
+  const envelopeConfig = getEnvelopeConfig()
 
   try {
     // Type assertion needed for Lob SDK v6 compatibility with some parameters
@@ -95,10 +101,11 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
         address_zip: options.to.postalCode,
         address_country: options.to.country,
       },
-      from: SENDER_ADDRESS,
+      from: getSenderAddress(),
       file: options.html,
       color: options.color ?? false,
       double_sided: options.doubleSided ?? false,
+      address_placement: envelopeConfig.address_placement,
       mail_type: options.mailType ?? "usps_first_class",
       use_type: options.useType ?? "operational", // Required by Lob API
     } as Parameters<typeof lob.letters.create>[0])
@@ -283,3 +290,105 @@ export async function cancelLetter(letterId: string) {
 export function isLobConfigured(): boolean {
   return !!lob
 }
+
+// =============================================================================
+// Templated Letter Functions (V3 Branding)
+// =============================================================================
+
+/**
+ * Options for sending a templated letter with V3 branding
+ */
+export interface TemplatedLetterOptions {
+  /** Recipient mailing address */
+  to: MailingAddress
+  /** Letter content as HTML (from Tiptap editor) */
+  letterContent: string
+  /** Date the letter was written */
+  writtenDate: Date
+  /** Date the letter is being delivered (defaults to today) */
+  deliveryDate?: Date
+  /** Optional letter title */
+  letterTitle?: string
+  /** Recipient name displayed in greeting (defaults to "Future Self") */
+  recipientName?: string
+  /** Print in color (costs more) */
+  color?: boolean
+  /** Print on both sides */
+  doubleSided?: boolean
+  /** Custom description for Lob dashboard */
+  description?: string
+  /** USPS mail class */
+  mailType?: "usps_first_class" | "usps_standard"
+  /** Use minimal template (smaller file size) */
+  minimalTemplate?: boolean
+}
+
+/**
+ * Send a letter using the V3 Capsule Note branded template
+ *
+ * This is the recommended function for sending physical letters.
+ * It automatically renders the letter with proper branding and styling.
+ *
+ * @example
+ * ```typescript
+ * const result = await sendTemplatedLetter({
+ *   to: {
+ *     name: "John Doe",
+ *     line1: "123 Main St",
+ *     city: "San Francisco",
+ *     state: "CA",
+ *     postalCode: "94107",
+ *     country: "US",
+ *   },
+ *   letterContent: "<p>Dear Future Self, remember to...</p>",
+ *   writtenDate: new Date("2024-01-01"),
+ *   letterTitle: "New Year Reflections",
+ * })
+ * ```
+ */
+export async function sendTemplatedLetter(
+  options: TemplatedLetterOptions
+): Promise<SendLetterResult> {
+  // Render the letter using V3 template
+  const renderedHtml = renderLetter({
+    recipientName: options.recipientName,
+    letterContent: options.letterContent,
+    writtenDate: options.writtenDate,
+    deliveryDate: options.deliveryDate,
+    letterTitle: options.letterTitle,
+    minimal: options.minimalTemplate,
+  })
+
+  // Send using the base sendLetter function
+  return sendLetter({
+    to: options.to,
+    html: renderedHtml,
+    color: options.color,
+    doubleSided: options.doubleSided,
+    description: options.description || `Capsule Note: ${options.letterTitle || "Letter to Future Self"}`,
+    mailType: options.mailType,
+    useType: "operational", // Capsule Note letters are always operational
+  })
+}
+
+/**
+ * Preview a templated letter without sending
+ *
+ * Returns the rendered HTML for display in the browser.
+ * Useful for showing users what their letter will look like.
+ */
+export function previewTemplatedLetter(
+  options: Omit<TemplatedLetterOptions, "to">
+): string {
+  return renderLetter({
+    recipientName: options.recipientName,
+    letterContent: options.letterContent,
+    writtenDate: options.writtenDate,
+    deliveryDate: options.deliveryDate,
+    letterTitle: options.letterTitle,
+    minimal: options.minimalTemplate,
+  })
+}
+
+// Re-export template utilities for convenience
+export { renderLetter, type RenderLetterOptions } from "@/server/templates/mail"
