@@ -28,10 +28,13 @@ export interface LetterTemplateVariables {
 }
 
 /**
- * V3 Neo-Brutalist Letter Template (2-Page Format)
+ * V3 Neo-Brutalist Letter Template (3-Page Format for Double-Sided Printing)
  *
  * Page 1: Cover page with branding (recipient address added by Lob at top)
- * Page 2: Actual letter content
+ * Page 2: Intentionally blank (so letter content starts on separate sheet when double-sided)
+ * Page 3: Actual letter content
+ *
+ * This ensures letter content is on a separate physical sheet from the envelope/cover.
  *
  * Design:
  * - Monospace fonts (Courier New for print compatibility)
@@ -314,7 +317,15 @@ export const LETTER_TEMPLATE_HTML = `
   </div>
 
   <!-- ================================
-       PAGE 2: LETTER CONTENT
+       PAGE 2: BLANK PAGE
+       (Ensures letter content starts on separate sheet for double-sided)
+       ================================ -->
+  <div class="blank-page" style="page-break-after: always; min-height: 9in;">
+    <!-- Intentionally blank for double-sided printing -->
+  </div>
+
+  <!-- ================================
+       PAGE 3: LETTER CONTENT
        ================================ -->
   <div class="letter-page">
     <header class="letter-header">
@@ -339,12 +350,13 @@ export const LETTER_TEMPLATE_HTML = `
 `
 
 /**
- * Minimal letter template for testing/preview (2-Page Format)
+ * Minimal letter template for testing/preview (3-Page Format for Double-Sided)
  * Smaller file size, fewer decorative elements
  * B&W safe design
  *
  * Page 1: Simple cover page
- * Page 2: Letter content
+ * Page 2: Blank (for double-sided printing)
+ * Page 3: Letter content
  */
 export const LETTER_TEMPLATE_MINIMAL_HTML = `
 <!DOCTYPE html>
@@ -480,7 +492,10 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
     <div class="cover-footer">capsulenote.com</div>
   </div>
 
-  <!-- PAGE 2: LETTER -->
+  <!-- PAGE 2: BLANK (for double-sided) -->
+  <div style="page-break-after: always; min-height: 9in;"></div>
+
+  <!-- PAGE 3: LETTER -->
   <div class="letter-page">
     <header class="header">
       <div class="brand">{{#if letter_title}}{{letter_title}}{{else}}Capsule Note{{/if}}</div>
