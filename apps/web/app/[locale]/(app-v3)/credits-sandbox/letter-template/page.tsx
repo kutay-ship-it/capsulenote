@@ -38,6 +38,58 @@ export default function LetterTemplateSandboxPage() {
   const [useMinimal, setUseMinimal] = React.useState(false)
   const [showTitle, setShowTitle] = React.useState(true)
 
+  // Send test letter state
+  const [isSending, setIsSending] = React.useState(false)
+  const [sendResult, setSendResult] = React.useState<{
+    success: boolean
+    pdfUrl?: string
+    letterId?: string
+    error?: string
+  } | null>(null)
+
+  // Send test letter to Lob
+  const handleSendTestLetter = async () => {
+    setIsSending(true)
+    setSendResult(null)
+
+    try {
+      const response = await fetch("/api/test/send-lob-letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipientName,
+          letterTitle: showTitle ? letterTitle : undefined,
+          letterContent,
+          writtenDate,
+          deliveryDate,
+          useMinimal,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setSendResult({
+          success: true,
+          pdfUrl: data.pdfUrl,
+          letterId: data.letterId,
+        })
+      } else {
+        setSendResult({
+          success: false,
+          error: data.error || "Failed to send letter",
+        })
+      }
+    } catch (error) {
+      setSendResult({
+        success: false,
+        error: error instanceof Error ? error.message : "Network error",
+      })
+    } finally {
+      setIsSending(false)
+    }
+  }
+
   // Generate preview HTML
   const previewHtml = React.useMemo(() => {
     return renderLetterPreview({
@@ -182,6 +234,63 @@ export default function LetterTemplateSandboxPage() {
                 Use Minimal Template
               </span>
             </div>
+
+            {/* Send Test Letter */}
+            <div className="pt-4 border-t-2 border-charcoal/20 mt-4">
+              <button
+                onClick={handleSendTestLetter}
+                disabled={isSending}
+                className={cn(
+                  "w-full h-[48px] border-3 border-charcoal font-mono text-sm font-bold uppercase tracking-wider transition-all",
+                  isSending
+                    ? "bg-charcoal/20 text-charcoal/50 cursor-wait"
+                    : "bg-teal-primary text-charcoal hover:shadow-[4px_4px_0_theme(colors.charcoal)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px]"
+                )}
+                style={{ borderRadius: "2px" }}
+              >
+                {isSending ? "Sending to Lob..." : "Send Test Letter to Lob"}
+              </button>
+              <p className="font-mono text-[10px] text-charcoal/50 mt-2 text-center">
+                Test mode - no real mail will be sent
+              </p>
+            </div>
+
+            {/* Send Result */}
+            {sendResult && (
+              <div
+                className={cn(
+                  "mt-4 p-4 border-2",
+                  sendResult.success
+                    ? "border-teal-primary bg-teal-primary/10"
+                    : "border-red-500 bg-red-500/10"
+                )}
+                style={{ borderRadius: "2px" }}
+              >
+                {sendResult.success ? (
+                  <div className="space-y-2">
+                    <p className="font-mono text-xs font-bold uppercase text-teal-primary">
+                      Letter Created Successfully
+                    </p>
+                    <p className="font-mono text-[10px] text-charcoal/70">
+                      ID: {sendResult.letterId}
+                    </p>
+                    <a
+                      href={sendResult.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 px-4 py-2 border-2 border-charcoal bg-duck-yellow font-mono text-xs font-bold uppercase hover:shadow-[2px_2px_0_theme(colors.charcoal)]"
+                      style={{ borderRadius: "2px" }}
+                    >
+                      View PDF Preview
+                    </a>
+                  </div>
+                ) : (
+                  <p className="font-mono text-xs text-red-600">
+                    Error: {sendResult.error}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

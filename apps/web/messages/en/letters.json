@@ -288,6 +288,10 @@
     "physicalMail": "Physical mail",
     "creditCost": "1 credit ({from} → {to})",
     "warning": "Once sealed, your letter will be <bold>locked and encrypted</bold> until the delivery date. You won't be able to read or edit it.",
+    "physicalMailWarning": {
+      "title": "Important: Physical Mail Content Is Final",
+      "description": "Your letter content will be sealed immediately for printing. Unlike email, you <bold>cannot edit the physical letter</bold> after scheduling, even before the delivery date."
+    },
     "goBack": "Go Back",
     "sealing": "Sealing...",
     "sealAndSchedule": "Seal & Schedule"

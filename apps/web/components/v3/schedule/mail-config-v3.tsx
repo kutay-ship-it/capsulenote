@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format, subDays } from "date-fns"
-import { Calendar, Truck, Palette, BookOpen, AlertTriangle, Info } from "lucide-react"
+import { Calendar, Truck, BookOpen, AlertTriangle, Info, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
@@ -13,6 +13,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  getTransitEstimate,
+  isInternationalDestination,
+  type MailType,
+} from "@/server/lib/mail-delivery-calculator"
 
 export type MailDeliveryMode = "send_on" | "arrive_by"
 
@@ -31,14 +36,18 @@ interface MailConfigV3Props {
   printOptions: PrintOptions
   onPrintOptionsChange: (options: PrintOptions) => void
   transitDays?: number
-  colorCreditCost?: number
   disabled?: boolean
 }
 
-// Calculate estimated send date for arrive-by mode
-function calculateSendDate(targetArrivalDate: Date, transitDays: number, bufferDays: number = 3): Date {
-  const totalLeadDays = transitDays + bufferDays // Transit + print/processing time
-  return subDays(targetArrivalDate, totalLeadDays)
+// Calculate estimated send date for arrive-by mode using the calculator
+function calculateSendDate(
+  targetArrivalDate: Date,
+  mailType: MailType,
+  countryCode?: string
+): { sendDate: Date; estimate: ReturnType<typeof getTransitEstimate> } {
+  const estimate = getTransitEstimate(mailType, countryCode)
+  const sendDate = subDays(targetArrivalDate, estimate.totalLeadDays)
+  return { sendDate, estimate }
 }
 
 export function MailConfigV3({
@@ -50,25 +59,24 @@ export function MailConfigV3({
   selectedAddress,
   printOptions,
   onPrintOptionsChange,
-  transitDays = 5,
-  colorCreditCost = 1,
+  transitDays: _transitDays, // Deprecated, now calculated from country
   disabled = false,
 }: MailConfigV3Props) {
-  const bufferDays = 3 // Print + processing buffer
-  const estimatedSendDate = calculateSendDate(deliveryDate, transitDays, bufferDays)
+  // Get country from selected address for transit calculation
+  const countryCode = selectedAddress?.country ?? "US"
+  const isInternational = isInternationalDestination(countryCode)
+
+  // Calculate send date and get transit estimate based on destination
+  const { sendDate: estimatedSendDate, estimate } = calculateSendDate(
+    deliveryDate,
+    "usps_first_class", // International only supports First Class anyway
+    countryCode
+  )
   const isArriveByTooSoon = estimatedSendDate < new Date()
 
   const handleDeliveryModeChange = (mode: MailDeliveryMode) => {
     if (disabled) return
     onDeliveryModeChange(mode)
-  }
-
-  const handleColorToggle = () => {
-    if (disabled) return
-    onPrintOptionsChange({
-      ...printOptions,
-      color: !printOptions.color,
-    })
   }
 
   const handleDoubleSidedToggle = () => {
@@ -118,8 +126,13 @@ export function MailConfigV3({
                   <span className="font-bold">Send On:</span> Your letter ships on the selected date.
                 </p>
                 <p className="mt-2 text-xs text-charcoal">
-                  <span className="font-bold">Arrive By:</span> We calculate when to ship so your letter arrives by the selected date.
+                  <span className="font-bold">Arrive By:</span> We ship early so your letter arrives <span className="font-bold text-teal-primary">2 days before</span> your selected date—giving you a buffer for any postal delays.
                 </p>
+                {isInternational && (
+                  <p className="mt-2 text-xs text-coral">
+                    <span className="font-bold">International:</span> Expect longer transit times (7-14+ additional days).
+                  </p>
+                )}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -196,7 +209,7 @@ export function MailConfigV3({
               "text-[10px] text-center",
               deliveryMode === "arrive_by" ? "text-white/70" : "text-charcoal/60"
             )}>
-              Arrives by your date
+              Arrives 2 days early
             </span>
           </button>
         </div>
@@ -227,28 +240,45 @@ export function MailConfigV3({
                         Arrival Date Too Soon
                       </p>
                       <p className="font-mono text-[10px] text-charcoal/70 mt-1">
-                        We need at least {transitDays + bufferDays} days lead time for printing and shipping. Please choose a later arrival date.
+                        We need at least {estimate.totalLeadDays} days lead time for printing and shipping{isInternational ? " (international delivery)" : ""}. Please choose a later arrival date.
                       </p>
                     </div>
                   </>
                 ) : (
                   <>
                     <div
-                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center border-2 border-teal-primary/50 bg-teal-primary/20"
+                      className={cn(
+                        "flex h-8 w-8 flex-shrink-0 items-center justify-center border-2",
+                        isInternational
+                          ? "border-duck-yellow/50 bg-duck-yellow/20"
+                          : "border-teal-primary/50 bg-teal-primary/20"
+                      )}
                       style={{ borderRadius: "2px" }}
                     >
-                      <Calendar className="h-4 w-4 text-teal-primary" strokeWidth={2} />
+                      {isInternational ? (
+                        <Globe className="h-4 w-4 text-duck-yellow" strokeWidth={2} />
+                      ) : (
+                        <Calendar className="h-4 w-4 text-teal-primary" strokeWidth={2} />
+                      )}
                     </div>
                     <div>
                       <p className="font-mono text-[10px] font-bold text-charcoal uppercase tracking-wider">
-                        Estimated Mail Date
+                        {isInternational ? "International Mail Date" : "Estimated Mail Date"}
                       </p>
-                      <p className="font-mono text-xs font-bold text-teal-primary mt-0.5">
+                      <p className={cn(
+                        "font-mono text-xs font-bold mt-0.5",
+                        isInternational ? "text-duck-yellow" : "text-teal-primary"
+                      )}>
                         {format(estimatedSendDate, "MMMM d, yyyy")}
                       </p>
                       <p className="font-mono text-[10px] text-charcoal/60 mt-0.5">
-                        ~{transitDays} business days transit time
+                        ~{estimate.transitDays} days transit + {estimate.earlyArrivalDays} days early arrival buffer
                       </p>
+                      {isInternational && (
+                        <p className="font-mono text-[10px] text-duck-yellow mt-1">
+                          ⚠️ International tracking is limited beyond US borders
+                        </p>
+                      )}
                     </div>
                   </>
                 )}
@@ -276,49 +306,6 @@ export function MailConfigV3({
           Print Options
         </p>
         <div className="space-y-2">
-          {/* Color Printing */}
-          <button
-            type="button"
-            onClick={handleColorToggle}
-            disabled={disabled}
-            className={cn(
-              "flex w-full items-center gap-3 border-2 border-charcoal p-3 font-mono transition-all duration-150",
-              "hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
-              printOptions.color
-                ? "bg-duck-yellow text-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] -translate-y-0.5"
-                : "bg-white shadow-[2px_2px_0_theme(colors.charcoal)]",
-              disabled && "opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-[2px_2px_0_theme(colors.charcoal)]"
-            )}
-            style={{ borderRadius: "2px" }}
-          >
-            <div
-              className={cn(
-                "flex h-6 w-6 items-center justify-center border-2 border-charcoal transition-colors",
-                printOptions.color ? "bg-charcoal" : "bg-white"
-              )}
-              style={{ borderRadius: "2px" }}
-            >
-              {printOptions.color && (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  className="h-4 w-4 text-white"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
-            </div>
-            <div className="flex-1 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Palette className="h-4 w-4" strokeWidth={2} />
-                <span className="text-xs font-bold uppercase tracking-wider">Color Printing</span>
-              </div>
-              <span className="text-[10px] text-charcoal/60">+{colorCreditCost} credit</span>
-            </div>
-          </button>
-
           {/* Double-Sided */}
           <button
             type="button"
@@ -363,12 +350,23 @@ export function MailConfigV3({
 
       {/* Transit Time Info */}
       <div
-        className="flex items-center gap-2 border-2 border-dashed border-charcoal/20 bg-off-white p-2"
+        className={cn(
+          "flex items-center gap-2 border-2 border-dashed p-2",
+          isInternational ? "border-duck-yellow/30 bg-duck-yellow/5" : "border-charcoal/20 bg-off-white"
+        )}
         style={{ borderRadius: "2px" }}
       >
-        <Truck className="h-4 w-4 text-charcoal/40" strokeWidth={2} />
+        {isInternational ? (
+          <Globe className="h-4 w-4 text-duck-yellow/70" strokeWidth={2} />
+        ) : (
+          <Truck className="h-4 w-4 text-charcoal/40" strokeWidth={2} />
+        )}
         <p className="font-mono text-[10px] text-charcoal/50">
-          USPS First Class Mail: <span className="font-bold text-charcoal/70">{transitDays} business days</span> typical transit
+          {isInternational ? (
+            <>International First Class: <span className="font-bold text-duck-yellow">{estimate.transitDays} days</span> typical transit</>
+          ) : (
+            <>USPS First Class Mail: <span className="font-bold text-charcoal/70">{estimate.transitDays} business days</span> typical transit</>
+          )}
         </p>
       </div>
     </div>

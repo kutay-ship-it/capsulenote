@@ -41,13 +41,13 @@ async function decryptLetter(
 }
 
 /**
- * Get Lob mail provider
+ * Get Lob mail provider (V3 branded template)
  */
 async function getMailProvider() {
-  const { sendLetter, isLobConfigured } = await import(
+  const { sendTemplatedLetter, isLobConfigured } = await import(
     "../../../apps/web/server/providers/lob"
   )
-  return { sendLetter, isLobConfigured }
+  return { sendTemplatedLetter, isLobConfigured }
 }
 
 /**
@@ -112,86 +112,6 @@ async function markDeliveryFailed(
     errorCode: error.code,
     errorMessage: error.message,
   })
-}
-
-/**
- * Convert HTML to printable letter format
- * Adds letterhead, formatting, and page structure for physical mail
- */
-function formatLetterForPrint(
-  title: string,
-  bodyHtml: string,
-  createdAt: Date
-): string {
-  const formattedDate = createdAt.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        @page {
-          margin: 1in;
-          size: letter;
-        }
-        body {
-          font-family: Georgia, 'Times New Roman', serif;
-          font-size: 12pt;
-          line-height: 1.6;
-          color: #333;
-        }
-        .letterhead {
-          text-align: center;
-          margin-bottom: 2em;
-          padding-bottom: 1em;
-          border-bottom: 1px solid #ccc;
-        }
-        .letterhead h1 {
-          font-size: 18pt;
-          margin: 0;
-          color: #1a1a1a;
-        }
-        .letterhead .date {
-          font-size: 10pt;
-          color: #666;
-          margin-top: 0.5em;
-        }
-        .title {
-          font-size: 14pt;
-          font-weight: bold;
-          margin: 1.5em 0 1em;
-        }
-        .content {
-          text-align: justify;
-        }
-        .footer {
-          margin-top: 3em;
-          text-align: center;
-          font-size: 10pt;
-          color: #999;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="letterhead">
-        <h1>A Letter From Your Past Self</h1>
-        <div class="date">Written on ${formattedDate}</div>
-      </div>
-      <div class="title">${title}</div>
-      <div class="content">
-        ${bodyHtml}
-      </div>
-      <div class="footer">
-        Delivered via Capsule Note &bull; capsulenote.com
-      </div>
-    </body>
-    </html>
-  `
 }
 
 export const deliverMail = inngest.createFunction(
@@ -532,9 +452,123 @@ export const deliverMail = inngest.createFunction(
       }
     })
 
-    // Decrypt letter content
-    const decryptedContent = await step.run("decrypt-letter", async () => {
+    // Check for immediate mode (already sent to Lob with send_date)
+    // In immediate mode, Lob already has the letter - we just need to update status
+    const mailDeliveryData = delivery.mailDelivery!
+    const isImmediateMode = mailDeliveryData.lobScheduleMode === "immediate" && mailDeliveryData.lobJobId
+
+    if (isImmediateMode) {
+      logger.info("Immediate mode: Letter already sent to Lob, updating status only", {
+        deliveryId,
+        lobJobId: mailDeliveryData.lobJobId,
+        lobSendDate: mailDeliveryData.lobSendDate,
+      })
+
+      // Update delivery status to sent
+      await step.run("update-status-sent-immediate", async () => {
+        try {
+          await prisma.$transaction([
+            prisma.delivery.update({
+              where: { id: deliveryId },
+              data: {
+                status: "sent",
+                attemptCount: { increment: 1 },
+              },
+            }),
+            prisma.mailDelivery.update({
+              where: { deliveryId },
+              data: {
+                trackingStatus: "in_production",
+              },
+            }),
+            prisma.deliveryAttempt.create({
+              data: {
+                letterId: delivery.letterId,
+                channel: "mail",
+                status: "sent",
+                errorCode: null,
+                errorMessage: null,
+              },
+            }),
+            prisma.auditEvent.create({
+              data: {
+                userId: delivery.userId,
+                type: "delivery.sent",
+                data: {
+                  deliveryId,
+                  letterId: delivery.letterId,
+                  channel: "mail",
+                  lobJobId: mailDeliveryData.lobJobId,
+                  mode: "immediate",
+                },
+              },
+            }),
+          ])
+
+          logger.info("Immediate mode delivery marked as sent", {
+            deliveryId,
+            lobJobId: mailDeliveryData.lobJobId,
+          })
+        } catch (error) {
+          const classified = classifyDatabaseError(error)
+          logger.error("Failed to update delivery status for immediate mode", {
+            deliveryId,
+            errorCode: classified.code,
+            errorMessage: classified.message,
+          })
+
+          if (!classified.retryable) {
+            throw new NonRetriableError(classified.message)
+          }
+
+          throw classified
+        }
+      })
+
+      return {
+        success: true,
+        lobJobId: mailDeliveryData.lobJobId,
+        mode: "immediate",
+      }
+    }
+
+    // Deferred mode: Decrypt sealed content (snapshot from schedule time)
+    const decryptedContent = await step.run("decrypt-sealed-content", async () => {
       try {
+        // Use sealed content if available (preferred for deferred mode)
+        if (mailDeliveryData.sealedCiphertext && mailDeliveryData.sealedNonce) {
+          assertRealBuffer(mailDeliveryData.sealedCiphertext, "sealedCiphertext")
+          assertRealBuffer(mailDeliveryData.sealedNonce, "sealedNonce")
+
+          logger.info("Using sealed content for deferred mode delivery", {
+            deliveryId,
+            letterId: delivery.letterId,
+            keyVersion: mailDeliveryData.sealedKeyVersion,
+            sealedAt: mailDeliveryData.sealedAt,
+          })
+
+          const { decrypt } = await import("../../../apps/web/server/lib/encryption")
+          const plaintext = await decrypt(
+            mailDeliveryData.sealedCiphertext,
+            mailDeliveryData.sealedNonce,
+            mailDeliveryData.sealedKeyVersion ?? 1
+          )
+          const content = JSON.parse(plaintext) as { bodyHtml: string; bodyRich: Record<string, unknown> }
+
+          logger.info("Sealed content decrypted successfully", {
+            deliveryId,
+            letterId: delivery.letterId,
+          })
+
+          return content
+        }
+
+        // Fallback: fetch fresh content from letter (legacy deliveries without sealed content)
+        logger.warn("No sealed content found, falling back to fresh letter content", {
+          deliveryId,
+          letterId: delivery.letterId,
+        })
+
         const letterWithEncryptedData = await prisma.letter.findUnique({
           where: { id: delivery.letterId },
           select: {
@@ -553,19 +587,13 @@ export const deliverMail = inngest.createFunction(
         assertRealBuffer(letterWithEncryptedData.bodyCiphertext, "bodyCiphertext")
         assertRealBuffer(letterWithEncryptedData.bodyNonce, "bodyNonce")
 
-        logger.info("Fetched fresh encrypted data for decryption", {
-          deliveryId,
-          letterId: delivery.letterId,
-          keyVersion: letterWithEncryptedData.keyVersion,
-        })
-
         const content = await decryptLetter(
           letterWithEncryptedData.bodyCiphertext,
           letterWithEncryptedData.bodyNonce,
           letterWithEncryptedData.keyVersion
         )
 
-        logger.info("Letter decrypted successfully", {
+        logger.info("Letter decrypted successfully (fallback)", {
           deliveryId,
           letterId: delivery.letterId,
         })
@@ -575,19 +603,28 @@ export const deliverMail = inngest.createFunction(
         if (error instanceof DecryptionError) {
           throw new NonRetriableError(error.message)
         }
-        throw error
+        logger.error("Decryption failed", {
+          error: error instanceof Error ? error.message : String(error),
+          deliveryId,
+        })
+        throw new DecryptionError("Failed to decrypt content", {
+          deliveryId,
+          originalError: error,
+        })
       }
     })
 
-    // Send physical mail via Lob
-    const sendResult = await step.run("send-mail", async () => {
+    // Send physical mail via Lob (V3 branded 2-page template) - Deferred mode
+    const sendResult = await step.run("send-mail-deferred", async () => {
       const mailDelivery = delivery.mailDelivery!
       const address = mailDelivery.shippingAddress!
       const printOptions =
         (mailDelivery.printOptions as { color?: boolean; doubleSided?: boolean }) ||
         {}
+      // Use sealed title if available, otherwise fall back to letter title
+      const letterTitle = mailDelivery.sealedTitle ?? delivery.letter.title
 
-      logger.info("Sending physical mail", {
+      logger.info("Deferred mode: Sending physical mail with V3 template", {
         deliveryId,
         recipientName: address.name,
         city: address.city,
@@ -595,22 +632,28 @@ export const deliverMail = inngest.createFunction(
         country: address.country,
         color: printOptions.color,
         doubleSided: printOptions.doubleSided,
+        usingSealedTitle: !!mailDelivery.sealedTitle,
       })
 
-      const letterHtml = formatLetterForPrint(
-        delivery.letter.title,
-        decryptedContent.bodyHtml,
-        new Date(delivery.letter.createdAt)
-      )
-
-      const { sendLetter, isLobConfigured } = await getMailProvider()
+      const { sendTemplatedLetter, isLobConfigured } = await getMailProvider()
 
       if (!isLobConfigured()) {
         throw new NonRetriableError("Lob is not configured")
       }
 
       try {
-        const result = await sendLetter({
+        // Generate idempotency key to prevent duplicate sends on retry
+        // Format: mail-delivery-{deliveryId}-attempt-{attemptNumber}
+        const idempotencyKey = `mail-delivery-${deliveryId}-attempt-${attempt}`
+
+        logger.info("Sending with idempotency key", {
+          deliveryId,
+          idempotencyKey,
+          attempt,
+        })
+
+        // Use V3 branded 2-page template (cover page + letter content)
+        const result = await sendTemplatedLetter({
           to: {
             name: address.name,
             line1: address.line1,
@@ -620,15 +663,19 @@ export const deliverMail = inngest.createFunction(
             postalCode: address.postalCode,
             country: address.country,
           },
-          html: letterHtml,
+          letterContent: decryptedContent.bodyHtml,
+          writtenDate: new Date(delivery.letter.createdAt),
+          deliveryDate: new Date(),
+          letterTitle,
+          recipientName: address.name,
           color: printOptions.color ?? false,
           doubleSided: printOptions.doubleSided ?? false,
-          description: `Capsule Note: ${delivery.letter.title}`,
-          useType: "operational",
+          description: `Capsule Note: ${letterTitle}`,
           mailType: "usps_first_class",
+          idempotencyKey,
         })
 
-        logger.info("Physical mail sent successfully", {
+        logger.info("Physical mail sent successfully with V3 template", {
           deliveryId,
           lobJobId: result.id,
           expectedDeliveryDate: result.expectedDeliveryDate,

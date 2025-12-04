@@ -27,11 +27,19 @@ import {
 } from "@/server/lib/mail-delivery-calculator"
 import { ratelimit } from "@/server/lib/redis"
 import { validateDeliveryTime } from "@/server/lib/dst-safety"
+import { encrypt, decryptLetter } from "@/server/lib/encryption"
+import {
+  sendTemplatedLetter,
+  cancelLetter as lobCancelLetter,
+  isLobConfigured,
+} from "@/server/providers/lob"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
 const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
 const MAX_DELAY_YEARS = 100
 const MIN_PHYSICAL_MAIL_LEAD_DAYS = 30 // Minimum 30 days advance notice for physical mail
+const LOB_MAX_SCHEDULE_DAYS = 180 // Lob's max send_date is 180 days in future
+const DEFERRED_HANDOFF_DAYS = 90 // Days before send date to hand off deferred letters to Lob
 
 /**
  * Schedule a new delivery for a letter
@@ -226,6 +234,9 @@ export async function scheduleDelivery(
     let mailTransitDays: number | null = null
     let mailTargetDate: Date | null = null
     let mailSendDate: Date | null = null
+    let lobScheduleMode: "immediate" | "deferred" = "deferred"
+    let sealedContent: { ciphertext: Buffer; nonce: Buffer; keyVersion: number } | null = null
+    let sealedTitle: string | null = null
 
     if (data.channel === 'mail') {
       // 30-day minimum lead time validation for physical mail
@@ -294,12 +305,21 @@ export async function scheduleDelivery(
       }
 
       // Handle arrive-by mode for physical mail
-      mailDeliveryMode = data.deliveryMode ?? "send_on"
+      mailDeliveryMode = data.deliveryMode ?? "arrive_by" // Default to arrive_by for better UX
       const mailType: MailType = data.mailType ?? "usps_first_class"
 
+      // Fetch shipping address early to get country for transit calculation
+      const mailAddress = data.shippingAddressId
+        ? await prisma.shippingAddress.findUnique({
+            where: { id: data.shippingAddressId },
+            select: { country: true },
+          })
+        : null
+      const destinationCountry = mailAddress?.country ?? "US"
+
       if (mailDeliveryMode === "arrive_by") {
-        // Validate that the arrival date is achievable
-        const validation = validateArrivalDate(data.deliverAt, mailType)
+        // Validate that the arrival date is achievable (considers international transit times)
+        const validation = validateArrivalDate(data.deliverAt, mailType, destinationCountry)
 
         if (!validation.isAchievable) {
           await logger.warn('Arrive-by date not achievable', {
@@ -307,6 +327,8 @@ export async function scheduleDelivery(
             targetDate: data.deliverAt,
             earliestPossible: validation.calculation.earliestPossibleArrival,
             mailType,
+            destinationCountry,
+            isInternational: validation.calculation.isInternational,
           })
 
           return {
@@ -318,13 +340,14 @@ export async function scheduleDelivery(
                 earliestPossibleArrival: validation.calculation.earliestPossibleArrival?.toISOString(),
                 transitDays: validation.calculation.transitDays,
                 bufferDays: validation.calculation.bufferDays,
+                isInternational: validation.calculation.isInternational,
               }
             }
           }
         }
 
-        // Calculate when to actually send the mail
-        const schedule = calculateJobScheduleDate(mailDeliveryMode, data.deliverAt, mailType)
+        // Calculate when to actually send the mail (includes 2-day early arrival buffer)
+        const schedule = calculateJobScheduleDate(mailDeliveryMode, data.deliverAt, mailType, destinationCountry)
         actualDeliverAt = schedule.scheduleDate
         mailTransitDays = schedule.transitDays
         mailTargetDate = data.deliverAt
@@ -335,7 +358,10 @@ export async function scheduleDelivery(
           targetDate: data.deliverAt,
           sendDate: actualDeliverAt,
           transitDays: mailTransitDays,
+          earlyArrivalDays: schedule.earlyArrivalDays,
           mailType,
+          destinationCountry,
+          isInternational: schedule.isInternational,
         })
       }
     }
@@ -361,6 +387,57 @@ export async function scheduleDelivery(
           code: ErrorCodes.NOT_FOUND,
           message: 'Letter not found or you do not have permission to schedule deliveries for it.',
         },
+      }
+    }
+
+    // For physical mail: seal content and determine scheduling mode
+    if (data.channel === 'mail') {
+      const millisecondsPerDay = 1000 * 60 * 60 * 24
+      const effectiveSendDate = mailSendDate ?? actualDeliverAt
+      const daysUntilSend = Math.floor(
+        (effectiveSendDate.getTime() - Date.now()) / millisecondsPerDay
+      )
+
+      // Determine scheduling mode based on Lob's 180-day limit
+      lobScheduleMode = daysUntilSend <= LOB_MAX_SCHEDULE_DAYS ? "immediate" : "deferred"
+
+      // Seal (snapshot) the letter content at scheduling time
+      // This ensures "what you seal is what gets printed"
+      try {
+        // Decrypt letter content
+        const decrypted = await decryptLetter(
+          letter.bodyCiphertext,
+          letter.bodyNonce,
+          letter.keyVersion
+        )
+
+        // Re-encrypt the sealed content (with current key version)
+        const contentToSeal = JSON.stringify({
+          bodyHtml: decrypted.bodyHtml,
+          bodyRich: decrypted.bodyRich,
+        })
+        sealedContent = await encrypt(contentToSeal)
+        sealedTitle = letter.title
+
+        await logger.info('Content sealed for physical mail', {
+          userId: user.id,
+          letterId: data.letterId,
+          lobScheduleMode,
+          daysUntilSend,
+        })
+      } catch (sealError) {
+        await logger.error('Failed to seal letter content for physical mail', sealError, {
+          userId: user.id,
+          letterId: data.letterId,
+        })
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.INTERNAL_ERROR,
+            message: 'Failed to prepare letter for physical mail. Please try again.',
+          },
+        }
       }
     }
 
@@ -517,6 +594,13 @@ export async function scheduleDelivery(
               sendDate: mailSendDate,
               transitDays: mailTransitDays,
               printOptions: data.printOptions ?? { color: false, doubleSided: false },
+              // Sealed content (immutable snapshot at schedule time)
+              lobScheduleMode,
+              sealedCiphertext: sealedContent?.ciphertext,
+              sealedNonce: sealedContent?.nonce,
+              sealedKeyVersion: sealedContent?.keyVersion,
+              sealedTitle,
+              sealedAt: new Date(),
             },
           })
         }
@@ -586,6 +670,157 @@ export async function scheduleDelivery(
           message: 'Failed to schedule delivery. Please try again.',
           // details removed - logged server-side
         },
+      }
+    }
+
+    // For immediate mode physical mail: send to Lob now with send_date
+    // Lob will hold the letter until the send_date
+    if (data.channel === "mail" && lobScheduleMode === "immediate" && sealedContent) {
+      try {
+        // Get the shipping address for Lob
+        const shippingAddress = await prisma.shippingAddress.findUnique({
+          where: { id: data.shippingAddressId },
+        })
+
+        if (!shippingAddress) {
+          throw new Error("Shipping address not found")
+        }
+
+        // Decrypt sealed content for Lob
+        const sealedContentStr = await import("@/server/lib/encryption").then(
+          (m) => m.decrypt(sealedContent.ciphertext, sealedContent.nonce, sealedContent.keyVersion)
+        )
+        const sealedData = JSON.parse(sealedContentStr) as { bodyHtml: string; bodyRich: Record<string, unknown> }
+
+        const printOptions = (data.printOptions ?? { color: false, doubleSided: false }) as {
+          color?: boolean
+          doubleSided?: boolean
+        }
+        const effectiveSendDate = mailSendDate ?? actualDeliverAt
+
+        // Send to Lob with send_date (Lob holds until that date)
+        const lobResult = await sendTemplatedLetter({
+          to: {
+            name: shippingAddress.name,
+            line1: shippingAddress.line1,
+            line2: shippingAddress.line2 ?? undefined,
+            city: shippingAddress.city,
+            state: shippingAddress.state,
+            postalCode: shippingAddress.postalCode,
+            country: shippingAddress.country,
+          },
+          letterContent: sealedData.bodyHtml,
+          writtenDate: new Date(letter.createdAt),
+          deliveryDate: effectiveSendDate,
+          letterTitle: sealedTitle ?? letter.title,
+          recipientName: shippingAddress.name,
+          color: printOptions.color ?? false,
+          doubleSided: printOptions.doubleSided ?? false,
+          description: `Capsule Note: ${sealedTitle ?? letter.title}`,
+          mailType: data.mailType ?? "usps_first_class",
+          idempotencyKey: `mail-delivery-${delivery.id}-schedule`,
+          sendDate: effectiveSendDate, // Lob holds until this date
+        })
+
+        // Update MailDelivery with Lob response
+        // CRITICAL: If DB update fails after Lob success, cancel the Lob job to prevent orphan
+        try {
+          await prisma.mailDelivery.update({
+            where: { deliveryId: delivery.id },
+            data: {
+              lobJobId: lobResult.id,
+              lobSendDate: effectiveSendDate,
+              lobExpectedDelivery: new Date(lobResult.expectedDeliveryDate),
+            },
+          })
+        } catch (dbError) {
+          // Compensation: Cancel Lob job since we can't store its ID
+          await logger.error('DB update failed after Lob success - cancelling Lob job', dbError, {
+            userId: user.id,
+            deliveryId: delivery.id,
+            lobJobId: lobResult.id,
+          })
+
+          try {
+            await lobCancelLetter(lobResult.id)
+            await logger.info('Successfully cancelled orphaned Lob job', {
+              lobJobId: lobResult.id,
+            })
+          } catch (cancelError) {
+            // Log but continue - the Lob job will remain orphaned
+            // Manual cleanup may be needed
+            await logger.error('CRITICAL: Failed to cancel orphaned Lob job - manual cleanup required', cancelError, {
+              lobJobId: lobResult.id,
+              deliveryId: delivery.id,
+            })
+          }
+
+          throw dbError // Re-throw to trigger outer rollback
+        }
+
+        await logger.info('Immediate mode: Letter sent to Lob with send_date', {
+          userId: user.id,
+          deliveryId: delivery.id,
+          lobJobId: lobResult.id,
+          sendDate: effectiveSendDate.toISOString(),
+          expectedDelivery: lobResult.expectedDeliveryDate,
+        })
+      } catch (lobError) {
+        // CRITICAL: Lob API failed - rollback delivery and refund
+        await logger.error('Failed to send letter to Lob - rolling back', lobError, {
+          userId: user.id,
+          deliveryId: delivery.id,
+        })
+
+        // Rollback: delete delivery and refund credit
+        try {
+          await prisma.$transaction(async (tx) => {
+            const currentUser = await tx.user.findUnique({
+              where: { id: user.id },
+              select: { physicalCredits: true },
+            })
+
+            if (currentUser) {
+              await tx.user.update({
+                where: { id: user.id },
+                data: { physicalCredits: { increment: 1 } },
+              })
+
+              await tx.creditTransaction.create({
+                data: {
+                  userId: user.id,
+                  creditType: "physical",
+                  transactionType: "grant_refund",
+                  amount: 1,
+                  balanceBefore: currentUser.physicalCredits,
+                  balanceAfter: currentUser.physicalCredits + 1,
+                  source: delivery.id,
+                  metadata: {
+                    reason: "lob_api_failure_rollback",
+                    letterId: data.letterId,
+                  },
+                },
+              })
+            }
+
+            await tx.delivery.delete({ where: { id: delivery.id } })
+          })
+
+          await invalidateEntitlementsCache(user.id)
+        } catch (rollbackError) {
+          await logger.error('CRITICAL: Failed to rollback delivery after Lob failure', rollbackError, {
+            deliveryId: delivery.id,
+            userId: user.id,
+          })
+        }
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.SERVICE_UNAVAILABLE,
+            message: 'Failed to schedule physical mail delivery. Please try again.',
+          },
+        }
       }
     }
 
@@ -970,12 +1205,17 @@ export async function cancelDelivery(
 
     const { deliveryId } = validated.data
 
-    // Verify ownership and status
+    // Verify ownership and status (include mailDelivery for Lob cancellation)
     const existing = await prisma.delivery.findFirst({
       where: {
         id: deliveryId,
         userId: user.id,
         status: { in: ["scheduled", "failed"] },
+      },
+      include: {
+        mailDelivery: {
+          select: { lobJobId: true },
+        },
       },
     })
 
@@ -997,6 +1237,32 @@ export async function cancelDelivery(
     const isLocked = existing.deliverAt.getTime() - Date.now() <= LOCK_WINDOW_MS
     const shouldRefundEmail = existing.channel === "email" && !isLocked
     const shouldRefundPhysical = existing.channel === "mail" && !isLocked
+
+    // For physical mail with lobJobId: cancel in Lob first
+    // Lob letters can be canceled before the send_date
+    let lobCanceled = false
+    if (existing.channel === "mail" && existing.mailDelivery?.lobJobId) {
+      try {
+        const lobResult = await lobCancelLetter(existing.mailDelivery.lobJobId)
+        lobCanceled = lobResult.deleted
+
+        await logger.info('Lob letter canceled successfully', {
+          userId: user.id,
+          deliveryId,
+          lobJobId: existing.mailDelivery.lobJobId,
+          deleted: lobResult.deleted,
+        })
+      } catch (lobError) {
+        // Log but continue with local cancellation
+        // The letter may have already been printed (past send_date)
+        await logger.warn('Failed to cancel Lob letter (may have been printed)', {
+          userId: user.id,
+          deliveryId,
+          lobJobId: existing.mailDelivery.lobJobId,
+          error: lobError instanceof Error ? lobError.message : String(lobError),
+        })
+      }
+    }
 
     // Cancel delivery
     try {
@@ -1091,12 +1357,19 @@ export async function cancelDelivery(
     await createAuditEvent({
       userId: user.id,
       type: "delivery.canceled",
-      data: { deliveryId },
+      data: {
+        deliveryId,
+        ...(existing.mailDelivery?.lobJobId && {
+          lobJobId: existing.mailDelivery.lobJobId,
+          lobCanceled,
+        }),
+      },
     })
 
     await logger.info('Delivery canceled successfully', {
       userId: user.id,
       deliveryId,
+      ...(existing.mailDelivery?.lobJobId && { lobCanceled }),
     })
 
     revalidatePath(`/deliveries/${deliveryId}`)
@@ -1181,9 +1454,13 @@ export async function retryDelivery(
       }
     }
 
-    // Re-trigger Inngest workflow
+    // Re-trigger Inngest workflow - use correct event based on channel
+    const inngestEventName = existing.channel === "mail"
+      ? "mail.delivery.scheduled"
+      : "delivery.scheduled"
+
     try {
-      const eventId = await triggerInngestEvent("delivery.scheduled", { deliveryId })
+      const eventId = await triggerInngestEvent(inngestEventName, { deliveryId })
 
       // Store event ID for correlation between DB records and Inngest jobs
       if (eventId) {
@@ -1196,13 +1473,15 @@ export async function retryDelivery(
       await logger.info('Inngest retry event sent successfully', {
         deliveryId,
         eventId,
-        event: 'delivery.scheduled',
+        event: inngestEventName,
+        channel: existing.channel,
         attemptCount: existing.attemptCount + 1,
       })
     } catch (inngestError) {
       await logger.error('Failed to send Inngest retry event', inngestError, {
         deliveryId,
-        event: 'delivery.scheduled',
+        event: inngestEventName,
+        channel: existing.channel,
       })
       // Don't fail the entire operation - backstop reconciler will catch this
     }

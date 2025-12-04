@@ -14,7 +14,6 @@ import {
   ArrowLeft,
   Sparkles,
   MapPin,
-  Palette,
   BookOpen,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -245,20 +244,12 @@ export function SealConfirmationV3({
                     {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
                   </p>
                   {/* Print Options Summary */}
-                  {printOptions && (printOptions.color || printOptions.doubleSided) && (
+                  {printOptions?.doubleSided && (
                     <div className="flex items-center gap-2 mt-1.5">
-                      {printOptions.color && (
-                        <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
-                          <Palette className="h-3 w-3" strokeWidth={2} />
-                          {t("printOptions.color")}
-                        </span>
-                      )}
-                      {printOptions.doubleSided && (
-                        <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
-                          <BookOpen className="h-3 w-3" strokeWidth={2} />
-                          {t("printOptions.doubleSided")}
-                        </span>
-                      )}
+                      <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
+                        <BookOpen className="h-3 w-3" strokeWidth={2} />
+                        {t("printOptions.doubleSided")}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -312,6 +303,26 @@ export function SealConfirmationV3({
               })}
             </p>
           </div>
+
+          {/* Physical Mail Content Sealing Warning */}
+          {hasPhysical && (
+            <div
+              className="flex items-start gap-3 p-3 border-2 border-coral/50 bg-coral/10"
+              style={{ borderRadius: "2px" }}
+            >
+              <Stamp className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" strokeWidth={2} />
+              <div className="space-y-0.5">
+                <p className="font-mono text-[10px] text-charcoal font-bold">
+                  {t("physicalMailWarning.title")}
+                </p>
+                <p className="font-mono text-[10px] text-charcoal/70 leading-relaxed">
+                  {t.rich("physicalMailWarning.description", {
+                    bold: (chunks) => <span className="font-bold">{chunks}</span>
+                  })}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Actions */}

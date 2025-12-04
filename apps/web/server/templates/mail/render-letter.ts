@@ -60,18 +60,19 @@ export function renderLetter(options: RenderLetterOptions): string {
     .replace(/\{\{written_date\}\}/g, formattedWrittenDate)
     .replace(/\{\{delivery_date\}\}/g, formattedDeliveryDate)
 
-  // Handle conditional title section
+  // Handle conditional title section with else support
   if (letterTitle) {
+    // If title exists: keep content before {{else}}, remove else block
     rendered = rendered
+      .replace(/\{\{#if letter_title\}\}([\s\S]*?)\{\{else\}\}[\s\S]*?\{\{\/if\}\}/g, "$1")
       .replace(/\{\{#if letter_title\}\}/g, "")
       .replace(/\{\{\/if\}\}/g, "")
       .replace(/\{\{letter_title\}\}/g, escapeHtml(letterTitle))
   } else {
-    // Remove the entire title section if no title
-    rendered = rendered.replace(
-      /\{\{#if letter_title\}\}[\s\S]*?\{\{\/if\}\}/g,
-      ""
-    )
+    // If no title: keep content after {{else}}, remove if block
+    rendered = rendered
+      .replace(/\{\{#if letter_title\}\}[\s\S]*?\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g, "$1")
+      .replace(/\{\{#if letter_title\}\}[\s\S]*?\{\{\/if\}\}/g, "")
   }
 
   return rendered

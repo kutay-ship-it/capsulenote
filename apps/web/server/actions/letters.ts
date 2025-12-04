@@ -207,9 +207,22 @@ export async function updateLetter(
 
     const { id, ...data } = validated.data
 
-    // Verify ownership
+    // Verify ownership and check for scheduled physical mail deliveries
     const existing = await prisma.letter.findFirst({
       where: { id, userId: user.id, deletedAt: null },
+      include: {
+        deliveries: {
+          where: {
+            channel: 'mail',
+            status: 'scheduled',
+          },
+          include: {
+            mailDelivery: {
+              select: { sealedAt: true },
+            },
+          },
+        },
+      },
     })
 
     if (!existing) {
@@ -223,6 +236,28 @@ export async function updateLetter(
         error: {
           code: ErrorCodes.NOT_FOUND,
           message: 'Letter not found or you do not have permission to edit it.',
+        },
+      }
+    }
+
+    // Block content edits if letter has sealed physical mail delivery
+    const hasSealedDelivery = existing.deliveries.some(
+      (d) => d.mailDelivery?.sealedAt != null
+    )
+    const isContentEdit = data.bodyRich !== undefined || data.bodyHtml !== undefined
+
+    if (hasSealedDelivery && isContentEdit) {
+      await logger.warn('Attempted to edit sealed letter content', {
+        userId: user.id,
+        letterId: id,
+        sealedDeliveryCount: existing.deliveries.filter((d) => d.mailDelivery?.sealedAt).length,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.VALIDATION_FAILED,
+          message: 'This letter cannot be edited because it has a scheduled physical mail delivery. Cancel the delivery first to make changes.',
         },
       }
     }

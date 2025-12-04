@@ -279,6 +279,13 @@ enum MailDeliveryMode {
   @@map("mail_delivery_mode")
 }
 
+enum LobScheduleMode {
+  immediate // Sent to Lob with send_date, Lob holds until print
+  deferred  // Inngest holds, will send to Lob at D-90
+
+  @@map("lob_schedule_mode")
+}
+
 model MailDelivery {
   deliveryId         String            @id @map("delivery_id") @db.Uuid
   shippingAddressId  String            @map("shipping_address_id") @db.Uuid
@@ -292,10 +299,26 @@ model MailDelivery {
   trackingStatus     String?           @map("tracking_status")
   createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  // Lob scheduling mode: immediate (<180 days) vs deferred (>180 days)
+  lobScheduleMode    LobScheduleMode   @default(deferred) @map("lob_schedule_mode")
+
+  // Sealed content snapshot (encrypted, immutable after schedule)
+  // This ensures "what you seal is what gets printed"
+  sealedCiphertext   Bytes?            @map("sealed_ciphertext")
+  sealedNonce        Bytes?            @map("sealed_nonce")
+  sealedKeyVersion   Int?              @map("sealed_key_version")
+  sealedTitle        String?           @map("sealed_title")
+  sealedAt           DateTime?         @map("sealed_at") @db.Timestamptz(3)
+
+  // Lob API response data for scheduled letters
+  lobSendDate        DateTime?         @map("lob_send_date") @db.Timestamptz(3)
+  lobExpectedDelivery DateTime?        @map("lob_expected_delivery") @db.Timestamptz(3)
+
   delivery        Delivery         @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
   shippingAddress ShippingAddress  @relation(fields: [shippingAddressId], references: [id])
 
   @@index([lobJobId])
+  @@index([lobScheduleMode])
   @@map("mail_deliveries")
 }
 

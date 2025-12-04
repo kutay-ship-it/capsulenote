@@ -163,7 +163,21 @@ async function LetterDetailContent({ id }: { id: string }) {
   const formattedDate = format(new Date(letter.createdAt), "MMMM d, yyyy")
   const isSent = latestDelivery?.status === "sent"
   const isScheduled = latestDelivery?.status === "scheduled" || latestDelivery?.status === "processing"
-  const isLocked = hasDelivery && !isSent
+
+  // Check if letter has any sealed physical mail delivery (content cannot be edited)
+  const hasSealedPhysicalMail = letter.deliveries.some(
+    (d) => d.channel === "mail" && d.mailDelivery?.sealedAt != null
+  )
+
+  // Letter is locked if it has a sealed physical mail delivery
+  // Email-only deliveries can still be edited (content isn't sealed until 72h before)
+  const isLocked = hasSealedPhysicalMail || (hasDelivery && isSent)
+
+  // Allow editing if: no deliveries, OR only email deliveries (not sealed), OR all deliveries sent/failed
+  const canEdit = !hasDelivery || (!hasSealedPhysicalMail && !isSent && letter.deliveries.every(
+    d => d.status === "failed" || d.status === "canceled"
+  ))
+
   const hasBeenOpened = !!letter.firstOpenedAt
   const formattedOpenedDate = letter.firstOpenedAt
     ? format(new Date(letter.firstOpenedAt), "MMMM d, yyyy 'at' h:mm a")
@@ -200,8 +214,8 @@ async function LetterDetailContent({ id }: { id: string }) {
 
         {/* Top-right action icons */}
         <div className="absolute top-4 right-6 flex items-center gap-2">
-          {/* Edit button - only for drafts */}
-          {!hasDelivery && (
+          {/* Edit button - available when content can still be edited */}
+          {canEdit && (
             <Link href={{ pathname: "/letters/[id]/edit", params: { id } }}>
               <button
                 className="flex h-8 w-8 items-center justify-center border-2 border-charcoal bg-duck-yellow text-charcoal hover:bg-duck-yellow/80 transition-colors"
@@ -212,7 +226,7 @@ async function LetterDetailContent({ id }: { id: string }) {
               </button>
             </Link>
           )}
-          {/* Schedule button - only for drafts */}
+          {/* Schedule button - only for letters without scheduled deliveries */}
           {!hasDelivery && (
             <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
               <button
@@ -224,8 +238,18 @@ async function LetterDetailContent({ id }: { id: string }) {
               </button>
             </Link>
           )}
+          {/* Content Sealed indicator - for physical mail (content frozen for printing) */}
+          {hasSealedPhysicalMail && (
+            <div
+              className="flex h-8 w-8 items-center justify-center border-2 border-coral/50 bg-coral/10"
+              style={{ borderRadius: "2px" }}
+              title="Content sealed for printing"
+            >
+              <Stamp className="h-4 w-4 text-coral" strokeWidth={2} />
+            </div>
+          )}
           {/* Lock indicator - for scheduled letters */}
-          {isLocked && (
+          {isLocked && !hasSealedPhysicalMail && (
             <div
               className="flex h-8 w-8 items-center justify-center border-2 border-charcoal/20 bg-charcoal/5"
               style={{ borderRadius: "2px" }}

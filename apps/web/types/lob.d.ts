@@ -57,12 +57,25 @@ declare module "lob" {
     merge_variables?: Record<string, unknown>
     metadata?: Record<string, string>
     return_envelope?: boolean
+    /** Address placement on letter: top_first_page shows through window envelope */
+    address_placement?: "top_first_page" | "insert_blank_page"
+    /** Idempotency key to prevent duplicate sends on retry */
+    idempotency_key?: string
+    /**
+     * Date to send the letter (YYYY-MM-DD or ISO 8601 datetime)
+     * Lob holds the letter until this date. Max 180 days in future.
+     * Letters with send_date are cancellable until the send date.
+     * @see https://docs.lob.com/#tag/Letters/operation/letter_create
+     */
+    send_date?: string
   }
 
   interface Letter {
     id: string
     description?: string
     expected_delivery_date: string
+    /** Scheduled send date if letter was created with send_date param */
+    send_date?: string
     date_created: string
     date_modified: string
     deleted?: boolean

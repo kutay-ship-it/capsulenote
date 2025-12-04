@@ -288,6 +288,10 @@
     "physicalMail": "FİZİKSEL POSTA",
     "creditCost": "1 kredi ({from} → {to})",
     "warning": "Mühürlendikten sonra mektubun teslimat tarihine kadar <bold>kilitli ve şifreli</bold> olacak. Okuyamaz veya düzenleyemezsin.",
+    "physicalMailWarning": {
+      "title": "Önemli: Fiziksel Posta İçeriği Kesindir",
+      "description": "Mektup içeriğin baskı için hemen mühürlenecek. E-postadan farklı olarak, planlamadan sonra <bold>fiziksel mektubu düzenleyemezsin</bold>, teslimat tarihinden önce bile."
+    },
     "goBack": "GERİ DÖN",
     "sealing": "MÜHÜRLENİYOR...",
     "sealAndSchedule": "MÜHÜRLE VE PLANLA"

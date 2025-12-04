@@ -48,12 +48,22 @@ export interface MailOptions {
   useType?: "marketing" | "operational"
   /** USPS mail class - defaults to first_class for faster delivery */
   mailType?: "usps_first_class" | "usps_standard"
+  /** Idempotency key to prevent duplicate sends on retry (format: delivery-{id}-attempt-{n}) */
+  idempotencyKey?: string
+  /**
+   * Scheduled send date (Lob holds until this date)
+   * Max 180 days in future. Format: Date object or YYYY-MM-DD string.
+   * Letters with send_date are cancellable until the send date.
+   */
+  sendDate?: Date | string
 }
 
 export interface SendLetterResult {
   id: string
   url: string
   expectedDeliveryDate: string
+  /** Scheduled send date if letter was created with sendDate */
+  sendDate?: string
   carrier: string
   trackingNumber?: string
   thumbnails?: { small: string; medium: string; large: string }[]
@@ -89,8 +99,8 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
   const envelopeConfig = getEnvelopeConfig()
 
   try {
-    // Type assertion needed for Lob SDK v6 compatibility with some parameters
-    const letter = await lob.letters.create({
+    // Build request params
+    const params: Parameters<typeof lob.letters.create>[0] = {
       description: options.description || "Letter to Future Self",
       to: {
         name: options.to.name,
@@ -108,12 +118,28 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
       address_placement: envelopeConfig.address_placement,
       mail_type: options.mailType ?? "usps_first_class",
       use_type: options.useType ?? "operational", // Required by Lob API
-    } as Parameters<typeof lob.letters.create>[0])
+    }
+
+    // Add idempotency key if provided (prevents duplicate sends on retry)
+    if (options.idempotencyKey) {
+      params.idempotency_key = options.idempotencyKey
+    }
+
+    // Add scheduled send date if provided (Lob holds letter until this date)
+    if (options.sendDate) {
+      const sendDate = options.sendDate instanceof Date
+        ? options.sendDate.toISOString().split("T")[0]
+        : options.sendDate
+      params.send_date = sendDate
+    }
+
+    const letter = await lob.letters.create(params)
 
     return {
       id: letter.id,
       url: letter.url,
       expectedDeliveryDate: letter.expected_delivery_date,
+      sendDate: letter.send_date,
       carrier: letter.carrier,
       trackingNumber: (letter as { tracking_number?: string }).tracking_number,
       thumbnails: letter.thumbnails as unknown as { small: string; medium: string; large: string }[],
@@ -321,6 +347,13 @@ export interface TemplatedLetterOptions {
   mailType?: "usps_first_class" | "usps_standard"
   /** Use minimal template (smaller file size) */
   minimalTemplate?: boolean
+  /** Idempotency key to prevent duplicate sends on retry (format: delivery-{id}-attempt-{n}) */
+  idempotencyKey?: string
+  /**
+   * Scheduled send date (Lob holds until this date)
+   * Max 180 days in future. Letters are cancellable until send date.
+   */
+  sendDate?: Date | string
 }
 
 /**
@@ -368,6 +401,8 @@ export async function sendTemplatedLetter(
     description: options.description || `Capsule Note: ${options.letterTitle || "Letter to Future Self"}`,
     mailType: options.mailType,
     useType: "operational", // Capsule Note letters are always operational
+    idempotencyKey: options.idempotencyKey,
+    sendDate: options.sendDate,
   })
 }
 

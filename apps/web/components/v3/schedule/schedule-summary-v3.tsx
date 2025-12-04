@@ -14,7 +14,6 @@ import {
   Stamp,
   ArrowLeft,
   Clock,
-  Palette,
   BookOpen,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -75,8 +74,7 @@ export function ScheduleSummaryV3({
   // Calculate costs
   const emailCost = hasEmail ? 1 : 0
   const mailCost = hasMail ? 1 : 0
-  const colorCost = hasMail && printOptions?.color ? 1 : 0
-  const totalCost = emailCost + mailCost + colorCost
+  const totalCost = emailCost + mailCost
 
   // Calculate lock date
   const lockDate = subHours(deliveryDate, LOCK_WINDOW_HOURS)
@@ -244,20 +242,12 @@ export function ScheduleSummaryV3({
                   {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
                 </p>
                 {/* Print Options */}
-                {printOptions && (printOptions.color || printOptions.doubleSided) && (
+                {printOptions?.doubleSided && (
                   <div className="flex items-center gap-2 mt-1.5">
-                    {printOptions.color && (
-                      <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
-                        <Palette className="h-3 w-3" strokeWidth={2} />
-                        Color
-                      </span>
-                    )}
-                    {printOptions.doubleSided && (
-                      <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
-                        <BookOpen className="h-3 w-3" strokeWidth={2} />
-                        Double-sided
-                      </span>
-                    )}
+                    <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
+                      <BookOpen className="h-3 w-3" strokeWidth={2} />
+                      Double-sided
+                    </span>
                   </div>
                 )}
               </div>
@@ -315,7 +305,7 @@ export function ScheduleSummaryV3({
                     <span className="font-mono text-xs text-charcoal">Physical Mail</span>
                   </div>
                   <span className="font-mono text-xs font-bold text-charcoal">
-                    {physicalCredits} → {physicalCredits - (mailCost + colorCost)}
+                    {physicalCredits} → {physicalCredits - mailCost}
                   </span>
                 </div>
               )}
@@ -342,6 +332,24 @@ export function ScheduleSummaryV3({
           <span className="font-bold text-charcoal">Once sealed</span>, this letter will be encrypted and locked until delivery. You won&apos;t be able to read or edit it again until it arrives.
         </p>
       </div>
+
+      {/* Physical Mail Content Sealing Warning */}
+      {hasMail && (
+        <div
+          className="flex items-start gap-3 p-3 border-2 border-coral/50 bg-coral/10"
+          style={{ borderRadius: "2px" }}
+        >
+          <Stamp className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" strokeWidth={2} />
+          <div className="space-y-1">
+            <p className="font-mono text-[10px] text-charcoal font-bold leading-relaxed">
+              IMPORTANT: Physical Mail Content Is Final
+            </p>
+            <p className="font-mono text-[10px] text-charcoal/70 leading-relaxed">
+              Your letter content will be sealed immediately for printing. Unlike email, you <span className="font-bold">cannot edit the physical letter</span> after scheduling, even before the delivery date.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       <div className="flex gap-3">

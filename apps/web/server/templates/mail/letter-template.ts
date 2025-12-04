@@ -112,7 +112,7 @@ export const LETTER_TEMPLATE_HTML = `
       font-size: 11pt;
       text-transform: uppercase;
       letter-spacing: 0.15em;
-      opacity: 0.7;
+      color: #555555;
       margin-bottom: 48px;
     }
 
@@ -134,14 +134,22 @@ export const LETTER_TEMPLATE_HTML = `
       font-weight: bold;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      margin-bottom: 48px;
+      margin-bottom: 16px;
     }
 
     .cover-date {
       font-size: 10pt;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      opacity: 0.6;
+      color: #555555;
+      margin-bottom: 32px;
+    }
+
+    .cover-thanks {
+      font-size: 10pt;
+      font-style: italic;
+      color: #555555;
+      margin-bottom: 48px;
     }
 
     .cover-footer {
@@ -150,7 +158,7 @@ export const LETTER_TEMPLATE_HTML = `
       font-size: 8pt;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      opacity: 0.5;
+      color: #666666;
     }
 
     /* ================================
@@ -186,7 +194,7 @@ export const LETTER_TEMPLATE_HTML = `
 
     .letter-date-label {
       font-size: 8pt;
-      opacity: 0.6;
+      color: #666666;
     }
 
     /* Title section */
@@ -252,7 +260,7 @@ export const LETTER_TEMPLATE_HTML = `
 
     .signature-date {
       font-size: 9pt;
-      opacity: 0.7;
+      color: #555555;
       margin-top: 4px;
     }
 
@@ -264,7 +272,7 @@ export const LETTER_TEMPLATE_HTML = `
       font-size: 8pt;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      opacity: 0.5;
+      color: #666666;
       text-align: center;
     }
 
@@ -288,15 +296,16 @@ export const LETTER_TEMPLATE_HTML = `
     <div class="cover-brand">
       <div class="cover-logo">C</div>
       <div class="cover-title">Capsule Note</div>
-      <div class="cover-tagline">A Letter to Your Future Self</div>
+      <div class="cover-tagline">A Letter from Past</div>
     </div>
 
     <div class="cover-divider"></div>
 
-    <div class="cover-message">A message from your past self for</div>
+    <div class="cover-message">This message was sent to you from</div>
     <div class="cover-recipient">{{recipient_name}}</div>
+    <div class="cover-date">Sent on {{written_date}}</div>
 
-    <div class="cover-date">Delivered on {{delivery_date}}</div>
+    <div class="cover-thanks">Thank you for sharing such a special moment with us.</div>
 
     <div class="cover-footer">
       <span class="footer-icon"></span>
@@ -309,30 +318,15 @@ export const LETTER_TEMPLATE_HTML = `
        ================================ -->
   <div class="letter-page">
     <header class="letter-header">
-      <div class="letter-brand">Capsule Note</div>
+      <div class="letter-brand">{{#if letter_title}}{{letter_title}}{{else}}Capsule Note{{/if}}</div>
       <div class="letter-date">
         <div class="letter-date-label">Written</div>
         <div>{{written_date}}</div>
       </div>
     </header>
 
-    {{#if letter_title}}
-    <div class="title-section">
-      <div class="letter-title">{{letter_title}}</div>
-    </div>
-    {{/if}}
-
-    <div class="greeting">
-      Dear {{recipient_name}},
-    </div>
-
     <div class="content">
       {{letter_content}}
-    </div>
-
-    <div class="signature">
-      <div class="signature-text">With hope for the future,</div>
-      <div class="signature-name">Your Past Self</div>
     </div>
 
     <footer class="letter-footer">
@@ -404,7 +398,7 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
       font-size: 9pt;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      opacity: 0.6;
+      color: #555555;
       margin-bottom: 32px;
     }
     .cover-divider {
@@ -427,14 +421,21 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
     .cover-date {
       font-size: 9pt;
       text-transform: uppercase;
-      opacity: 0.5;
+      color: #555555;
+      margin-bottom: 24px;
+    }
+    .cover-thanks {
+      font-size: 9pt;
+      font-style: italic;
+      color: #555555;
+      margin-bottom: 32px;
     }
     .cover-footer {
       margin-top: auto;
       padding-top: 24px;
       font-size: 7pt;
       text-transform: uppercase;
-      opacity: 0.4;
+      color: #666666;
     }
 
     /* PAGE 2: LETTER */
@@ -447,7 +448,7 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
       background: #ffffff;
     }
     .brand { font-size: 14pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
-    .date-info { font-size: 8pt; text-transform: uppercase; opacity: 0.6; }
+    .date-info { font-size: 8pt; text-transform: uppercase; color: #666666; }
     .title-section {
       border: 2px solid #383838;
       padding: 10px 16px;
@@ -459,8 +460,8 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
     .content { margin-bottom: 24px; text-align: justify; }
     .content p { margin-bottom: 12px; }
     .signature { border-top: 2px dashed #383838; padding-top: 12px; margin-top: 24px; }
-    .footer { margin-top: 32px; font-size: 8pt; text-transform: uppercase; opacity: 0.5; text-align: center; }
-    .footer-icon { display: inline-block; width: 6px; height: 6px; background: #383838; margin-right: 4px; vertical-align: middle; }
+    .footer { margin-top: 32px; font-size: 8pt; text-transform: uppercase; color: #666666; text-align: center; }
+    .footer-icon { display: inline-block; width: 6px; height: 6px; background: #666666; margin-right: 4px; vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -469,32 +470,23 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
     <div class="cover-brand">
       <div class="cover-logo">C</div>
       <div class="cover-title">Capsule Note</div>
-      <div class="cover-tagline">A Letter to Your Future Self</div>
+      <div class="cover-tagline">A Letter from Past</div>
     </div>
     <div class="cover-divider"></div>
-    <div class="cover-message">A message from your past self for</div>
+    <div class="cover-message">This message was sent to you from</div>
     <div class="cover-recipient">{{recipient_name}}</div>
-    <div class="cover-date">Delivered on {{delivery_date}}</div>
+    <div class="cover-date">Sent on {{written_date}}</div>
+    <div class="cover-thanks">Thank you for sharing such a special moment with us.</div>
     <div class="cover-footer">capsulenote.com</div>
   </div>
 
   <!-- PAGE 2: LETTER -->
   <div class="letter-page">
     <header class="header">
-      <div class="brand">Capsule Note</div>
+      <div class="brand">{{#if letter_title}}{{letter_title}}{{else}}Capsule Note{{/if}}</div>
       <div class="date-info">Written {{written_date}}</div>
     </header>
-    {{#if letter_title}}
-    <div class="title-section">
-      <div class="letter-title">{{letter_title}}</div>
-    </div>
-    {{/if}}
-    <div class="greeting">Dear {{recipient_name}},</div>
     <div class="content">{{letter_content}}</div>
-    <div class="signature">
-      <div>With hope for the future,</div>
-      <div><strong>Your Past Self</strong></div>
-    </div>
     <footer class="footer"><span class="footer-icon"></span>Capsule Note &mdash; capsulenote.com</footer>
   </div>
 </body>

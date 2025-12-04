@@ -132,10 +132,10 @@ export function ScheduleWizardV3({
     recipientEmail: userEmail,
     recipientName: "",
     emailSubject: "",
-    mailDeliveryMode: "send_on",
+    mailDeliveryMode: "arrive_by",
     selectedAddressId: null,
     selectedAddress: null,
-    printOptions: { color: false, doubleSided: false },
+    printOptions: { color: false, doubleSided: true },
   })
 
   // Refresh eligibility data from server

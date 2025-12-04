@@ -9,6 +9,8 @@ import {
   X,
   RotateCcw,
   Calendar,
+  Stamp,
+  Info,
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -32,6 +34,9 @@ interface DeliveryInfo {
     shippingAddressId: string
     trackingStatus?: string | null
     previewUrl?: string | null
+    sealedAt?: Date | string | null
+    lobScheduleMode?: "immediate" | "deferred" | null
+    lobSendDate?: Date | string | null
   } | null
 }
 
@@ -164,6 +169,21 @@ export function DeliveryTimelineV3({
                       To: {delivery.emailDelivery.toEmail}
                     </p>
                   )}
+
+                {/* Physical mail sealed status indicator */}
+                {delivery.channel === "mail" && delivery.mailDelivery?.sealedAt && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Stamp className="h-3 w-3 text-coral" strokeWidth={2} />
+                    <span className="font-mono text-[10px] text-coral uppercase tracking-wider">
+                      Content Sealed for Print
+                    </span>
+                    {delivery.mailDelivery.lobScheduleMode === "immediate" && delivery.mailDelivery.lobSendDate && (
+                      <span className="font-mono text-[10px] text-charcoal/50">
+                        • Ships {format(new Date(delivery.mailDelivery.lobSendDate), "MMM d")}
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {isFailed && delivery.lastError && (
                   <p className="mt-1 font-mono text-xs text-coral">
