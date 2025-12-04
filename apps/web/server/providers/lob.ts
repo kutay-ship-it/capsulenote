@@ -120,16 +120,18 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
   }
 }
 
-export async function verifyAddress(
-  address: Omit<MailingAddress, "name">
+/**
+ * Verify a US address using Lob's US Verification API
+ */
+export async function verifyUsAddress(
+  address: Omit<MailingAddress, "name" | "country">
 ): Promise<AddressVerificationResult> {
   if (!lob) {
     throw new Error("Lob API key not configured - set LOB_API_KEY environment variable")
   }
 
   try {
-    // Access usVerifications via type assertion for SDK compatibility
-    const verification = await (lob as any).usVerifications.verify({
+    const verification = await lob.usVerifications.verify({
       primary_line: address.line1,
       secondary_line: address.line2,
       city: address.city,
@@ -150,22 +152,84 @@ export async function verifyAddress(
         ? {
             primaryLine: verification.primary_line,
             secondaryLine: verification.secondary_line,
-            city: verification.components?.city,
-            state: verification.components?.state,
-            zipCode: verification.components?.zip_code,
+            city: verification.components?.city ?? address.city,
+            state: verification.components?.state ?? address.state,
+            zipCode: verification.components?.zip_code ?? address.postalCode,
             zipCodePlus4: verification.components?.zip_code_plus_4,
           }
         : undefined,
       error: !isDeliverable ? verification.deliverability : undefined,
     }
   } catch (error: any) {
-    console.error("Address verification error:", error?.message || error)
+    console.error("US address verification error:", error?.message || error)
     return {
       isValid: false,
       deliverability: "verification_failed",
       error: error?.message || "Verification failed",
     }
   }
+}
+
+/**
+ * Verify an international address using Lob's International Verification API
+ */
+export async function verifyIntlAddress(
+  address: Omit<MailingAddress, "name">
+): Promise<AddressVerificationResult> {
+  if (!lob) {
+    throw new Error("Lob API key not configured - set LOB_API_KEY environment variable")
+  }
+
+  try {
+    const verification = await lob.intlVerifications.verify({
+      primary_line: address.line1,
+      secondary_line: address.line2,
+      city: address.city,
+      state: address.state,
+      postal_code: address.postalCode,
+      country: address.country,
+    })
+
+    const isDeliverable =
+      verification.deliverability === "deliverable" ||
+      verification.deliverability === "deliverable_missing_info"
+
+    return {
+      isValid: isDeliverable,
+      deliverability: verification.deliverability,
+      suggestedAddress: isDeliverable
+        ? {
+            primaryLine: verification.primary_line,
+            secondaryLine: verification.secondary_line,
+            city: verification.components?.city ?? address.city,
+            state: verification.components?.state ?? address.state,
+            zipCode: verification.components?.postal_code ?? address.postalCode,
+          }
+        : undefined,
+      error: !isDeliverable ? verification.deliverability : undefined,
+    }
+  } catch (error: any) {
+    console.error("International address verification error:", error?.message || error)
+    return {
+      isValid: false,
+      deliverability: "verification_failed",
+      error: error?.message || "Verification failed",
+    }
+  }
+}
+
+/**
+ * Unified address verification - auto-routes to US or International based on country
+ */
+export async function verifyAddress(
+  address: Omit<MailingAddress, "name">
+): Promise<AddressVerificationResult> {
+  // Route to appropriate verification endpoint based on country
+  const { country, ...usAddressFields } = address
+  if (country === "US" || country === "USA" || country === "United States") {
+    return verifyUsAddress(usAddressFields)
+  }
+  return verifyIntlAddress(address)
 }
 
 /**

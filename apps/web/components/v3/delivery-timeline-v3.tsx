@@ -16,6 +16,7 @@ import { Link } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { CancelDeliveryDialogV3 } from "./cancel-delivery-dialog-v3"
+import { MailTrackingRoad } from "./mail-tracking-road"
 import { retryDelivery } from "@/server/actions/deliveries"
 
 interface DeliveryInfo {
@@ -29,6 +30,8 @@ interface DeliveryInfo {
   } | null
   mailDelivery?: {
     shippingAddressId: string
+    trackingStatus?: string | null
+    previewUrl?: string | null
   } | null
 }
 
@@ -167,6 +170,15 @@ export function DeliveryTimelineV3({
                     {delivery.lastError}
                   </p>
                 )}
+
+                {/* Mail Tracking Road - only for physical mail with tracking */}
+                {delivery.channel === "mail" &&
+                  delivery.mailDelivery?.trackingStatus && (
+                    <MailTrackingRoad
+                      trackingStatus={delivery.mailDelivery.trackingStatus}
+                      className="mt-3"
+                    />
+                  )}
               </div>
 
               {/* Actions */}

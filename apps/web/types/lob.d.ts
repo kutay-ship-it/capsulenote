@@ -19,23 +19,29 @@ declare module "lob" {
 
   interface AddressVerifyResult {
     id: string
-    deliverability: "deliverable" | "deliverable_incorrect_unit" | "undeliverable" | "no_match"
+    deliverability:
+      | "deliverable"
+      | "deliverable_unnecessary_unit"
+      | "deliverable_incorrect_unit"
+      | "deliverable_missing_unit"
+      | "undeliverable"
+      | "no_match"
     primary_line: string
     secondary_line?: string
     urbanization?: string
     last_line: string
     components: {
-      primary_number: string
-      street_predirection: string
-      street_name: string
-      street_suffix: string
-      street_postdirection: string
-      secondary_designator: string
-      secondary_number: string
-      city: string
-      state: string
-      zip_code: string
-      zip_code_plus_4: string
+      primary_number?: string
+      street_predirection?: string
+      street_name?: string
+      street_suffix?: string
+      street_postdirection?: string
+      secondary_designator?: string
+      secondary_number?: string
+      city?: string
+      state?: string
+      zip_code?: string
+      zip_code_plus_4?: string
     }
   }
 
@@ -81,6 +87,50 @@ declare module "lob" {
     verify(address: Partial<Address>): Promise<AddressVerifyResult>
   }
 
+  interface UsVerificationParams {
+    primary_line: string
+    secondary_line?: string
+    city: string
+    state: string
+    zip_code: string
+  }
+
+  interface UsVerifications {
+    verify(params: UsVerificationParams): Promise<AddressVerifyResult>
+  }
+
+  interface IntlVerificationParams {
+    primary_line: string
+    secondary_line?: string
+    city: string
+    state?: string
+    postal_code?: string
+    country: string
+  }
+
+  interface IntlAddressVerifyResult {
+    id: string
+    recipient?: string
+    primary_line: string
+    secondary_line?: string
+    last_line: string
+    country: string
+    deliverability: "deliverable" | "deliverable_missing_info" | "undeliverable" | "no_match"
+    components: {
+      primary_number?: string
+      street_name?: string
+      city?: string
+      state?: string
+      postal_code?: string
+      country?: string
+      country_short?: string
+    }
+  }
+
+  interface IntlVerifications {
+    verify(params: IntlVerificationParams): Promise<IntlAddressVerifyResult>
+  }
+
   interface Letters {
     create(params: LetterCreateParams): Promise<Letter>
     retrieve(id: string): Promise<Letter>
@@ -95,6 +145,8 @@ declare module "lob" {
     constructor(apiKey: string, config?: LobConfig)
     addresses: Addresses
     letters: Letters
+    usVerifications: UsVerifications
+    intlVerifications: IntlVerifications
   }
 
   export = Lob

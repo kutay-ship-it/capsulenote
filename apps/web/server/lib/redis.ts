@@ -57,6 +57,12 @@ export const ratelimit = {
       analytics: true,
       prefix: "ratelimit:webhook:resend",
     }),
+    lob: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(100, "1 m"),
+      analytics: true,
+      prefix: "ratelimit:webhook:lob",
+    }),
   },
 
   // Cron job rate limit: 20 per hour (prevents abuse)
