@@ -9,6 +9,8 @@ import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
+import { getDeliveryEligibility } from "@/server/actions/entitlements"
 import { DateSelectorV3 } from "./date-selector-v3"
 import { DeliveryCountdownV3 } from "./delivery-countdown-v3"
 import { TimelineVisualizerV3 } from "./timeline-visualizer-v3"
@@ -18,10 +20,28 @@ import { EmailConfigV3 } from "./email-config-v3"
 import { MailConfigV3, type MailDeliveryMode, type PrintOptions } from "./mail-config-v3"
 import { ScheduleSummaryV3 } from "./schedule-summary-v3"
 import { SealAnimationV3 } from "./seal-animation-v3"
+import { ExistingDeliveriesBannerV3 } from "./existing-deliveries-banner-v3"
+import { PhysicalMailTrialModal } from "@/components/v3/physical-mail-trial-modal"
+import { PhysicalMailUpgradeModal } from "@/components/v3/physical-mail-upgrade-modal"
 import { scheduleDelivery } from "@/server/actions/deliveries"
 import type { ShippingAddress } from "@/server/actions/addresses"
+import type { DeliveryChannel as PrismaDeliveryChannel, DeliveryStatus } from "@prisma/client"
 
 type WizardStep = 1 | 2 | 3
+
+interface ExistingDelivery {
+  id: string
+  channel: PrismaDeliveryChannel
+  status: DeliveryStatus
+  deliverAt: Date
+  emailDelivery?: {
+    toEmail: string
+    subject: string
+  } | null
+  mailDelivery?: {
+    shippingAddressId: string
+  } | null
+}
 
 interface ScheduleWizardV3Props {
   letterId: string
@@ -33,7 +53,11 @@ interface ScheduleWizardV3Props {
   physicalCredits: number
   isPhysicalLocked?: boolean
   canShowTrialOffer?: boolean
-  onPhysicalUpsellTriggered?: () => void
+  // Eligibility flags for internal upsell modal logic
+  isDigitalCapsule?: boolean
+  canPurchasePhysicalTrial?: boolean
+  hasUsedPhysicalTrial?: boolean
+  existingDeliveries?: ExistingDelivery[]
 }
 
 interface WizardState {
@@ -69,7 +93,10 @@ export function ScheduleWizardV3({
   physicalCredits,
   isPhysicalLocked = false,
   canShowTrialOffer = false,
-  onPhysicalUpsellTriggered,
+  isDigitalCapsule = false,
+  canPurchasePhysicalTrial = false,
+  hasUsedPhysicalTrial = false,
+  existingDeliveries = [],
 }: ScheduleWizardV3Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -80,7 +107,22 @@ export function ScheduleWizardV3({
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [showCelebration, setShowCelebration] = React.useState(false)
 
-  // Wizard state
+  // Upsell modal state
+  const [showTrialModal, setShowTrialModal] = React.useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = React.useState(false)
+
+  // Track if user was trying to select physical mail when upsell triggered
+  const [pendingMailSelection, setPendingMailSelection] = React.useState(false)
+
+  // Dynamic eligibility state that can be refreshed
+  const [currentEligibility, setCurrentEligibility] = React.useState({
+    physicalCredits,
+    canPurchasePhysicalTrial,
+    hasUsedPhysicalTrial,
+    isDigitalCapsule,
+  })
+
+  // Wizard state (moved up so refreshEligibility can access it)
   const [state, setState] = React.useState<WizardState>({
     deliveryDate: undefined,
     deliveryTime: "09:00",
@@ -95,6 +137,86 @@ export function ScheduleWizardV3({
     selectedAddress: null,
     printOptions: { color: false, doubleSided: false },
   })
+
+  // Refresh eligibility data from server
+  const refreshEligibility = React.useCallback(async () => {
+    try {
+      const freshEligibility = await getDeliveryEligibility()
+      setCurrentEligibility({
+        physicalCredits: freshEligibility.physicalCredits,
+        canPurchasePhysicalTrial: freshEligibility.canPurchasePhysicalTrial,
+        hasUsedPhysicalTrial: freshEligibility.hasUsedPhysicalTrial,
+        isDigitalCapsule: freshEligibility.isDigitalCapsule,
+      })
+
+      // If user was trying to select mail and now has credits, auto-select mail
+      if (pendingMailSelection && freshEligibility.physicalCredits > 0) {
+        if (!state.channels.includes("mail")) {
+          setState(prev => ({
+            ...prev,
+            channels: [...prev.channels, "mail"]
+          }))
+        }
+        setPendingMailSelection(false)
+        toast.success("Physical mail unlocked!", {
+          description: "You can now configure your physical letter delivery.",
+        })
+      }
+    } catch (error) {
+      console.error("Failed to refresh eligibility:", error)
+    }
+  }, [pendingMailSelection, state.channels])
+
+  // Listen for credit updates from other tabs (e.g., after Stripe checkout)
+  useCreditsUpdateListener(refreshEligibility)
+
+  // Derive current locked/trial states from dynamic eligibility
+  const currentIsPhysicalLocked =
+    currentEligibility.isDigitalCapsule &&
+    currentEligibility.physicalCredits <= 0 &&
+    !currentEligibility.canPurchasePhysicalTrial &&
+    currentEligibility.hasUsedPhysicalTrial
+
+  const currentCanShowTrialOffer =
+    currentEligibility.isDigitalCapsule &&
+    currentEligibility.physicalCredits <= 0 &&
+    currentEligibility.canPurchasePhysicalTrial
+
+  // Handler for when user clicks locked physical mail (triggers appropriate upsell modal)
+  const handlePhysicalUpsellTriggered = React.useCallback(() => {
+    // Mark that user wants to select physical mail
+    setPendingMailSelection(true)
+
+    // If user can purchase trial, show trial modal ($4.99)
+    if (currentEligibility.canPurchasePhysicalTrial) {
+      setShowTrialModal(true)
+      return
+    }
+    // If user has used trial but no credits (needs upgrade), show upgrade modal
+    if (currentEligibility.hasUsedPhysicalTrial && currentEligibility.physicalCredits <= 0) {
+      setShowUpgradeModal(true)
+      return
+    }
+    // Fallback: show upgrade modal
+    setShowUpgradeModal(true)
+  }, [currentEligibility])
+
+  // Handle modal close - refresh eligibility to check if user now has credits
+  const handleTrialModalClose = React.useCallback((open: boolean) => {
+    setShowTrialModal(open)
+    if (!open) {
+      // Modal was closed - refresh eligibility in case user purchased
+      refreshEligibility()
+    }
+  }, [refreshEligibility])
+
+  const handleUpgradeModalClose = React.useCallback((open: boolean) => {
+    setShowUpgradeModal(open)
+    if (!open) {
+      // Modal was closed - refresh eligibility in case user upgraded
+      refreshEligibility()
+    }
+  }, [refreshEligibility])
 
   // Update URL when step changes
   React.useEffect(() => {
@@ -251,7 +373,7 @@ export function ScheduleWizardV3({
                   Schedule Delivery
                 </p>
                 <p className="font-mono text-sm font-bold text-charcoal truncate">
-                  "{letterTitle}"
+                  &ldquo;{letterTitle}&rdquo;
                 </p>
               </div>
             </div>
@@ -313,6 +435,16 @@ export function ScheduleWizardV3({
 
         {/* Content */}
         <div className="mx-auto max-w-2xl px-4 py-8">
+          {/* Existing Deliveries Banner */}
+          {existingDeliveries.length > 0 && (
+            <div className="mb-8">
+              <ExistingDeliveriesBannerV3
+                deliveries={existingDeliveries}
+                letterId={letterId}
+              />
+            </div>
+          )}
+
           {/* Step 1: Date & Time */}
           {currentStep === 1 && (
             <div className="space-y-8">
@@ -380,10 +512,10 @@ export function ScheduleWizardV3({
                 value={state.channels}
                 onChange={(channels) => updateState("channels", channels)}
                 emailCredits={emailCredits}
-                physicalCredits={physicalCredits}
-                isPhysicalLocked={isPhysicalLocked}
-                canShowTrialOffer={canShowTrialOffer}
-                onPhysicalUpsellTriggered={onPhysicalUpsellTriggered}
+                physicalCredits={currentEligibility.physicalCredits}
+                isPhysicalLocked={currentIsPhysicalLocked}
+                canShowTrialOffer={currentCanShowTrialOffer}
+                onPhysicalUpsellTriggered={handlePhysicalUpsellTriggered}
               />
 
               {/* Email Config */}
@@ -466,6 +598,16 @@ export function ScheduleWizardV3({
           )}
         </div>
       </div>
+
+      {/* Physical Mail Upsell Modals */}
+      <PhysicalMailTrialModal
+        open={showTrialModal}
+        onOpenChange={handleTrialModalClose}
+      />
+      <PhysicalMailUpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={handleUpgradeModalClose}
+      />
     </>
   )
 }

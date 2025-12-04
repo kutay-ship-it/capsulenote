@@ -550,6 +550,29 @@ export async function scheduleDelivery(
         }
       }
 
+      // Check for unique constraint violation (duplicate delivery)
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === "P2002"
+      ) {
+        await logger.warn('Duplicate delivery attempt blocked', {
+          userId: user.id,
+          letterId: data.letterId,
+          channel: data.channel,
+          deliverAt: actualDeliverAt.toISOString(),
+        })
+
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.DUPLICATE_ENTRY,
+            message: 'A delivery for this letter with the same channel and time already exists. Please check your scheduled deliveries.',
+          },
+        }
+      }
+
       await logger.error('Delivery creation error', error, {
         userId: user.id,
         letterId: data.letterId,

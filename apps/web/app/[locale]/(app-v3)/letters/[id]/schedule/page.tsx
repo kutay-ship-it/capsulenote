@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 
 import { getLetter } from "@/server/actions/letters"
 import { getDeliveryEligibility } from "@/server/actions/entitlements"
@@ -119,26 +119,24 @@ async function ScheduleWizardContent({ id }: { id: string }) {
     notFound()
   }
 
-  // Only allow scheduling for drafts (no existing deliveries)
-  // Letters with existing deliveries should be managed from detail page
-  if (letter.deliveries.length > 0) {
-    redirect(`/letters/${id}`)
-  }
-
   // Get delivery eligibility and credits
   const eligibility = await getDeliveryEligibility()
 
   // Get user timezone from profile
   const timezone = getUserTimezone(user)
 
-  // Determine if physical mail is locked
-  // Physical mail is locked for DIGITAL_CAPSULE plan users who haven't purchased trial
-  const isPhysicalLocked = eligibility.isDigitalCapsule && !eligibility.hasUsedPhysicalTrial
+  // Physical mail is locked when user is on Digital Capsule, has no credits,
+  // can't purchase trial (already purchased), and has used their trial
+  const isPhysicalLocked =
+    eligibility.isDigitalCapsule &&
+    eligibility.physicalCredits <= 0 &&
+    !eligibility.canPurchasePhysicalTrial &&
+    eligibility.hasUsedPhysicalTrial
 
-  // Can show trial offer if digital capsule, hasn't used trial, and can purchase
+  // Can show trial offer if digital capsule, no credits, and can still purchase trial
   const canShowTrialOffer =
     eligibility.isDigitalCapsule &&
-    !eligibility.hasUsedPhysicalTrial &&
+    eligibility.physicalCredits <= 0 &&
     eligibility.canPurchasePhysicalTrial
 
   return (
@@ -151,7 +149,11 @@ async function ScheduleWizardContent({ id }: { id: string }) {
       physicalCredits={eligibility.physicalCredits}
       isPhysicalLocked={isPhysicalLocked}
       canShowTrialOffer={canShowTrialOffer}
-      onPhysicalUpsellTriggered={undefined}
+      // Pass eligibility flags for internal upsell modal logic
+      isDigitalCapsule={eligibility.isDigitalCapsule}
+      canPurchasePhysicalTrial={eligibility.canPurchasePhysicalTrial}
+      hasUsedPhysicalTrial={eligibility.hasUsedPhysicalTrial}
+      existingDeliveries={letter.deliveries}
     />
   )
 }

@@ -310,7 +310,7 @@ export function SealAnimationV3({
                       Your Letter
                     </p>
                     <p className="font-mono text-xs font-bold text-charcoal truncate">
-                      "{letterTitle}"
+                      &ldquo;{letterTitle}&rdquo;
                     </p>
                   </div>
                 </motion.div>

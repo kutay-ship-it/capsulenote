@@ -339,7 +339,7 @@ export function ScheduleSummaryV3({
       >
         <Lock className="h-4 w-4 text-charcoal/50 flex-shrink-0 mt-0.5" strokeWidth={2} />
         <p className="font-mono text-[10px] text-charcoal/60 leading-relaxed">
-          <span className="font-bold text-charcoal">Once sealed</span>, this letter will be encrypted and locked until delivery. You won't be able to read or edit it again until it arrives.
+          <span className="font-bold text-charcoal">Once sealed</span>, this letter will be encrypted and locked until delivery. You won&apos;t be able to read or edit it again until it arrives.
         </p>
       </div>
 

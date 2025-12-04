@@ -180,7 +180,7 @@ export function TimelineVisualizerV3({
           style={{ borderRadius: "2px" }}
         />
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Your Letter's Journey
+          Your Letter&apos;s Journey
         </p>
       </div>
 
