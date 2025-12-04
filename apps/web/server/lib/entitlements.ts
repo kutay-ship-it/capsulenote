@@ -2,7 +2,7 @@
  * Entitlements Service (Capsule Note)
  *
  * Credit-based access control aligned to the yearly plans:
- * - Digital Capsule: 6 email credits/year
+ * - Digital Capsule: 9 email credits/year
  * - Paper & Pixels: 24 email + 3 physical credits/year
  *
  * Notes:
@@ -70,7 +70,7 @@ export class QuotaExceededError extends Error {
 
 const CACHE_TTL_SECONDS = 300 // 5 minutes
 const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
-  DIGITAL_CAPSULE: { email: 6, physical: 0 },
+  DIGITAL_CAPSULE: { email: 9, physical: 0 },
   PAPER_PIXELS: { email: 24, physical: 3 },
 }
 const ACTIVE_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = ["active", "trialing"]

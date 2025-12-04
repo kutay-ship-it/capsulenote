@@ -32,7 +32,7 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
     features: {
       canScheduleDeliveries: true,
       canSchedulePhysicalMail: false,
-      emailDeliveriesIncluded: 6,
+      emailDeliveriesIncluded: 9,
       mailCreditsPerMonth: 0,
     },
     usage: {

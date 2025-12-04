@@ -105,7 +105,7 @@ describe("Entitlements (paid-only)", () => {
   it("returns DIGITAL_CAPSULE entitlements when subscription active", async () => {
     mockPrisma.user.findUnique.mockResolvedValue({
       ...baseUser,
-      emailCredits: 6,
+      emailCredits: 9,
       physicalCredits: 0,
       subscriptions: [
         {
@@ -240,7 +240,7 @@ describe("Entitlements (paid-only)", () => {
     })
     mockPrisma.user.findUnique.mockResolvedValue({
       ...baseUser,
-      emailCredits: 6,
+      emailCredits: 9,
       physicalCredits: 0,
       subscriptions: [
         {

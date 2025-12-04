@@ -74,8 +74,8 @@
   },
   "addons": {
     "title": "Purchase add-ons",
-    "email": "+5 Email Credits ($4)",
-    "physical": "+1 Physical Letter ($5)",
+    "email": "+5 Email Credits ($4.45)",
+    "physical": "+1 Physical Letter ($7.99)",
     "toast": {
       "failedTitle": "Add-on purchase failed",
       "failedDescription": "Please try again.",

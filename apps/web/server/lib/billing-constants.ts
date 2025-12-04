@@ -2,7 +2,7 @@ import type { PlanType } from "@prisma/client"
 import type Stripe from "stripe"
 
 export const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
-  DIGITAL_CAPSULE: { email: 6, physical: 0 },
+  DIGITAL_CAPSULE: { email: 9, physical: 0 },
   PAPER_PIXELS: { email: 24, physical: 3 },
 }
 

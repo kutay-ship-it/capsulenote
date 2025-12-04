@@ -6,12 +6,32 @@ import { stripe } from "@/server/providers/stripe/client"
 import { env } from "@/env.mjs"
 import type { ActionResult } from "@dearme/types"
 import { ErrorCodes } from "@dearme/types"
+import {
+  getCreditAddonTier,
+  CREDIT_ADDON_BASE_PRICES,
+  type CreditAddonType,
+} from "@/lib/pricing-constants"
 
 type AddOnType = "email" | "physical"
 
+/**
+ * Stripe price IDs for credit addons (used as feature flags)
+ *
+ * NOTE: These are NOT used for pricing - pricing is calculated at backend
+ * using volume discount tiers from pricing-constants.ts.
+ * These serve as feature flags: if not set, the addon type is disabled.
+ */
 const ADDON_PRICE_IDS: Record<AddOnType, string | undefined> = {
   email: env.STRIPE_PRICE_ADDON_EMAIL,
   physical: env.STRIPE_PRICE_ADDON_PHYSICAL,
+}
+
+/**
+ * Product names for Stripe checkout display
+ */
+const ADDON_PRODUCT_NAMES: Record<AddOnType, string> = {
+  email: "Email Credit",
+  physical: "Physical Mail Credit",
 }
 
 // Validation constraints for addon quantities
@@ -54,9 +74,10 @@ export async function createAddOnCheckoutSession(input: {
     }
 
     const { type, quantity, successUrl, cancelUrl } = validated.data
-    const priceId = ADDON_PRICE_IDS[type]
 
-    if (!priceId) {
+    // Check if addon type is enabled (env var set = feature enabled)
+    const isAddonEnabled = ADDON_PRICE_IDS[type]
+    if (!isAddonEnabled) {
       return {
         success: false,
         error: {
@@ -78,15 +99,32 @@ export async function createAddOnCheckoutSession(input: {
       }
     }
 
-    // Create Stripe Checkout session with volume pricing
-    // Stripe will calculate the correct total based on quantity tier
-    // @see CREDIT_ADDON_TIERS in billing-constants.ts for tier configuration
+    // Calculate volume-discounted price at backend
+    // Stripe products don't have volume pricing - we handle discounts here
+    const tier = getCreditAddonTier(type as CreditAddonType, quantity)
+    const unitAmountCents = Math.round(tier.unitPrice * 100) // Convert to cents for Stripe
+    const basePrice = CREDIT_ADDON_BASE_PRICES[type as CreditAddonType]
+    const discountPercent = tier.discountPercent
+
+    // Create Stripe Checkout session with calculated price_data
+    // Using price_data allows dynamic pricing based on quantity tier
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer: customerId,
       line_items: [
         {
-          price: priceId,
+          price_data: {
+            currency: "usd",
+            unit_amount: unitAmountCents,
+            product_data: {
+              name: quantity > 1
+                ? `${ADDON_PRODUCT_NAMES[type]} (${quantity}x)`
+                : ADDON_PRODUCT_NAMES[type],
+              description: discountPercent > 0
+                ? `${discountPercent}% volume discount applied ($${tier.unitPrice.toFixed(2)}/ea instead of $${basePrice.toFixed(2)})`
+                : `$${tier.unitPrice.toFixed(2)} per credit`,
+            },
+          },
           quantity,
         },
       ],
@@ -98,6 +136,8 @@ export async function createAddOnCheckoutSession(input: {
         addon_type: type,
         quantity: quantity.toString(),
         type: "credit_addon", // Identifies this as credit addon for webhook routing
+        unit_price_cents: unitAmountCents.toString(),
+        discount_percent: discountPercent.toString(),
       },
       // Payment intent metadata - backup for payment_intent.succeeded webhook
       payment_intent_data: {
@@ -106,6 +146,8 @@ export async function createAddOnCheckoutSession(input: {
           addon_type: type,
           quantity: quantity.toString(),
           type: "credit_addon",
+          unit_price_cents: unitAmountCents.toString(),
+          discount_percent: discountPercent.toString(),
         },
       },
     })

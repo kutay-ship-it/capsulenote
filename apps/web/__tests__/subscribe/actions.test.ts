@@ -107,7 +107,7 @@ vi.mock("@/server/lib/stripe-helpers", () => ({
 }))
 vi.mock("@/server/lib/billing-constants", () => ({
   PLAN_CREDITS: {
-    DIGITAL_CAPSULE: { email: 6, physical: 0 },
+    DIGITAL_CAPSULE: { email: 9, physical: 0 },
     PAPER_PIXELS: { email: 24, physical: 3 },
   },
   getSubscriptionPeriodDates: vi.fn(() => ({

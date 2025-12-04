@@ -147,7 +147,7 @@
       "name": "Dijital Kapsül",
       "description": "Kendine kişisel mektuplar için—tamamen dijital teslimat.",
       "features": {
-        "emailDeliveries": "Yılda 6 e-posta teslimatı",
+        "emailDeliveries": "Yılda 9 e-posta teslimatı",
         "scheduleYears": "100 yıl sonrasına kadar planla",
         "timezoneReminders": "Saat dilimi duyarlı hatırlatmalar",
         "encryptedStorage": "Şifrelenmiş depolama"

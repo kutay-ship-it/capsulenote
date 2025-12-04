@@ -147,7 +147,7 @@
       "name": "Digital Capsule",
       "description": "For personal letters to yourself—purely digital delivery.",
       "features": {
-        "emailDeliveries": "6 email deliveries / year",
+        "emailDeliveries": "9 email deliveries / year",
         "scheduleYears": "Schedule up to 100 years out",
         "timezoneReminders": "Timezone-aware reminders",
         "encryptedStorage": "Encrypted storage"

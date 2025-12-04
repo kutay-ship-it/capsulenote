@@ -46,7 +46,7 @@
       "interval": "year",
       "intervalLabel": "year",
       "description": "For personal letters to yourself—purely digital delivery.",
-      "features": ["6 email deliveries / year", "Schedule up to 100 years out", "Timezone-aware reminders", "Encrypted storage"],
+      "features": ["9 email deliveries / year", "Schedule up to 100 years out", "Timezone-aware reminders", "Encrypted storage"],
       "cta": "Choose Digital",
       "priceKey": "STRIPE_PRICE_DIGITAL_ANNUAL"
     },
@@ -72,37 +72,33 @@
   "matrixTitle": "Compare Plans",
   "matrixSubtitle": "See exactly what's included in each plan",
   "matrix": {
-    "headers": { "feature": "Features", "free": "Free", "pro": "Pro", "enterprise": "Enterprise" },
+    "headers": { "feature": "Features", "digital": "Digital Capsule", "paper": "Paper & Pixels" },
     "categories": [
       {
         "name": "Core Features",
         "features": [
-          { "name": "Letters per month", "free": "3", "pro": "Unlimited", "enterprise": "Unlimited" },
-          { "name": "Email delivery", "free": true, "pro": true, "enterprise": true },
-          { "name": "Physical mail delivery", "free": false, "pro": true, "enterprise": true },
-          { "name": "Free physical mails/month", "free": "0", "pro": "2", "enterprise": "Custom" },
-          { "name": "Encrypted storage", "free": true, "pro": true, "enterprise": true },
-          { "name": "Letter templates", "free": "Basic", "pro": "Premium", "enterprise": "Custom" }
+          { "name": "Email credits / year", "digital": "9", "paper": "24" },
+          { "name": "Physical mail credits / year", "digital": "0", "paper": "3" },
+          { "name": "Schedule ahead", "digital": "100 years", "paper": "100 years" },
+          { "name": "Encrypted storage", "digital": true, "paper": true },
+          { "name": "Timezone-aware delivery", "digital": true, "paper": true }
         ]
       },
       {
-        "name": "Advanced Features",
+        "name": "Physical Mail",
         "features": [
-          { "name": "Advanced scheduling", "free": false, "pro": true, "enterprise": true },
-          { "name": "Arrive-by mode", "free": false, "pro": true, "enterprise": true },
-          { "name": "Recurring letters", "free": false, "pro": true, "enterprise": true },
-          { "name": "Custom branding", "free": false, "pro": false, "enterprise": true },
-          { "name": "API access", "free": false, "pro": false, "enterprise": true },
-          { "name": "Webhooks", "free": false, "pro": false, "enterprise": true }
+          { "name": "Physical mail delivery", "digital": false, "paper": true },
+          { "name": "Address verification", "digital": false, "paper": true },
+          { "name": "Arrive-by scheduling", "digital": false, "paper": true },
+          { "name": "Premium paper quality", "digital": false, "paper": true },
+          { "name": "One-time trial ($4.99)", "digital": true, "paper": "Included" }
         ]
       },
       {
-        "name": "Support & Analytics",
+        "name": "Support",
         "features": [
-          { "name": "Support", "free": "Community", "pro": "Priority", "enterprise": "Dedicated" },
-          { "name": "Analytics", "free": "Basic", "pro": "Advanced", "enterprise": "Custom" },
-          { "name": "SLA", "free": false, "pro": false, "enterprise": true },
-          { "name": "Dedicated manager", "free": false, "pro": false, "enterprise": true }
+          { "name": "Email support", "digital": true, "paper": true },
+          { "name": "Priority support", "digital": false, "paper": true }
         ]
       }
     ],
@@ -123,15 +119,15 @@
       },
       {
         "question": "How do physical mail credits work?",
-        "answer": "Pro members get 2 free physical mail deliveries per month. Additional physical mails cost $3.50 each (US) or $5.50 (international). Credits don't roll over, but you can purchase extras anytime."
+        "answer": "Paper & Pixels members get 3 physical mail credits per year included with their subscription. Additional physical mail credits cost $7.99 each. Digital Capsule users can try physical mail once for $4.99."
       },
       {
         "question": "What payment methods do you accept?",
         "answer": "We accept all major credit cards (Visa, Mastercard, American Express, Discover) processed securely through Stripe. We don't store your payment information on our servers."
       },
       {
-        "question": "Is there a discount for annual plans?",
-        "answer": "Yes! Annual plans save you 17% compared to paying monthly. You'll pay $189/year instead of $228/year, saving $39."
+        "question": "Is there a discount for buying credits in bulk?",
+        "answer": "Yes! Volume discounts apply when purchasing additional credits. Buy 5+ credits for 10% off, 10+ for 15% off, 25+ for 20% off, or 50+ for 25% off."
       },
       {
         "question": "What happens to my letters if I cancel?",

@@ -519,38 +519,37 @@
   },
   "pricingPreview": {
     "badge": "Simple Pricing",
-    "title": "Start Free,",
-    "titleHighlight": "Upgrade Anytime",
-    "description": "Your first letter is always free. No credit card required.",
+    "title": "Choose Your",
+    "titleHighlight": "Plan",
+    "description": "Start writing letters to your future self today.",
     "mostPopular": "Most Popular",
     "seeFullPricing": "See full pricing details",
     "tiers": [
       {
-        "name": "Free",
-        "price": "$0",
-        "period": "forever",
-        "description": "Perfect for your first letter",
-        "cta": "Start Free",
+        "name": "Digital Capsule",
+        "price": "$9",
+        "period": "/year",
+        "description": "Email delivery for personal letters",
+        "cta": "Choose Digital",
         "features": [
-          "1 free letter",
-          "Email delivery",
-          "Basic encryption",
-          "Schedule up to 5 years ahead"
+          "9 email credits / year",
+          "Schedule up to 100 years",
+          "Encrypted storage",
+          "Timezone-aware delivery"
         ]
       },
       {
-        "name": "Premium",
-        "price": "$5",
+        "name": "Paper & Pixels",
+        "price": "$29",
         "period": "/year",
-        "description": "Unlimited letters, physical mail",
-        "cta": "Go Premium",
+        "description": "Email + physical mail delivery",
+        "cta": "Choose Paper & Pixels",
         "features": [
-          "Unlimited letters",
-          "Email + physical mail",
-          "Advanced encryption",
-          "Schedule up to 50 years ahead",
-          "Priority delivery",
-          "Writing prompts"
+          "24 email credits / year",
+          "3 physical mail credits / year",
+          "Premium paper quality",
+          "Address verification",
+          "Priority support"
         ]
       }
     ]

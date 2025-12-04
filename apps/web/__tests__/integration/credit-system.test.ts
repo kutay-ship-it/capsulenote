@@ -110,7 +110,7 @@ const createTestUser = (overrides?: Partial<{
   creditExpiresAt: Date | null
 }>) => ({
   id: "user_test_123",
-  emailCredits: 6,
+  emailCredits: 9,
   physicalCredits: 3,
   emailAddonCredits: 0,
   physicalAddonCredits: 0,
@@ -131,7 +131,7 @@ describe("Email Credit Deduction", () => {
 
   describe("Single Email Delivery", () => {
     it("should deduct 1 email credit for delivery", async () => {
-      const user = createTestUser({ emailCredits: 6 })
+      const user = createTestUser({ emailCredits: 9 })
       mockUserFindUnique.mockResolvedValue(user)
       mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 5 })
       mockCreditTransactionCreate.mockResolvedValue({})
@@ -145,7 +145,7 @@ describe("Email Credit Deduction", () => {
     })
 
     it("should record credit transaction with correct details", async () => {
-      const user = createTestUser({ emailCredits: 6 })
+      const user = createTestUser({ emailCredits: 9 })
       mockUserFindUnique.mockResolvedValue(user)
       mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 5 })
       mockCreditTransactionCreate.mockResolvedValue({})
@@ -164,7 +164,7 @@ describe("Email Credit Deduction", () => {
     })
 
     it("should track balance before and after in transaction", async () => {
-      const user = createTestUser({ emailCredits: 6 })
+      const user = createTestUser({ emailCredits: 9 })
       mockUserFindUnique.mockResolvedValue(user)
       mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 5 })
       mockCreditTransactionCreate.mockResolvedValue({})
@@ -295,7 +295,7 @@ describe("Double Delivery (Email + Physical Mail)", () => {
   })
 
   it("should deduct 2 total credits for double delivery", async () => {
-    const user = createTestUser({ emailCredits: 6, physicalCredits: 3 })
+    const user = createTestUser({ emailCredits: 9, physicalCredits: 3 })
     mockUserFindUnique.mockResolvedValue(user)
     mockUserUpdate.mockResolvedValue({ ...user })
     mockCreditTransactionCreate.mockResolvedValue({})
@@ -309,7 +309,7 @@ describe("Double Delivery (Email + Physical Mail)", () => {
   })
 
   it("should record separate transactions for each credit type", async () => {
-    const user = createTestUser({ emailCredits: 6, physicalCredits: 3 })
+    const user = createTestUser({ emailCredits: 9, physicalCredits: 3 })
     mockUserFindUnique.mockResolvedValue(user)
     mockUserUpdate.mockResolvedValue({ ...user })
     mockCreditTransactionCreate.mockResolvedValue({})
@@ -359,7 +359,7 @@ describe("Credit Refund on Cancellation", () => {
     it("should refund email credit on delivery cancellation", async () => {
       const user = createTestUser({ emailCredits: 5, emailAddonCredits: 0 })
       mockUserFindUnique.mockResolvedValue(user)
-      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 6 })
+      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 9 })
       mockCreditTransactionCreate.mockResolvedValue({})
 
       await addEmailCredits(user.id, 1, {
@@ -379,7 +379,7 @@ describe("Credit Refund on Cancellation", () => {
     it("should record refund transaction with grant_refund type", async () => {
       const user = createTestUser({ emailCredits: 5 })
       mockUserFindUnique.mockResolvedValue(user)
-      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 6 })
+      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 9 })
       mockCreditTransactionCreate.mockResolvedValue({})
 
       await addEmailCredits(user.id, 1, {
@@ -644,10 +644,10 @@ describe("Credit Balance Tracking", () => {
     it("should not track addon credits for subscription grants", async () => {
       const user = createTestUser({ emailCredits: 0, emailAddonCredits: 0 })
       mockUserFindUnique.mockResolvedValue(user)
-      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 6 })
+      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 9 })
       mockCreditTransactionCreate.mockResolvedValue({})
 
-      await addEmailCredits(user.id, 6, {
+      await addEmailCredits(user.id, 9, {
         source: "subscription_renewal",
         transactionType: "grant_subscription",
         isAddon: false,
@@ -657,7 +657,7 @@ describe("Credit Balance Tracking", () => {
       expect(mockUserUpdate).toHaveBeenCalledWith({
         where: { id: user.id },
         data: {
-          emailCredits: { increment: 6 },
+          emailCredits: { increment: 9 },
         },
       })
     })
@@ -674,14 +674,14 @@ describe("Plan-Based Credit Allocation", () => {
   })
 
   describe("Digital Capsule Plan", () => {
-    it("should allocate 6 email credits for Digital Capsule", () => {
+    it("should allocate 9 email credits for Digital Capsule", () => {
       // Plan constants (mirrored from entitlements.ts)
       const PLAN_CREDITS = {
-        DIGITAL_CAPSULE: { email: 6, physical: 0 },
+        DIGITAL_CAPSULE: { email: 9, physical: 0 },
         PAPER_PIXELS: { email: 24, physical: 3 },
       }
 
-      expect(PLAN_CREDITS.DIGITAL_CAPSULE.email).toBe(6)
+      expect(PLAN_CREDITS.DIGITAL_CAPSULE.email).toBe(9)
       expect(PLAN_CREDITS.DIGITAL_CAPSULE.physical).toBe(0)
     })
   })
@@ -689,7 +689,7 @@ describe("Plan-Based Credit Allocation", () => {
   describe("Paper & Pixels Plan", () => {
     it("should allocate 24 email and 3 physical credits", () => {
       const PLAN_CREDITS = {
-        DIGITAL_CAPSULE: { email: 6, physical: 0 },
+        DIGITAL_CAPSULE: { email: 9, physical: 0 },
         PAPER_PIXELS: { email: 24, physical: 3 },
       }
 
