@@ -23,6 +23,7 @@ import { requireUser } from "@/server/lib/auth"
 import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { DeliveryTimelineV3 } from "@/components/v3/delivery-timeline-v3"
 
 // Force dynamic rendering - letter detail must always show fresh data
 export const dynamic = "force-dynamic"
@@ -395,101 +396,11 @@ async function LetterDetailContent({ id }: { id: string }) {
 
       {/* Delivery Timeline - only if has deliveries */}
       {hasDelivery && (
-        <div
-          className="border-2 border-charcoal bg-white p-6 shadow-[2px_2px_0_theme(colors.charcoal)]"
-          style={{ borderRadius: "2px" }}
-        >
-          <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal mb-4">
-            Delivery Timeline
-          </h2>
-
-          <div className="space-y-3">
-            {letter.deliveries.map((delivery) => {
-              const deliveryDate = format(new Date(delivery.deliverAt), "MMMM d, yyyy 'at' h:mm a")
-              const isDelivered = delivery.status === "sent"
-              const isFailed = delivery.status === "failed"
-              const isScheduled = delivery.status === "scheduled"
-              const isProcessing = delivery.status === "processing"
-
-              return (
-                <div
-                  key={delivery.id}
-                  className={cn(
-                    "flex items-center gap-4 border-2 border-l-4 p-4",
-                    isDelivered && "border-teal-primary bg-white",
-                    isFailed && "border-coral bg-white",
-                    isScheduled && "border-duck-blue bg-white",
-                    isProcessing && "border-duck-yellow bg-white"
-                  )}
-                  style={{ borderRadius: "2px" }}
-                >
-                  {/* Icon */}
-                  <div
-                    className={cn(
-                      "flex h-10 w-10 flex-shrink-0 items-center justify-center border-2 border-charcoal",
-                      isDelivered && "bg-teal-primary text-white",
-                      isFailed && "bg-coral text-white",
-                      isScheduled && "bg-duck-blue text-charcoal",
-                      isProcessing && "bg-duck-yellow text-charcoal"
-                    )}
-                    style={{ borderRadius: "2px" }}
-                  >
-                    {isDelivered && <CheckCircle2 className="h-5 w-5" strokeWidth={2} />}
-                    {isFailed && <AlertCircle className="h-5 w-5" strokeWidth={2} />}
-                    {isScheduled && <Clock className="h-5 w-5" strokeWidth={2} />}
-                    {isProcessing && <Clock className="h-5 w-5 animate-pulse" strokeWidth={2} />}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
-                        {delivery.channel === "email" ? "Email" : "Mail"}
-                      </span>
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider",
-                          isDelivered && "bg-teal-primary text-white",
-                          isFailed && "bg-coral text-white",
-                          isScheduled && "bg-duck-blue text-charcoal",
-                          isProcessing && "bg-duck-yellow text-charcoal"
-                        )}
-                        style={{ borderRadius: "2px" }}
-                      >
-                        {delivery.status}
-                      </span>
-                    </div>
-
-                    <p className="mt-1 font-mono text-xs text-charcoal/60">
-                      {deliveryDate}
-                    </p>
-
-                    {delivery.channel === "email" && delivery.emailDelivery?.toEmail && (
-                      <p className="font-mono text-xs text-charcoal/40">
-                        To: {delivery.emailDelivery.toEmail}
-                      </p>
-                    )}
-
-                    {isFailed && delivery.lastError && (
-                      <p className="mt-1 font-mono text-xs text-coral">
-                        {delivery.lastError}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  {isScheduled && (
-                    <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
-                      <Button variant="outline" size="sm" className="font-mono text-xs uppercase tracking-wider">
-                        Reschedule
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
+        <DeliveryTimelineV3
+          deliveries={letter.deliveries}
+          letterId={letter.id}
+          letterTitle={letter.title || "Untitled Letter"}
+        />
       )}
 
       {/* Schedule CTA - only if no deliveries */}

@@ -69,6 +69,7 @@ export const ErrorCodes = {
   // Resource errors
   NOT_FOUND: 'NOT_FOUND',
   ALREADY_EXISTS: 'ALREADY_EXISTS',
+  DUPLICATE_ENTRY: 'DUPLICATE_ENTRY',
 
   // Operation errors
   CREATION_FAILED: 'CREATION_FAILED',

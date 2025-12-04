@@ -278,8 +278,16 @@ export function ScheduleWizardV3({
     return fromZonedTime(dateWithTime, userTimezone)
   }
 
+  // Track which channels have been successfully scheduled (prevents double submission)
+  const [scheduledChannels, setScheduledChannels] = React.useState<Set<DeliveryChannel>>(new Set())
+
   // Submit handler
   const handleConfirm = async () => {
+    // Prevent double submission
+    if (isSubmitting) {
+      return
+    }
+
     const deliverAt = getDeliveryDateTime()
     if (!deliverAt) {
       toast.error("Please select a delivery date")
@@ -289,8 +297,12 @@ export function ScheduleWizardV3({
     setIsSubmitting(true)
 
     try {
-      // Schedule each channel
-      for (const channel of state.channels) {
+      // Schedule each channel that hasn't been scheduled yet
+      const channelsToSchedule = state.channels.filter(
+        (channel) => !scheduledChannels.has(channel)
+      )
+
+      for (const channel of channelsToSchedule) {
         const result = await scheduleDelivery({
           letterId,
           channel: channel === "email" ? "email" : "mail",
@@ -311,12 +323,23 @@ export function ScheduleWizardV3({
         })
 
         if (!result.success) {
+          // Check if it's a duplicate error (already scheduled)
+          if (result.error?.code === "DUPLICATE_ENTRY") {
+            // Mark as scheduled since it already exists
+            setScheduledChannels((prev) => new Set([...prev, channel]))
+            toast.info(`${channel === "email" ? "Email" : "Physical mail"} delivery already scheduled`)
+            continue
+          }
+
           toast.error(`Failed to schedule ${channel}`, {
             description: result.error?.message || "Unknown error",
           })
           setIsSubmitting(false)
           return
         }
+
+        // Mark channel as successfully scheduled
+        setScheduledChannels((prev) => new Set([...prev, channel]))
       }
 
       // Show celebration animation
