@@ -19,7 +19,7 @@ export const ratelimit = {
   // Letter creation: 10 per hour
   createLetter: new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(10, "1 h"),
+    limiter: Ratelimit.slidingWindow(env.NODE_ENV === "development" ? 100 : 10, "1 h"),
     analytics: true,
   }),
 

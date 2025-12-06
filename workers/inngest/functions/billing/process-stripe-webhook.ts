@@ -36,6 +36,28 @@ import {
 } from "./handlers"
 
 /**
+ * Events that fire during normal Stripe flows but don't require handling.
+ * These are intentionally ignored to reduce log noise.
+ *
+ * - charge.succeeded/updated: Covered by payment_intent.succeeded or invoice.payment_succeeded
+ * - payment_intent.created: Just indicates creation, no action needed
+ * - invoice.created/updated/finalized: We only act on payment_succeeded/failed
+ * - payment_method.updated: We only care about attached/detached
+ */
+const INTENTIONALLY_IGNORED_EVENTS = new Set([
+  "charge.succeeded",
+  "charge.updated",
+  "payment_intent.created",
+  "invoice.created",
+  "invoice.updated",
+  "invoice.finalized",
+  "invoice.paid", // Covered by invoice.payment_succeeded
+  "payment_method.updated",
+  "customer.subscription.pending_update_applied",
+  "customer.subscription.pending_update_expired",
+])
+
+/**
  * Route webhook event to appropriate handler
  *
  * Exported for use by retry-stripe-webhook.ts
@@ -124,10 +146,19 @@ export async function routeWebhookEvent(event: Stripe.Event): Promise<void> {
       break
 
     default:
-      console.log("[Webhook Processor] Unhandled event type", {
-        eventId: event.id,
-        eventType: event.type,
-      })
+      if (INTENTIONALLY_IGNORED_EVENTS.has(event.type)) {
+        // Known event that doesn't require handling - debug level only
+        console.debug("[Webhook Processor] Ignoring event (no handler needed)", {
+          eventId: event.id,
+          eventType: event.type,
+        })
+      } else {
+        // Truly unknown event - log at warn level for investigation
+        console.warn("[Webhook Processor] Unknown event type - may need handler", {
+          eventId: event.id,
+          eventType: event.type,
+        })
+      }
   }
 }
 

@@ -96,6 +96,18 @@ export function classifyProviderError(error: any): WorkerError {
   const errorMessage = error?.message || String(error)
   const statusCode = error?.statusCode || error?.response?.status
 
+  // Lob HTML size limit (non-retryable)
+  if (
+    error?.code === "LOB_HTML_TOO_LARGE" ||
+    errorMessage.includes("LOB_HTML_TOO_LARGE") ||
+    errorMessage.includes("HTML must be less than 10000")
+  ) {
+    return new ProviderRejectionError(errorMessage, {
+      statusCode,
+      originalError: error,
+    })
+  }
+
   // Network-related errors (retryable)
   if (
     errorMessage.includes('ECONNREFUSED') ||

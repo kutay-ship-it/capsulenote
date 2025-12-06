@@ -591,8 +591,20 @@ export async function getLetter(letterId: string) {
     letter.keyVersion
   )
 
+  // Strip non-serializable fields before sending to client components
+  const sanitizedDeliveries = letter.deliveries.map((delivery) => {
+    const { mailDelivery, ...rest } = delivery
+    if (!mailDelivery) {
+      return { ...rest, mailDelivery: null }
+    }
+
+    const { sealedCiphertext, sealedNonce, ...serializableMail } = mailDelivery
+    return { ...rest, mailDelivery: serializableMail }
+  })
+
   return {
     ...letter,
+    deliveries: sanitizedDeliveries,
     bodyRich: decrypted.bodyRich,
     bodyHtml: decrypted.bodyHtml,
   }

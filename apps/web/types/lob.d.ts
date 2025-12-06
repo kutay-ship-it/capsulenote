@@ -48,7 +48,9 @@ declare module "lob" {
   interface LetterCreateParams {
     to: Address
     from?: Address
-    file: string
+    file?: string
+    template?: string
+    template_version_id?: string
     color?: boolean
     double_sided?: boolean
     description?: string
@@ -59,8 +61,6 @@ declare module "lob" {
     return_envelope?: boolean
     /** Address placement on letter: top_first_page shows through window envelope */
     address_placement?: "top_first_page" | "insert_blank_page"
-    /** Idempotency key to prevent duplicate sends on retry */
-    idempotency_key?: string
     /**
      * Date to send the letter (YYYY-MM-DD or ISO 8601 datetime)
      * Lob holds the letter until this date. Max 180 days in future.
@@ -145,7 +145,7 @@ declare module "lob" {
   }
 
   interface Letters {
-    create(params: LetterCreateParams): Promise<Letter>
+    create(params: LetterCreateParams, headers?: Record<string, string>): Promise<Letter>
     retrieve(id: string): Promise<Letter>
     delete(id: string): Promise<{ id: string; deleted: boolean }>
     list(params?: { limit?: number; offset?: number }): Promise<{

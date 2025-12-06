@@ -5,17 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Capsule Note Letter</title>
   <style>
+    /*
+     * ============================================
+     * LOB LETTER TEMPLATE - 8.5" x 11" US Letter
+     * ============================================
+     *
+     * CRITICAL LOB SPECIFICATIONS:
+     * - Page size: 8.5" x 11"
+     * - Content area: 8.125" x 10.625" (0.1875" from edges)
+     * - Address block (white box): 3.15" x 2" at left: 0.6", top: 0.84"
+     * - QR code area: 0.58" x 0.58" bottom-left corner
+     * - Safe zone: 1/8" from edges for critical content
+     * - Required clear space: 1/16" from all edges
+     * - NO bleed capability - no edge-to-edge printing
+     *
+     * Merge variables use {{variable_name}} syntax
+     */
+
     /* Reset */
-    * {
+    *, *:before, *:after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
     }
 
-    /* Page setup - US Letter 8.5" x 11" with 0.5" margins */
+    /* Page setup - US Letter 8.5" x 11" with NO margins (Lob handles margins) */
     @page {
       size: letter;
-      margin: 0.5in;
+      margin: 0;
     }
 
     body {
@@ -23,111 +42,183 @@
       font-size: 12pt;
       line-height: 1.6;
       color: #383838;
-      max-width: 7.5in;
-      margin: 0 auto;
-      padding: 0.5in;
+      width: 8.5in;
+      height: 11in;
+      margin: 0;
+      padding: 0;
       background: #ffffff;
     }
 
-    /* ================================
-       PAGE 1: COVER PAGE
-       ================================ */
-    .cover-page {
-      min-height: 9in;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
+    /* Base page structure - matches Lob's content area */
+    .page {
+      position: relative;
+      width: 8.5in;
+      height: 11in;
       page-break-after: always;
     }
 
+    .page-content {
+      position: absolute;
+      width: 8.125in;
+      height: 10.625in;
+      left: 0.1875in;
+      top: 0.1875in;
+    }
+
+    /* ============================================
+       LOB ADDRESS ZONES (for reference)
+       These areas are covered by Lob's white box
+       ============================================ */
+
+    /*
+     * White box covers: left: 0.6in, top: 0.84in, width: 3.15in, height: 2in
+     * This means content must start BELOW 2.84in from top on first page
+     *
+     * Return address window: left: 0.625in, top: 0.5in, width: 3.25in, height: 0.875in
+     * Recipient address window: left: 0.625in, top: 1.7in, width: 4in, height: 1in
+     *
+     * QR code area: 0.58" x 0.58" at bottom-left corner (leave clear)
+     */
+
+    /* ============================================
+       PAGE 1: COVER PAGE
+       ============================================ */
+    .cover-page {
+      position: relative;
+      width: 8.5in;
+      height: 11in;
+      page-break-after: always;
+    }
+
+    .cover-content {
+      position: absolute;
+      width: 8.125in;
+      left: 0.1875in;
+      /* Start content below Lob's address block (top: 0.84in + height: 2in = 2.84in) */
+      /* Adding 0.16in buffer = 3in from top */
+      top: 3in;
+      /* Leave 0.7in at bottom for footer + QR code area */
+      height: 7.3in;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 0.35in;
+    }
+
     .cover-brand {
-      margin-top: 2in; /* Space for Lob's address block at top */
+      margin-bottom: 28px;
     }
 
     .cover-logo {
-      width: 80px;
-      height: 80px;
-      border: 4px solid #383838;
-      margin: 0 auto 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32pt;
+      width: 78px;
+      height: 78px;
+      border: 3px solid #383838;
+      margin: 0 auto 20px;
+      /* Use line-height for vertical centering (more print-compatible than flexbox) */
+      line-height: 72px; /* height - border (78 - 6 = 72) */
+      text-align: center;
+      font-size: 30pt;
       font-weight: bold;
     }
 
     .cover-title {
-      font-size: 28pt;
+      font-size: 26pt;
       font-weight: bold;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       margin-bottom: 8px;
     }
 
     .cover-tagline {
-      font-size: 11pt;
+      font-size: 10pt;
       text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: #555555;
-      margin-bottom: 48px;
+      letter-spacing: 0.18em;
+      color: #4a4a4a;
+      margin-bottom: 32px;
     }
 
     .cover-divider {
-      width: 120px;
-      height: 4px;
+      width: 140px;
+      height: 3px;
       background: #383838;
-      margin: 0 auto 48px;
+      margin: 0 auto 28px;
     }
 
     .cover-message {
       font-size: 14pt;
       font-style: italic;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
 
     .cover-recipient {
-      font-size: 18pt;
+      font-size: 17pt;
       font-weight: bold;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 16px;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
     }
 
     .cover-date {
       font-size: 10pt;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #555555;
-      margin-bottom: 32px;
+      letter-spacing: 0.14em;
+      color: #4a4a4a;
+      margin-bottom: 24px;
     }
 
     .cover-thanks {
       font-size: 10pt;
       font-style: italic;
       color: #555555;
-      margin-bottom: 48px;
     }
 
+    /* Cover page footer - positioned absolutely at bottom */
     .cover-footer {
-      margin-top: auto;
-      padding-top: 32px;
-      font-size: 8pt;
+      position: absolute;
+      bottom: 0.5in;
+      left: 0;
+      right: 0;
+      font-size: 8.5pt;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.14em;
       color: #666666;
+      text-align: center;
     }
 
-    /* ================================
-       PAGE 2: LETTER CONTENT
-       ================================ */
+    /* ============================================
+       PAGE 2: BLANK PAGE (for double-sided printing)
+       ============================================ */
+    .blank-page {
+      position: relative;
+      width: 8.5in;
+      height: 11in;
+      page-break-after: always;
+      /* Intentionally blank for double-sided printing */
+    }
+
+    /* ============================================
+       PAGE 3+: LETTER CONTENT
+       ============================================ */
     .letter-page {
-      /* No page-break-before needed - blank page already has page-break-after */
-      min-height: 9in;
+      position: relative;
+      width: 8.5in;
+      min-height: 11in;
+      page-break-after: always;
+    }
+
+    .letter-page:last-child {
+      page-break-after: auto;
+    }
+
+    .letter-content {
+      position: relative;
+      width: 7.5in;
+      margin: 0 auto;
+      padding: 0.5in 0;
       display: flex;
       flex-direction: column;
-      padding: 0.25in;
+      min-height: 10in;
     }
 
     .letter-header {
@@ -154,23 +245,18 @@
       white-space: nowrap;
     }
 
-    /* Greeting */
-    .greeting {
-      margin-bottom: 20px;
-      font-size: 12pt;
-    }
-
-    /* Letter content */
+    /* Letter body content */
     .content {
-      flex: 1; /* Takes available space, pushes footer down */
+      flex: 1;
       margin-bottom: 32px;
+      width: 100%;
       text-align: justify;
     }
 
     .content p {
       margin-bottom: 16px;
-      orphans: 3; /* Minimum lines at bottom of page */
-      widows: 3;  /* Minimum lines at top of next page */
+      orphans: 3;
+      widows: 3;
     }
 
     .content p:last-child {
@@ -180,7 +266,7 @@
     .content ul, .content ol {
       margin-bottom: 16px;
       padding-left: 24px;
-      page-break-inside: avoid; /* Try to keep lists together */
+      page-break-inside: avoid;
     }
 
     .content li {
@@ -193,7 +279,7 @@
       margin-top: 32px;
       padding-top: 16px;
       border-top: 2px dashed #383838;
-      page-break-inside: avoid; /* Keep signature together */
+      page-break-inside: avoid;
     }
 
     .signature-text {
@@ -214,7 +300,7 @@
 
     /* Letter footer */
     .letter-footer {
-      margin-top: auto; /* Push to bottom of page */
+      margin-top: auto;
       padding-top: 12px;
       border-top: 2px solid #383838;
       font-size: 8pt;
@@ -236,25 +322,29 @@
   </style>
 </head>
 <body>
-  <!-- ================================
+  <!-- ============================================
        PAGE 1: COVER PAGE
-       ================================ -->
+       ============================================
+       Lob adds recipient address at top of this page.
+       The white box (3.15" x 2" at left: 0.6", top: 0.84")
+       covers any content in that zone.
+       ============================================ -->
   <div class="cover-page">
-    <!-- Lob adds recipient address at top of this page -->
+    <div class="cover-content">
+      <div class="cover-brand">
+        <div class="cover-logo">C</div>
+        <div class="cover-title">Capsule Note</div>
+        <div class="cover-tagline">A Letter from the Past</div>
+      </div>
 
-    <div class="cover-brand">
-      <div class="cover-logo">C</div>
-      <div class="cover-title">Capsule Note</div>
-      <div class="cover-tagline">A Letter from Past</div>
+      <div class="cover-divider"></div>
+
+      <div class="cover-message">This message was sent to you from</div>
+      <div class="cover-recipient">{{recipient_name}}</div>
+      <div class="cover-date">Sent on {{written_date}}</div>
+
+      <div class="cover-thanks">Thank you for sharing such a special moment with us.</div>
     </div>
-
-    <div class="cover-divider"></div>
-
-    <div class="cover-message">This message was sent to you from</div>
-    <div class="cover-recipient">{{recipient_name}}</div>
-    <div class="cover-date">Sent on {{written_date}}</div>
-
-    <div class="cover-thanks">Thank you for sharing such a special moment with us.</div>
 
     <div class="cover-footer">
       <span class="footer-icon"></span>
@@ -262,31 +352,35 @@
     </div>
   </div>
 
-  <!-- ================================
+  <!-- ============================================
        PAGE 2: BLANK PAGE
-       (Ensures letter content starts on separate sheet for double-sided)
-       ================================ -->
-  <div class="blank-page" style="page-break-after: always; min-height: 9in;">
+       Ensures letter content starts on separate
+       sheet for double-sided printing.
+       ============================================ -->
+  <div class="blank-page">
     <!-- Intentionally blank for double-sided printing -->
   </div>
 
-  <!-- ================================
-       PAGE 3: LETTER CONTENT
-       ================================ -->
+  <!-- ============================================
+       PAGE 3+: LETTER CONTENT
+       This is where the actual letter text appears.
+       ============================================ -->
   <div class="letter-page">
-    <header class="letter-header">
-      <div class="letter-title">{{letter_title}}</div>
-      <div class="letter-date">Written at {{written_date}}</div>
-    </header>
+    <div class="letter-content">
+      <header class="letter-header">
+        <div class="letter-title">{{letter_title}}</div>
+        <div class="letter-date">Written on {{written_date}}</div>
+      </header>
 
-    <div class="content">
-      {{letter_content}}
+      <div class="content">
+        {{letter_content}}
+      </div>
+
+      <footer class="letter-footer">
+        <span class="footer-icon"></span>
+        Capsule Note &mdash; capsulenote.com
+      </footer>
     </div>
-
-    <footer class="letter-footer">
-      <span class="footer-icon"></span>
-      Capsule Note &mdash; capsulenote.com
-    </footer>
   </div>
 </body>
 </html>

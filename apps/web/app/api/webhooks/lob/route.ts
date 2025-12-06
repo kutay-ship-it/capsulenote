@@ -90,7 +90,10 @@ function verifyLobSignature(
 
   try {
     // Parse header: t=1234567890,v1=abc123...
-    const parts = signatureHeader.split(",")
+    const parts = signatureHeader
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean)
     const timestampPart = parts.find((p) => p.startsWith("t="))
     const signaturePart = parts.find((p) => p.startsWith("v1="))
 

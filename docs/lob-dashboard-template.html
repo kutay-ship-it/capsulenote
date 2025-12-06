@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Capsule Note – Lob Template Test</title>
+  <style>
+    /*
+     * LOB LETTER TEMPLATE - Single Page Version
+     *
+     * Lob Specs:
+     * - Page: 8.5" x 11" US Letter
+     * - Address block (white box): 3.15" x 2" at left: 0.6", top: 0.84"
+     * - Safe zone: 1/8" from edges
+     * - QR code area: 0.58" x 0.58" bottom-left
+     * - No bleed capability
+     */
+    @page { size: letter; margin: 0; }
+    *, *:before, *:after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #383838;
+      width: 8.5in;
+      height: 11in;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+    }
+
+    .page {
+      position: relative;
+      width: 8.5in;
+      height: 11in;
+    }
+
+    .page-content {
+      position: absolute;
+      width: 7.5in;
+      left: 0.5in;
+      /* Start below Lob's address block (0.84" + 2" = 2.84") + buffer */
+      top: 3in;
+      /* Leave room at bottom for QR code area */
+      height: 7.5in;
+    }
+
+    /* Address safety zone - shows where Lob prints addresses */
+    .address-guard {
+      position: absolute;
+      left: 0.6in;
+      top: 0.84in;
+      width: 3.15in;
+      height: 2in;
+      border: 1px dashed #d0d0d0;
+      background: rgba(255, 200, 200, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 8pt;
+      text-align: center;
+    }
+
+    .header {
+      border: 3px solid #383838;
+      border-bottom: 5px solid #383838;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      font-size: 14pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .date-info {
+      font-size: 9pt;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: right;
+    }
+
+    .title-section {
+      border: 2px solid #383838;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      background: #f5f5f5;
+    }
+
+    .letter-title {
+      font-size: 14pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .greeting { margin-bottom: 16px; }
+
+    .content {
+      margin-bottom: 28px;
+      text-align: justify;
+    }
+
+    .content p { margin-bottom: 14px; }
+    .content p:last-child { margin-bottom: 0; }
+    .content ul, .content ol { margin: 0 0 14px 24px; }
+    .content li { margin-bottom: 8px; }
+
+    .signature {
+      border-top: 2px dashed #383838;
+      padding-top: 14px;
+      margin-top: 20px;
+    }
+
+    .footer {
+      margin-top: 24px;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666666;
+      text-align: center;
+    }
+
+    .footer-icon {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #666666;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    /* QR code area indicator (bottom-left) */
+    .qr-guard {
+      position: absolute;
+      left: 0.2in;
+      bottom: 0.2in;
+      width: 0.58in;
+      height: 0.58in;
+      border: 1px dashed #d0d0d0;
+      background: rgba(200, 200, 255, 0.2);
+      font-size: 6pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Visual guides for Lob zones (can be removed in production) -->
+    <div class="address-guard">
+      Lob Address Block<br>(3.15" × 2")
+    </div>
+    <div class="qr-guard">QR</div>
+
+    <!-- Main content starts below address block -->
+    <div class="page-content">
+      <header class="header">
+        <div class="brand">{{#if letter_title}}{{letter_title}}{{else}}Capsule Note{{/if}}</div>
+        <div class="date-info">
+          <div>Written {{written_date}}</div>
+          <div>Delivered {{delivery_date}}</div>
+        </div>
+      </header>
+
+      {{#if letter_title}}
+        <section class="title-section">
+          <div class="letter-title">{{letter_title}}</div>
+        </section>
+      {{/if}}
+
+      <div class="greeting">Dear {{recipient_name}},</div>
+
+      <section class="content">
+        {{{letter_content}}}
+      </section>
+
+      <section class="signature">
+        <div class="signature-text">With gratitude,</div>
+        <div class="signature-name">Your past self</div>
+        <div class="signature-date">{{written_date}}</div>
+      </section>
+
+      <footer class="footer">
+        <span class="footer-icon"></span>Capsule Note &mdash; capsulenote.com
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

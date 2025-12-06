@@ -15,6 +15,7 @@ export {
 export {
   renderLetter,
   renderLetterPreview,
+  sanitizeLetterContentForPrint,
   tiptapJsonToHtml,
   type RenderLetterOptions,
 } from "./render-letter"

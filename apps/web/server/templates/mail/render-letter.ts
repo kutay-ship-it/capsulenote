@@ -75,7 +75,7 @@ export function renderLetter(options: RenderLetterOptions): string {
       .replace(/\{\{#if letter_title\}\}[\s\S]*?\{\{\/if\}\}/g, "")
   }
 
-  return rendered
+  return minifyHtml(rendered)
 }
 
 /**
@@ -96,6 +96,13 @@ function prepareContentForPrint(content: string): string {
   return paragraphs
     .map((p) => `<p>${sanitizeForPrint(p.trim())}</p>`)
     .join("\n")
+}
+
+/**
+ * Exported helper to sanitize/format letter body for Lob templates
+ */
+export function sanitizeLetterContentForPrint(content: string): string {
+  return prepareContentForPrint(content)
 }
 
 /**
@@ -233,6 +240,20 @@ function renderListItems(
       return ""
     })
     .join("")
+}
+
+/**
+ * Minify HTML to stay under provider size limits (Lob: 10k chars)
+ * Trims indentation/newlines and collapses whitespace between tags
+ * without changing text content.
+ */
+function minifyHtml(html: string): string {
+  return html
+    .split("\n")
+    .map((line) => line.trim())
+    .join("")
+    .replace(/>\s+</g, "><")
+    .trim()
 }
 
 /**

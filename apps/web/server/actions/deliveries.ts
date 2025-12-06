@@ -41,6 +41,22 @@ const MIN_PHYSICAL_MAIL_LEAD_DAYS = 30 // Minimum 30 days advance notice for phy
 const LOB_MAX_SCHEDULE_DAYS = 180 // Lob's max send_date is 180 days in future
 const DEFERRED_HANDOFF_DAYS = 90 // Days before send date to hand off deferred letters to Lob
 
+function isLobHtmlSizeError(error: unknown): boolean {
+  const code = typeof error === "object" && error && "code" in error ? (error as any).code : null
+  const message =
+    typeof error === "string"
+      ? error
+      : error instanceof Error
+        ? error.message
+        : ""
+
+  return (
+    code === "LOB_HTML_TOO_LARGE" ||
+    message.includes("LOB_HTML_TOO_LARGE") ||
+    message.includes("HTML must be less than 10000")
+  )
+}
+
 /**
  * Schedule a new delivery for a letter
  * Returns error instead of throwing for predictable error handling
@@ -766,10 +782,19 @@ export async function scheduleDelivery(
           expectedDelivery: lobResult.expectedDeliveryDate,
         })
       } catch (lobError) {
+        const htmlLength =
+          typeof lobError === "object" &&
+          lobError &&
+          "details" in lobError &&
+          (lobError as any).details?.length
+            ? (lobError as any).details.length
+            : undefined
+
         // CRITICAL: Lob API failed - rollback delivery and refund
         await logger.error('Failed to send letter to Lob - rolling back', lobError, {
           userId: user.id,
           deliveryId: delivery.id,
+          htmlLength,
         })
 
         // Rollback: delete delivery and refund credit
@@ -814,11 +839,19 @@ export async function scheduleDelivery(
           })
         }
 
+        const isHtmlTooLarge = isLobHtmlSizeError(lobError)
+        const errorMessage = isHtmlTooLarge
+          ? 'Your letter is too long for physical mail. Lob requires HTML under 10,000 characters. Please shorten or simplify the content and try again.'
+          : 'Failed to schedule physical mail delivery. Please try again.'
+
         return {
           success: false,
           error: {
-            code: ErrorCodes.SERVICE_UNAVAILABLE,
-            message: 'Failed to schedule physical mail delivery. Please try again.',
+            code: isHtmlTooLarge ? ErrorCodes.VALIDATION_FAILED : ErrorCodes.SERVICE_UNAVAILABLE,
+            message: errorMessage,
+            ...(isHtmlTooLarge && htmlLength
+              ? { details: { htmlLength, limit: 10000 } }
+              : {}),
           },
         }
       }

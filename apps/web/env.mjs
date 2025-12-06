@@ -45,6 +45,8 @@ export const env = createEnv({
     // Lob (Optional)
     LOB_API_KEY: z.string().optional(),
     LOB_WEBHOOK_SECRET: z.string().optional(),
+    LOB_TEMPLATE_ID: z.string().optional(),
+    LOB_TEMPLATE_VERSION_ID: z.string().optional(),
 
     // ClickSend (Optional)
     CLICKSEND_USERNAME: z.string().optional(),
@@ -125,6 +127,8 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     LOB_API_KEY: process.env.LOB_API_KEY,
     LOB_WEBHOOK_SECRET: process.env.LOB_WEBHOOK_SECRET,
+    LOB_TEMPLATE_ID: process.env.LOB_TEMPLATE_ID,
+    LOB_TEMPLATE_VERSION_ID: process.env.LOB_TEMPLATE_VERSION_ID,
     CLICKSEND_USERNAME: process.env.CLICKSEND_USERNAME,
     CLICKSEND_API_KEY: process.env.CLICKSEND_API_KEY,
     POSTMARK_SERVER_TOKEN: process.env.POSTMARK_SERVER_TOKEN,

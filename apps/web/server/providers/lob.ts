@@ -15,18 +15,28 @@
  * @see scripts/test-lob-api.ts for proof of concept tests
  */
 
+import { format } from "date-fns"
 import Lob from "lob"
 import { env } from "@/env.mjs"
 import {
   renderLetter,
+  sanitizeLetterContentForPrint,
   getProductionSenderAddress,
   getEnvelopeConfig,
   type RenderLetterOptions,
 } from "@/server/templates/mail"
 
 const lobApiKey = env.LOB_API_KEY
+const lobTemplateId = env.LOB_TEMPLATE_ID
+const lobTemplateVersionId = env.LOB_TEMPLATE_VERSION_ID
+const LOB_HTML_CHAR_LIMIT = 10000
 
 export const lob = lobApiKey ? new Lob(lobApiKey) : null
+
+type LobApiError = Error & {
+  statusCode?: number
+  lobMessage?: string
+}
 
 export interface MailingAddress {
   name: string
@@ -40,7 +50,7 @@ export interface MailingAddress {
 
 export interface MailOptions {
   to: MailingAddress
-  html: string
+  html?: string
   color?: boolean
   doubleSided?: boolean
   description?: string
@@ -56,6 +66,10 @@ export interface MailOptions {
    * Letters with send_date are cancellable until the send date.
    */
   sendDate?: Date | string
+  /** Use a stored Lob template instead of inline HTML */
+  lobTemplateId?: string
+  lobTemplateVersionId?: string
+  mergeVariables?: Record<string, unknown>
 }
 
 export interface SendLetterResult {
@@ -112,7 +126,6 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
         address_country: options.to.country,
       },
       from: getSenderAddress(),
-      file: options.html,
       color: options.color ?? false,
       double_sided: options.doubleSided ?? false,
       address_placement: envelopeConfig.address_placement,
@@ -120,9 +133,19 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
       use_type: options.useType ?? "operational", // Required by Lob API
     }
 
-    // Add idempotency key if provided (prevents duplicate sends on retry)
-    if (options.idempotencyKey) {
-      params.idempotency_key = options.idempotencyKey
+    // Choose between inline HTML and stored template
+    if (options.lobTemplateId) {
+      params.template = options.lobTemplateId
+      if (options.lobTemplateVersionId) {
+        params.template_version_id = options.lobTemplateVersionId
+      }
+      if (options.mergeVariables) {
+        params.merge_variables = options.mergeVariables
+      }
+    } else if (options.html) {
+      params.file = options.html
+    } else {
+      throw new Error("Missing Lob letter content (HTML or template)")
     }
 
     // Add scheduled send date if provided (Lob holds letter until this date)
@@ -133,7 +156,13 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
       params.send_date = sendDate
     }
 
-    const letter = await lob.letters.create(params)
+    // Pass idempotency key via header (payload rejects idempotency_key)
+    const headers: Record<string, string> = {}
+    if (options.idempotencyKey) {
+      headers["Idempotency-Key"] = options.idempotencyKey
+    }
+
+    const letter = await lob.letters.create(params, headers)
 
     return {
       id: letter.id,
@@ -145,11 +174,25 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
       thumbnails: letter.thumbnails as unknown as { small: string; medium: string; large: string }[],
     }
   } catch (error: any) {
-    console.error("Lob API error:", error?.message || error)
-    if (error?.status_code === 422) {
-      throw new Error(`Lob validation error: ${error?.message || "Invalid request"}`)
-    }
-    throw new Error("Failed to send letter via Lob")
+    const statusCode = error?.status_code
+    const lobMessage =
+      error?.message ||
+      error?._response?.body?.error?.message ||
+      (typeof error === "string" ? error : "Unknown Lob error")
+
+    console.error("Lob API error:", lobMessage, {
+      statusCode,
+      details: error?._response?.body?.error?.details,
+    })
+
+    const normalizedError = new Error(
+      statusCode === 422 ? `Lob validation error: ${lobMessage || "Invalid request"}` : "Failed to send letter via Lob"
+    ) as LobApiError
+    normalizedError.name = statusCode === 422 ? "LobValidationError" : "LobApiError"
+    normalizedError.statusCode = statusCode
+    normalizedError.lobMessage = lobMessage
+
+    throw normalizedError
   }
 }
 
@@ -357,6 +400,85 @@ export interface TemplatedLetterOptions {
 }
 
 /**
+ * Create a normalized error for Lob HTML size violations
+ */
+function createLobHtmlTooLargeError(length: number, originalLength?: number) {
+  const error = new Error(
+    `LOB_HTML_TOO_LARGE: Rendered letter HTML is ${length} characters; Lob accepts a maximum of ${LOB_HTML_CHAR_LIMIT}. Please shorten or simplify the letter for physical mail.`
+  ) as Error & {
+    code?: string
+    details?: Record<string, unknown>
+  }
+  error.name = "LobHtmlTooLargeError"
+  error.code = "LOB_HTML_TOO_LARGE"
+  error.details = {
+    length,
+    limit: LOB_HTML_CHAR_LIMIT,
+    originalLength: originalLength ?? length,
+  }
+  return error
+}
+
+/**
+ * Ensure rendered HTML fits Lob's 10k character limit, falling back to
+ * the minimal template when possible.
+ */
+function chooseTemplateHtml(
+  options: RenderLetterOptions & { minimal?: boolean }
+): { html: string; length: number; minimalApplied: boolean } {
+  const primaryHtml = renderLetter(options)
+  const primaryLength = primaryHtml.length
+  let html = primaryHtml
+  let length = primaryLength
+  let minimalApplied = options.minimal ?? false
+
+  // If over limit and not already minimal, try minimal template automatically
+  if (!minimalApplied && primaryLength > LOB_HTML_CHAR_LIMIT) {
+    const minimalHtml = renderLetter({ ...options, minimal: true })
+    const minimalLength = minimalHtml.length
+
+    if (minimalLength < primaryLength) {
+      minimalApplied = true
+      html = minimalHtml
+      length = minimalLength
+      console.warn("[Lob] Falling back to minimal template to fit size limit", {
+        primaryLength,
+        minimalLength,
+      })
+    }
+  }
+
+  if (length > LOB_HTML_CHAR_LIMIT) {
+    throw createLobHtmlTooLargeError(length, primaryLength)
+  }
+
+  return { html, length, minimalApplied }
+}
+
+function getConfiguredLobTemplate() {
+  if (!lobTemplateId) return null
+  return {
+    templateId: lobTemplateId,
+    templateVersionId: lobTemplateVersionId || undefined,
+  }
+}
+
+function buildLobMergeVariables(options: TemplatedLetterOptions) {
+  const formattedWrittenDate = format(options.writtenDate, "MMMM d, yyyy")
+  const formattedDeliveryDate = format(options.deliveryDate ?? new Date(), "MMMM d, yyyy")
+
+  return {
+    recipient_name: options.recipientName ?? "Future Self",
+    letter_content: sanitizeLetterContentForPrint(options.letterContent),
+    written_date: formattedWrittenDate,
+    delivery_date: formattedDeliveryDate,
+    // Use empty string instead of null to avoid Lob printing "null"
+    // The Lob template should handle empty strings appropriately
+    letter_title: options.letterTitle ?? "",
+  }
+}
+
+/**
  * Send a letter using the V3 Capsule Note branded template
  *
  * This is the recommended function for sending physical letters.
@@ -382,28 +504,72 @@ export interface TemplatedLetterOptions {
 export async function sendTemplatedLetter(
   options: TemplatedLetterOptions
 ): Promise<SendLetterResult> {
-  // Render the letter using V3 template
-  const renderedHtml = renderLetter({
-    recipientName: options.recipientName,
-    letterContent: options.letterContent,
-    writtenDate: options.writtenDate,
-    deliveryDate: options.deliveryDate,
-    letterTitle: options.letterTitle,
-    minimal: options.minimalTemplate,
-  })
+  const templateConfig = getConfiguredLobTemplate()
 
-  // Send using the base sendLetter function
-  return sendLetter({
-    to: options.to,
-    html: renderedHtml,
-    color: options.color,
-    doubleSided: options.doubleSided,
-    description: options.description || `Capsule Note: ${options.letterTitle || "Letter to Future Self"}`,
-    mailType: options.mailType,
-    useType: "operational", // Capsule Note letters are always operational
-    idempotencyKey: options.idempotencyKey,
-    sendDate: options.sendDate,
-  })
+  const sendInlineLetter = () => {
+    const { html: renderedHtml } = chooseTemplateHtml({
+      recipientName: options.recipientName,
+      letterContent: options.letterContent,
+      writtenDate: options.writtenDate,
+      deliveryDate: options.deliveryDate,
+      letterTitle: options.letterTitle,
+      minimal: options.minimalTemplate,
+    })
+
+    return sendLetter({
+      to: options.to,
+      html: renderedHtml,
+      color: options.color,
+      doubleSided: options.doubleSided,
+      description:
+        options.description || `Capsule Note: ${options.letterTitle || "Letter to Future Self"}`,
+      mailType: options.mailType,
+      useType: "operational",
+      idempotencyKey: options.idempotencyKey,
+      sendDate: options.sendDate,
+    })
+  }
+
+  // Prefer stored Lob template to avoid inline size limits
+  if (templateConfig) {
+    const mergeVariables = buildLobMergeVariables(options)
+
+    try {
+      return await sendLetter({
+        to: options.to,
+        color: options.color,
+        doubleSided: options.doubleSided,
+        description:
+          options.description || `Capsule Note: ${options.letterTitle || "Letter to Future Self"}`,
+        mailType: options.mailType,
+        useType: "operational", // Capsule Note letters are always operational
+        idempotencyKey: options.idempotencyKey,
+        sendDate: options.sendDate,
+        lobTemplateId: templateConfig.templateId,
+        lobTemplateVersionId: templateConfig.templateVersionId,
+        mergeVariables,
+      })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      const statusCode = (error as LobApiError)?.statusCode
+      const shouldFallbackToInline =
+        statusCode === 422 && message.toLowerCase().includes("file is required")
+
+      if (shouldFallbackToInline) {
+        console.warn("[Lob] Template send failed, falling back to inline HTML", {
+          reason: message,
+          templateId: templateConfig.templateId,
+          templateVersionId: templateConfig.templateVersionId,
+        })
+        return sendInlineLetter()
+      }
+
+      throw error
+    }
+  }
+
+  // Fallback: Render inline HTML (auto-fallback to minimal if oversized)
+  return sendInlineLetter()
 }
 
 /**

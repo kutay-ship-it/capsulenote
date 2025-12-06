@@ -37,7 +37,10 @@ function verifyLobSignature(
 
   try {
     // Parse header: t=1234567890,v1=abc123...
-    const parts = signatureHeader.split(",")
+    const parts = signatureHeader
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean)
     const timestampPart = parts.find((p) => p.startsWith("t="))
     const signaturePart = parts.find((p) => p.startsWith("v1="))
 
@@ -114,6 +117,14 @@ describe("Lob Webhook Signature Verification", () => {
       const fourMinutesAgo = Math.floor(Date.now() / 1000) - 240
       const signature = createLobSignature(testPayload, testSecret, fourMinutesAgo)
       const result = verifyLobSignature(testPayload, signature, testSecret)
+
+      expect(result.valid).toBe(true)
+    })
+
+    it("should accept signature headers with spaces after commas", () => {
+      const signature = createLobSignature(testPayload, testSecret)
+      const spacedSignature = signature.replace(",", ", ")
+      const result = verifyLobSignature(testPayload, spacedSignature, testSecret)
 
       expect(result.valid).toBe(true)
     })
