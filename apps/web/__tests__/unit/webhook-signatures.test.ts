@@ -25,31 +25,34 @@ import { createHmac } from "crypto"
 /**
  * Reimplementation of Lob signature verification for testing
  * This mirrors the production code in apps/web/app/api/webhooks/lob/route.ts
+ *
+ * Lob uses TWO separate headers:
+ * - Lob-Signature: the hex signature
+ * - Lob-Signature-Timestamp: the Unix timestamp
+ *
+ * @see https://help.lob.com/print-and-mail/getting-data-and-results/using-webhooks
  */
 function verifyLobSignature(
   payload: string,
   signatureHeader: string | null,
+  timestampHeader: string | null,
   secret: string
 ): { valid: boolean; timestamp?: number; error?: string } {
-  if (!signatureHeader) {
-    return { valid: false, error: "Missing signature header" }
+  if (!signatureHeader || signatureHeader.trim() === "") {
+    return { valid: false, error: "Missing Lob-Signature header" }
+  }
+
+  if (!timestampHeader || timestampHeader.trim() === "") {
+    return { valid: false, error: "Missing Lob-Signature-Timestamp header" }
   }
 
   try {
-    // Parse header: t=1234567890,v1=abc123...
-    const parts = signatureHeader
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean)
-    const timestampPart = parts.find((p) => p.startsWith("t="))
-    const signaturePart = parts.find((p) => p.startsWith("v1="))
-
-    if (!timestampPart || !signaturePart) {
-      return { valid: false, error: "Invalid signature format" }
+    const timestamp = parseInt(timestampHeader.trim(), 10)
+    if (isNaN(timestamp)) {
+      return { valid: false, error: "Invalid timestamp format" }
     }
 
-    const timestamp = parseInt(timestampPart.substring(2), 10)
-    const providedSignature = signaturePart.substring(3)
+    const providedSignature = signatureHeader.trim()
 
     // Check timestamp is within 5 minutes
     const now = Math.floor(Date.now() / 1000)
@@ -84,16 +87,17 @@ function verifyLobSignature(
 
 /**
  * Helper to create valid Lob signature for testing
+ * Returns separate signature and timestamp values (Lob's format)
  */
 function createLobSignature(
   payload: string,
   secret: string,
   timestamp?: number
-): string {
+): { signature: string; timestamp: number } {
   const ts = timestamp ?? Math.floor(Date.now() / 1000)
   const signedPayload = `${ts}.${payload}`
   const signature = createHmac("sha256", secret).update(signedPayload).digest("hex")
-  return `t=${ts},v1=${signature}`
+  return { signature, timestamp: ts }
 }
 
 describe("Lob Webhook Signature Verification", () => {
@@ -106,8 +110,8 @@ describe("Lob Webhook Signature Verification", () => {
 
   describe("Valid Signatures", () => {
     it("should accept valid signature with current timestamp", () => {
-      const signature = createLobSignature(testPayload, testSecret)
-      const result = verifyLobSignature(testPayload, signature, testSecret)
+      const { signature, timestamp } = createLobSignature(testPayload, testSecret)
+      const result = verifyLobSignature(testPayload, signature, String(timestamp), testSecret)
 
       expect(result.valid).toBe(true)
       expect(result.error).toBeUndefined()
@@ -115,24 +119,23 @@ describe("Lob Webhook Signature Verification", () => {
 
     it("should accept valid signature within 5 minute window", () => {
       const fourMinutesAgo = Math.floor(Date.now() / 1000) - 240
-      const signature = createLobSignature(testPayload, testSecret, fourMinutesAgo)
-      const result = verifyLobSignature(testPayload, signature, testSecret)
+      const { signature } = createLobSignature(testPayload, testSecret, fourMinutesAgo)
+      const result = verifyLobSignature(testPayload, signature, String(fourMinutesAgo), testSecret)
 
       expect(result.valid).toBe(true)
     })
 
-    it("should accept signature headers with spaces after commas", () => {
-      const signature = createLobSignature(testPayload, testSecret)
-      const spacedSignature = signature.replace(",", ", ")
-      const result = verifyLobSignature(testPayload, spacedSignature, testSecret)
+    it("should accept signature with whitespace trimmed", () => {
+      const { signature, timestamp } = createLobSignature(testPayload, testSecret)
+      const result = verifyLobSignature(testPayload, `  ${signature}  `, String(timestamp), testSecret)
 
       expect(result.valid).toBe(true)
     })
 
     it("should return timestamp in verification result", () => {
       const now = Math.floor(Date.now() / 1000)
-      const signature = createLobSignature(testPayload, testSecret, now)
-      const result = verifyLobSignature(testPayload, signature, testSecret)
+      const { signature } = createLobSignature(testPayload, testSecret, now)
+      const result = verifyLobSignature(testPayload, signature, String(now), testSecret)
 
       expect(result.timestamp).toBe(now)
     })
@@ -140,24 +143,24 @@ describe("Lob Webhook Signature Verification", () => {
 
   describe("Invalid Signatures", () => {
     it("should reject signature with wrong secret", () => {
-      const signature = createLobSignature(testPayload, "wrong_secret")
-      const result = verifyLobSignature(testPayload, signature, testSecret)
+      const { signature, timestamp } = createLobSignature(testPayload, "wrong_secret")
+      const result = verifyLobSignature(testPayload, signature, String(timestamp), testSecret)
 
       expect(result.valid).toBe(false)
     })
 
     it("should reject signature with tampered payload", () => {
-      const signature = createLobSignature(testPayload, testSecret)
+      const { signature, timestamp } = createLobSignature(testPayload, testSecret)
       const tamperedPayload = JSON.stringify({ id: "evt_456", tampered: true })
-      const result = verifyLobSignature(tamperedPayload, signature, testSecret)
+      const result = verifyLobSignature(tamperedPayload, signature, String(timestamp), testSecret)
 
       expect(result.valid).toBe(false)
     })
 
     it("should reject signature with modified signature value", () => {
-      const signature = createLobSignature(testPayload, testSecret)
-      const tamperedSignature = signature.replace(/v1=.{10}/, "v1=0000000000")
-      const result = verifyLobSignature(testPayload, tamperedSignature, testSecret)
+      const { signature, timestamp } = createLobSignature(testPayload, testSecret)
+      const tamperedSignature = signature.substring(0, 10) + "0000000000" + signature.substring(20)
+      const result = verifyLobSignature(testPayload, tamperedSignature, String(timestamp), testSecret)
 
       expect(result.valid).toBe(false)
     })
@@ -166,8 +169,8 @@ describe("Lob Webhook Signature Verification", () => {
   describe("Expired Timestamps (Replay Attack Prevention)", () => {
     it("should reject signature older than 5 minutes", () => {
       const sixMinutesAgo = Math.floor(Date.now() / 1000) - 360
-      const signature = createLobSignature(testPayload, testSecret, sixMinutesAgo)
-      const result = verifyLobSignature(testPayload, signature, testSecret)
+      const { signature } = createLobSignature(testPayload, testSecret, sixMinutesAgo)
+      const result = verifyLobSignature(testPayload, signature, String(sixMinutesAgo), testSecret)
 
       expect(result.valid).toBe(false)
       expect(result.error).toBe("Timestamp too old")
@@ -175,8 +178,8 @@ describe("Lob Webhook Signature Verification", () => {
 
     it("should reject signature from the future (> 5 minutes)", () => {
       const sixMinutesFromNow = Math.floor(Date.now() / 1000) + 360
-      const signature = createLobSignature(testPayload, testSecret, sixMinutesFromNow)
-      const result = verifyLobSignature(testPayload, signature, testSecret)
+      const { signature } = createLobSignature(testPayload, testSecret, sixMinutesFromNow)
+      const result = verifyLobSignature(testPayload, signature, String(sixMinutesFromNow), testSecret)
 
       expect(result.valid).toBe(false)
       expect(result.error).toBe("Timestamp too old")
@@ -184,92 +187,89 @@ describe("Lob Webhook Signature Verification", () => {
 
     it("should reject very old timestamp (1 hour ago)", () => {
       const oneHourAgo = Math.floor(Date.now() / 1000) - 3600
-      const signature = createLobSignature(testPayload, testSecret, oneHourAgo)
-      const result = verifyLobSignature(testPayload, signature, testSecret)
+      const { signature } = createLobSignature(testPayload, testSecret, oneHourAgo)
+      const result = verifyLobSignature(testPayload, signature, String(oneHourAgo), testSecret)
 
       expect(result.valid).toBe(false)
     })
   })
 
-  describe("Missing Signature Header", () => {
+  describe("Missing Headers", () => {
     it("should reject null signature header", () => {
-      const result = verifyLobSignature(testPayload, null, testSecret)
+      const { timestamp } = createLobSignature(testPayload, testSecret)
+      const result = verifyLobSignature(testPayload, null, String(timestamp), testSecret)
 
       expect(result.valid).toBe(false)
-      expect(result.error).toBe("Missing signature header")
+      expect(result.error).toBe("Missing Lob-Signature header")
+    })
+
+    it("should reject null timestamp header", () => {
+      const { signature } = createLobSignature(testPayload, testSecret)
+      const result = verifyLobSignature(testPayload, signature, null, testSecret)
+
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe("Missing Lob-Signature-Timestamp header")
     })
 
     it("should reject empty string signature header", () => {
-      const result = verifyLobSignature(testPayload, "", testSecret)
+      const { timestamp } = createLobSignature(testPayload, testSecret)
+      const result = verifyLobSignature(testPayload, "", String(timestamp), testSecret)
 
       expect(result.valid).toBe(false)
-      // Empty string is treated as missing signature
-      expect(result.error).toBe("Missing signature header")
+      expect(result.error).toBe("Missing Lob-Signature header")
+    })
+
+    it("should reject empty string timestamp header", () => {
+      const { signature } = createLobSignature(testPayload, testSecret)
+      const result = verifyLobSignature(testPayload, signature, "", testSecret)
+
+      expect(result.valid).toBe(false)
+      expect(result.error).toBe("Missing Lob-Signature-Timestamp header")
     })
   })
 
-  describe("Malformed Signature Formats", () => {
-    it("should reject signature without timestamp (t=)", () => {
-      const malformed = "v1=abc123def456"
-      const result = verifyLobSignature(testPayload, malformed, testSecret)
+  describe("Malformed Headers", () => {
+    it("should reject non-numeric timestamp", () => {
+      const { signature } = createLobSignature(testPayload, testSecret)
+      const result = verifyLobSignature(testPayload, signature, "not-a-number", testSecret)
 
       expect(result.valid).toBe(false)
-      expect(result.error).toBe("Invalid signature format")
+      expect(result.error).toBe("Invalid timestamp format")
     })
 
-    it("should reject signature without version (v1=)", () => {
-      const malformed = "t=1234567890"
-      const result = verifyLobSignature(testPayload, malformed, testSecret)
+    it("should reject timestamp with letters mixed in", () => {
+      const { signature } = createLobSignature(testPayload, testSecret)
+      // Note: parseInt("123abc456") returns 123, so this fails due to timestamp age
+      // not NaN check. This is expected JavaScript behavior.
+      const result = verifyLobSignature(testPayload, signature, "123abc456", testSecret)
 
       expect(result.valid).toBe(false)
-      expect(result.error).toBe("Invalid signature format")
-    })
-
-    it("should reject completely malformed header", () => {
-      const malformed = "this-is-not-a-valid-signature"
-      const result = verifyLobSignature(testPayload, malformed, testSecret)
-
-      expect(result.valid).toBe(false)
-      expect(result.error).toBe("Invalid signature format")
-    })
-
-    it("should reject signature with non-numeric timestamp", () => {
-      const malformed = "t=notanumber,v1=abc123"
-      const result = verifyLobSignature(testPayload, malformed, testSecret)
-
-      expect(result.valid).toBe(false)
-      // NaN timestamp will fail the timestamp check
-    })
-
-    it("should reject signature with wrong separator", () => {
-      const malformed = "t=1234567890;v1=abc123" // semicolon instead of comma
-      const result = verifyLobSignature(testPayload, malformed, testSecret)
-
-      expect(result.valid).toBe(false)
+      // The timestamp 123 (from year 1970) is way too old
+      expect(result.error).toBe("Timestamp too old")
     })
   })
 
   describe("Edge Cases", () => {
     it("should handle empty payload", () => {
       const emptyPayload = ""
-      const signature = createLobSignature(emptyPayload, testSecret)
-      const result = verifyLobSignature(emptyPayload, signature, testSecret)
+      const { signature, timestamp } = createLobSignature(emptyPayload, testSecret)
+      const result = verifyLobSignature(emptyPayload, signature, String(timestamp), testSecret)
 
       expect(result.valid).toBe(true)
     })
 
     it("should handle large payload", () => {
       const largePayload = JSON.stringify({ data: "x".repeat(100000) })
-      const signature = createLobSignature(largePayload, testSecret)
-      const result = verifyLobSignature(largePayload, signature, testSecret)
+      const { signature, timestamp } = createLobSignature(largePayload, testSecret)
+      const result = verifyLobSignature(largePayload, signature, String(timestamp), testSecret)
 
       expect(result.valid).toBe(true)
     })
 
     it("should handle special characters in payload", () => {
       const specialPayload = JSON.stringify({ emoji: "🎉", unicode: "日本語" })
-      const signature = createLobSignature(specialPayload, testSecret)
-      const result = verifyLobSignature(specialPayload, signature, testSecret)
+      const { signature, timestamp } = createLobSignature(specialPayload, testSecret)
+      const result = verifyLobSignature(specialPayload, signature, String(timestamp), testSecret)
 
       expect(result.valid).toBe(true)
     })
@@ -672,17 +672,17 @@ describe("Cross-Provider Security Tests", () => {
       const payload = JSON.stringify({ id: "evt_1" })
 
       // Create valid signature
-      const signature = createLobSignature(payload, secret)
+      const { signature, timestamp } = createLobSignature(payload, secret)
 
       // Verify immediately - should pass
-      const result1 = verifyLobSignature(payload, signature, secret)
+      const result1 = verifyLobSignature(payload, signature, String(timestamp), secret)
       expect(result1.valid).toBe(true)
 
       // After 5+ minutes, same signature should fail
       // We simulate this by using an old timestamp
       const oldTimestamp = Math.floor(Date.now() / 1000) - 400 // 6.5 minutes ago
-      const oldSignature = createLobSignature(payload, secret, oldTimestamp)
-      const result2 = verifyLobSignature(payload, oldSignature, secret)
+      const { signature: oldSignature } = createLobSignature(payload, secret, oldTimestamp)
+      const result2 = verifyLobSignature(payload, oldSignature, String(oldTimestamp), secret)
       expect(result2.valid).toBe(false)
     })
   })
@@ -691,15 +691,15 @@ describe("Cross-Provider Security Tests", () => {
     it("should not leak timing information via signature comparison", () => {
       const secret = "test_secret"
       const payload = JSON.stringify({ id: "evt_1" })
-      const validSig = createLobSignature(payload, secret)
+      const { signature: validSig, timestamp } = createLobSignature(payload, secret)
 
       // Both should take similar time regardless of where they differ
-      const wrongAtStart = validSig.replace(/v1=./, "v1=X")
+      const wrongAtStart = "X" + validSig.slice(1)
       const wrongAtEnd = validSig.slice(0, -1) + "X"
 
       // Just verify both are rejected (timing would need more sophisticated testing)
-      const result1 = verifyLobSignature(payload, wrongAtStart, secret)
-      const result2 = verifyLobSignature(payload, wrongAtEnd, secret)
+      const result1 = verifyLobSignature(payload, wrongAtStart, String(timestamp), secret)
+      const result2 = verifyLobSignature(payload, wrongAtEnd, String(timestamp), secret)
 
       expect(result1.valid).toBe(false)
       expect(result2.valid).toBe(false)
@@ -711,9 +711,11 @@ describe("Cross-Provider Security Tests", () => {
       const lobSecret = "lob_secret"
       const stripeSecret = "stripe_secret"
       const payload = JSON.stringify({ id: "evt_1" })
+      const timestamp = String(Math.floor(Date.now() / 1000))
 
+      // Stripe signature format won't work as Lob signature
       const stripeSignature = createStripeSignature(payload, stripeSecret)
-      const result = verifyLobSignature(payload, stripeSignature, lobSecret)
+      const result = verifyLobSignature(payload, stripeSignature, timestamp, lobSecret)
 
       expect(result.valid).toBe(false)
     })
@@ -723,7 +725,8 @@ describe("Cross-Provider Security Tests", () => {
       const stripeSecret = "stripe_secret"
       const payload = JSON.stringify({ id: "evt_1" })
 
-      const lobSignature = createLobSignature(payload, lobSecret)
+      // Lob returns { signature, timestamp } - Stripe expects "t=...,v1=..." format
+      const { signature: lobSignature } = createLobSignature(payload, lobSecret)
       const result = verifyStripeSignature(payload, lobSignature, stripeSecret)
 
       expect(result.valid).toBe(false)

@@ -76,33 +76,35 @@ const EVENT_TO_STATUS: Record<string, string> = {
 /**
  * Verify Lob webhook signature
  *
- * Lob uses HMAC-SHA256 with format: t={timestamp},v1={signature}
- * Signature is computed over: {timestamp}.{payload}
+ * Lob uses HMAC-SHA256 with TWO separate headers:
+ * - Lob-Signature: the hex signature
+ * - Lob-Signature-Timestamp: the Unix timestamp
+ *
+ * Signature is computed as: HMAC-SHA256({timestamp}.{payload}, secret)
+ *
+ * @see https://help.lob.com/print-and-mail/getting-data-and-results/using-webhooks
  */
 function verifyLobSignature(
   payload: string,
   signatureHeader: string | null,
+  timestampHeader: string | null,
   secret: string
 ): { valid: boolean; timestamp?: number; error?: string } {
-  if (!signatureHeader) {
-    return { valid: false, error: "Missing signature header" }
+  if (!signatureHeader || signatureHeader.trim() === "") {
+    return { valid: false, error: "Missing Lob-Signature header" }
+  }
+
+  if (!timestampHeader || timestampHeader.trim() === "") {
+    return { valid: false, error: "Missing Lob-Signature-Timestamp header" }
   }
 
   try {
-    // Parse header: t=1234567890,v1=abc123...
-    const parts = signatureHeader
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean)
-    const timestampPart = parts.find((p) => p.startsWith("t="))
-    const signaturePart = parts.find((p) => p.startsWith("v1="))
-
-    if (!timestampPart || !signaturePart) {
-      return { valid: false, error: "Invalid signature format" }
+    const timestamp = parseInt(timestampHeader.trim(), 10)
+    if (isNaN(timestamp)) {
+      return { valid: false, error: "Invalid timestamp format" }
     }
 
-    const timestamp = parseInt(timestampPart.substring(2), 10)
-    const providedSignature = signaturePart.substring(3)
+    const providedSignature = signatureHeader.trim()
 
     // Check timestamp is within 5 minutes
     const now = Math.floor(Date.now() / 1000)
@@ -155,15 +157,22 @@ export async function POST(req: Request) {
     // 2. Get raw payload for signature verification
     const payload = await req.text()
     const signatureHeader = headerPayload.get("lob-signature")
+    const timestampHeader = headerPayload.get("lob-signature-timestamp")
 
     // 3. Verify signature if secret is configured
     if (env.LOB_WEBHOOK_SECRET) {
-      const verification = verifyLobSignature(payload, signatureHeader, env.LOB_WEBHOOK_SECRET)
+      const verification = verifyLobSignature(
+        payload,
+        signatureHeader,
+        timestampHeader,
+        env.LOB_WEBHOOK_SECRET
+      )
 
       if (!verification.valid) {
         console.error("[Lob Webhook] Signature verification failed", {
           error: verification.error,
           hasSignature: !!signatureHeader,
+          hasTimestamp: !!timestampHeader,
         })
         return new Response("Invalid signature", { status: 401 })
       }

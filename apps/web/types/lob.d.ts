@@ -49,7 +49,7 @@ declare module "lob" {
     to: Address
     from?: Address
     file?: string
-    template?: string
+    template_id?: string
     template_version_id?: string
     color?: boolean
     double_sided?: boolean

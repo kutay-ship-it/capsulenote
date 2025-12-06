@@ -31,6 +31,13 @@ const lobTemplateId = env.LOB_TEMPLATE_ID
 const lobTemplateVersionId = env.LOB_TEMPLATE_VERSION_ID
 const LOB_HTML_CHAR_LIMIT = 10000
 
+// Debug: Log template config on module load
+console.log("[Lob] Module initialized", {
+  hasApiKey: !!lobApiKey,
+  templateId: lobTemplateId || "(not set)",
+  templateVersionId: lobTemplateVersionId || "(not set)",
+})
+
 export const lob = lobApiKey ? new Lob(lobApiKey) : null
 
 type LobApiError = Error & {
@@ -134,14 +141,18 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
     }
 
     // Choose between inline HTML and stored template
+    // IMPORTANT: Lob requires template_id to be passed as the 'file' parameter, NOT as 'template_id'
     if (options.lobTemplateId) {
-      params.template = options.lobTemplateId
-      if (options.lobTemplateVersionId) {
-        params.template_version_id = options.lobTemplateVersionId
-      }
+      // Pass template_id as the file parameter (Lob API requirement)
+      params.file = options.lobTemplateId
       if (options.mergeVariables) {
         params.merge_variables = options.mergeVariables
       }
+      console.log("[Lob] Request params with template:", {
+        file: params.file,
+        merge_variables_keys: params.merge_variables ? Object.keys(params.merge_variables) : [],
+        apiKeyPrefix: lobApiKey?.substring(0, 10),
+      })
     } else if (options.html) {
       params.file = options.html
     } else {
@@ -456,7 +467,14 @@ function chooseTemplateHtml(
 }
 
 function getConfiguredLobTemplate() {
-  if (!lobTemplateId) return null
+  if (!lobTemplateId) {
+    console.log("[Lob] No template ID configured, will use inline HTML")
+    return null
+  }
+  console.log("[Lob] Template configured", {
+    templateId: lobTemplateId,
+    templateVersionId: lobTemplateVersionId || "latest",
+  })
   return {
     templateId: lobTemplateId,
     templateVersionId: lobTemplateVersionId || undefined,
@@ -468,6 +486,9 @@ function buildLobMergeVariables(options: TemplatedLetterOptions) {
   const formattedDeliveryDate = format(options.deliveryDate ?? new Date(), "MMMM d, yyyy")
 
   return {
+    // Note: 'variable_name' is required by the Lob template but not used in output
+    // It exists in the template merge_variables.keys so we must provide it
+    variable_name: "",
     recipient_name: options.recipientName ?? "Future Self",
     letter_content: sanitizeLetterContentForPrint(options.letterContent),
     written_date: formattedWrittenDate,
@@ -507,13 +528,20 @@ export async function sendTemplatedLetter(
   const templateConfig = getConfiguredLobTemplate()
 
   const sendInlineLetter = () => {
-    const { html: renderedHtml } = chooseTemplateHtml({
+    console.log("[Lob] Sending letter with inline HTML template")
+    const { html: renderedHtml, length, minimalApplied } = chooseTemplateHtml({
       recipientName: options.recipientName,
       letterContent: options.letterContent,
       writtenDate: options.writtenDate,
       deliveryDate: options.deliveryDate,
       letterTitle: options.letterTitle,
       minimal: options.minimalTemplate,
+    })
+
+    console.log("[Lob] Inline HTML prepared", {
+      htmlLength: length,
+      minimalApplied,
+      charLimit: LOB_HTML_CHAR_LIMIT,
     })
 
     return sendLetter({
@@ -534,8 +562,17 @@ export async function sendTemplatedLetter(
   if (templateConfig) {
     const mergeVariables = buildLobMergeVariables(options)
 
+    console.log("[Lob] Sending letter with stored template", {
+      templateId: templateConfig.templateId,
+      templateVersionId: templateConfig.templateVersionId,
+      mergeVariableKeys: Object.keys(mergeVariables),
+      recipientName: mergeVariables.recipient_name,
+      letterTitle: mergeVariables.letter_title || "(none)",
+      contentLength: (mergeVariables.letter_content as string).length,
+    })
+
     try {
-      return await sendLetter({
+      const result = await sendLetter({
         to: options.to,
         color: options.color,
         doubleSided: options.doubleSided,
@@ -549,6 +586,13 @@ export async function sendTemplatedLetter(
         lobTemplateVersionId: templateConfig.templateVersionId,
         mergeVariables,
       })
+
+      console.log("[Lob] Template letter sent successfully", {
+        letterId: result.id,
+        expectedDelivery: result.expectedDeliveryDate,
+      })
+
+      return result
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       const statusCode = (error as LobApiError)?.statusCode
