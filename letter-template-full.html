@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capsule Note Letter</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Page setup - US Letter 8.5" x 11" with 0.5" margins */
+    @page {
+      size: letter;
+      margin: 0.5in;
+    }
+
+    body {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #383838;
+      max-width: 7.5in;
+      margin: 0 auto;
+      padding: 0.5in;
+      background: #ffffff;
+    }
+
+    /* ================================
+       PAGE 1: COVER PAGE
+       ================================ */
+    .cover-page {
+      min-height: 9in;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      page-break-after: always;
+    }
+
+    .cover-brand {
+      margin-top: 2in; /* Space for Lob's address block at top */
+    }
+
+    .cover-logo {
+      width: 80px;
+      height: 80px;
+      border: 4px solid #383838;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32pt;
+      font-weight: bold;
+    }
+
+    .cover-title {
+      font-size: 28pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .cover-tagline {
+      font-size: 11pt;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #555555;
+      margin-bottom: 48px;
+    }
+
+    .cover-divider {
+      width: 120px;
+      height: 4px;
+      background: #383838;
+      margin: 0 auto 48px;
+    }
+
+    .cover-message {
+      font-size: 14pt;
+      font-style: italic;
+      margin-bottom: 16px;
+    }
+
+    .cover-recipient {
+      font-size: 18pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+
+    .cover-date {
+      font-size: 10pt;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #555555;
+      margin-bottom: 32px;
+    }
+
+    .cover-thanks {
+      font-size: 10pt;
+      font-style: italic;
+      color: #555555;
+      margin-bottom: 48px;
+    }
+
+    .cover-footer {
+      margin-top: auto;
+      padding-top: 32px;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666666;
+    }
+
+    /* ================================
+       PAGE 2: LETTER CONTENT
+       ================================ */
+    .letter-page {
+      /* No page-break-before needed - blank page already has page-break-after */
+      min-height: 9in;
+      display: flex;
+      flex-direction: column;
+      padding: 0.25in;
+    }
+
+    .letter-header {
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #cccccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      page-break-inside: avoid;
+      page-break-after: avoid;
+    }
+
+    .letter-title {
+      font-size: 14pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .letter-date {
+      font-size: 9pt;
+      color: #666666;
+      white-space: nowrap;
+    }
+
+    /* Greeting */
+    .greeting {
+      margin-bottom: 20px;
+      font-size: 12pt;
+    }
+
+    /* Letter content */
+    .content {
+      flex: 1; /* Takes available space, pushes footer down */
+      margin-bottom: 32px;
+      text-align: justify;
+    }
+
+    .content p {
+      margin-bottom: 16px;
+      orphans: 3; /* Minimum lines at bottom of page */
+      widows: 3;  /* Minimum lines at top of next page */
+    }
+
+    .content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .content ul, .content ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+      page-break-inside: avoid; /* Try to keep lists together */
+    }
+
+    .content li {
+      margin-bottom: 8px;
+      page-break-inside: avoid;
+    }
+
+    /* Signature section */
+    .signature {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 2px dashed #383838;
+      page-break-inside: avoid; /* Keep signature together */
+    }
+
+    .signature-text {
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+
+    .signature-name {
+      font-weight: bold;
+      font-size: 11pt;
+    }
+
+    .signature-date {
+      font-size: 9pt;
+      color: #555555;
+      margin-top: 4px;
+    }
+
+    /* Letter footer */
+    .letter-footer {
+      margin-top: auto; /* Push to bottom of page */
+      padding-top: 12px;
+      border-top: 2px solid #383838;
+      font-size: 8pt;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #666666;
+      text-align: center;
+      page-break-inside: avoid;
+    }
+
+    .footer-icon {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #383838;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <!-- ================================
+       PAGE 1: COVER PAGE
+       ================================ -->
+  <div class="cover-page">
+    <!-- Lob adds recipient address at top of this page -->
+
+    <div class="cover-brand">
+      <div class="cover-logo">C</div>
+      <div class="cover-title">Capsule Note</div>
+      <div class="cover-tagline">A Letter from Past</div>
+    </div>
+
+    <div class="cover-divider"></div>
+
+    <div class="cover-message">This message was sent to you from</div>
+    <div class="cover-recipient">{{recipient_name}}</div>
+    <div class="cover-date">Sent on {{written_date}}</div>
+
+    <div class="cover-thanks">Thank you for sharing such a special moment with us.</div>
+
+    <div class="cover-footer">
+      <span class="footer-icon"></span>
+      capsulenote.com
+    </div>
+  </div>
+
+  <!-- ================================
+       PAGE 2: BLANK PAGE
+       (Ensures letter content starts on separate sheet for double-sided)
+       ================================ -->
+  <div class="blank-page" style="page-break-after: always; min-height: 9in;">
+    <!-- Intentionally blank for double-sided printing -->
+  </div>
+
+  <!-- ================================
+       PAGE 3: LETTER CONTENT
+       ================================ -->
+  <div class="letter-page">
+    <header class="letter-header">
+      <div class="letter-title">{{letter_title}}</div>
+      <div class="letter-date">Written at {{written_date}}</div>
+    </header>
+
+    <div class="content">
+      {{letter_content}}
+    </div>
+
+    <footer class="letter-footer">
+      <span class="footer-icon"></span>
+      Capsule Note &mdash; capsulenote.com
+    </footer>
+  </div>
+</body>
+</html>

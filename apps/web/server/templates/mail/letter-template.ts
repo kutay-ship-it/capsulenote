@@ -168,7 +168,10 @@ export const LETTER_TEMPLATE_HTML = `
        PAGE 2: LETTER CONTENT
        ================================ */
     .letter-page {
-      page-break-before: always;
+      /* No page-break-before needed - blank page already has page-break-after */
+      min-height: 9in;
+      display: flex;
+      flex-direction: column;
     }
 
     .letter-header {
@@ -179,6 +182,8 @@ export const LETTER_TEMPLATE_HTML = `
       display: flex;
       justify-content: space-between;
       align-items: center;
+      page-break-inside: avoid; /* Don't split header across pages */
+      page-break-after: avoid;  /* Keep header with content */
     }
 
     .letter-brand {
@@ -206,6 +211,8 @@ export const LETTER_TEMPLATE_HTML = `
       padding: 12px 20px;
       margin-bottom: 24px;
       background: #f5f5f5;
+      page-break-inside: avoid;
+      page-break-after: avoid; /* Keep title with content */
     }
 
     .letter-title {
@@ -223,12 +230,15 @@ export const LETTER_TEMPLATE_HTML = `
 
     /* Letter content */
     .content {
+      flex: 1; /* Takes available space, pushes footer down */
       margin-bottom: 32px;
       text-align: justify;
     }
 
     .content p {
       margin-bottom: 16px;
+      orphans: 3; /* Minimum lines at bottom of page */
+      widows: 3;  /* Minimum lines at top of next page */
     }
 
     .content p:last-child {
@@ -238,10 +248,12 @@ export const LETTER_TEMPLATE_HTML = `
     .content ul, .content ol {
       margin-bottom: 16px;
       padding-left: 24px;
+      page-break-inside: avoid; /* Try to keep lists together */
     }
 
     .content li {
       margin-bottom: 8px;
+      page-break-inside: avoid;
     }
 
     /* Signature section */
@@ -249,6 +261,7 @@ export const LETTER_TEMPLATE_HTML = `
       margin-top: 32px;
       padding-top: 16px;
       border-top: 2px dashed #383838;
+      page-break-inside: avoid; /* Keep signature together */
     }
 
     .signature-text {
@@ -269,7 +282,7 @@ export const LETTER_TEMPLATE_HTML = `
 
     /* Letter footer */
     .letter-footer {
-      margin-top: 48px;
+      margin-top: auto; /* Push to bottom of page */
       padding-top: 12px;
       border-top: 2px solid #383838;
       font-size: 8pt;
@@ -277,6 +290,7 @@ export const LETTER_TEMPLATE_HTML = `
       letter-spacing: 0.1em;
       color: #666666;
       text-align: center;
+      page-break-inside: avoid;
     }
 
     .footer-icon {
@@ -451,13 +465,19 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
     }
 
     /* PAGE 2: LETTER */
-    .letter-page { page-break-before: always; }
+    .letter-page {
+      min-height: 9in;
+      display: flex;
+      flex-direction: column;
+    }
     .header {
       border: 3px solid #383838;
       border-bottom: 5px solid #383838;
       padding: 12px 16px;
       margin-bottom: 20px;
       background: #ffffff;
+      page-break-inside: avoid;
+      page-break-after: avoid;
     }
     .brand { font-size: 14pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
     .date-info { font-size: 8pt; text-transform: uppercase; color: #666666; }
@@ -466,13 +486,15 @@ export const LETTER_TEMPLATE_MINIMAL_HTML = `
       padding: 10px 16px;
       margin-bottom: 20px;
       background: #f5f5f5;
+      page-break-inside: avoid;
+      page-break-after: avoid;
     }
     .letter-title { font-size: 13pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.02em; }
     .greeting { margin-bottom: 16px; }
-    .content { margin-bottom: 24px; text-align: justify; }
-    .content p { margin-bottom: 12px; }
-    .signature { border-top: 2px dashed #383838; padding-top: 12px; margin-top: 24px; }
-    .footer { margin-top: 32px; font-size: 8pt; text-transform: uppercase; color: #666666; text-align: center; }
+    .content { flex: 1; margin-bottom: 24px; text-align: justify; }
+    .content p { margin-bottom: 12px; orphans: 3; widows: 3; }
+    .signature { border-top: 2px dashed #383838; padding-top: 12px; margin-top: 24px; page-break-inside: avoid; }
+    .footer { margin-top: auto; font-size: 8pt; text-transform: uppercase; color: #666666; text-align: center; page-break-inside: avoid; }
     .footer-icon { display: inline-block; width: 6px; height: 6px; background: #666666; margin-right: 4px; vertical-align: middle; }
   </style>
 </head>
