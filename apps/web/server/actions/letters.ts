@@ -11,6 +11,12 @@ import { logger } from "@/server/lib/logger"
 import { triggerInngestEvent, cancelInngestRun } from "@/server/lib/trigger-inngest"
 import { trackLetterCreation } from "@/server/lib/entitlements"
 import { ratelimit } from "@/server/lib/redis"
+import {
+  stripHtmlTags,
+  estimatePageCount,
+  CONTENT_PAGE_LIMIT,
+  MAX_CONTENT_CHARS,
+} from "@/lib/page-estimation"
 
 /**
  * Create a new letter with encrypted content
@@ -58,6 +64,33 @@ export async function createLetter(
     }
 
     const data = validated.data
+
+    // Validate page limit (Lob allows max 6 pages, template uses 2 fixed pages)
+    const plainText = stripHtmlTags(data.bodyHtml)
+    const estimatedPages = estimatePageCount(plainText)
+
+    if (estimatedPages > CONTENT_PAGE_LIMIT) {
+      await logger.warn('Letter exceeds page limit', {
+        userId: user.id,
+        estimatedPages,
+        maxPages: CONTENT_PAGE_LIMIT,
+        characterCount: plainText.length,
+      })
+
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.LETTER_TOO_LONG,
+          message: `Your letter is approximately ${estimatedPages} pages, but physical mail is limited to ${CONTENT_PAGE_LIMIT} pages of content. Please shorten your letter.`,
+          details: {
+            estimatedPages,
+            maxPages: CONTENT_PAGE_LIMIT,
+            characterCount: plainText.length,
+            maxCharacters: MAX_CONTENT_CHARS,
+          },
+        },
+      }
+    }
 
     // Encrypt letter content before transaction
     let encrypted: Awaited<ReturnType<typeof encryptLetter>>
@@ -276,7 +309,7 @@ export async function updateLetter(
     if (data.tags !== undefined) updateData.tags = data.tags
     if (data.visibility !== undefined) updateData.visibility = data.visibility
 
-    // If body content is being updated, re-encrypt
+    // If body content is being updated, validate and re-encrypt
     if (data.bodyRich || data.bodyHtml) {
       try {
         // Decrypt once to avoid race conditions
@@ -288,6 +321,34 @@ export async function updateLetter(
 
         const bodyRich = data.bodyRich || decrypted.bodyRich
         const bodyHtml = data.bodyHtml || decrypted.bodyHtml
+
+        // Validate page limit for updated content
+        const plainText = stripHtmlTags(bodyHtml)
+        const estimatedPages = estimatePageCount(plainText)
+
+        if (estimatedPages > CONTENT_PAGE_LIMIT) {
+          await logger.warn('Letter update exceeds page limit', {
+            userId: user.id,
+            letterId: id,
+            estimatedPages,
+            maxPages: CONTENT_PAGE_LIMIT,
+            characterCount: plainText.length,
+          })
+
+          return {
+            success: false,
+            error: {
+              code: ErrorCodes.LETTER_TOO_LONG,
+              message: `Your letter is approximately ${estimatedPages} pages, but physical mail is limited to ${CONTENT_PAGE_LIMIT} pages of content. Please shorten your letter.`,
+              details: {
+                estimatedPages,
+                maxPages: CONTENT_PAGE_LIMIT,
+                characterCount: plainText.length,
+                maxCharacters: MAX_CONTENT_CHARS,
+              },
+            },
+          }
+        }
 
         const encrypted = await encryptLetter({ bodyRich, bodyHtml })
         updateData.bodyCiphertext = encrypted.bodyCiphertext

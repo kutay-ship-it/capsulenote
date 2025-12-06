@@ -25,6 +25,13 @@ import {
   getEnvelopeConfig,
   type RenderLetterOptions,
 } from "@/server/templates/mail"
+import {
+  stripHtmlTags,
+  estimatePageCount,
+  LOB_MAX_PAGES,
+  FIXED_TEMPLATE_PAGES,
+  CONTENT_PAGE_LIMIT,
+} from "@/lib/page-estimation"
 
 const lobApiKey = env.LOB_API_KEY
 const lobTemplateId = env.LOB_TEMPLATE_ID
@@ -56,7 +63,11 @@ export interface MailingAddress {
 }
 
 export interface MailOptions {
-  to: MailingAddress
+  /**
+   * Recipient address - either a MailingAddress object or a Lob address ID (adr_xxx).
+   * Using address IDs is recommended for international mail to avoid formatting issues.
+   */
+  to: MailingAddress | string
   html?: string
   color?: boolean
   doubleSided?: boolean
@@ -120,18 +131,30 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
   const envelopeConfig = getEnvelopeConfig()
 
   try {
+    // Determine if 'to' is a Lob address ID or inline address
+    const toAddress: Parameters<typeof lob.letters.create>[0]["to"] =
+      typeof options.to === "string"
+        ? options.to // Use Lob address ID directly (adr_xxx)
+        : {
+            // Build inline address object
+            name: options.to.name,
+            address_line1: options.to.line1,
+            address_line2: options.to.line2,
+            address_city: options.to.city,
+            address_state: options.to.state,
+            address_zip: options.to.postalCode,
+            address_country: options.to.country,
+          }
+
+    // Log which approach is being used
+    if (typeof options.to === "string") {
+      console.log("[Lob] Using address ID for recipient:", options.to)
+    }
+
     // Build request params
     const params: Parameters<typeof lob.letters.create>[0] = {
       description: options.description || "Letter to Future Self",
-      to: {
-        name: options.to.name,
-        address_line1: options.to.line1,
-        address_line2: options.to.line2,
-        address_city: options.to.city,
-        address_state: options.to.state,
-        address_zip: options.to.postalCode,
-        address_country: options.to.country,
-      },
+      to: toAddress,
       from: getSenderAddress(),
       color: options.color ?? false,
       double_sided: options.doubleSided ?? false,
@@ -319,6 +342,649 @@ export async function verifyAddress(
   return verifyIntlAddress(address)
 }
 
+// =============================================================================
+// Lob Address Object Functions (Address ID System)
+// =============================================================================
+// Using Lob Address IDs (adr_xxx) instead of inline addresses prevents
+// address formatting issues that occur with international addresses.
+// The Address ID system lets Lob normalize and store addresses properly.
+
+/**
+ * Character limits for Lob addresses
+ * @see https://docs.lob.com/#tag/Addresses/operation/address_create
+ */
+export const LOB_ADDRESS_LIMITS = {
+  /** Max chars for name field (US addresses) */
+  NAME_US: 40,
+  /** Max chars for name field (international) */
+  NAME_INTL: 50,
+  /** Max chars for address_line1 */
+  ADDRESS_LINE1: 64,
+  /** Max chars for address_line2 */
+  ADDRESS_LINE2: 64,
+  /** Max chars for city */
+  CITY: 200,
+  /** Max chars for state */
+  STATE: 200,
+  /** Max chars for postal code */
+  POSTAL_CODE: 40,
+  /** Legacy: Combined limit for address_line1 + address_line2 for inline addresses */
+  COMBINED_ADDRESS_LINES_LEGACY: 50,
+}
+
+/**
+ * Result of Lob address creation
+ */
+export interface LobAddressResult {
+  /** Lob address ID (adr_xxx format) */
+  id: string
+  /** Normalized address components */
+  normalized: {
+    name: string
+    line1: string
+    line2?: string
+    city: string
+    state: string
+    postalCode: string
+    country: string
+  }
+  /** ISO timestamp of creation */
+  dateCreated: string
+}
+
+/**
+ * Address validation result
+ */
+export interface AddressValidationResult {
+  isValid: boolean
+  errors: string[]
+  warnings: string[]
+}
+
+/**
+ * Validate a mailing address against Lob's character limits
+ *
+ * IMPORTANT: This checks the individual field limits, not the legacy
+ * combined 50-char limit. The Address ID system has more generous limits.
+ */
+export function validateAddressForLob(
+  address: MailingAddress
+): AddressValidationResult {
+  const errors: string[] = []
+  const warnings: string[] = []
+
+  const isUS = address.country === "US" || address.country === "USA"
+  const nameLimit = isUS ? LOB_ADDRESS_LIMITS.NAME_US : LOB_ADDRESS_LIMITS.NAME_INTL
+
+  // Check name
+  if (!address.name || address.name.trim().length === 0) {
+    errors.push("Name is required")
+  } else if (address.name.length > nameLimit) {
+    errors.push(`Name exceeds ${nameLimit} character limit (${address.name.length} chars)`)
+  }
+
+  // Check line1
+  if (!address.line1 || address.line1.trim().length === 0) {
+    errors.push("Address line 1 is required")
+  } else if (address.line1.length > LOB_ADDRESS_LIMITS.ADDRESS_LINE1) {
+    errors.push(`Address line 1 exceeds ${LOB_ADDRESS_LIMITS.ADDRESS_LINE1} character limit (${address.line1.length} chars)`)
+  }
+
+  // Check line2 (optional)
+  if (address.line2 && address.line2.length > LOB_ADDRESS_LIMITS.ADDRESS_LINE2) {
+    errors.push(`Address line 2 exceeds ${LOB_ADDRESS_LIMITS.ADDRESS_LINE2} character limit (${address.line2.length} chars)`)
+  }
+
+  // Check city
+  if (!address.city || address.city.trim().length === 0) {
+    errors.push("City is required")
+  } else if (address.city.length > LOB_ADDRESS_LIMITS.CITY) {
+    errors.push(`City exceeds ${LOB_ADDRESS_LIMITS.CITY} character limit (${address.city.length} chars)`)
+  }
+
+  // Check state
+  if (!address.state || address.state.trim().length === 0) {
+    warnings.push("State/province is empty (may be required for some countries)")
+  } else if (address.state.length > LOB_ADDRESS_LIMITS.STATE) {
+    errors.push(`State exceeds ${LOB_ADDRESS_LIMITS.STATE} character limit (${address.state.length} chars)`)
+  }
+
+  // Check postal code
+  if (!address.postalCode || address.postalCode.trim().length === 0) {
+    errors.push("Postal code is required")
+  } else if (address.postalCode.length > LOB_ADDRESS_LIMITS.POSTAL_CODE) {
+    errors.push(`Postal code exceeds ${LOB_ADDRESS_LIMITS.POSTAL_CODE} character limit (${address.postalCode.length} chars)`)
+  }
+
+  // Check country
+  if (!address.country || address.country.trim().length === 0) {
+    errors.push("Country is required")
+  } else if (address.country.length !== 2) {
+    warnings.push("Country should be a 2-letter ISO code (e.g., 'US', 'TR')")
+  }
+
+  // Warn about legacy combined limit (for information)
+  const combinedLength = (address.line1?.length || 0) + (address.line2?.length || 0)
+  if (combinedLength > LOB_ADDRESS_LIMITS.COMBINED_ADDRESS_LINES_LEGACY) {
+    warnings.push(
+      `Combined address lines (${combinedLength} chars) exceed legacy 50-char inline limit. ` +
+      `Using Address ID system to avoid formatting issues.`
+    )
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    warnings,
+  }
+}
+
+/**
+ * Create a Lob address object and return its ID
+ *
+ * This stores the address in Lob's system and returns an address ID (adr_xxx)
+ * that can be used in letter creation. Using address IDs avoids formatting
+ * issues that occur with inline addresses, especially for international mail.
+ *
+ * @example
+ * ```typescript
+ * const address = await createLobAddress({
+ *   name: "John Doe",
+ *   line1: "North Istanbul Sitesi E Blok Daire 8",
+ *   line2: "Zekeriyaköy Mahallesi",
+ *   city: "Sarıyer",
+ *   state: "İstanbul",
+ *   postalCode: "34450",
+ *   country: "TR",
+ * })
+ *
+ * // Use address.id (adr_xxx) in letter creation
+ * ```
+ */
+export async function createLobAddress(
+  address: MailingAddress,
+  options?: {
+    /** Optional description for the address */
+    description?: string
+    /** Custom metadata (max 20 keys) */
+    metadata?: Record<string, string>
+  }
+): Promise<LobAddressResult> {
+  if (!lob) {
+    throw new Error("Lob API key not configured - set LOB_API_KEY environment variable")
+  }
+
+  // Validate address before sending to Lob
+  const validation = validateAddressForLob(address)
+  if (!validation.isValid) {
+    const error = new Error(`Invalid address: ${validation.errors.join("; ")}`) as Error & {
+      code?: string
+      validationErrors?: string[]
+    }
+    error.name = "LobAddressValidationError"
+    error.code = "ADDRESS_VALIDATION_FAILED"
+    error.validationErrors = validation.errors
+    throw error
+  }
+
+  // Log warnings
+  if (validation.warnings.length > 0) {
+    console.warn("[Lob] Address validation warnings:", validation.warnings)
+  }
+
+  try {
+    const lobAddress = await lob.addresses.create({
+      name: address.name,
+      address_line1: address.line1,
+      address_line2: address.line2,
+      address_city: address.city,
+      address_state: address.state,
+      address_zip: address.postalCode,
+      address_country: address.country,
+      description: options?.description,
+      metadata: options?.metadata,
+    })
+
+    console.log("[Lob] Address created successfully", {
+      id: lobAddress.id,
+      name: lobAddress.name,
+      city: lobAddress.address_city,
+      country: lobAddress.address_country,
+    })
+
+    return {
+      id: lobAddress.id,
+      normalized: {
+        name: lobAddress.name,
+        line1: lobAddress.address_line1,
+        line2: lobAddress.address_line2,
+        city: lobAddress.address_city,
+        state: lobAddress.address_state,
+        postalCode: lobAddress.address_zip,
+        country: lobAddress.address_country,
+      },
+      dateCreated: lobAddress.date_created,
+    }
+  } catch (error: any) {
+    const statusCode = error?.status_code
+    const lobMessage =
+      error?.message ||
+      error?._response?.body?.error?.message ||
+      "Unknown Lob error"
+
+    console.error("[Lob] Address creation error:", lobMessage, {
+      statusCode,
+      address: {
+        name: address.name,
+        city: address.city,
+        country: address.country,
+      },
+    })
+
+    const normalizedError = new Error(
+      statusCode === 422
+        ? `Lob address validation error: ${lobMessage}`
+        : `Failed to create Lob address: ${lobMessage}`
+    ) as LobApiError
+    normalizedError.name = statusCode === 422 ? "LobValidationError" : "LobApiError"
+    normalizedError.statusCode = statusCode
+    normalizedError.lobMessage = lobMessage
+
+    throw normalizedError
+  }
+}
+
+/**
+ * Retrieve a Lob address by ID
+ */
+export async function getLobAddress(addressId: string): Promise<LobAddressResult> {
+  if (!lob) {
+    throw new Error("Lob API key not configured - set LOB_API_KEY environment variable")
+  }
+
+  if (!addressId.startsWith("adr_")) {
+    throw new Error(`Invalid Lob address ID format: ${addressId}. Expected format: adr_xxx`)
+  }
+
+  try {
+    const lobAddress = await lob.addresses.retrieve(addressId)
+
+    return {
+      id: lobAddress.id,
+      normalized: {
+        name: lobAddress.name,
+        line1: lobAddress.address_line1,
+        line2: lobAddress.address_line2,
+        city: lobAddress.address_city,
+        state: lobAddress.address_state,
+        postalCode: lobAddress.address_zip,
+        country: lobAddress.address_country,
+      },
+      dateCreated: lobAddress.date_created,
+    }
+  } catch (error: any) {
+    console.error("[Lob] Get address error:", error?.message || error)
+    throw new Error(`Failed to retrieve Lob address: ${error?.message || "Unknown error"}`)
+  }
+}
+
+/**
+ * Delete a Lob address (soft delete)
+ */
+export async function deleteLobAddress(addressId: string): Promise<{ id: string; deleted: boolean }> {
+  if (!lob) {
+    throw new Error("Lob API key not configured - set LOB_API_KEY environment variable")
+  }
+
+  if (!addressId.startsWith("adr_")) {
+    throw new Error(`Invalid Lob address ID format: ${addressId}. Expected format: adr_xxx`)
+  }
+
+  try {
+    const result = await lob.addresses.delete(addressId)
+    console.log("[Lob] Address deleted", { id: result.id, deleted: result.deleted })
+    return {
+      id: result.id,
+      deleted: result.deleted,
+    }
+  } catch (error: any) {
+    console.error("[Lob] Delete address error:", error?.message || error)
+    throw new Error(`Failed to delete Lob address: ${error?.message || "Unknown error"}`)
+  }
+}
+
+/**
+ * Check if a string is a Lob address ID
+ */
+export function isLobAddressId(value: unknown): value is string {
+  return typeof value === "string" && value.startsWith("adr_")
+}
+
+// =============================================================================
+// Address Normalization Functions
+// =============================================================================
+// These functions fix common address field mapping issues that occur with
+// international addresses, particularly Turkish addresses where:
+// - Neighborhoods (mahalle) and districts (ilçe) get combined in line2
+// - City field incorrectly contains province instead of district
+// - State field correctly has province but duplicates city
+//
+// Turkish Address Hierarchy (correct mapping):
+// - line2: Mahalle (neighborhood) - e.g., "Zekeriyaköy Mahallesi"
+// - city: İlçe (district) - e.g., "Sarıyer"
+// - state: İl (province) - e.g., "İstanbul"
+
+/**
+ * Result of address normalization
+ */
+export interface AddressNormalizationResult {
+  /** The normalized address */
+  address: MailingAddress
+  /** Whether any normalization was applied */
+  wasNormalized: boolean
+  /** Description of what was changed */
+  changes: string[]
+}
+
+/**
+ * Turkish districts (ilçe) by province
+ * Used to detect when a district name is incorrectly placed in line2
+ */
+const TURKISH_DISTRICTS: Record<string, string[]> = {
+  // İstanbul districts (most common)
+  "İstanbul": [
+    "Adalar", "Arnavutköy", "Ataşehir", "Avcılar", "Bağcılar", "Bahçelievler",
+    "Bakırköy", "Başakşehir", "Bayrampaşa", "Beşiktaş", "Beykoz", "Beylikdüzü",
+    "Beyoğlu", "Büyükçekmece", "Çatalca", "Çekmeköy", "Esenler", "Esenyurt",
+    "Eyüp", "Eyüpsultan", "Fatih", "Gaziosmanpaşa", "Güngören", "Kadıköy",
+    "Kağıthane", "Kartal", "Küçükçekmece", "Maltepe", "Pendik", "Sancaktepe",
+    "Sarıyer", "Silivri", "Sultanbeyli", "Sultangazi", "Şile", "Şişli",
+    "Tuzla", "Ümraniye", "Üsküdar", "Zeytinburnu"
+  ],
+  // Ankara districts
+  "Ankara": [
+    "Akyurt", "Altındağ", "Ayaş", "Balâ", "Beypazarı", "Çamlıdere", "Çankaya",
+    "Çubuk", "Elmadağ", "Etimesgut", "Evren", "Gölbaşı", "Güdül", "Haymana",
+    "Kahramankazan", "Kalecik", "Keçiören", "Kızılcahamam", "Mamak", "Nallıhan",
+    "Polatlı", "Pursaklar", "Sincan", "Şereflikoçhisar", "Yenimahalle"
+  ],
+  // İzmir districts
+  "İzmir": [
+    "Aliağa", "Balçova", "Bayındır", "Bayraklı", "Bergama", "Beydağ", "Bornova",
+    "Buca", "Çeşme", "Çiğli", "Dikili", "Foça", "Gaziemir", "Güzelbahçe",
+    "Karabağlar", "Karaburun", "Karşıyaka", "Kemalpaşa", "Kınık", "Kiraz",
+    "Konak", "Menderes", "Menemen", "Narlıdere", "Ödemiş", "Seferihisar",
+    "Selçuk", "Tire", "Torbalı", "Urla"
+  ],
+}
+
+/**
+ * Common Turkish neighborhood suffixes
+ */
+const TURKISH_NEIGHBORHOOD_SUFFIXES = [
+  "Mahallesi", "Mah.", "Mah", "Köyü", "Sitesi", "Evleri"
+]
+
+/**
+ * Normalize an address for Lob API
+ *
+ * This function fixes common address field mapping issues, particularly for
+ * Turkish addresses where:
+ * - Neighborhoods and districts are combined in line2
+ * - City incorrectly contains province instead of district
+ *
+ * @example
+ * ```typescript
+ * // BEFORE (incorrect):
+ * const address = {
+ *   name: "Kutay Sakallıoğlu",
+ *   line1: "North Istanbul Sitesi E Blok Daire 8",
+ *   line2: "Zekeriyaköy Mahallesi, Sarıyer",  // District mixed in
+ *   city: "İstanbul",                          // Province, not district
+ *   state: "İstanbul",                         // Correct
+ *   postalCode: "34450",
+ *   country: "TR",
+ * }
+ *
+ * // AFTER (normalized):
+ * const { address: normalized } = normalizeAddressForLob(address)
+ * // normalized = {
+ * //   name: "Kutay Sakallıoğlu",
+ * //   line1: "North Istanbul Sitesi E Blok Daire 8",
+ * //   line2: "Zekeriyaköy Mahallesi",         // Just neighborhood
+ * //   city: "Sarıyer",                         // District extracted
+ * //   state: "İstanbul",                       // Province unchanged
+ * //   postalCode: "34450",
+ * //   country: "TR",
+ * // }
+ * ```
+ */
+export function normalizeAddressForLob(
+  address: MailingAddress
+): AddressNormalizationResult {
+  const changes: string[] = []
+  let normalized = { ...address }
+
+  // Only normalize Turkish addresses for now
+  if (address.country !== "TR") {
+    return {
+      address: normalized,
+      wasNormalized: false,
+      changes: [],
+    }
+  }
+
+  console.log("[Lob] Normalizing Turkish address", {
+    originalLine2: address.line2,
+    originalCity: address.city,
+    originalState: address.state,
+  })
+
+  // Detect the common problem pattern: city === state (both are province)
+  // This indicates the district was likely put in line2 instead of city
+  const cityEqualsState = normalizeString(address.city) === normalizeString(address.state)
+
+  if (cityEqualsState && address.line2) {
+    // Try to extract district from line2
+    const extractedDistrict = extractDistrictFromLine2(address.line2, address.state)
+
+    if (extractedDistrict) {
+      // Move district to city, update line2 to just neighborhood
+      normalized.city = extractedDistrict.district
+      normalized.line2 = extractedDistrict.neighborhood || undefined
+
+      changes.push(
+        `Extracted district "${extractedDistrict.district}" from line2 to city`,
+        `Updated line2 to "${extractedDistrict.neighborhood || "(empty)"}"`
+      )
+
+      console.log("[Lob] Turkish address normalized", {
+        extractedDistrict: extractedDistrict.district,
+        newLine2: normalized.line2,
+        newCity: normalized.city,
+      })
+    }
+  }
+
+  // Also check if line2 contains a district name even if city !== state
+  // This handles cases where the data has a different issue
+  if (!changes.length && address.line2) {
+    const districtInLine2 = findDistrictInString(address.line2, address.state || address.city)
+
+    if (districtInLine2 && normalizeString(address.city) !== normalizeString(districtInLine2)) {
+      // District found in line2 but city is different - extract it
+      const cleanedLine2 = removeDistrictFromLine2(address.line2, districtInLine2)
+
+      if (cleanedLine2 !== address.line2) {
+        // Check if current city looks like a province (common large cities)
+        const largeCities = ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Adana"]
+        const cityIsProvince = largeCities.some(
+          lc => normalizeString(lc) === normalizeString(address.city)
+        )
+
+        if (cityIsProvince) {
+          normalized.city = districtInLine2
+          normalized.line2 = cleanedLine2 || undefined
+
+          changes.push(
+            `Extracted district "${districtInLine2}" from line2 to city`,
+            `Updated line2 to "${cleanedLine2 || "(empty)"}"`
+          )
+        }
+      }
+    }
+  }
+
+  return {
+    address: normalized,
+    wasNormalized: changes.length > 0,
+    changes,
+  }
+}
+
+/**
+ * Normalize string for comparison (lowercase, remove diacritics)
+ */
+function normalizeString(str: string): string {
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+    .replace(/ı/g, "i")  // Turkish dotless i
+    .replace(/ş/g, "s")  // Turkish s with cedilla
+    .replace(/ğ/g, "g")  // Turkish soft g
+    .replace(/ü/g, "u")  // Turkish u with umlaut
+    .replace(/ö/g, "o")  // Turkish o with umlaut
+    .replace(/ç/g, "c")  // Turkish c with cedilla
+    .trim()
+}
+
+/**
+ * Extract district and neighborhood from line2
+ *
+ * Common patterns:
+ * - "Zekeriyaköy Mahallesi, Sarıyer" → { neighborhood: "Zekeriyaköy Mahallesi", district: "Sarıyer" }
+ * - "Zekeriyaköy, Sarıyer" → { neighborhood: "Zekeriyaköy", district: "Sarıyer" }
+ * - "Sarıyer" (just district) → { neighborhood: null, district: "Sarıyer" }
+ */
+function extractDistrictFromLine2(
+  line2: string,
+  province: string
+): { neighborhood: string | null; district: string } | null {
+  // Get districts for this province
+  const districts = getDistrictsForProvince(province)
+  if (!districts.length) {
+    // If we don't have district list, try to parse by comma
+    return parseByComma(line2)
+  }
+
+  // Check if line2 contains a district name
+  const foundDistrict = districts.find(district => {
+    const normalizedDistrict = normalizeString(district)
+    const normalizedLine2 = normalizeString(line2)
+    return normalizedLine2.includes(normalizedDistrict)
+  })
+
+  if (!foundDistrict) {
+    // No known district found, try comma parsing
+    return parseByComma(line2)
+  }
+
+  // Extract the neighborhood part (everything except the district)
+  const neighborhood = removeDistrictFromLine2(line2, foundDistrict)
+
+  return {
+    neighborhood: neighborhood || null,
+    district: foundDistrict,
+  }
+}
+
+/**
+ * Parse line2 by comma to extract neighborhood and district
+ */
+function parseByComma(line2: string): { neighborhood: string | null; district: string } | null {
+  // Check for comma separation: "Neighborhood, District"
+  const commaParts = line2.split(",").map(p => p.trim())
+
+  if (commaParts.length >= 2) {
+    // Last part is likely the district
+    const possibleDistrict = commaParts[commaParts.length - 1]!
+    const neighborhood = commaParts.slice(0, -1).join(", ")
+
+    // Basic validation: district shouldn't contain neighborhood suffixes
+    const isNeighborhood = TURKISH_NEIGHBORHOOD_SUFFIXES.some(
+      suffix => possibleDistrict.includes(suffix)
+    )
+
+    if (!isNeighborhood && possibleDistrict.length > 2) {
+      return {
+        neighborhood: neighborhood || null,
+        district: possibleDistrict,
+      }
+    }
+  }
+
+  return null
+}
+
+/**
+ * Find a district name within a string
+ */
+function findDistrictInString(str: string, province: string): string | null {
+  const districts = getDistrictsForProvince(province)
+
+  for (const district of districts) {
+    if (normalizeString(str).includes(normalizeString(district))) {
+      return district
+    }
+  }
+
+  return null
+}
+
+/**
+ * Remove district name from line2, returning the neighborhood part
+ */
+function removeDistrictFromLine2(line2: string, district: string): string {
+  // Try various patterns to remove the district
+  const patterns = [
+    new RegExp(`,\\s*${escapeRegex(district)}\\s*$`, "i"),  // ", District" at end
+    new RegExp(`\\s*${escapeRegex(district)}\\s*,`, "i"),   // "District ," anywhere
+    new RegExp(`\\s*${escapeRegex(district)}\\s*$`, "i"),   // "District" at end
+    new RegExp(`^\\s*${escapeRegex(district)}\\s*,`, "i"),  // "District, " at start
+  ]
+
+  let result = line2
+  for (const pattern of patterns) {
+    result = result.replace(pattern, "")
+  }
+
+  return result.trim()
+}
+
+/**
+ * Get districts for a given province
+ */
+function getDistrictsForProvince(province: string): string[] {
+  // Normalize the province name for lookup
+  const normalizedProvince = normalizeString(province)
+
+  for (const [prov, districts] of Object.entries(TURKISH_DISTRICTS)) {
+    if (normalizeString(prov) === normalizedProvince) {
+      return districts
+    }
+  }
+
+  return []
+}
+
+/**
+ * Escape special regex characters
+ */
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
 /**
  * Retrieve a letter by ID to check tracking status
  */
@@ -379,8 +1045,11 @@ export function isLobConfigured(): boolean {
  * Options for sending a templated letter with V3 branding
  */
 export interface TemplatedLetterOptions {
-  /** Recipient mailing address */
-  to: MailingAddress
+  /**
+   * Recipient address - either a MailingAddress object or a Lob address ID (adr_xxx).
+   * Using address IDs is recommended for international mail to avoid formatting issues.
+   */
+  to: MailingAddress | string
   /** Letter content as HTML (from Tiptap editor) */
   letterContent: string
   /** Date the letter was written */
@@ -428,6 +1097,50 @@ function createLobHtmlTooLargeError(length: number, originalLength?: number) {
     originalLength: originalLength ?? length,
   }
   return error
+}
+
+/**
+ * Create a normalized error for Lob page limit violations
+ */
+function createLobPageLimitExceededError(
+  contentPages: number,
+  totalPages: number
+) {
+  const error = new Error(
+    `LOB_PAGE_LIMIT_EXCEEDED: Letter would be approximately ${totalPages} pages (${contentPages} content + ${FIXED_TEMPLATE_PAGES} fixed). Lob allows a maximum of ${LOB_MAX_PAGES} pages (${CONTENT_PAGE_LIMIT} content pages). Please shorten your letter.`
+  ) as Error & {
+    code?: string
+    details?: Record<string, unknown>
+  }
+  error.name = "LobPageLimitExceededError"
+  error.code = "LOB_PAGE_LIMIT_EXCEEDED"
+  error.details = {
+    contentPages,
+    totalPages,
+    maxTotalPages: LOB_MAX_PAGES,
+    maxContentPages: CONTENT_PAGE_LIMIT,
+    fixedTemplatePages: FIXED_TEMPLATE_PAGES,
+  }
+  return error
+}
+
+/**
+ * Validate that letter content doesn't exceed Lob's page limit
+ */
+function validatePageLimit(letterContent: string): void {
+  const plainText = stripHtmlTags(letterContent)
+  const contentPages = estimatePageCount(plainText)
+  const totalPages = FIXED_TEMPLATE_PAGES + contentPages
+
+  if (totalPages > LOB_MAX_PAGES) {
+    console.warn("[Lob] Letter exceeds page limit", {
+      contentPages,
+      totalPages,
+      maxPages: LOB_MAX_PAGES,
+      characterCount: plainText.length,
+    })
+    throw createLobPageLimitExceededError(contentPages, totalPages)
+  }
 }
 
 /**
@@ -525,6 +1238,9 @@ function buildLobMergeVariables(options: TemplatedLetterOptions) {
 export async function sendTemplatedLetter(
   options: TemplatedLetterOptions
 ): Promise<SendLetterResult> {
+  // Validate page limit before proceeding (final safety check)
+  validatePageLimit(options.letterContent)
+
   const templateConfig = getConfiguredLobTemplate()
 
   const sendInlineLetter = () => {

@@ -65,6 +65,7 @@ export const ErrorCodes = {
   // Validation
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   INVALID_INPUT: 'INVALID_INPUT',
+  LETTER_TOO_LONG: 'LETTER_TOO_LONG',
 
   // Resource errors
   NOT_FOUND: 'NOT_FOUND',

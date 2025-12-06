@@ -1,9 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { Mail } from "lucide-react"
+import { Mail, FileText, AlertTriangle } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import {
+  estimatePageCount,
+  getPageStatus,
+  CONTENT_PAGE_LIMIT,
+  type PageStatus,
+} from "@/lib/page-estimation"
 import {
   Field,
   FieldSet,
@@ -84,11 +90,21 @@ export function LetterEditorForm({
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
   const [showCustomDate, setShowCustomDate] = React.useState(false)
   const [errors, setErrors] = React.useState<Partial<Record<keyof LetterFormData, string>>>({})
+  const [estimatedPages, setEstimatedPages] = React.useState(0)
+  const [pageStatus, setPageStatus] = React.useState<PageStatus>("safe")
 
   // Calculate counts from HTML (strip tags for text counting)
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
   const characterCount = plainText.length
   const wordCount = plainText ? plainText.split(/\s+/).length : 0
+
+  // Update page estimation when content changes
+  React.useEffect(() => {
+    const pages = estimatePageCount(plainText)
+    const status = getPageStatus(pages)
+    setEstimatedPages(pages)
+    setPageStatus(status)
+  }, [plainText])
 
   const datePresets = [
     { label: t("datePresets.6months"), months: 6, key: "6months" },
@@ -188,6 +204,8 @@ export function LetterEditorForm({
 
     if (!plainText) {
       newErrors.body = t("content.required")
+    } else if (estimatedPages > CONTENT_PAGE_LIMIT) {
+      newErrors.body = `Your letter is approximately ${estimatedPages} pages, but physical mail is limited to ${CONTENT_PAGE_LIMIT} pages of content. Please shorten your letter.`
     }
 
     if (!recipientEmail.trim()) {
@@ -332,12 +350,28 @@ export function LetterEditorForm({
           </Field>
 
           {/* Letter Content */}
-          <Field data-invalid={!!errors.body}>
+          <Field data-invalid={!!errors.body || pageStatus === "exceeded"}>
             <div className="flex items-center justify-between gap-2">
               <FieldLabel htmlFor="letter-body">{t("content.label")}</FieldLabel>
-              <div className="flex gap-2 font-mono text-[10px] text-gray-secondary uppercase sm:gap-3 sm:text-xs">
+              <div className="flex items-center gap-2 font-mono text-[10px] text-gray-secondary uppercase sm:gap-3 sm:text-xs">
                 <span className="whitespace-nowrap">{t("content.words", { count: wordCount })}</span>
                 <span className="whitespace-nowrap">{t("content.chars", { count: characterCount })}</span>
+                <span className="text-charcoal/30">|</span>
+                <span
+                  className={cn(
+                    "flex items-center gap-1 whitespace-nowrap",
+                    pageStatus === "safe" && "text-green-600",
+                    pageStatus === "warning" && "text-yellow-600",
+                    pageStatus === "danger" && "text-orange-500",
+                    pageStatus === "exceeded" && "text-coral font-medium"
+                  )}
+                >
+                  <FileText className="h-3 w-3" />
+                  ~{estimatedPages}/{CONTENT_PAGE_LIMIT} pages
+                  {pageStatus === "exceeded" && (
+                    <AlertTriangle className="h-3 w-3 ml-0.5" />
+                  )}
+                </span>
               </div>
             </div>
             <LetterEditor

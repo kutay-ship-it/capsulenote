@@ -9,12 +9,19 @@ import Link from "@tiptap/extension-link"
 import { Button } from "@/components/ui/button"
 import { Bold, Italic, List, ListOrdered, Quote } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  estimatePageCount,
+  getPageStatus,
+  type PageStatus,
+} from "@/lib/page-estimation"
 
 interface LetterEditorProps {
   /** Initial content as HTML string or TipTap JSON */
   content?: string | Record<string, unknown>
   /** Called when content changes with JSON and HTML */
   onChange?: (json: Record<string, unknown>, html: string) => void
+  /** Called when page estimate changes */
+  onPageEstimate?: (pages: number, status: PageStatus) => void
   /** Placeholder text for empty editor */
   placeholder?: string
   /** Minimum height for editor area */
@@ -28,6 +35,7 @@ interface LetterEditorProps {
 export function LetterEditor({
   content,
   onChange,
+  onPageEstimate,
   placeholder,
   minHeight = "280px",
   className,
@@ -55,6 +63,14 @@ export function LetterEditor({
       const json = editor.getJSON()
       const html = editor.getHTML()
       onChange?.(json as Record<string, unknown>, html)
+
+      // Calculate page estimate from plaintext
+      if (onPageEstimate) {
+        const plainText = editor.getText()
+        const pages = estimatePageCount(plainText)
+        const status = getPageStatus(pages)
+        onPageEstimate(pages, status)
+      }
     },
   })
 
