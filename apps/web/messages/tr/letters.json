@@ -253,8 +253,8 @@
         "feature4": "Premium kağıt baskı"
       }
     },
-    "prorationTitle": "Akıllı Fiyatlandırma",
-    "prorationDescription": "Sadece fatura döngünüzün geri kalanı için farkı ödersiniz. Stripe otomatik olarak orantılı tutarı hesaplar.",
+    "prorationTitle": "Anında Yükseltme",
+    "prorationDescription": "Fiziksel posta özelliklerini hemen açmak için $20 ödeyin. Bu, plan farkı için tek seferlik bir yükseltme ücretidir.",
     "maybeLater": "Belki Sonra",
     "loading": "Yükleniyor...",
     "upgradeNow": "Şimdi Yükselt"

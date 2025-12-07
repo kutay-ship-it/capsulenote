@@ -24,6 +24,7 @@ import { AuditEventType } from "../../../../../apps/web/server/lib/audit"
 import {
   PLAN_CREDITS,
   getSubscriptionPeriodDates,
+  getPlanFromPriceId,
 } from "../../../../../apps/web/server/lib/billing-constants"
 
 /**
@@ -127,10 +128,26 @@ export async function handleSubscriptionCreatedOrUpdated(
     return
   }
 
-  const plan =
-    (subscription.metadata?.plan as PlanType | undefined) ||
-    (subscription.items?.data?.[0]?.price?.metadata?.plan as PlanType | undefined) ||
-    "DIGITAL_CAPSULE"
+  // Plan detection priority:
+  // 1. Price ID mapping (most reliable - works for Billing Portal upgrades)
+  // 2. Subscription metadata (set during original checkout)
+  // 3. Price metadata (fallback)
+  // 4. Default to DIGITAL_CAPSULE
+  const priceId = subscription.items?.data?.[0]?.price?.id
+  const planFromPriceId = getPlanFromPriceId(priceId)
+  const planFromSubMetadata = subscription.metadata?.plan as PlanType | undefined
+  const planFromPriceMetadata = subscription.items?.data?.[0]?.price?.metadata?.plan as PlanType | undefined
+
+  const plan = planFromPriceId || planFromSubMetadata || planFromPriceMetadata || "DIGITAL_CAPSULE"
+
+  console.log("[Subscription Handler] Plan detection", {
+    subscriptionId: subscription.id,
+    priceId,
+    planFromPriceId,
+    planFromSubMetadata,
+    planFromPriceMetadata,
+    finalPlan: plan,
+  })
 
   // Extract period dates from subscription (handles both legacy and new API versions)
   const { periodStart: safePeriodStart, periodEnd: safePeriodEnd } = getSubscriptionPeriodDates(subscription)
@@ -168,7 +185,15 @@ export async function handleSubscriptionCreatedOrUpdated(
   if (subscription.status === "active" || subscription.status === "trialing") {
     await createUsageRecord(user.id, safePeriodStart, PLAN_CREDITS[plan]?.physical ?? 0)
 
-    // Get current addon credits to preserve them
+    // Check if this is a mid-cycle plan upgrade (existing subscription with different plan)
+    const existingSubscription = await prisma.subscription.findUnique({
+      where: { stripeSubscriptionId: subscription.id },
+      select: { plan: true },
+    })
+
+    const isUpgrade = existingSubscription && existingSubscription.plan !== plan
+
+    // Get current credits
     const currentUser = await prisma.user.findUnique({
       where: { id: user.id },
       select: { emailAddonCredits: true, physicalAddonCredits: true, emailCredits: true, physicalCredits: true },
@@ -178,10 +203,44 @@ export async function handleSubscriptionCreatedOrUpdated(
     const planPhysicalCredits = PLAN_CREDITS[plan]?.physical ?? 0
     const addonEmail = currentUser?.emailAddonCredits ?? 0
     const addonPhysical = currentUser?.physicalAddonCredits ?? 0
+    const currentEmailCredits = currentUser?.emailCredits ?? 0
+    const currentPhysicalCredits = currentUser?.physicalCredits ?? 0
 
-    // New total = plan credits + preserved addon credits
-    const newEmailTotal = planEmailCredits + addonEmail
-    const newPhysicalTotal = planPhysicalCredits + addonPhysical
+    let newEmailTotal: number
+    let newPhysicalTotal: number
+
+    if (isUpgrade) {
+      // Upgrade: Add new plan credits to existing credits
+      // Example: User has 6 email + 1 physical, upgrades to Paper & Pixels (24 email, 3 physical)
+      // Result: 6 + 24 = 30 email, 1 + 3 = 4 physical
+      newEmailTotal = currentEmailCredits + planEmailCredits
+      newPhysicalTotal = currentPhysicalCredits + planPhysicalCredits
+      console.log("[Subscription Handler] Plan upgrade detected - stacking credits", {
+        subscriptionId: subscription.id,
+        previousPlan: existingSubscription.plan,
+        newPlan: plan,
+        currentEmailCredits,
+        currentPhysicalCredits,
+        planEmailCredits,
+        planPhysicalCredits,
+        newEmailTotal,
+        newPhysicalTotal,
+      })
+    } else {
+      // New subscription or renewal: Set to plan credits + addon credits
+      newEmailTotal = planEmailCredits + addonEmail
+      newPhysicalTotal = planPhysicalCredits + addonPhysical
+      console.log("[Subscription Handler] New subscription or renewal - setting plan credits", {
+        subscriptionId: subscription.id,
+        plan,
+        planEmailCredits,
+        planPhysicalCredits,
+        addonEmail,
+        addonPhysical,
+        newEmailTotal,
+        newPhysicalTotal,
+      })
+    }
 
     // Record audit trail for plan credit grant
     if (planEmailCredits > 0) {

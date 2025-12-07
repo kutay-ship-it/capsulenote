@@ -284,6 +284,122 @@ export async function createBillingPortalSession(): Promise<
 }
 
 /**
+ * Create Stripe Checkout Session for subscription upgrade
+ *
+ * Upgrades user from Digital Capsule to Paper & Pixels plan.
+ * Uses Stripe Billing Portal's subscription update flow for seamless upgrade.
+ *
+ * Flow:
+ * 1. Validate user has active subscription
+ * 2. Get Stripe subscription ID
+ * 3. Create billing portal session with upgrade flow
+ * 4. Return portal URL for redirect
+ *
+ * @returns Portal URL for redirect to upgrade flow
+ *
+ * @throws Never - All errors returned as ActionResult
+ */
+export async function createUpgradeSession(): Promise<
+  ActionResult<{ url: string }>
+> {
+  try {
+    // 1. Authenticate user
+    const user = await requireUser()
+
+    // 2. Get existing subscription
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        userId: user.id,
+        status: { in: ["active", "trialing"] },
+      },
+    })
+
+    if (!subscription) {
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.SUBSCRIPTION_REQUIRED,
+          message: "No active subscription found. Please subscribe first.",
+          details: {
+            action: "subscribe",
+            url: "/pricing",
+          },
+        },
+      }
+    }
+
+    // 3. Get or verify Stripe customer
+    const customerId = user.profile?.stripeCustomerId
+    if (!customerId) {
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.NO_CUSTOMER,
+          message: "No billing account found. Please contact support.",
+        },
+      }
+    }
+
+    // 4. Create billing portal session with subscription update flow
+    let session: Stripe.BillingPortal.Session
+    try {
+      session = await createStripeBillingPortalSession(customerId)
+    } catch (error) {
+      console.error("[Billing] Failed to create upgrade portal session:", error)
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.PAYMENT_PROVIDER_ERROR,
+          message: "Failed to create upgrade session. Please try again.",
+        },
+      }
+    }
+
+    // 5. Audit log
+    try {
+      await createAuditEvent({
+        userId: user.id,
+        type: AuditEventType.BILLING_PORTAL_SESSION_CREATED,
+        data: {
+          sessionId: session.id,
+          purpose: "upgrade",
+          fromPlan: subscription.plan,
+        },
+      })
+    } catch (error) {
+      // Non-critical - log but don't fail
+      console.error("[Billing] Failed to create audit event:", error)
+    }
+
+    return {
+      success: true,
+      data: { url: session.url },
+    }
+  } catch (error) {
+    console.error("[Billing] Upgrade session creation error:", error)
+
+    // Handle authentication errors
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return {
+        success: false,
+        error: {
+          code: ErrorCodes.UNAUTHORIZED,
+          message: "Please sign in to continue",
+        },
+      }
+    }
+
+    return {
+      success: false,
+      error: {
+        code: ErrorCodes.INTERNAL_ERROR,
+        message: "An unexpected error occurred. Please try again.",
+      },
+    }
+  }
+}
+
+/**
  * Check subscription status (for client-side polling)
  *
  * Used by checkout success page to poll for subscription after webhook processing.

@@ -1,17 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import {
   FileText,
-  Mail,
   Sparkles,
   Check,
   ArrowRight,
   X,
-  Clock,
   Crown,
   Zap,
+  Loader2,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import {
@@ -21,6 +19,8 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { createUpgradeSession } from "@/server/actions/billing"
+import { toast } from "sonner"
 
 interface PhysicalMailUpgradeModalProps {
   open: boolean
@@ -32,13 +32,26 @@ export function PhysicalMailUpgradeModal({
   onOpenChange,
 }: PhysicalMailUpgradeModalProps) {
   const t = useTranslations("letters.physicalMailUpgrade")
-  const router = useRouter()
   const [isLoading, setIsLoading] = React.useState(false)
 
   const handleUpgrade = async () => {
     setIsLoading(true)
-    // Navigate to pricing page - Stripe will calculate proration
-    router.push("/pricing?upgrade=paper_pixels")
+    try {
+      const result = await createUpgradeSession()
+      if (result.success) {
+        window.location.href = result.data.url
+      } else {
+        toast.error("Failed to start upgrade", {
+          description: result.error.message || "Please try again",
+        })
+        setIsLoading(false)
+      }
+    } catch {
+      toast.error("Failed to start upgrade", {
+        description: "An unexpected error occurred. Please try again.",
+      })
+      setIsLoading(false)
+    }
   }
 
   const digitalFeatures = [
@@ -221,12 +234,12 @@ export function PhysicalMailUpgradeModal({
               type="button"
               onClick={handleUpgrade}
               disabled={isLoading}
-              className="flex-[2] gap-2 h-11 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs uppercase tracking-wider border-2 border-charcoal shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
+              className="flex-[2] gap-2 h-11 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs uppercase tracking-wider border-2 border-charcoal shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ borderRadius: "2px" }}
             >
               {isLoading ? (
                 <>
-                  <Clock className="h-4 w-4 animate-pulse" strokeWidth={2} />
+                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={2} />
                   {t("loading")}
                 </>
               ) : (

@@ -177,8 +177,8 @@
       "recommended": "Recommended",
       "paperPixels": "Paper & Pixels",
       "emailAndPhysical": "Email + Physical",
-      "proratedPrice": "Prorated pricing",
-      "stripeCalculates": "Stripe calculates your upgrade cost",
+      "upgradeFee": "$20 upgrade fee",
+      "unlockPhysicalMail": "Unlock physical mail features instantly",
       "upgradeNow": "Upgrade Now",
       "trialReady": "Trial Credit Ready!",
       "trialReadyDescription": "You have {credits} physical mail credit available. Schedule a letter to use it."

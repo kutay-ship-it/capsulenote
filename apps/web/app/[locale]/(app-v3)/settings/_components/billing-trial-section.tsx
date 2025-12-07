@@ -1,10 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
-import { Crown, ArrowRight, Lock, Mail, FileText, Gift } from "lucide-react"
+import { Crown, ArrowRight, Lock, Mail, FileText, Gift, Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
+import { createUpgradeSession } from "@/server/actions/billing"
+import { toast } from "sonner"
 
 interface BillingTrialSectionProps {
   /** User is on Digital Capsule plan */
@@ -24,15 +25,31 @@ export function BillingTrialSection({
   physicalCredits,
 }: BillingTrialSectionProps) {
   const t = useTranslations("settings.billing.trial")
-  const router = useRouter()
+  const [isLoading, setIsLoading] = React.useState(false)
 
   // Only show for Digital Capsule users
   if (!isDigitalCapsule) {
     return null
   }
 
-  const handleUpgrade = () => {
-    router.push("/pricing?upgrade=paper_pixels")
+  const handleUpgrade = async () => {
+    setIsLoading(true)
+    try {
+      const result = await createUpgradeSession()
+      if (result.success) {
+        window.location.href = result.data.url
+      } else {
+        toast.error("Failed to start upgrade", {
+          description: result.error.message || "Please try again",
+        })
+      }
+    } catch {
+      toast.error("Failed to start upgrade", {
+        description: "An unexpected error occurred. Please try again.",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   // For Digital Capsule users, show "See Upgrade Options" button (like navbar)
@@ -77,11 +94,16 @@ export function BillingTrialSection({
         <div className="pl-13">
           <Button
             onClick={handleUpgrade}
-            className="gap-2 h-9 px-4 bg-white hover:bg-off-white text-charcoal font-mono text-[10px] font-bold uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] hover:shadow-[3px_3px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
+            disabled={isLoading}
+            className="gap-2 h-9 px-4 bg-white hover:bg-off-white text-charcoal font-mono text-[10px] font-bold uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] hover:shadow-[3px_3px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ borderRadius: "2px" }}
           >
-            <Crown className="h-3.5 w-3.5" strokeWidth={2} />
-            {t("seeUpgradeOptions")}
+            {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+            ) : (
+              <Crown className="h-3.5 w-3.5" strokeWidth={2} />
+            )}
+            {isLoading ? "Loading..." : t("seeUpgradeOptions")}
           </Button>
         </div>
       </div>
@@ -136,16 +158,21 @@ export function BillingTrialSection({
         {/* CTA */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-mono text-[10px] text-charcoal/50">{t("proratedPrice")}</p>
-            <p className="font-mono text-xs text-charcoal">{t("stripeCalculates")}</p>
+            <p className="font-mono text-[10px] text-charcoal/50">{t("upgradeFee")}</p>
+            <p className="font-mono text-xs text-charcoal">{t("unlockPhysicalMail")}</p>
           </div>
           <Button
             onClick={handleUpgrade}
-            className="gap-2 h-9 px-4 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-[10px] font-bold uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] hover:shadow-[3px_3px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
+            disabled={isLoading}
+            className="gap-2 h-9 px-4 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-[10px] font-bold uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] hover:shadow-[3px_3px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ borderRadius: "2px" }}
           >
-            <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
-            {t("upgradeNow")}
+            {isLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+            ) : (
+              <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} />
+            )}
+            {isLoading ? "Loading..." : t("upgradeNow")}
           </Button>
         </div>
       </div>

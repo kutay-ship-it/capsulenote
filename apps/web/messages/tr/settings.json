@@ -177,8 +177,8 @@
       "recommended": "Önerilen",
       "paperPixels": "Kağıt & Pikseller",
       "emailAndPhysical": "E-posta + Fiziksel",
-      "proratedPrice": "Orantılı fiyatlandırma",
-      "stripeCalculates": "Stripe yükseltme maliyetinizi hesaplar",
+      "upgradeFee": "$20 yükseltme ücreti",
+      "unlockPhysicalMail": "Fiziksel posta özelliklerini anında açın",
       "upgradeNow": "Şimdi Yükselt",
       "trialReady": "Deneme Kredisi Hazır!",
       "trialReadyDescription": "{credits} fiziksel posta krediniz mevcut. Kullanmak için bir mektup planlayın."

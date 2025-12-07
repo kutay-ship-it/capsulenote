@@ -253,8 +253,8 @@
         "feature4": "Premium paper printing"
       }
     },
-    "prorationTitle": "Smart Pricing",
-    "prorationDescription": "You'll only pay the difference for the remainder of your billing cycle. Stripe automatically calculates the prorated amount.",
+    "prorationTitle": "Instant Upgrade",
+    "prorationDescription": "Pay $20 to unlock physical mail features immediately. This is a one-time upgrade fee for the plan difference.",
     "maybeLater": "Maybe Later",
     "loading": "Loading...",
     "upgradeNow": "Upgrade Now"

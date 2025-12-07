@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/popover"
 import { createAddOnCheckoutSession } from "@/server/actions/addons"
 import { createTrialPhysicalCheckoutSession } from "@/server/actions/trial-physical"
+import { createUpgradeSession } from "@/server/actions/billing"
 import { toast } from "sonner"
 import {
   type CreditAddonType,
@@ -392,15 +393,15 @@ function DigitalCapsuleMailPanel({
   hasUsedTrial,
   onClose,
 }: DigitalCapsuleMailPanelProps) {
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [isUpgrading, setIsUpgrading] = useState(false)
   const t = useTranslations("settings.billing.mailCredits")
 
   const handleTrialPurchase = () => {
     startTransition(async () => {
       const result = await createTrialPhysicalCheckoutSession()
       if (result.success && result.data?.url) {
-        router.push(result.data.url)
+        window.location.href = result.data.url
         onClose()
       } else if (!result.success) {
         toast.error("Failed to start checkout", {
@@ -410,9 +411,25 @@ function DigitalCapsuleMailPanel({
     })
   }
 
-  const handleUpgrade = () => {
-    router.push("/pricing?upgrade=paper_pixels")
-    onClose()
+  const handleUpgrade = async () => {
+    setIsUpgrading(true)
+    try {
+      const result = await createUpgradeSession()
+      if (result.success) {
+        window.location.href = result.data.url
+        onClose()
+      } else {
+        toast.error("Failed to start upgrade", {
+          description: result.error.message || "Please try again",
+        })
+      }
+    } catch {
+      toast.error("Failed to start upgrade", {
+        description: "An unexpected error occurred. Please try again.",
+      })
+    } finally {
+      setIsUpgrading(false)
+    }
   }
 
   // If user has credits (from trial), show available state
@@ -451,11 +468,16 @@ function DigitalCapsuleMailPanel({
 
           <button
             onClick={handleUpgrade}
-            className="flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-2.5 bg-white hover:bg-off-white font-mono text-xs font-bold uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]"
+            disabled={isUpgrading}
+            className="flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-2.5 bg-white hover:bg-off-white font-mono text-xs font-bold uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)] disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ borderRadius: "2px" }}
           >
-            <Crown className="h-3.5 w-3.5" strokeWidth={2} />
-            {t("viewUpgradeOptions")}
+            {isUpgrading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+            ) : (
+              <Crown className="h-3.5 w-3.5" strokeWidth={2} />
+            )}
+            {isUpgrading ? "Loading..." : t("viewUpgradeOptions")}
           </button>
         </div>
       </div>
@@ -587,11 +609,16 @@ function DigitalCapsuleMailPanel({
 
         <button
           onClick={handleUpgrade}
-          className="flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-3 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs font-bold uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
+          disabled={isUpgrading}
+          className="flex w-full items-center justify-center gap-2 border-2 border-charcoal px-4 py-3 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs font-bold uppercase tracking-wider transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ borderRadius: "2px" }}
         >
-          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
-          {t("upgradeNow")}
+          {isUpgrading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2.5} />
+          ) : (
+            <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          )}
+          {isUpgrading ? "Loading..." : t("upgradeNow")}
         </button>
       </div>
     </div>

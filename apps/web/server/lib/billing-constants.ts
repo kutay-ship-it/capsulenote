@@ -1,9 +1,38 @@
 import type { PlanType } from "@prisma/client"
 import type Stripe from "stripe"
+import { env } from "@/env.mjs"
 
 export const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
   DIGITAL_CAPSULE: { email: 9, physical: 0 },
   PAPER_PIXELS: { email: 24, physical: 3 },
+}
+
+/**
+ * Map Stripe price ID to PlanType.
+ *
+ * This is essential for detecting plan changes when users upgrade/downgrade
+ * via Stripe Billing Portal, where subscription metadata may not be set.
+ * Price IDs are always present in subscription.items and provide reliable
+ * plan detection regardless of how the subscription was created or modified.
+ *
+ * @param priceId - The Stripe price ID from subscription.items.data[0].price.id
+ * @returns The PlanType or null if not a subscription plan price (e.g., add-ons)
+ */
+export function getPlanFromPriceId(priceId: string | undefined | null): PlanType | null {
+  if (!priceId) return null
+
+  // Map subscription plan price IDs to PlanType
+  if (priceId === env.STRIPE_PRICE_DIGITAL_ANNUAL) {
+    return "DIGITAL_CAPSULE"
+  }
+
+  if (priceId === env.STRIPE_PRICE_PAPER_ANNUAL) {
+    return "PAPER_PIXELS"
+  }
+
+  // Add-on prices (STRIPE_PRICE_ADDON_EMAIL, STRIPE_PRICE_ADDON_PHYSICAL,
+  // STRIPE_PRICE_TRIAL_PHYSICAL) are not subscription plans
+  return null
 }
 
 // ============================================================================
