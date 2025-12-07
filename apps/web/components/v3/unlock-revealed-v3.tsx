@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import { motion } from "framer-motion"
 import { format } from "date-fns"
+import { useTranslations } from "next-intl"
 import { sanitizeLetterHtml } from "@/lib/sanitize"
 import { MailOpen, Calendar, RotateCcw, ArrowLeft, PenLine, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,7 @@ export function UnlockRevealedV3({
   firstOpenedAt,
   onReplay,
 }: UnlockRevealedV3Props) {
+  const t = useTranslations("letters.revealed")
   const formattedWrittenDate = format(new Date(writtenDate), "MMMM d, yyyy")
   const formattedOpenedDate = firstOpenedAt
     ? format(new Date(firstOpenedAt), "MMMM d, yyyy 'at' h:mm a")
@@ -54,7 +56,7 @@ export function UnlockRevealedV3({
           style={{ borderRadius: "2px" }}
         >
           <Clock className="h-3 w-3" strokeWidth={2.5} />
-          First Opened
+          {t("firstOpened")}
         </motion.div>
       )}
 
@@ -84,14 +86,14 @@ export function UnlockRevealedV3({
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-charcoal/60" strokeWidth={2} />
                 <span className="font-mono text-xs text-charcoal/70 uppercase tracking-wider">
-                  Written on {formattedWrittenDate}
+                  {t("writtenOn", { date: formattedWrittenDate })}
                 </span>
               </div>
               {formattedOpenedDate && (
                 <div className="flex items-center gap-2">
                   <MailOpen className="h-4 w-4 text-charcoal/60" strokeWidth={2} />
                   <span className="font-mono text-xs text-charcoal/70 uppercase tracking-wider">
-                    Opened on {formattedOpenedDate}
+                    {t("openedOn", { date: formattedOpenedDate })}
                   </span>
                 </div>
               )}
@@ -121,7 +123,7 @@ export function UnlockRevealedV3({
         {/* Footer */}
         <div className="border-t-4 border-dashed border-charcoal/20 bg-duck-cream p-6 md:p-8">
           <p className="font-mono text-xs text-charcoal/50 uppercase tracking-wider text-center italic">
-            "The best time to write to your future self was yesterday. The second best time is now."
+            "{t("quote")}"
           </p>
         </div>
       </div>
@@ -140,7 +142,7 @@ export function UnlockRevealedV3({
           style={{ borderRadius: "2px" }}
         >
           <RotateCcw className="h-4 w-4" strokeWidth={2} />
-          Replay Opening
+          {t("replayOpening")}
         </Button>
 
         <Link href="/letters">
@@ -150,7 +152,7 @@ export function UnlockRevealedV3({
             style={{ borderRadius: "2px" }}
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-            Back to Letters
+            {t("backToLetters")}
           </Button>
         </Link>
 
@@ -160,7 +162,7 @@ export function UnlockRevealedV3({
             style={{ borderRadius: "2px" }}
           >
             <PenLine className="h-4 w-4" strokeWidth={2} />
-            Write New Letter
+            {t("writeNewLetter")}
           </Button>
         </Link>
       </motion.div>

@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { ArrowLeft } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 
 import { Link } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,8 @@ import { getDeliveryEligibility } from "@/server/actions/entitlements"
 export default async function NewLetterV3Page() {
   // Fetch user's delivery eligibility (credits, subscription status)
   const eligibility = await getDeliveryEligibility()
+  const t = await getTranslations("letters")
+
   return (
     <div className="container">
       {/* Header - matches letters page pattern */}
@@ -21,14 +24,14 @@ export default async function NewLetterV3Page() {
               className="gap-2 -ml-4 font-mono text-xs uppercase tracking-wider text-charcoal/60 hover:text-charcoal"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Letters
+              {t("detail.back")}
             </Button>
           </Link>
           <h1 className="font-mono text-3xl font-bold uppercase tracking-wide text-charcoal">
-            Write a Letter
+            {t("new.heading")}
           </h1>
           <p className="font-mono text-sm text-charcoal/70">
-            A message to your future self, delivered when you need it most.
+            {t("new.subtitle")}
           </p>
         </div>
       </header>

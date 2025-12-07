@@ -5,7 +5,9 @@
   "new": {
     "badge": "Oluştur ve Planla",
     "title": "Mektubunu Yaz",
-    "description": "Mesajını yaz ve ne zaman teslim edileceğini seç - hepsi tek sayfada."
+    "description": "Mesajını yaz ve ne zaman teslim edileceğini seç - hepsi tek sayfada.",
+    "heading": "Mektup Yaz",
+    "subtitle": "Gelecekteki kendine bir mesaj, en çok ihtiyacın olduğunda teslim edilir."
   },
   "delete": "Mektubu sil",
   "filters": {
@@ -402,5 +404,14 @@
       "dismiss": "Kapat"
     },
     "physicalMailDateTooSoon": "Fiziksel posta için en az {days} gün önceden planlama gerekiyor. Fiziksel posta göndermek için lütfen daha ileri bir tarih seçin."
+  },
+  "revealed": {
+    "firstOpened": "İlk Açılış",
+    "writtenOn": "{date} tarihinde yazıldı",
+    "openedOn": "{date} tarihinde açıldı",
+    "quote": "Gelecekteki kendine yazmak için en iyi zaman dündü. İkinci en iyi zaman ise şimdi.",
+    "replayOpening": "Açılışı Tekrarla",
+    "backToLetters": "Mektuplara Dön",
+    "writeNewLetter": "Yeni Mektup Yaz"
   }
 }

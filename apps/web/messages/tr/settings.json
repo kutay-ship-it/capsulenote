@@ -210,6 +210,31 @@
       "upgradeNow": "Şimdi Yükselt",
       "checkoutOpened": "Ödeme yeni sekmede açıldı",
       "checkoutOpenedDescription": "Satın almayı tamamlayın. Geri döndüğünüzde bu sayfa güncellenecek."
+    },
+    "credits": {
+      "emailCredits": "E-posta Kredileri",
+      "emailCredit": "E-posta Kredisi",
+      "mailCredits": "Posta Kredileri",
+      "mailCredit": "Posta Kredisi",
+      "email": "E-posta",
+      "mail": "Posta",
+      "noCredits": "Kredi Yok",
+      "noCreditsMessage": "Teslimat planlamak için krediye ihtiyacın var",
+      "runningLow": "Azalıyor",
+      "runningLowMessage": "Sadece {count} kredi kaldı",
+      "available": "{count} Mevcut",
+      "addMoreAnytime": "İstediğin zaman kredi ekle",
+      "quickAdd": "Hızlı Ekle",
+      "off": "%{discount} İNDİRİM",
+      "customQuantity": "Özel Miktar",
+      "discount": "İndirim (%{discount})",
+      "processing": "İşleniyor...",
+      "addCredits": "+{quantity} Ekle — {price}",
+      "try": "Dene",
+      "checkoutOpened": "Ödeme yeni sekmede açıldı",
+      "checkoutOpenedDescription": "Satın almayı tamamlayın. Geri döndüğünüzde kredileriniz güncellenecek.",
+      "failedToStartCheckout": "Ödeme başlatılamadı",
+      "total": "Toplam"
     }
   },
   "privacy": {

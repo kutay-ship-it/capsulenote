@@ -55,19 +55,19 @@ const CREDIT_CONFIG: Record<
   CreditType,
   {
     icon: typeof Mail
-    label: string
-    singularLabel: string
+    labelKey: string
+    singularLabelKey: string
   }
 > = {
   email: {
     icon: Mail,
-    label: "Email Credits",
-    singularLabel: "Email Credit",
+    labelKey: "emailCredits",
+    singularLabelKey: "emailCredit",
   },
   mail: {
     icon: FileText,
-    label: "Mail Credits",
-    singularLabel: "Mail Credit",
+    labelKey: "mailCredits",
+    singularLabelKey: "mailCredit",
   },
 }
 
@@ -128,6 +128,7 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
   const [quantity, setQuantity] = useState(25)
   const [isPending, startTransition] = useTransition()
   const [isExpanded, setIsExpanded] = useState(false)
+  const t = useTranslations("settings.billing.credits")
 
   const Icon = type === "email" ? Mail : FileText
   const status = getCreditStatus(currentCredits)
@@ -150,24 +151,24 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
       headerBg: "bg-coral",
       headerText: "text-white",
       badgeIcon: AlertTriangle,
-      badgeText: "No Credits",
-      message: "You need credits to schedule deliveries",
+      badgeText: t("noCredits"),
+      message: t("noCreditsMessage"),
     },
     low: {
       borderColor: "border-duck-yellow",
       headerBg: "bg-duck-yellow",
       headerText: "text-charcoal",
       badgeIcon: Zap,
-      badgeText: "Running Low",
-      message: `Only ${currentCredits} credit${currentCredits === 1 ? "" : "s"} left`,
+      badgeText: t("runningLow"),
+      message: t("runningLowMessage", { count: currentCredits }),
     },
     good: {
       borderColor: "border-teal-primary",
       headerBg: "bg-teal-primary",
       headerText: "text-white",
       badgeIcon: Check,
-      badgeText: `${currentCredits} Available`,
-      message: "Add more credits anytime",
+      badgeText: t("available", { count: currentCredits }),
+      message: t("addMoreAnytime"),
     },
   }
 
@@ -189,12 +190,12 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
 
       if (result.success) {
         window.open(result.data.url, "_blank")
-        toast.info("Checkout opened in new tab", {
-          description: "Complete your purchase to add credits.",
+        toast.info(t("checkoutOpened"), {
+          description: t("checkoutOpenedDescription"),
         })
         onClose()
       } else {
-        toast.error("Failed to start checkout", {
+        toast.error(t("failedToStartCheckout"), {
           description: result.error.message || "Please try again",
         })
       }
@@ -214,7 +215,7 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
         <div className="flex items-center gap-2">
           <Icon className={cn("h-3.5 w-3.5", config.headerText)} strokeWidth={2} />
           <span className={cn("font-mono text-[10px] uppercase", config.headerText)}>
-            {type === "email" ? "Email" : "Mail"}
+            {type === "email" ? t("email") : t("mail")}
           </span>
         </div>
       </div>
@@ -227,7 +228,7 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
         {/* Quick Select Options */}
         <div className="space-y-2">
           <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal/50">
-            Quick Add
+            {t("quickAdd")}
           </span>
           <div className="grid grid-cols-3 gap-2">
             {quickOptions.map((q) => {
@@ -254,7 +255,7 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
                   <span className="font-mono text-[10px] font-bold text-charcoal">${qPrice.toFixed(2)}</span>
                   {qDiscount > 0 && (
                     <span className="mt-0.5 px-1 py-0.5 bg-teal-primary/10 font-mono text-[8px] font-bold text-teal-primary">
-                      {qDiscount}% OFF
+                      {t("off", { discount: qDiscount })}
                     </span>
                   )}
                   {isSelected && (
@@ -275,7 +276,7 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
             className="flex items-center justify-between w-full group"
           >
             <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal/50 group-hover:text-charcoal">
-              Custom Quantity
+              {t("customQuantity")}
             </span>
             <div
               className={cn(
@@ -331,12 +332,12 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between">
-                    <span className="font-mono text-[10px] font-bold text-teal-primary">Discount ({discount}%)</span>
+                    <span className="font-mono text-[10px] font-bold text-teal-primary">{t("discount", { discount })}</span>
                     <span className="font-mono text-[10px] font-bold text-teal-primary">-${savings.toFixed(2)}</span>
                   </div>
                 )}
                 <div className="border-t border-charcoal/10 pt-1.5 flex justify-between">
-                  <span className="font-mono text-xs font-bold text-charcoal">Total</span>
+                  <span className="font-mono text-xs font-bold text-charcoal">{t("total")}</span>
                   <span className="font-mono text-base font-bold text-charcoal">${price.toFixed(2)}</span>
                 </div>
               </div>
@@ -360,12 +361,12 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
           {isPending ? (
             <>
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Processing...
+              {t("processing")}
             </>
           ) : (
             <>
               <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
-              Add {quantity} — ${price.toFixed(2)}
+              {t("addCredits", { quantity, price: `$${price.toFixed(2)}` })}
               {discount > 0 && <span className="text-teal-primary ml-1">({discount}%)</span>}
             </>
           )}
@@ -644,6 +645,7 @@ export function CreditIndicatorV3({
   className,
 }: CreditIndicatorV3Props) {
   const [open, setOpen] = useState(false)
+  const tCredits = useTranslations("settings.billing.credits")
 
   const config = CREDIT_CONFIG[type]
   const status = getCreditStatus(count)
@@ -661,7 +663,7 @@ export function CreditIndicatorV3({
             isEmpty ? "text-coral" : isLow ? "text-duck-yellow" : "text-charcoal",
             className
           )}
-          aria-label={`${count} ${count === 1 ? config.singularLabel : config.label}`}
+          aria-label={`${count} ${count === 1 ? tCredits(config.singularLabelKey) : tCredits(config.labelKey)}`}
         >
           <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
           <span className="tabular-nums">{count}</span>
@@ -717,6 +719,7 @@ export function MailCreditIndicatorV3({
   hasUsedTrial = false,
 }: MailCreditIndicatorV3Props) {
   const [open, setOpen] = useState(false)
+  const tCredits = useTranslations("settings.billing.credits")
 
   const config = CREDIT_CONFIG.mail
   const Icon = config.icon
@@ -741,7 +744,7 @@ export function MailCreditIndicatorV3({
                   : "text-charcoal",
             className
           )}
-          aria-label={`${count} ${count === 1 ? config.singularLabel : config.label}`}
+          aria-label={`${count} ${count === 1 ? tCredits(config.singularLabelKey) : tCredits(config.labelKey)}`}
         >
           {isLockedForDigitalCapsule ? (
             <Lock className="h-3.5 w-3.5" strokeWidth={2.5} />
@@ -751,7 +754,7 @@ export function MailCreditIndicatorV3({
           <span className="tabular-nums">{count}</span>
           {showTrialBadge && (
             <span className="ml-0.5 px-1 py-0.5 bg-duck-yellow text-charcoal font-mono text-[8px] font-bold uppercase" style={{ borderRadius: "2px" }}>
-              Try
+              {tCredits("try")}
             </span>
           )}
         </button>

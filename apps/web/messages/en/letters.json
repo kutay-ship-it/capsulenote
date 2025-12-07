@@ -5,7 +5,9 @@
   "new": {
     "badge": "Create & Schedule",
     "title": "Write Your Letter",
-    "description": "Write your message and choose when it will be delivered - all in one place."
+    "description": "Write your message and choose when it will be delivered - all in one place.",
+    "heading": "Write a Letter",
+    "subtitle": "A message to your future self, delivered when you need it most."
   },
   "delete": "Delete letter",
   "filters": {
@@ -402,5 +404,14 @@
       "dismiss": "Dismiss"
     },
     "physicalMailDateTooSoon": "Physical mail requires at least {days} days notice. Please select a later date to send physical mail."
+  },
+  "revealed": {
+    "firstOpened": "First Opened",
+    "writtenOn": "Written on {date}",
+    "openedOn": "Opened on {date}",
+    "quote": "The best time to write to your future self was yesterday. The second best time is now.",
+    "replayOpening": "Replay Opening",
+    "backToLetters": "Back to Letters",
+    "writeNewLetter": "Write New Letter"
   }
 }

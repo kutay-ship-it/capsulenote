@@ -210,6 +210,31 @@
       "upgradeNow": "Upgrade Now",
       "checkoutOpened": "Checkout opened in new tab",
       "checkoutOpenedDescription": "Complete your purchase. This page will refresh when you return."
+    },
+    "credits": {
+      "emailCredits": "Email Credits",
+      "emailCredit": "Email Credit",
+      "mailCredits": "Mail Credits",
+      "mailCredit": "Mail Credit",
+      "email": "Email",
+      "mail": "Mail",
+      "noCredits": "No Credits",
+      "noCreditsMessage": "You need credits to schedule deliveries",
+      "runningLow": "Running Low",
+      "runningLowMessage": "Only {count} credit(s) left",
+      "available": "{count} Available",
+      "addMoreAnytime": "Add more credits anytime",
+      "quickAdd": "Quick Add",
+      "off": "{discount}% OFF",
+      "customQuantity": "Custom Quantity",
+      "discount": "Discount ({discount}%)",
+      "processing": "Processing...",
+      "addCredits": "Add {quantity} — {price}",
+      "try": "Try",
+      "checkoutOpened": "Checkout opened in new tab",
+      "checkoutOpenedDescription": "Complete your purchase to add credits.",
+      "failedToStartCheckout": "Failed to start checkout",
+      "total": "Total"
     }
   },
   "privacy": {
