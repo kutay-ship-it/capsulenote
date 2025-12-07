@@ -78,15 +78,15 @@ export function SealConfirmationV3({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="max-w-md overflow-visible border-2 border-charcoal bg-white p-0"
+        className="max-w-md overflow-hidden border-2 border-charcoal bg-white p-0 flex flex-col max-h-[90vh]"
         style={{
           borderRadius: "2px",
           boxShadow: "8px 8px 0px 0px rgb(56, 56, 56)",
         }}
       >
         <DialogTitle className="sr-only">{t("dialogTitle")}</DialogTitle>
-        {/* Header with Wax Seal */}
-        <div className="relative border-b-2 border-charcoal bg-duck-yellow p-6 pt-8 text-center">
+        {/* Header with Wax Seal - Fixed */}
+        <div className="relative border-b-2 border-charcoal bg-duck-yellow p-6 pt-8 text-center flex-shrink-0">
           {/* Floating Badge */}
           <div
             className="absolute -top-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-4 py-1 bg-charcoal font-mono text-[10px] font-bold uppercase tracking-wider text-white z-10"
@@ -112,8 +112,8 @@ export function SealConfirmationV3({
           </p>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-4">
+        {/* Content - Scrollable */}
+        <div className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
           {/* Letter Title */}
           <div
             className="border-2 border-charcoal bg-off-white p-4"
@@ -325,8 +325,8 @@ export function SealConfirmationV3({
           )}
         </div>
 
-        {/* Footer Actions */}
-        <div className="border-t-2 border-charcoal bg-off-white p-4">
+        {/* Footer Actions - Fixed */}
+        <div className="border-t-2 border-charcoal bg-off-white p-4 flex-shrink-0">
           <div className="flex gap-3">
             <Button
               type="button"

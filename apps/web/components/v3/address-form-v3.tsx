@@ -294,6 +294,7 @@ export function AddressFormV3({
           style={{ borderRadius: "2px" }}
           aria-invalid={!!errors.line1}
           disabled={isSubmitting}
+          maxLength={50}
         />
         {errors.line1 && (
           <p className="font-mono text-xs text-coral">{errors.line1}</p>
@@ -319,6 +320,7 @@ export function AddressFormV3({
           className="border-2 border-charcoal font-mono text-sm"
           style={{ borderRadius: "2px" }}
           disabled={isSubmitting}
+          maxLength={50}
         />
       </div>
 

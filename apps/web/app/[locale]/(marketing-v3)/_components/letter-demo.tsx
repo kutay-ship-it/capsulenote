@@ -245,7 +245,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
               deliveryDate: toISOStringSafe(deliveryDate),
               selectedPreset,
               selectedAddressId: null,
-              printOptions: { color: false, doubleSided: false },
+              printOptions: { color: false, doubleSided: true },
               lastSaved: new Date().toISOString(),
               createdAt: new Date().toISOString(),
             }

@@ -609,7 +609,7 @@ export async function scheduleDelivery(
               targetDate: mailTargetDate,
               sendDate: mailSendDate,
               transitDays: mailTransitDays,
-              printOptions: data.printOptions ?? { color: false, doubleSided: false },
+              printOptions: data.printOptions ?? { color: false, doubleSided: true },
               // Sealed content (immutable snapshot at schedule time)
               lobScheduleMode,
               sealedCiphertext: sealedContent?.ciphertext,
@@ -708,7 +708,7 @@ export async function scheduleDelivery(
         )
         const sealedData = JSON.parse(sealedContentStr) as { bodyHtml: string; bodyRich: Record<string, unknown> }
 
-        const printOptions = (data.printOptions ?? { color: false, doubleSided: false }) as {
+        const printOptions = (data.printOptions ?? { color: false, doubleSided: true }) as {
           color?: boolean
           doubleSided?: boolean
         }

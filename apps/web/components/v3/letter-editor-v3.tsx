@@ -16,7 +16,6 @@ import {
   Sparkles,
   Truck,
   MapPin,
-  Printer,
   FileEdit,
   FileText,
   AlertTriangle,
@@ -46,9 +45,10 @@ import { TemplateSelectorV3 } from "@/components/v3/template-selector-v3"
 import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-type-v3"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
 import { LetterModals, LetterFormActions } from "@/components/v3/letter-editor"
-import { PrintOptionsV3, type PrintOptions } from "@/components/v3/print-options-v3"
+import type { PrintOptions } from "@/components/v3/print-options-v3"
 import type { LetterTemplate } from "@/server/actions/templates"
 import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
+import { PHYSICAL_MAIL_MIN_LEAD_DAYS } from "@/server/lib/entitlement-types"
 import type { ShippingAddress } from "@/server/actions/addresses"
 
 type RecipientType = "myself" | "someone-else"
@@ -152,7 +152,7 @@ const initialFormState: FormState = {
 const initialPhysicalMailState: PhysicalMailState = {
   selectedAddressId: null,
   selectedAddress: null,
-  printOptions: { color: false, doubleSided: false },
+  printOptions: { color: false, doubleSided: true },
 }
 
 const initialModalState: ModalState = {
@@ -421,6 +421,16 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   // Track if physical delivery is selected
   const hasPhysicalSelected = deliveryChannels.includes("physical")
 
+  // Check if physical mail date is too soon (< 30 days)
+  const physicalMailDateTooSoon = React.useMemo(() => {
+    const needsPhysical = deliveryChannels.includes("physical")
+    if (!needsPhysical || !deliveryDate) return false
+
+    const now = new Date()
+    const minDate = new Date(now.getTime() + PHYSICAL_MAIL_MIN_LEAD_DAYS * 24 * 60 * 60 * 1000)
+    return deliveryDate < minDate
+  }, [deliveryChannels, deliveryDate])
+
   // Credit eligibility checks
   const canScheduleSelectedChannels = React.useMemo(() => {
     const needsEmail = deliveryChannels.includes("email")
@@ -433,9 +443,12 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
     // Physical mail requires an address to be selected
     if (needsPhysical && !selectedAddressId) return false
 
+    // Physical mail requires at least 30 days lead time
+    if (needsPhysical && physicalMailDateTooSoon) return false
+
     // Must have at least one channel selected
     return deliveryChannels.length > 0
-  }, [deliveryChannels, currentEligibility, selectedAddressId])
+  }, [deliveryChannels, currentEligibility, selectedAddressId, physicalMailDateTooSoon])
 
   // Compute if there are any credit shortages for selected channels
   const hasInsufficientCredits = React.useMemo(() => {
@@ -961,28 +974,6 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                     />
                   </div>
 
-                  {/* Print Options - only show when address is selected */}
-                  {selectedAddressId && (
-                    <>
-                      {/* Dashed separator */}
-                      <div className="w-full border-t-2 border-dashed border-charcoal/10" />
-
-                      <div className="space-y-3">
-                        <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-2">
-                          <Printer className="h-3.5 w-3.5" strokeWidth={2} />
-                          {t("printOptionsLabel")}
-                        </label>
-                        <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider -mt-1">
-                          {t("printOptionsHint")}
-                        </p>
-                        <PrintOptionsV3
-                          value={printOptions}
-                          onChange={(options) => dispatchPhysicalMail({ type: "SET_PRINT_OPTIONS", payload: options })}
-                          disabled={isPending}
-                        />
-                      </div>
-                    </>
-                  )}
                 </>
               )}
 
@@ -1099,6 +1090,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             isPending={isPending}
             canScheduleSelectedChannels={canScheduleSelectedChannels}
             hasInsufficientCredits={hasInsufficientCredits}
+            physicalMailDateTooSoon={physicalMailDateTooSoon}
             eligibility={currentEligibility}
             deliveryChannels={deliveryChannels}
             onSaveBeforeCheckout={saveCurrentDraft}

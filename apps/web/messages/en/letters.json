@@ -400,6 +400,7 @@
       "title": "Your draft is ready!",
       "description": "We saved what you wrote earlier. Review your letter and make any changes before scheduling delivery.",
       "dismiss": "Dismiss"
-    }
+    },
+    "physicalMailDateTooSoon": "Physical mail requires at least {days} days notice. Please select a later date to send physical mail."
   }
 }

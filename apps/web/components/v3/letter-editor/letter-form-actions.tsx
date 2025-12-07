@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import { Stamp, Trash2 } from "lucide-react"
+import { Stamp, Trash2, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { CreditWarningBanner } from "@/components/v3/credit-warning-banner"
 import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
+import { PHYSICAL_MAIL_MIN_LEAD_DAYS } from "@/server/lib/entitlement-types"
 
 type DeliveryChannel = "email" | "physical"
 
@@ -27,6 +28,8 @@ interface LetterFormActionsProps {
   canScheduleSelectedChannels: boolean
   /** Whether user has insufficient credits for selected channels */
   hasInsufficientCredits: boolean
+  /** Whether physical mail date is less than 30 days away */
+  physicalMailDateTooSoon: boolean
   /** Current eligibility state */
   eligibility: DeliveryEligibility
   /** Selected delivery channels */
@@ -45,6 +48,7 @@ export function LetterFormActions({
   isPending,
   canScheduleSelectedChannels,
   hasInsufficientCredits,
+  physicalMailDateTooSoon,
   eligibility,
   deliveryChannels,
   onSaveBeforeCheckout,
@@ -80,8 +84,21 @@ export function LetterFormActions({
           {isPending ? t("sealing") : t("sealAndSchedule")}
         </Button>
 
+        {/* Warning for physical mail date too soon */}
+        {physicalMailDateTooSoon && (
+          <div
+            className="flex items-start gap-2 p-3 border-2 border-coral bg-coral/10"
+            style={{ borderRadius: "2px" }}
+          >
+            <AlertTriangle className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" strokeWidth={2} />
+            <p className="font-mono text-[10px] text-charcoal leading-relaxed">
+              {t("physicalMailDateTooSoon", { days: PHYSICAL_MAIL_MIN_LEAD_DAYS })}
+            </p>
+          </div>
+        )}
+
         {/* Helpful message when button is disabled */}
-        {!canScheduleSelectedChannels && !hasInsufficientCredits && (
+        {!canScheduleSelectedChannels && !hasInsufficientCredits && !physicalMailDateTooSoon && (
           <p className="font-mono text-[10px] text-center text-charcoal/50 uppercase tracking-wider">
             {!eligibility.hasActiveSubscription
               ? t("subscribeToSchedule")

@@ -73,7 +73,7 @@ function normalizeAnonymousDraft(draft: AnonymousDraft): RestoredDraftData {
     deliveryDate: parseDateSafe(draft.deliveryDate),
     selectedPreset: draft.selectedPreset ?? null,
     selectedAddressId: null,
-    printOptions: { color: false, doubleSided: false },
+    printOptions: { color: false, doubleSided: true },
   }
 }
 
@@ -92,7 +92,7 @@ function normalizeAuthenticatedDraft(draft: LetterAutosave): RestoredDraftData {
     deliveryDate: parseDateSafe(draft.deliveryDate),
     selectedPreset: draft.selectedPreset,
     selectedAddressId: draft.selectedAddressId,
-    printOptions: draft.printOptions ?? { color: false, doubleSided: false },
+    printOptions: draft.printOptions ?? { color: false, doubleSided: true },
   }
 }
 
@@ -217,5 +217,5 @@ export const emptyFormState: RestoredDraftData = {
   deliveryDate: null,
   selectedPreset: null,
   selectedAddressId: null,
-  printOptions: { color: false, doubleSided: false },
+  printOptions: { color: false, doubleSided: true },
 }

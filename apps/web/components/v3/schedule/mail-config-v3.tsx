@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format, subDays } from "date-fns"
-import { Calendar, Truck, BookOpen, AlertTriangle, Info, Globe } from "lucide-react"
+import { Calendar, Truck, AlertTriangle, Info, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
@@ -77,14 +77,6 @@ export function MailConfigV3({
   const handleDeliveryModeChange = (mode: MailDeliveryMode) => {
     if (disabled) return
     onDeliveryModeChange(mode)
-  }
-
-  const handleDoubleSidedToggle = () => {
-    if (disabled) return
-    onPrintOptionsChange({
-      ...printOptions,
-      doubleSided: !printOptions.doubleSided,
-    })
   }
 
   return (
@@ -298,54 +290,6 @@ export function MailConfigV3({
           onChange={onAddressChange}
           disabled={disabled}
         />
-      </div>
-
-      {/* Print Options */}
-      <div className="space-y-3">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Print Options
-        </p>
-        <div className="space-y-2">
-          {/* Double-Sided */}
-          <button
-            type="button"
-            onClick={handleDoubleSidedToggle}
-            disabled={disabled}
-            className={cn(
-              "flex w-full items-center gap-3 border-2 border-charcoal p-3 font-mono transition-all duration-150",
-              "hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
-              printOptions.doubleSided
-                ? "bg-duck-blue text-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] -translate-y-0.5"
-                : "bg-white shadow-[2px_2px_0_theme(colors.charcoal)]",
-              disabled && "opacity-50 cursor-not-allowed hover:translate-y-0 hover:shadow-[2px_2px_0_theme(colors.charcoal)]"
-            )}
-            style={{ borderRadius: "2px" }}
-          >
-            <div
-              className={cn(
-                "flex h-6 w-6 items-center justify-center border-2 border-charcoal transition-colors",
-                printOptions.doubleSided ? "bg-charcoal" : "bg-white"
-              )}
-              style={{ borderRadius: "2px" }}
-            >
-              {printOptions.doubleSided && (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  className="h-4 w-4 text-white"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
-            </div>
-            <div className="flex-1 flex items-center gap-2">
-              <BookOpen className="h-4 w-4" strokeWidth={2} />
-              <span className="text-xs font-bold uppercase tracking-wider">Double-Sided</span>
-            </div>
-          </button>
-        </div>
       </div>
 
       {/* Transit Time Info */}

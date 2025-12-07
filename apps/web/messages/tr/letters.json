@@ -400,6 +400,7 @@
       "title": "Taslağın hazır!",
       "description": "Daha önce yazdıklarını kaydettik. Göndermeden önce mektubunu gözden geçir ve istediğin değişiklikleri yap.",
       "dismiss": "Kapat"
-    }
+    },
+    "physicalMailDateTooSoon": "Fiziksel posta için en az {days} gün önceden planlama gerekiyor. Fiziksel posta göndermek için lütfen daha ileri bir tarih seçin."
   }
 }
