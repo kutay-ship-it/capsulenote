@@ -222,10 +222,12 @@
     },
     "completeSignup": {
       "title": "Complete Your Signup",
-      "description": "Create your account to activate your subscription"
+      "description": "Create your account to activate your subscription",
+      "step1": "Step 1 of 2: Create Password"
     },
     "paymentProcessed": "Your payment for {planName} has been processed. Complete your signup below to activate your subscription.",
-    "securityNotice": "You must verify your email address before your subscription is activated. Check your inbox for a verification email."
+    "securityNotice": "Choose a secure password below to create your account. After submitting, you'll receive a verification code via email to confirm your address.",
+    "passwordHint": "Create a password for your new account (minimum 8 characters)"
   },
   "emailForm": {
     "label": "Email Address",

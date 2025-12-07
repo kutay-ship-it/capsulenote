@@ -12,11 +12,12 @@ import { detectBrowserTimezone } from "@/lib/timezone"
 
 interface CustomSignUpFormProps {
   lockedEmail?: string
+  passwordHint?: string
 }
 
 type Step = "form" | "verify"
 
-export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
+export function CustomSignUpForm({ lockedEmail, passwordHint }: CustomSignUpFormProps) {
   const router = useRouter()
   const { isLoaded, signUp, setActive } = useSignUp()
   const t = useTranslations("auth.signUp")
@@ -149,7 +150,13 @@ export function CustomSignUpForm({ lockedEmail }: CustomSignUpFormProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
+                placeholder={passwordHint ? "••••••••" : undefined}
               />
+              {passwordHint && (
+                <p className="text-xs text-muted-foreground">
+                  {passwordHint}
+                </p>
+              )}
             </div>
 
             {/* Clerk Smart CAPTCHA widget placeholder */}

@@ -222,10 +222,12 @@
     },
     "completeSignup": {
       "title": "Kaydını Tamamla",
-      "description": "Aboneliğini aktif etmek için hesabını oluştur"
+      "description": "Aboneliğini aktif etmek için hesabını oluştur",
+      "step1": "Adım 1/2: Şifre Oluştur"
     },
     "paymentProcessed": "{planName} için ödemen işlendi. Aboneliğini aktif etmek için aşağıdan kaydını tamamla.",
-    "securityNotice": "Aboneliğin aktif edilmeden önce e-posta adresini doğrulaman gerekiyor. Gelen kutunu doğrulama e-postası için kontrol et."
+    "securityNotice": "Hesabını oluşturmak için aşağıdan güvenli bir şifre seç. Gönderdikten sonra, e-posta adresini doğrulamak için bir doğrulama kodu alacaksın.",
+    "passwordHint": "Yeni hesabın için bir şifre oluştur (en az 8 karakter)"
   },
   "emailForm": {
     "label": "E-posta adresi",

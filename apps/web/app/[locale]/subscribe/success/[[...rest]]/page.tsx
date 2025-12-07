@@ -200,9 +200,16 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             </p>
           </div>
 
+          {/* Step Indicator */}
+          <div className="rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 p-3 text-center">
+            <p className="text-sm font-semibold text-primary">
+              🔐 {t("completeSignup.step1")}
+            </p>
+          </div>
+
           <Card className="border-2 border-charcoal shadow-lg">
             <CardContent className="pt-6">
-              <CustomSignUpForm lockedEmail={email} />
+              <CustomSignUpForm lockedEmail={email} passwordHint={t("passwordHint")} />
             </CardContent>
           </Card>
 
