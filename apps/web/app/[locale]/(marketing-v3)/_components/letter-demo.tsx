@@ -18,9 +18,10 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { motion, useInView } from "framer-motion"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 import { cn, getUserTimezone } from "@/lib/utils"
+import { getIntlLocale } from "@/lib/date-formatting"
 import { saveAnonymousDraft, getAnonymousDraft, getLetterAutosave } from "@/lib/localStorage-letter"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -62,6 +63,8 @@ interface LetterDemoProps {
 
 export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   const t = useTranslations("marketing.letterDemo")
+  const locale = useLocale()
+  const intlLocale = getIntlLocale(locale)
   const datePresets = t.raw("datePresets") as DatePreset[]
   const router = useRouter()
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -613,7 +616,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                             {t("labels.scheduledFor")}
                           </p>
                           <p className="font-mono text-xs text-charcoal truncate">
-                            {deliveryDate.toLocaleDateString("en-US", {
+                            {deliveryDate.toLocaleDateString(intlLocale, {
                               weekday: "short",
                               year: "numeric",
                               month: "short",

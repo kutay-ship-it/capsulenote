@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
+import { getIntlLocale } from "@/lib/date-formatting"
 import { Eye, Monitor, Smartphone } from "lucide-react"
 import {
   Dialog,
@@ -28,11 +29,13 @@ export function EmailPreviewModal({
   disabled = false,
 }: EmailPreviewModalProps) {
   const t = useTranslations("preview")
+  const locale = useLocale()
+  const intlLocale = getIntlLocale(locale)
   const [open, setOpen] = useState(false)
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop")
 
   const formattedDate = deliveryDate
-    ? deliveryDate.toLocaleDateString("en-US", {
+    ? deliveryDate.toLocaleDateString(intlLocale, {
         weekday: "long",
         year: "numeric",
         month: "long",

@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { Mail, FileText, AlertTriangle } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
+import { getIntlLocale } from "@/lib/date-formatting"
 import { cn } from "@/lib/utils"
 import {
   estimatePageCount,
@@ -67,6 +68,8 @@ export function LetterEditorForm({
   isSubmitting = false,
 }: LetterEditorFormProps) {
   const t = useTranslations("forms.letterEditor")
+  const locale = useLocale()
+  const intlLocale = getIntlLocale(locale)
 
   const [title, setTitle] = React.useState(initialData?.title || "")
   const [bodyRich, setBodyRich] = React.useState<Record<string, unknown> | null>(
@@ -512,7 +515,7 @@ export function LetterEditorForm({
                   <div className="mt-3 p-3 bg-bg-blue-pale border-2 border-duck-blue sm:mt-4 sm:p-4" style={{ borderRadius: "2px" }}>
                     <p className="font-mono text-xs text-charcoal sm:text-sm">
                       <span className="uppercase text-duck-blue font-normal">{t("datePicker.scheduledFor")}</span>{" "}
-                      {deliveryDate.toLocaleDateString("en-US", {
+                      {deliveryDate.toLocaleDateString(intlLocale, {
                         weekday: "long",
                         year: "numeric",
                         month: "long",
