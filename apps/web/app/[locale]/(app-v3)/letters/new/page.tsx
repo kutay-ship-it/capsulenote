@@ -7,14 +7,21 @@ import { Button } from "@/components/ui/button"
 import { LetterEditorWrapper } from "@/components/v3/letter-editor-wrapper"
 import { getDeliveryEligibility } from "@/server/actions/entitlements"
 
-export default async function NewLetterV3Page() {
-  // Fetch user's delivery eligibility (credits, subscription status)
+/**
+ * Async component that fetches eligibility data inside the Suspense boundary.
+ * This allows the page shell (header) to render instantly while data loads.
+ */
+async function LetterEditorWithData() {
   const eligibility = await getDeliveryEligibility()
+  return <LetterEditorWrapper initialEligibility={eligibility} />
+}
+
+export default async function NewLetterV3Page() {
   const t = await getTranslations("letters")
 
   return (
     <div className="container">
-      {/* Header - matches letters page pattern */}
+      {/* Header - renders instantly (outside Suspense) */}
       <header className="flex flex-col gap-4 py-12 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <Link href="/letters">
@@ -36,10 +43,10 @@ export default async function NewLetterV3Page() {
         </div>
       </header>
 
-      {/* Editor Section */}
+      {/* Editor Section - data fetched inside Suspense for instant page load */}
       <section className="pb-12">
         <Suspense fallback={<div className="h-96 animate-pulse bg-charcoal/5 rounded" />}>
-          <LetterEditorWrapper initialEligibility={eligibility} />
+          <LetterEditorWithData />
         </Suspense>
       </section>
     </div>
