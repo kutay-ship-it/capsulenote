@@ -29,13 +29,15 @@ export async function getUserByStripeCustomer(customerId: string) {
     },
   })
 
-  return profile
-    ? {
-        id: profile.userId,
-        email: profile.user.email,
-        clerkUserId: profile.user.clerkUserId,
-      }
-    : null
+  if (profile) {
+    return {
+      id: profile.userId,
+      email: profile.user.email,
+      clerkUserId: profile.user.clerkUserId,
+    }
+  }
+
+  return null
 }
 
 /**

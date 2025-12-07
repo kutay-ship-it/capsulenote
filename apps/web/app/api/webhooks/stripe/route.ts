@@ -57,7 +57,7 @@ export async function POST(req: Request) {
 
   // Validate event age (prevent replay attacks)
   const eventAgeMs = Math.abs(Date.now() - (event.created * 1000))
-  const MAX_AGE_MS = 5 * 60 * 1000
+  const MAX_AGE_MS = 5 * 60 * 1000 // 5 minutes
 
   if (eventAgeMs > MAX_AGE_MS) {
     console.error("[Stripe Webhook] Event too old, rejecting", {
