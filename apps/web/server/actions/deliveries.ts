@@ -1305,11 +1305,26 @@ export async function cancelDelivery(
           data: { status: "canceled" },
         })
 
-        // Update associated letter status
-        await tx.letter.update({
-          where: { id: existing.letterId },
-          data: { status: "CANCELLED" },
+        // Check if letter has other active (non-cancelled) deliveries
+        const otherActiveDeliveries = await tx.delivery.count({
+          where: {
+            letterId: existing.letterId,
+            id: { not: deliveryId },
+            status: { in: ["scheduled", "processing"] },
+          },
         })
+
+        // Only revert to DRAFT if no other active deliveries
+        // This allows the user to reschedule the same letter
+        if (otherActiveDeliveries === 0) {
+          await tx.letter.update({
+            where: { id: existing.letterId },
+            data: {
+              status: "DRAFT",
+              scheduledFor: null, // Clear scheduling metadata
+            },
+          })
+        }
 
         // Refund email credits with audit trail
         if (shouldRefundEmail) {
@@ -1386,6 +1401,11 @@ export async function cancelDelivery(
         },
       }
     }
+
+    // Invalidate entitlements cache after successful credit refund
+    // This ensures the user sees their updated credit balance immediately
+    // Must be outside transaction try/catch so it runs after successful commit
+    await invalidateEntitlementsCache(user.id)
 
     await createAuditEvent({
       userId: user.id,
