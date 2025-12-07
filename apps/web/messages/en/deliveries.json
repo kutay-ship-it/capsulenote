@@ -19,5 +19,49 @@
   "labels": {
     "deliveryAt": "Delivery time",
     "timezone": "Timezone"
+  },
+  "timeline": {
+    "title": "Delivery Timeline",
+    "sealedForPrint": "Content Sealed for Print",
+    "ships": "Ships {date}",
+    "actions": {
+      "cancel": "Cancel",
+      "reschedule": "Reschedule",
+      "retry": "Retry",
+      "retrying": "Retrying..."
+    },
+    "toasts": {
+      "retryFailed": "Failed to retry delivery",
+      "retrySuccess": "Delivery rescheduled",
+      "retryDescription": "The delivery will be attempted again.",
+      "unexpectedError": "An unexpected error occurred."
+    }
+  },
+  "cancelDialog": {
+    "title": "Cancel Delivery?",
+    "scheduledFor": "Scheduled for",
+    "lockWarning": {
+      "title": "Credit Will NOT Be Refunded",
+      "description": "This delivery is within the 72-hour lock window ({time} remaining). Your {creditType} credit will be lost if you cancel.",
+      "lost": "lost"
+    },
+    "refundInfo": {
+      "title": "Credit Will Be Refunded",
+      "description": "Your {creditType} credit will be returned to your account when you cancel this delivery."
+    },
+    "explanation": "Canceling will stop this delivery from being sent. The letter itself will remain in your account as a draft.",
+    "buttons": {
+      "keepScheduled": "Keep Scheduled",
+      "cancelAnyway": "Cancel Anyway",
+      "cancelDelivery": "Cancel Delivery",
+      "canceling": "Canceling..."
+    },
+    "toasts": {
+      "failed": "Failed to cancel delivery",
+      "success": "Delivery canceled",
+      "refundedDescription": "Your {creditType} credit has been refunded.",
+      "canceledDescription": "The delivery has been canceled.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    }
   }
 }

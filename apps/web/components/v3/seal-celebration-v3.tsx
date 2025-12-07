@@ -4,6 +4,7 @@ import * as React from "react"
 import { format } from "date-fns"
 import { motion, AnimatePresence } from "framer-motion"
 import { Stamp, Sparkles, Mail, Calendar, Check } from "lucide-react"
+import { useTranslations, useLocale } from "next-intl"
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { BrutalistConfetti } from "@/components/animations/brutalist-confetti"
+import { getDateFnsLocale } from "@/lib/date-formatting"
 
 interface SealCelebrationV3Props {
   open: boolean
@@ -29,6 +31,9 @@ export function SealCelebrationV3({
   recipientEmail,
   onComplete,
 }: SealCelebrationV3Props) {
+  const t = useTranslations("schedule.sealAnimation")
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
   const [showConfetti, setShowConfetti] = React.useState(false)
   const [phase, setPhase] = React.useState<"sealing" | "sealed">("sealing")
 
@@ -55,7 +60,7 @@ export function SealCelebrationV3({
     }
   }, [open, onComplete])
 
-  const formattedDate = format(deliveryDate, "MMMM d, yyyy")
+  const formattedDate = format(deliveryDate, "PPP", { locale: dateFnsLocale })
   const daysFromNow = Math.ceil((deliveryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
 
   return (
@@ -67,7 +72,7 @@ export function SealCelebrationV3({
           boxShadow: "8px 8px 0px 0px rgb(56, 56, 56)",
         }}
       >
-        <DialogTitle className="sr-only">Sealing your letter</DialogTitle>
+        <DialogTitle className="sr-only">{t("sealing")}</DialogTitle>
         {/* Confetti */}
         <AnimatePresence>
           {showConfetti && <BrutalistConfetti count={40} originY="40vh" />}
@@ -112,7 +117,7 @@ export function SealCelebrationV3({
                 transition={{ delay: 0.3 }}
                 className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal"
               >
-                Sealing Your Letter...
+                {t("sealing")}
               </motion.h2>
 
               <motion.div
@@ -128,7 +133,7 @@ export function SealCelebrationV3({
                   style={{ borderRadius: "50%" }}
                 />
                 <span className="font-mono text-xs uppercase tracking-wider text-charcoal/60">
-                  Encrypting & Scheduling
+                  {t("encrypting")}
                 </span>
               </motion.div>
             </motion.div>
@@ -150,7 +155,7 @@ export function SealCelebrationV3({
                   style={{ borderRadius: "2px" }}
                 >
                   <Check className="h-3 w-3" strokeWidth={3} />
-                  <span>Success</span>
+                  <span>{t("scheduled")}</span>
                 </motion.div>
 
                 {/* Success Icon */}
@@ -170,7 +175,7 @@ export function SealCelebrationV3({
                   transition={{ delay: 0.3 }}
                   className="font-mono text-2xl font-bold uppercase tracking-wide text-white"
                 >
-                  Letter Sealed!
+                  {t("letterSealed")}
                 </motion.h2>
               </div>
 
@@ -192,7 +197,7 @@ export function SealCelebrationV3({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                      Your Letter
+                      {t("yourLetter")}
                     </p>
                     <p className="font-mono text-xs font-bold text-charcoal truncate">
                       "{letterTitle}"
@@ -216,13 +221,13 @@ export function SealCelebrationV3({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                      Arrives On
+                      {t("arrivesOn")}
                     </p>
                     <p className="font-mono text-xs font-bold text-charcoal">
                       {formattedDate}
                     </p>
                     <p className="font-mono text-[10px] text-teal-primary font-bold">
-                      {daysFromNow === 1 ? "Tomorrow!" : `${daysFromNow} days from now`}
+                      {daysFromNow === 1 ? t("timing.tomorrow") : t("timing.daysFromNow", { count: daysFromNow })}
                     </p>
                   </div>
                 </motion.div>
@@ -235,7 +240,7 @@ export function SealCelebrationV3({
                   className="text-center py-2"
                 >
                   <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider">
-                    Sending to
+                    {t("deliveringTo")}
                   </p>
                   <p className="font-mono text-xs font-bold text-charcoal">
                     {recipientEmail}
@@ -251,7 +256,7 @@ export function SealCelebrationV3({
                 className="border-t-2 border-dashed border-charcoal/20 bg-duck-cream p-4 text-center"
               >
                 <p className="font-mono text-[10px] text-charcoal/60 uppercase tracking-wider">
-                  Redirecting to your letters...
+                  {t("redirecting")}
                 </p>
               </motion.div>
             </motion.div>

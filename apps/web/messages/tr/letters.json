@@ -112,6 +112,7 @@
   "detail": {
     "back": "Mektuplara dön",
     "created": "Oluşturuldu {date}",
+    "writtenOn": "{date} tarihinde yazıldı",
     "scheduleCta": "Teslimatı planla",
     "scheduledHeading": "Planlanan teslimatlar",
     "deliveryStatus": {
@@ -136,6 +137,39 @@
       "title": "Teslimatı Planla",
       "description": "Bu mektubu ne zaman ve nasıl alacağını seç",
       "expand": "Planla"
+    },
+    "sealed": {
+      "title": "Bu mektup mühürlendi",
+      "description": "Zaman kapsülün {date} tarihinde açılacak"
+    },
+    "countdown": {
+      "arrivingToday": "Bugün ulaşıyor",
+      "arrivingTomorrow": "Yarın ulaşıyor",
+      "daysToGo": "{count} gün kaldı"
+    },
+    "delivered": {
+      "opened": "Mektup Açıldı",
+      "arrived": "Zaman Kapsülün Geldi!",
+      "firstOpenedOn": "İlk açılış: {date}",
+      "waitingMessage": "Geçmişinden bir mesaj açılmayı bekliyor."
+    },
+    "buttons": {
+      "viewFullLetter": "Mektubun Tamamını Gör",
+      "openTimeCapsule": "Zaman Kapsülünü Aç"
+    },
+    "scheduleCtaSection": {
+      "title": "Bu mektubu göndermeye hazır mısın?",
+      "description": "Bir teslimat tarihi planla ve mektubun zamanı geldiğinde gelen kutuna ulaşsın."
+    },
+    "dangerZone": {
+      "title": "Tehlikeli Bölge",
+      "descriptionWithDelivery": "Teslimatları iptal et ve bu mektubu kalıcı olarak sil.",
+      "descriptionWithoutDelivery": "Bu mektubu kalıcı olarak sil.",
+      "delete": "Sil"
+    },
+    "footer": {
+      "delivered": "{date} tarihinde teslim edildi",
+      "delivers": "{date} tarihinde teslim edilecek"
     }
   },
   "schedule": {

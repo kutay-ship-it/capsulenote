@@ -112,6 +112,7 @@
   "detail": {
     "back": "Back to Letters",
     "created": "Created {date}",
+    "writtenOn": "Written on {date}",
     "scheduleCta": "Schedule Delivery",
     "scheduledHeading": "Scheduled Deliveries",
     "deliveryStatus": {
@@ -136,6 +137,39 @@
       "title": "Schedule Delivery",
       "description": "Choose when and how to receive this letter",
       "expand": "Schedule"
+    },
+    "sealed": {
+      "title": "This letter is sealed",
+      "description": "Your time capsule will be unlocked on {date}"
+    },
+    "countdown": {
+      "arrivingToday": "Arriving today",
+      "arrivingTomorrow": "Arriving tomorrow",
+      "daysToGo": "{count} days to go"
+    },
+    "delivered": {
+      "opened": "Letter Opened",
+      "arrived": "Your Time Capsule Has Arrived!",
+      "firstOpenedOn": "First opened on {date}",
+      "waitingMessage": "A message from your past is waiting to be revealed."
+    },
+    "buttons": {
+      "viewFullLetter": "View Full Letter",
+      "openTimeCapsule": "Open Time Capsule"
+    },
+    "scheduleCtaSection": {
+      "title": "Ready to send this letter?",
+      "description": "Schedule a delivery date and your letter will arrive in your inbox when the time comes."
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "descriptionWithDelivery": "Cancel deliveries and permanently delete this letter.",
+      "descriptionWithoutDelivery": "Permanently delete this letter.",
+      "delete": "Delete"
+    },
+    "footer": {
+      "delivered": "Delivered {date}",
+      "delivers": "Delivers {date}"
     }
   },
   "schedule": {

@@ -16,8 +16,10 @@ import {
   Stamp,
   MailOpen,
 } from "lucide-react"
+import { getTranslations, getLocale } from "next-intl/server"
 
 import { Link } from "@/i18n/routing"
+import { getDateFnsLocale } from "@/lib/date-formatting"
 import { getLetter } from "@/server/actions/letters"
 import { requireUser } from "@/server/lib/auth"
 import { sanitizeLetterHtml } from "@/lib/sanitize"
@@ -45,8 +47,18 @@ type StatusConfig = {
   icon: React.ReactNode
 }
 
+type CardTranslations = {
+  draft: string
+  delivered: string
+  failed: string
+  today: string
+  tomorrow: string
+  days: (count: number) => string
+}
+
 function getStatusConfig(
   hasDelivery: boolean,
+  t: CardTranslations,
   status?: string,
   daysUntil?: number
 ): StatusConfig {
@@ -54,7 +66,7 @@ function getStatusConfig(
   if (!hasDelivery) {
     return {
       borderColor: "border-duck-yellow",
-      badgeText: "Draft",
+      badgeText: t.draft,
       badgeBg: "bg-duck-yellow",
       badgeTextColor: "text-charcoal",
       icon: <FileEdit className="h-4 w-4" strokeWidth={2} />,
@@ -65,7 +77,7 @@ function getStatusConfig(
   if (status === "sent") {
     return {
       borderColor: "border-teal-primary",
-      badgeText: "Delivered",
+      badgeText: t.delivered,
       badgeBg: "bg-teal-primary",
       badgeTextColor: "text-white",
       icon: <Mail className="h-4 w-4" strokeWidth={2} />,
@@ -76,7 +88,7 @@ function getStatusConfig(
   if (status === "failed") {
     return {
       borderColor: "border-coral",
-      badgeText: "Failed",
+      badgeText: t.failed,
       badgeBg: "bg-coral",
       badgeTextColor: "text-white",
       icon: <AlertCircle className="h-4 w-4" strokeWidth={2} />,
@@ -86,10 +98,10 @@ function getStatusConfig(
   // Scheduled - show days remaining
   const daysText =
     daysUntil === undefined || daysUntil <= 0
-      ? "Today"
+      ? t.today
       : daysUntil === 1
-        ? "Tomorrow"
-        : `${daysUntil} days`
+        ? t.tomorrow
+        : t.days(daysUntil)
 
   return {
     borderColor: "border-duck-blue",
@@ -146,6 +158,10 @@ function LetterDetailV3Skeleton() {
  * Async component for letter content
  */
 async function LetterDetailContent({ id }: { id: string }) {
+  const t = await getTranslations("letters")
+  const locale = await getLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
+
   let letter
   try {
     letter = await getLetter(id)
@@ -159,8 +175,17 @@ async function LetterDetailContent({ id }: { id: string }) {
     ? differenceInDays(new Date(latestDelivery.deliverAt), new Date())
     : undefined
 
-  const statusConfig = getStatusConfig(hasDelivery, latestDelivery?.status, daysUntil)
-  const formattedDate = format(new Date(letter.createdAt), "MMMM d, yyyy")
+  const cardTranslations: CardTranslations = {
+    draft: t("card.status.draft"),
+    delivered: t("card.status.delivered"),
+    failed: t("card.status.failed"),
+    today: t("card.status.today"),
+    tomorrow: t("card.status.tomorrow"),
+    days: (count: number) => t("card.status.days", { count }),
+  }
+
+  const statusConfig = getStatusConfig(hasDelivery, cardTranslations, latestDelivery?.status, daysUntil)
+  const formattedDate = format(new Date(letter.createdAt), "MMMM d, yyyy", { locale: dateFnsLocale })
   const isSent = latestDelivery?.status === "sent"
   const isScheduled = latestDelivery?.status === "scheduled" || latestDelivery?.status === "processing"
 
@@ -272,12 +297,12 @@ async function LetterDetailContent({ id }: { id: string }) {
 
         {/* Title */}
         <h1 className="mt-4 mb-2 font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal">
-          {letter.title || "Untitled Letter"}
+          {letter.title || t("card.untitled")}
         </h1>
 
         {/* Meta */}
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-6">
-          Written on {formattedDate}
+          {t("detail.writtenOn", { date: formattedDate })}
         </p>
 
         {/* Dashed separator */}
@@ -306,13 +331,12 @@ async function LetterDetailContent({ id }: { id: string }) {
             {/* Message */}
             <div className="space-y-2 max-w-md">
               <h2 className="font-mono text-lg font-bold uppercase tracking-wide text-charcoal">
-                This letter is sealed
+                {t("detail.sealed.title")}
               </h2>
               <p className="font-mono text-sm text-charcoal/70">
-                Your time capsule will be unlocked on{" "}
-                <span className="font-bold text-charcoal">
-                  {format(new Date(latestDelivery!.deliverAt), "MMMM d, yyyy")}
-                </span>
+                {t("detail.sealed.description", {
+                  date: format(new Date(latestDelivery!.deliverAt), "MMMM d, yyyy", { locale: dateFnsLocale })
+                })}
               </p>
             </div>
 
@@ -331,10 +355,10 @@ async function LetterDetailContent({ id }: { id: string }) {
               <Clock className="h-4 w-4" strokeWidth={2} />
               <span className="font-mono text-xs uppercase tracking-wider">
                 {daysUntil === undefined || daysUntil <= 0
-                  ? "Arriving today"
+                  ? t("detail.countdown.arrivingToday")
                   : daysUntil === 1
-                    ? "Arriving tomorrow"
-                    : `${daysUntil} days to go`}
+                    ? t("detail.countdown.arrivingTomorrow")
+                    : t("detail.countdown.daysToGo", { count: daysUntil })}
               </span>
             </div>
           </div>
@@ -361,16 +385,15 @@ async function LetterDetailContent({ id }: { id: string }) {
             {/* Message */}
             <div className="space-y-2 max-w-md">
               <h2 className="font-mono text-lg font-bold uppercase tracking-wide text-charcoal">
-                {hasBeenOpened ? "Letter Opened" : "Your Time Capsule Has Arrived!"}
+                {hasBeenOpened ? t("detail.delivered.opened") : t("detail.delivered.arrived")}
               </h2>
               {hasBeenOpened ? (
                 <p className="font-mono text-sm text-charcoal/70">
-                  First opened on{" "}
-                  <span className="font-bold text-charcoal">{formattedOpenedDate}</span>
+                  {t("detail.delivered.firstOpenedOn", { date: formattedOpenedDate! })}
                 </p>
               ) : (
                 <p className="font-mono text-sm text-charcoal/70">
-                  A message from your past is waiting to be revealed.
+                  {t("detail.delivered.waitingMessage")}
                 </p>
               )}
             </div>
@@ -390,12 +413,12 @@ async function LetterDetailContent({ id }: { id: string }) {
                 {hasBeenOpened ? (
                   <>
                     <MailOpen className="h-5 w-5" strokeWidth={2} />
-                    View Full Letter
+                    {t("detail.buttons.viewFullLetter")}
                   </>
                 ) : (
                   <>
                     <Stamp className="h-5 w-5" strokeWidth={2} />
-                    Open Time Capsule
+                    {t("detail.buttons.openTimeCapsule")}
                   </>
                 )}
               </Button>
@@ -411,8 +434,8 @@ async function LetterDetailContent({ id }: { id: string }) {
           {hasDelivery && (
             <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
               {latestDelivery?.status === "sent"
-                ? `Delivered ${format(new Date(latestDelivery.deliverAt), "MMM d, yyyy")}`
-                : `Delivers ${format(new Date(latestDelivery!.deliverAt), "MMM d, yyyy")}`}
+                ? t("detail.footer.delivered", { date: format(new Date(latestDelivery.deliverAt), "MMM d, yyyy", { locale: dateFnsLocale }) })
+                : t("detail.footer.delivers", { date: format(new Date(latestDelivery!.deliverAt), "MMM d, yyyy", { locale: dateFnsLocale }) })}
             </span>
           )}
         </div>
@@ -423,7 +446,7 @@ async function LetterDetailContent({ id }: { id: string }) {
         <DeliveryTimelineV3
           deliveries={letter.deliveries}
           letterId={letter.id}
-          letterTitle={letter.title || "Untitled Letter"}
+          letterTitle={letter.title || t("card.untitled")}
         />
       )}
 
@@ -445,17 +468,17 @@ async function LetterDetailContent({ id }: { id: string }) {
             {/* Message */}
             <div className="space-y-2 max-w-md">
               <h2 className="font-mono text-xl md:text-2xl font-bold uppercase tracking-wide text-charcoal">
-                Ready to send this letter?
+                {t("detail.scheduleCtaSection.title")}
               </h2>
               <p className="font-mono text-sm text-charcoal/70">
-                Schedule a delivery date and your letter will arrive in your inbox when the time comes.
+                {t("detail.scheduleCtaSection.description")}
               </p>
             </div>
 
             {/* CTA */}
             <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
               <Button className="gap-2">
-                Schedule Delivery
+                {t("detail.scheduleCta")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -471,12 +494,12 @@ async function LetterDetailContent({ id }: { id: string }) {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal/60">
-              Danger Zone
+              {t("detail.dangerZone.title")}
             </h3>
             <p className="mt-1 font-mono text-xs text-charcoal/40">
               {hasDelivery
-                ? "Cancel deliveries and permanently delete this letter."
-                : "Permanently delete this letter."}
+                ? t("detail.dangerZone.descriptionWithDelivery")
+                : t("detail.dangerZone.descriptionWithoutDelivery")}
             </p>
           </div>
           <Button
@@ -485,7 +508,7 @@ async function LetterDetailContent({ id }: { id: string }) {
             className="gap-2 font-mono text-xs uppercase tracking-wider text-coral/70 hover:text-coral hover:bg-coral/5"
           >
             <Trash2 className="h-4 w-4" />
-            Delete
+            {t("detail.dangerZone.delete")}
           </Button>
         </div>
       </div>
@@ -495,6 +518,7 @@ async function LetterDetailContent({ id }: { id: string }) {
 
 export default async function LetterDetailV3Page({ params }: PageProps) {
   const { id } = await params
+  const t = await getTranslations("letters")
 
   // Verify user is authenticated
   await requireUser()
@@ -511,7 +535,7 @@ export default async function LetterDetailV3Page({ params }: PageProps) {
               className="gap-2 -ml-4 font-mono text-xs uppercase tracking-wider text-charcoal/60 hover:text-charcoal"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Letters
+              {t("detail.back")}
             </Button>
           </Link>
         </div>

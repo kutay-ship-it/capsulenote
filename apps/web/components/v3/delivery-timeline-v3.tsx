@@ -13,7 +13,7 @@ import {
   Info,
 } from "lucide-react"
 import { toast } from "sonner"
-import { useLocale } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 import { getDateFnsLocale } from "@/lib/date-formatting"
@@ -53,6 +53,7 @@ export function DeliveryTimelineV3({
   letterId,
   letterTitle,
 }: DeliveryTimelineV3Props) {
+  const t = useTranslations("deliveries")
   const locale = useLocale()
   const dateFnsLocale = getDateFnsLocale(locale)
   const [retryingId, setRetryingId] = React.useState<string | null>(null)
@@ -64,19 +65,19 @@ export function DeliveryTimelineV3({
       const result = await retryDelivery(deliveryId)
 
       if (!result.success) {
-        toast.error("Failed to retry delivery", {
-          description: result.error?.message || "Please try again.",
+        toast.error(t("timeline.toasts.retryFailed"), {
+          description: result.error?.message || t("timeline.toasts.unexpectedError"),
         })
         return
       }
 
-      toast.success("Delivery rescheduled", {
-        description: "The delivery will be attempted again.",
+      toast.success(t("timeline.toasts.retrySuccess"), {
+        description: t("timeline.toasts.retryDescription"),
       })
     } catch (error) {
       console.error("Failed to retry delivery:", error)
-      toast.error("Failed to retry delivery", {
-        description: "An unexpected error occurred.",
+      toast.error(t("timeline.toasts.retryFailed"), {
+        description: t("timeline.toasts.unexpectedError"),
       })
     } finally {
       setRetryingId(null)
@@ -89,7 +90,7 @@ export function DeliveryTimelineV3({
       style={{ borderRadius: "2px" }}
     >
       <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal mb-4">
-        Delivery Timeline
+        {t("timeline.title")}
       </h2>
 
       <div className="space-y-3">
@@ -147,7 +148,7 @@ export function DeliveryTimelineV3({
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
-                    {delivery.channel === "email" ? "Email" : "Mail"}
+                    {delivery.channel === "email" ? t("channel.email") : t("channel.mail")}
                   </span>
                   <span
                     className={cn(
@@ -160,7 +161,7 @@ export function DeliveryTimelineV3({
                     )}
                     style={{ borderRadius: "2px" }}
                   >
-                    {delivery.status}
+                    {t(`status.${delivery.status}`)}
                   </span>
                 </div>
 
@@ -180,11 +181,11 @@ export function DeliveryTimelineV3({
                   <div className="flex items-center gap-1.5 mt-1">
                     <Stamp className="h-3 w-3 text-coral" strokeWidth={2} />
                     <span className="font-mono text-[10px] text-coral uppercase tracking-wider">
-                      Content Sealed for Print
+                      {t("timeline.sealedForPrint")}
                     </span>
                     {delivery.mailDelivery.lobScheduleMode === "immediate" && delivery.mailDelivery.lobSendDate && (
                       <span className="font-mono text-[10px] text-charcoal/50">
-                        • Ships {format(new Date(delivery.mailDelivery.lobSendDate), "MMM d", { locale: dateFnsLocale })}
+                        • {t("timeline.ships", { date: format(new Date(delivery.mailDelivery.lobSendDate), "MMM d", { locale: dateFnsLocale }) })}
                       </span>
                     )}
                   </div>
@@ -222,7 +223,7 @@ export function DeliveryTimelineV3({
                       className="font-mono text-xs uppercase tracking-wider text-coral hover:text-coral hover:bg-coral/10"
                     >
                       <X className="h-4 w-4 mr-1" strokeWidth={2} />
-                      Cancel
+                      {t("timeline.actions.cancel")}
                     </Button>
                   </CancelDeliveryDialogV3>
                 )}
@@ -239,7 +240,7 @@ export function DeliveryTimelineV3({
                       style={{ borderRadius: "2px" }}
                     >
                       <Calendar className="h-4 w-4 mr-1" strokeWidth={2} />
-                      Reschedule
+                      {t("timeline.actions.reschedule")}
                     </Button>
                   </Link>
                 )}
@@ -261,7 +262,7 @@ export function DeliveryTimelineV3({
                       )}
                       strokeWidth={2}
                     />
-                    {retryingId === delivery.id ? "Retrying..." : "Retry"}
+                    {retryingId === delivery.id ? t("timeline.actions.retrying") : t("timeline.actions.retry")}
                   </Button>
                 )}
               </div>

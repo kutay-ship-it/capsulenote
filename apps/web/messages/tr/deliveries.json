@@ -19,5 +19,49 @@
   "labels": {
     "deliveryAt": "Teslim zamanı",
     "timezone": "Saat dilimi"
+  },
+  "timeline": {
+    "title": "Teslimat Zaman Çizelgesi",
+    "sealedForPrint": "İçerik Baskı için Mühürlendi",
+    "ships": "{date} tarihinde gönderilir",
+    "actions": {
+      "cancel": "İptal",
+      "reschedule": "Yeniden Planla",
+      "retry": "Tekrar Dene",
+      "retrying": "Deneniyor..."
+    },
+    "toasts": {
+      "retryFailed": "Teslimat tekrar denenemedi",
+      "retrySuccess": "Teslimat yeniden planlandı",
+      "retryDescription": "Teslimat tekrar denenecek.",
+      "unexpectedError": "Beklenmeyen bir hata oluştu."
+    }
+  },
+  "cancelDialog": {
+    "title": "Teslimatı İptal Et?",
+    "scheduledFor": "Planlandı:",
+    "lockWarning": {
+      "title": "Kredi İade EDİLMEYECEK",
+      "description": "Bu teslimat 72 saatlik kilitleme penceresi içinde ({time} kaldı). İptal ederseniz {creditType} krediniz kaybolacak.",
+      "lost": "kaybolacak"
+    },
+    "refundInfo": {
+      "title": "Kredi İade Edilecek",
+      "description": "Bu teslimatı iptal ettiğinizde {creditType} krediniz hesabınıza geri yüklenecek."
+    },
+    "explanation": "İptal etmek bu teslimatın gönderilmesini durduracak. Mektubun kendisi hesabınızda taslak olarak kalacak.",
+    "buttons": {
+      "keepScheduled": "Planı Koru",
+      "cancelAnyway": "Yine de İptal Et",
+      "cancelDelivery": "Teslimatı İptal Et",
+      "canceling": "İptal ediliyor..."
+    },
+    "toasts": {
+      "failed": "Teslimat iptal edilemedi",
+      "success": "Teslimat iptal edildi",
+      "refundedDescription": "{creditType} krediniz iade edildi.",
+      "canceledDescription": "Teslimat iptal edildi.",
+      "unexpectedError": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
+    }
   }
 }

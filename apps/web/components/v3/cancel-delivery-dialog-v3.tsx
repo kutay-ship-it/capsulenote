@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { AlertTriangle, Clock, CreditCard, X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations, useLocale } from "next-intl"
 
+import { getDateFnsLocale } from "@/lib/date-formatting"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +42,9 @@ export function CancelDeliveryDialogV3({
   children,
   onCanceled,
 }: CancelDeliveryDialogV3Props) {
+  const t = useTranslations("deliveries")
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -52,7 +57,7 @@ export function CancelDeliveryDialogV3({
   const daysUntilDelivery = Math.floor(hoursUntilDelivery / 24)
 
   // Credit type
-  const creditType = channel === "email" ? "email" : "physical mail"
+  const creditType = channel === "email" ? t("channel.email").toLowerCase() : t("channel.mail").toLowerCase()
   const willRefund = !isLocked
 
   const handleCancel = async () => {
@@ -62,18 +67,18 @@ export function CancelDeliveryDialogV3({
       const result = await cancelDelivery({ deliveryId })
 
       if (!result.success) {
-        toast.error("Failed to cancel delivery", {
-          description: result.error?.message || "Please try again.",
+        toast.error(t("cancelDialog.toasts.failed"), {
+          description: result.error?.message || t("cancelDialog.toasts.unexpectedError"),
         })
         setIsLoading(false)
         return
       }
 
       // Success
-      toast.success("Delivery canceled", {
+      toast.success(t("cancelDialog.toasts.success"), {
         description: willRefund
-          ? `Your ${creditType} credit has been refunded.`
-          : "The delivery has been canceled.",
+          ? t("cancelDialog.toasts.refundedDescription", { creditType })
+          : t("cancelDialog.toasts.canceledDescription"),
       })
 
       setOpen(false)
@@ -81,8 +86,8 @@ export function CancelDeliveryDialogV3({
       router.refresh()
     } catch (error) {
       console.error("Failed to cancel delivery:", error)
-      toast.error("Failed to cancel delivery", {
-        description: "An unexpected error occurred. Please try again.",
+      toast.error(t("cancelDialog.toasts.failed"), {
+        description: t("cancelDialog.toasts.unexpectedError"),
       })
       setIsLoading(false)
     }
@@ -116,7 +121,7 @@ export function CancelDeliveryDialogV3({
             </div>
             <div className="flex-1">
               <AlertDialogTitle className="font-mono text-lg font-bold uppercase tracking-wide text-charcoal">
-                Cancel Delivery?
+                {t("cancelDialog.title")}
               </AlertDialogTitle>
               <AlertDialogDescription className="mt-1 font-mono text-xs text-charcoal/60">
                 &ldquo;{letterTitle}&rdquo;
@@ -134,9 +139,9 @@ export function CancelDeliveryDialogV3({
           >
             <Clock className="h-4 w-4 text-charcoal/50" strokeWidth={2} />
             <div className="font-mono text-xs">
-              <span className="text-charcoal/60">Scheduled for </span>
+              <span className="text-charcoal/60">{t("cancelDialog.scheduledFor")} </span>
               <span className="font-bold text-charcoal">
-                {format(deliveryDate, "MMMM d, yyyy 'at' h:mm a")}
+                {format(deliveryDate, "PPP 'at' p", { locale: dateFnsLocale })}
               </span>
             </div>
           </div>
@@ -154,16 +159,21 @@ export function CancelDeliveryDialogV3({
                 />
                 <div className="space-y-2">
                   <p className="font-mono text-xs font-bold uppercase tracking-wider text-coral">
-                    Credit Will NOT Be Refunded
+                    {t("cancelDialog.lockWarning.title")}
                   </p>
                   <p className="font-mono text-xs text-charcoal/70">
-                    This delivery is within the 72-hour lock window (
-                    {hoursUntilDelivery < 24
-                      ? `${hoursUntilDelivery} hours`
-                      : `${daysUntilDelivery} days`}{" "}
-                    remaining). Your {creditType} credit will be{" "}
-                    <span className="font-bold text-coral">lost</span> if you
-                    cancel.
+                    {t("cancelDialog.lockWarning.description", {
+                      time: hoursUntilDelivery < 24
+                        ? `${hoursUntilDelivery} hours`
+                        : `${daysUntilDelivery} days`,
+                      creditType
+                    }).split(t("cancelDialog.lockWarning.lost")).map((part, i, arr) =>
+                      i === arr.length - 1 ? part : (
+                        <React.Fragment key={i}>
+                          {part}<span className="font-bold text-coral">{t("cancelDialog.lockWarning.lost")}</span>
+                        </React.Fragment>
+                      )
+                    )}
                   </p>
                 </div>
               </div>
@@ -180,11 +190,10 @@ export function CancelDeliveryDialogV3({
                 />
                 <div className="space-y-2">
                   <p className="font-mono text-xs font-bold uppercase tracking-wider text-teal-primary">
-                    Credit Will Be Refunded
+                    {t("cancelDialog.refundInfo.title")}
                   </p>
                   <p className="font-mono text-xs text-charcoal/70">
-                    Your {creditType} credit will be returned to your account
-                    when you cancel this delivery.
+                    {t("cancelDialog.refundInfo.description", { creditType })}
                   </p>
                 </div>
               </div>
@@ -193,8 +202,7 @@ export function CancelDeliveryDialogV3({
 
           {/* Additional context */}
           <p className="font-mono text-[10px] text-charcoal/50 leading-relaxed">
-            Canceling will stop this delivery from being sent. The letter itself
-            will remain in your account as a draft.
+            {t("cancelDialog.explanation")}
           </p>
         </div>
 
@@ -205,7 +213,7 @@ export function CancelDeliveryDialogV3({
             style={{ borderRadius: "2px" }}
             disabled={isLoading}
           >
-            Keep Scheduled
+            {t("cancelDialog.buttons.keepScheduled")}
           </AlertDialogCancel>
           <Button
             onClick={handleCancel}
@@ -221,12 +229,12 @@ export function CancelDeliveryDialogV3({
             {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Canceling...
+                {t("cancelDialog.buttons.canceling")}
               </>
             ) : isLocked ? (
-              "Cancel Anyway"
+              t("cancelDialog.buttons.cancelAnyway")
             ) : (
-              "Cancel Delivery"
+              t("cancelDialog.buttons.cancelDelivery")
             )}
           </Button>
         </AlertDialogFooter>
