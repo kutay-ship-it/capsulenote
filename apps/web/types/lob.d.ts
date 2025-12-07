@@ -45,9 +45,85 @@ declare module "lob" {
     }
   }
 
+  /**
+   * Parameters for creating a Lob address object
+   * @see https://docs.lob.com/#tag/Addresses/operation/address_create
+   */
+  interface AddressCreateParams {
+    /** Recipient or company name. Max 40 characters for US, 50 for international */
+    name: string
+    /** Primary address line. Max 64 characters */
+    address_line1: string
+    /** Secondary address line (apt, suite, etc). Max 64 characters */
+    address_line2?: string
+    /** City name */
+    address_city: string
+    /** State/province/region */
+    address_state: string
+    /** Postal/ZIP code */
+    address_zip: string
+    /** 2-letter ISO country code (e.g., "US", "TR") */
+    address_country: string
+    /** Optional description for the address */
+    description?: string
+    /** Company name if applicable */
+    company?: string
+    /** Email for notifications */
+    email?: string
+    /** Phone number */
+    phone?: string
+    /** Custom metadata (max 20 keys, 500 char values) */
+    metadata?: Record<string, string>
+  }
+
+  /**
+   * A Lob address object returned from the API
+   * @see https://docs.lob.com/#tag/Addresses
+   */
+  interface LobAddressObject {
+    /** Unique identifier starting with "adr_" */
+    id: string
+    /** Always "address" */
+    object: "address"
+    /** Description of the address */
+    description?: string
+    /** Recipient name */
+    name: string
+    /** Company name */
+    company?: string
+    /** Phone number */
+    phone?: string
+    /** Email address */
+    email?: string
+    /** Primary address line (normalized by Lob) */
+    address_line1: string
+    /** Secondary address line */
+    address_line2?: string
+    /** City (normalized) */
+    address_city: string
+    /** State (normalized) */
+    address_state: string
+    /** ZIP/postal code (normalized) */
+    address_zip: string
+    /** Country code */
+    address_country: string
+    /** Custom metadata */
+    metadata?: Record<string, string>
+    /** ISO 8601 timestamp of creation */
+    date_created: string
+    /** ISO 8601 timestamp of last modification */
+    date_modified: string
+    /** Whether the address has been deleted */
+    deleted?: boolean
+    /** Recipient type for compliance */
+    recipient_moved?: boolean
+  }
+
   interface LetterCreateParams {
-    to: Address
-    from?: Address
+    /** Recipient address - can be inline Address object OR Lob address ID (adr_xxx) */
+    to: Address | string
+    /** Sender address - can be inline Address object OR Lob address ID (adr_xxx) */
+    from?: Address | string
     file?: string
     template_id?: string
     template_version_id?: string
@@ -97,7 +173,26 @@ declare module "lob" {
   }
 
   interface Addresses {
+    /** Verify a US address */
     verify(address: Partial<Address>): Promise<AddressVerifyResult>
+    /** Create a new address object in Lob */
+    create(params: AddressCreateParams): Promise<LobAddressObject>
+    /** Retrieve an existing address by ID */
+    retrieve(id: string): Promise<LobAddressObject>
+    /** Delete an address (soft delete) */
+    delete(id: string): Promise<{ id: string; deleted: boolean }>
+    /** List all addresses with pagination */
+    list(params?: {
+      limit?: number
+      offset?: number
+      include?: string[]
+      date_created?: { gt?: string; gte?: string; lt?: string; lte?: string }
+      metadata?: Record<string, string>
+    }): Promise<{
+      data: LobAddressObject[]
+      count: number
+      object: "list"
+    }>
   }
 
   interface UsVerificationParams {

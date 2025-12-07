@@ -18,12 +18,19 @@ import {
   MapPin,
   Printer,
   FileEdit,
+  FileText,
+  AlertTriangle,
   X,
 } from "lucide-react"
 import { toast } from "sonner"
 import { fromZonedTime } from "date-fns-tz"
 
 import { cn } from "@/lib/utils"
+import {
+  estimatePageCount,
+  getPageStatus,
+  CONTENT_PAGE_LIMIT,
+} from "@/lib/page-estimation"
 import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
 import { useLetterAutosave } from "@/hooks/use-letter-autosave"
 import { useDraftRestoration, emptyFormState } from "@/hooks/use-draft-restoration"
@@ -330,6 +337,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const wordCount = plainText ? plainText.split(/\s+/).length : 0
   const characterCount = plainText.length
 
+  // Page estimation for Lob 6-page limit (template uses 2 fixed pages, leaving 4 for content)
+  const estimatedPages = estimatePageCount(plainText)
+  const pageStatus = getPageStatus(estimatedPages)
+
   // Track if form has unsaved changes (for navigate-away warning)
   const hasUnsavedChanges = React.useMemo(() => {
     return title.trim() !== "" || plainText !== ""
@@ -513,6 +524,8 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
 
     if (!plainText) {
       newErrors.bodyHtml = t("validation.contentRequired")
+    } else if (estimatedPages > CONTENT_PAGE_LIMIT) {
+      newErrors.bodyHtml = `Your letter is approximately ${estimatedPages} pages, but physical mail is limited to ${CONTENT_PAGE_LIMIT} pages of content. Please shorten your letter.`
     }
 
     // Validate recipient name for "someone else"
@@ -753,9 +766,25 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                 <label className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
                   {t("messageLabel")}
                 </label>
-                <div className="flex gap-3 font-mono text-[10px] text-charcoal/50 uppercase tracking-wider">
+                <div className="flex items-center gap-3 font-mono text-[10px] text-charcoal/50 uppercase tracking-wider">
                   <span>{wordCount} {t("words")}</span>
                   <span>{characterCount} {t("chars")}</span>
+                  <span className="text-charcoal/20">|</span>
+                  <span
+                    className={cn(
+                      "flex items-center gap-1",
+                      pageStatus === "safe" && "text-green-600",
+                      pageStatus === "warning" && "text-yellow-600",
+                      pageStatus === "danger" && "text-orange-500",
+                      pageStatus === "exceeded" && "text-coral font-medium"
+                    )}
+                  >
+                    <FileText className="h-3 w-3" />
+                    ~{estimatedPages}/{CONTENT_PAGE_LIMIT} pages
+                    {pageStatus === "exceeded" && (
+                      <AlertTriangle className="h-3 w-3 ml-0.5" />
+                    )}
+                  </span>
                 </div>
               </div>
               <div className="flex-1 flex flex-col min-h-0">

@@ -44,10 +44,22 @@ async function decryptLetter(
  * Get Lob mail provider (V3 branded template)
  */
 async function getMailProvider() {
-  const { sendTemplatedLetter, isLobConfigured } = await import(
-    "../../../apps/web/server/providers/lob"
-  )
-  return { sendTemplatedLetter, isLobConfigured }
+  const {
+    sendTemplatedLetter,
+    isLobConfigured,
+    createLobAddress,
+    validateAddressForLob,
+    normalizeAddressForLob,
+    LOB_ADDRESS_LIMITS,
+  } = await import("../../../apps/web/server/providers/lob")
+  return {
+    sendTemplatedLetter,
+    isLobConfigured,
+    createLobAddress,
+    validateAddressForLob,
+    normalizeAddressForLob,
+    LOB_ADDRESS_LIMITS,
+  }
 }
 
 /**
@@ -614,10 +626,116 @@ export const deliverMail = inngest.createFunction(
       }
     })
 
+    // Create Lob address object first (avoids inline address formatting issues)
+    // This is especially important for international addresses where Lob's normalization
+    // can cause duplication when combined address lines exceed 50 characters
+    const lobAddressResult = await step.run("create-lob-address", async () => {
+      const mailDelivery = delivery.mailDelivery!
+      const address = mailDelivery.shippingAddress!
+
+      const { createLobAddress, validateAddressForLob, normalizeAddressForLob, LOB_ADDRESS_LIMITS } =
+        await getMailProvider()
+
+      // Build mailing address object
+      const rawMailingAddress = {
+        name: address.name,
+        line1: address.line1,
+        line2: address.line2 || undefined,
+        city: address.city,
+        state: address.state,
+        postalCode: address.postalCode,
+        country: address.country,
+      }
+
+      // Normalize address for Lob (fixes Turkish address field mapping issues)
+      // This extracts district from line2 and moves it to city field for proper formatting
+      const normalization = normalizeAddressForLob(rawMailingAddress)
+      const mailingAddress = normalization.address
+
+      if (normalization.wasNormalized) {
+        logger.info("Address normalized for Lob", {
+          deliveryId,
+          changes: normalization.changes,
+          original: {
+            line2: rawMailingAddress.line2,
+            city: rawMailingAddress.city,
+            state: rawMailingAddress.state,
+          },
+          normalized: {
+            line2: mailingAddress.line2,
+            city: mailingAddress.city,
+            state: mailingAddress.state,
+          },
+        })
+      }
+
+      // Validate address before sending to Lob
+      const validation = validateAddressForLob(mailingAddress)
+
+      logger.info("Address validation result", {
+        deliveryId,
+        isValid: validation.isValid,
+        errors: validation.errors,
+        warnings: validation.warnings,
+        combinedAddressLength:
+          (mailingAddress.line1?.length || 0) +
+          (mailingAddress.line2?.length || 0),
+        legacyLimit: LOB_ADDRESS_LIMITS.COMBINED_ADDRESS_LINES_LEGACY,
+        wasNormalized: normalization.wasNormalized,
+      })
+
+      if (!validation.isValid) {
+        throw new NonRetriableError(
+          `Invalid address: ${validation.errors.join("; ")}`
+        )
+      }
+
+      try {
+        // Create Lob address object - this normalizes the address and returns an ID
+        const lobAddress = await createLobAddress(mailingAddress, {
+          description: `Capsule Note delivery ${deliveryId}`,
+          metadata: {
+            delivery_id: deliveryId,
+            letter_id: delivery.letterId,
+          },
+        })
+
+        logger.info("Lob address created successfully", {
+          deliveryId,
+          lobAddressId: lobAddress.id,
+          normalizedCity: lobAddress.normalized.city,
+          normalizedCountry: lobAddress.normalized.country,
+          addressWasNormalized: normalization.wasNormalized,
+        })
+
+        return {
+          id: lobAddress.id,
+          recipientName: address.name,
+        }
+      } catch (error) {
+        logger.error("Failed to create Lob address", {
+          deliveryId,
+          error: error instanceof Error ? error.message : String(error),
+          address: {
+            name: address.name,
+            city: mailingAddress.city,
+            country: address.country,
+          },
+          wasNormalized: normalization.wasNormalized,
+        })
+
+        const classified = classifyProviderError(error)
+        if (!classified.retryable) {
+          throw new NonRetriableError(classified.message)
+        }
+
+        throw classified
+      }
+    })
+
     // Send physical mail via Lob (V3 branded 2-page template) - Deferred mode
     const sendResult = await step.run("send-mail-deferred", async () => {
       const mailDelivery = delivery.mailDelivery!
-      const address = mailDelivery.shippingAddress!
       const printOptions =
         (mailDelivery.printOptions as { color?: boolean; doubleSided?: boolean }) ||
         {}
@@ -626,10 +744,8 @@ export const deliverMail = inngest.createFunction(
 
       logger.info("Deferred mode: Sending physical mail with V3 template", {
         deliveryId,
-        recipientName: address.name,
-        city: address.city,
-        state: address.state,
-        country: address.country,
+        lobAddressId: lobAddressResult.id,
+        recipientName: lobAddressResult.recipientName,
         color: printOptions.color,
         doubleSided: printOptions.doubleSided,
         usingSealedTitle: !!mailDelivery.sealedTitle,
@@ -650,24 +766,18 @@ export const deliverMail = inngest.createFunction(
           deliveryId,
           idempotencyKey,
           attempt,
+          usingAddressId: true,
         })
 
         // Use V3 branded 2-page template (cover page + letter content)
+        // Pass Lob address ID instead of inline address to avoid formatting issues
         const result = await sendTemplatedLetter({
-          to: {
-            name: address.name,
-            line1: address.line1,
-            line2: address.line2 || undefined,
-            city: address.city,
-            state: address.state,
-            postalCode: address.postalCode,
-            country: address.country,
-          },
+          to: lobAddressResult.id, // Use Lob address ID (adr_xxx) instead of inline address
           letterContent: decryptedContent.bodyHtml,
           writtenDate: new Date(delivery.letter.createdAt),
           deliveryDate: new Date(),
           letterTitle,
-          recipientName: address.name,
+          recipientName: lobAddressResult.recipientName,
           color: printOptions.color ?? false,
           doubleSided: printOptions.doubleSided ?? false,
           description: `Capsule Note: ${letterTitle}`,
@@ -678,6 +788,7 @@ export const deliverMail = inngest.createFunction(
         logger.info("Physical mail sent successfully with V3 template", {
           deliveryId,
           lobJobId: result.id,
+          lobAddressId: lobAddressResult.id,
           expectedDeliveryDate: result.expectedDeliveryDate,
           carrier: result.carrier,
         })

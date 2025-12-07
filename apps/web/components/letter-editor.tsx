@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import {
   estimatePageCount,
   getPageStatus,
+  MAX_CONTENT_CHARS,
   type PageStatus,
 } from "@/lib/page-estimation"
 
@@ -47,7 +48,9 @@ export function LetterEditor({
       Placeholder.configure({
         placeholder: placeholder || "Write your letter to your future self...",
       }),
-      CharacterCount,
+      CharacterCount.configure({
+        limit: 8000, // Hard limit for editor (leaves buffer below Lob's 10k limit)
+      }),
       Link.configure({
         openOnClick: false,
       }),
