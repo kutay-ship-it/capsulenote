@@ -18,7 +18,8 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
+import { getDateFnsLocale } from "@/lib/date-formatting"
 import type { DeliveryChannel } from "./channel-selector-v3"
 import type { PrintOptions, MailDeliveryMode } from "./mail-config-v3"
 import type { ShippingAddress } from "@/server/actions/addresses"
@@ -69,6 +70,8 @@ export function ScheduleSummaryV3({
   disabled = false,
 }: ScheduleSummaryV3Props) {
   const t = useTranslations("schedule.summary")
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
   const hasEmail = channels.includes("email")
   const hasMail = channels.includes("mail")
   const isBoth = hasEmail && hasMail
@@ -147,7 +150,7 @@ export function ScheduleSummaryV3({
                 {t("deliveryDate")}
               </p>
               <p className="font-mono text-xs font-bold text-charcoal">
-                {format(deliveryDate, "EEEE, MMMM d, yyyy")}
+                {format(deliveryDate, "EEEE, MMMM d, yyyy", { locale: dateFnsLocale })}
               </p>
               <p className="font-mono text-[10px] text-duck-blue font-bold">
                 at {formatTimeDisplay(deliveryTime)} • {daysFromNow === 1 ? t("tomorrow") : t("daysFromNow", { count: daysFromNow })}
@@ -272,7 +275,7 @@ export function ScheduleSummaryV3({
                 {t("lockDate")}
               </p>
               <p className="font-mono text-xs font-bold text-charcoal">
-                {format(lockDate, "MMMM d, yyyy")}
+                {format(lockDate, "PPP", { locale: dateFnsLocale })}
               </p>
               <p className="font-mono text-[10px] text-charcoal/60">
                 {t("noEditsAfter")}

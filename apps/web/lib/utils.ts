@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { getIntlLocale } from "./date-formatting"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,18 +17,18 @@ export function typedHref<T extends string>(path: T): T {
   return path
 }
 
-export function formatDate(date: Date | string): string {
+export function formatDate(date: Date | string, locale: string = "en"): string {
   const d = typeof date === "string" ? new Date(date) : date
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     month: "long",
     day: "numeric",
     year: "numeric",
   }).format(d)
 }
 
-export function formatDateTime(date: Date | string): string {
+export function formatDateTime(date: Date | string, locale: string = "en"): string {
   const d = typeof date === "string" ? new Date(date) : date
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(getIntlLocale(locale), {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -40,11 +41,12 @@ export function formatDateTime(date: Date | string): string {
  * Format date and time with timezone abbreviation
  * Example: "January 15, 2026 at 9:00 AM PST"
  */
-export function formatDateTimeWithTimezone(date: Date | string): string {
+export function formatDateTimeWithTimezone(date: Date | string, locale: string = "en"): string {
   const d = typeof date === "string" ? new Date(date) : date
+  const intlLocale = getIntlLocale(locale)
 
   // Format date and time
-  const dateTimeStr = new Intl.DateTimeFormat("en-US", {
+  const dateTimeStr = new Intl.DateTimeFormat(intlLocale, {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -54,7 +56,7 @@ export function formatDateTimeWithTimezone(date: Date | string): string {
   }).format(d)
 
   // Get timezone abbreviation
-  const timezoneParts = new Intl.DateTimeFormat("en-US", {
+  const timezoneParts = new Intl.DateTimeFormat(intlLocale, {
     timeZoneName: "short",
   }).formatToParts(d)
   const timezoneName = timezoneParts.find(part => part.type === "timeZoneName")?.value || ""
@@ -83,9 +85,9 @@ export function getUserTimezone(): string {
  * Get timezone abbreviation for a given date
  * Example: "PST" or "PDT" depending on DST
  */
-export function getTimezoneAbbr(date: Date | string = new Date()): string {
+export function getTimezoneAbbr(date: Date | string = new Date(), locale: string = "en"): string {
   const d = typeof date === "string" ? new Date(date) : date
-  const timezoneParts = new Intl.DateTimeFormat("en-US", {
+  const timezoneParts = new Intl.DateTimeFormat(getIntlLocale(locale), {
     timeZoneName: "short",
   }).formatToParts(d)
   return timezoneParts.find(part => part.type === "timeZoneName")?.value || ""

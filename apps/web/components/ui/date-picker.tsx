@@ -3,6 +3,7 @@
 import * as React from "react"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
+import { useLocale } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -11,6 +12,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { getDateFnsLocale } from "@/lib/date-formatting"
 
 interface DatePickerProps {
   date?: Date
@@ -27,6 +29,8 @@ export function DatePicker({
   disabled = false,
   minDate,
 }: DatePickerProps) {
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
   const [open, setOpen] = React.useState(false)
 
   const handleSelect = (selectedDate: Date | undefined) => {
@@ -49,7 +53,7 @@ export function DatePicker({
           )}
         >
           <CalendarIcon className="mr-3 h-5 w-5" />
-          {date ? format(date, "PPP") : <span>{placeholder}</span>}
+          {date ? format(date, "PPP", { locale: dateFnsLocale }) : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -72,6 +76,7 @@ export function DatePicker({
           }}
           initialFocus
           className="font-mono"
+          appLocale={locale}
         />
       </PopoverContent>
     </Popover>

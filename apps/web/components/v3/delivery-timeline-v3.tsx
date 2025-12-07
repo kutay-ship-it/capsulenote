@@ -13,8 +13,10 @@ import {
   Info,
 } from "lucide-react"
 import { toast } from "sonner"
+import { useLocale } from "next-intl"
 
 import { Link } from "@/i18n/routing"
+import { getDateFnsLocale } from "@/lib/date-formatting"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { CancelDeliveryDialogV3 } from "./cancel-delivery-dialog-v3"
@@ -51,6 +53,8 @@ export function DeliveryTimelineV3({
   letterId,
   letterTitle,
 }: DeliveryTimelineV3Props) {
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
   const [retryingId, setRetryingId] = React.useState<string | null>(null)
 
   const handleRetry = async (deliveryId: string) => {
@@ -92,7 +96,8 @@ export function DeliveryTimelineV3({
         {deliveries.map((delivery) => {
           const deliveryDate = format(
             new Date(delivery.deliverAt),
-            "MMMM d, yyyy 'at' h:mm a"
+            "PPP 'at' p",
+            { locale: dateFnsLocale }
           )
           const isDelivered = delivery.status === "sent"
           const isFailed = delivery.status === "failed"
@@ -179,7 +184,7 @@ export function DeliveryTimelineV3({
                     </span>
                     {delivery.mailDelivery.lobScheduleMode === "immediate" && delivery.mailDelivery.lobSendDate && (
                       <span className="font-mono text-[10px] text-charcoal/50">
-                        • Ships {format(new Date(delivery.mailDelivery.lobSendDate), "MMM d")}
+                        • Ships {format(new Date(delivery.mailDelivery.lobSendDate), "MMM d", { locale: dateFnsLocale })}
                       </span>
                     )}
                   </div>

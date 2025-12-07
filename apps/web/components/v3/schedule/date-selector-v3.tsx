@@ -4,8 +4,9 @@ import * as React from "react"
 import { format, addMonths, addYears, setMonth, setDate } from "date-fns"
 import { Calendar as CalendarIcon, Gift, Sparkles, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import { Calendar } from "@/components/ui/calendar"
+import { getDateFnsLocale } from "@/lib/date-formatting"
 import {
   Popover,
   PopoverContent,
@@ -57,6 +58,8 @@ export function DateSelectorV3({
   disabled = false,
 }: DateSelectorV3Props) {
   const t = useTranslations("schedule.dateSelector")
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
   const [calendarOpen, setCalendarOpen] = React.useState(false)
   const today = new Date()
 
@@ -65,26 +68,26 @@ export function DateSelectorV3({
     {
       id: "6months",
       label: t("presets.6months"),
-      sublabel: format(addMonths(today, 6), "MMM yyyy"),
+      sublabel: format(addMonths(today, 6), "MMM yyyy", { locale: dateFnsLocale }),
       date: addMonths(today, 6),
     },
     {
       id: "1year",
       label: t("presets.1year"),
-      sublabel: format(addYears(today, 1), "MMM yyyy"),
+      sublabel: format(addYears(today, 1), "MMM yyyy", { locale: dateFnsLocale }),
       date: addYears(today, 1),
       featured: true,
     },
     {
       id: "3years",
       label: t("presets.3years"),
-      sublabel: format(addYears(today, 3), "MMM yyyy"),
+      sublabel: format(addYears(today, 3), "MMM yyyy", { locale: dateFnsLocale }),
       date: addYears(today, 3),
     },
     {
       id: "5years",
       label: t("presets.5years"),
-      sublabel: format(addYears(today, 5), "MMM yyyy"),
+      sublabel: format(addYears(today, 5), "MMM yyyy", { locale: dateFnsLocale }),
       date: addYears(today, 5),
     },
   ]
@@ -95,7 +98,7 @@ export function DateSelectorV3({
           {
             id: "birthday",
             label: t("presets.nextBirthday"),
-            sublabel: format(calculateNextBirthday(userBirthday), "MMM d, yyyy"),
+            sublabel: format(calculateNextBirthday(userBirthday), "MMM d, yyyy", { locale: dateFnsLocale }),
             date: calculateNextBirthday(userBirthday),
             icon: <Gift className="h-4 w-4" strokeWidth={2} />,
           },
@@ -104,14 +107,14 @@ export function DateSelectorV3({
     {
       id: "newyear",
       label: t("presets.newYear"),
-      sublabel: format(calculateNextNewYear(), "MMM d, yyyy"),
+      sublabel: format(calculateNextNewYear(), "MMM d, yyyy", { locale: dateFnsLocale }),
       date: calculateNextNewYear(),
       icon: <Sparkles className="h-4 w-4" strokeWidth={2} />,
     },
     {
       id: "10years",
       label: t("presets.10years"),
-      sublabel: format(addYears(today, 10), "MMM yyyy"),
+      sublabel: format(addYears(today, 10), "MMM yyyy", { locale: dateFnsLocale }),
       date: addYears(today, 10),
       icon: <Clock className="h-4 w-4" strokeWidth={2} />,
     },
@@ -292,6 +295,7 @@ export function DateSelectorV3({
               }}
               initialFocus
               className="font-mono"
+              appLocale={locale}
             />
           </PopoverContent>
         </Popover>

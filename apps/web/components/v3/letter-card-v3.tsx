@@ -3,10 +3,11 @@
 import React from "react"
 import { format, differenceInDays } from "date-fns"
 import { Mail, Clock, FileEdit, AlertCircle, ArrowRight, Lock } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
+import { getDateFnsLocale } from "@/lib/date-formatting"
 import type { LetterWithPreview } from "@/server/actions/redesign-dashboard"
 
 export type ViewMode = "grid" | "list"
@@ -93,6 +94,8 @@ export const LetterCardV3 = React.memo(function LetterCardV3({
   viewMode = "grid",
 }: LetterCardV3Props) {
   const t = useTranslations("letters")
+  const locale = useLocale()
+  const dateFnsLocale = getDateFnsLocale(locale)
 
   // Memoize status config to avoid recalculation on every render
   const statusConfig = React.useMemo(
@@ -100,7 +103,7 @@ export const LetterCardV3 = React.memo(function LetterCardV3({
     [letter.delivery?.status, letter.delivery?.deliverAt, t]
   )
 
-  const formattedDate = format(new Date(letter.createdAt), "MMM d, yyyy")
+  const formattedDate = format(new Date(letter.createdAt), "MMM d, yyyy", { locale: dateFnsLocale })
   const isSent = letter.delivery?.status === "sent"
   const untitledText = t("card.untitled")
   const noContentText = t("card.noContent")
