@@ -34,12 +34,13 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now()
 
   try {
-    // Find stuck webhook events (CLAIMED but not COMPLETED for >5 minutes)
     const stuckThreshold = new Date(Date.now() - STUCK_THRESHOLD_MINUTES * 60 * 1000)
 
+    // Find stuck webhook events (CLAIMED or PROCESSING but not completed for >5 minutes)
+    // PROCESSING events can get stuck if the handler crashes mid-execution
     const stuckEvents = await prisma.webhookEvent.findMany({
       where: {
-        status: "CLAIMED",
+        status: { in: ["CLAIMED", "PROCESSING"] },
         claimedAt: { lt: stuckThreshold },
         retryCount: { lt: MAX_RETRIES },
       },
@@ -83,15 +84,16 @@ export async function GET(request: NextRequest) {
     const results: Array<{ eventId: string; status: string; inngestEventId?: string }> = []
 
     for (const event of stuckEvents) {
-      // Atomically increment retry count (optimistic locking)
+      // Atomically increment retry count and reset status to CLAIMED for retry (optimistic locking)
       const updated = await prisma.webhookEvent.updateMany({
         where: {
           id: event.id,
-          status: "CLAIMED",
+          status: { in: ["CLAIMED", "PROCESSING"] },
           retryCount: event.retryCount, // Optimistic lock - prevents race condition
         },
         data: {
           retryCount: { increment: 1 },
+          status: "CLAIMED", // Reset to CLAIMED for retry
         },
       })
 
@@ -156,10 +158,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Mark events that exceeded retry limit as FAILED
+    // Mark events that exceeded retry limit as FAILED (includes stuck PROCESSING events)
     const failedCount = await prisma.webhookEvent.updateMany({
       where: {
-        status: "CLAIMED",
+        status: { in: ["CLAIMED", "PROCESSING"] },
         retryCount: { gte: MAX_RETRIES },
       },
       data: {

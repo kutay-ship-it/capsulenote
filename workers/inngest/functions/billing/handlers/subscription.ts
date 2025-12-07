@@ -25,6 +25,7 @@ import {
   PLAN_CREDITS,
   getSubscriptionPeriodDates,
   getPlanFromPriceId,
+  comparePlans,
 } from "../../../../../apps/web/server/lib/billing-constants"
 
 /**
@@ -67,6 +68,11 @@ export async function handleSubscriptionCreatedOrUpdated(
     subscriptionId: subscription.id,
     customerId,
     status: subscription.status,
+    items: subscription.items?.data?.map((item) => ({
+      priceId: item.price?.id,
+      productId: item.price?.product,
+      metadata: item.price?.metadata,
+    })),
   })
 
   // Find user; fallback to pending subscription/email mapping if customer lookup fails
@@ -159,6 +165,13 @@ export async function handleSubscriptionCreatedOrUpdated(
     normalizedStatus,
   })
 
+  // IMPORTANT: Check existing subscription BEFORE upsert to detect plan upgrades
+  // If we query after upsert, we always get the new plan, so isUpgrade would be false
+  const existingSubscriptionBeforeUpsert = await prisma.subscription.findUnique({
+    where: { stripeSubscriptionId: subscription.id },
+    select: { plan: true },
+  })
+
   // Upsert subscription
   await prisma.subscription.upsert({
     where: { stripeSubscriptionId: subscription.id },
@@ -185,124 +198,168 @@ export async function handleSubscriptionCreatedOrUpdated(
   if (subscription.status === "active" || subscription.status === "trialing") {
     await createUsageRecord(user.id, safePeriodStart, PLAN_CREDITS[plan]?.physical ?? 0)
 
-    // Check if this is a mid-cycle plan upgrade (existing subscription with different plan)
-    const existingSubscription = await prisma.subscription.findUnique({
-      where: { stripeSubscriptionId: subscription.id },
-      select: { plan: true },
-    })
-
-    const isUpgrade = existingSubscription && existingSubscription.plan !== plan
-
-    // Get current credits
-    const currentUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { emailAddonCredits: true, physicalAddonCredits: true, emailCredits: true, physicalCredits: true },
-    })
+    // Detect plan change type using proper comparison
+    // Uses existingSubscriptionBeforeUpsert from BEFORE the upsert (queried on line 169)
+    const previousPlan = existingSubscriptionBeforeUpsert?.plan ?? null
+    const planChangeType = comparePlans(previousPlan, plan)
+    const isUpgrade = planChangeType === "upgrade"
+    const isDowngrade = planChangeType === "downgrade"
 
     const planEmailCredits = PLAN_CREDITS[plan]?.email ?? 0
     const planPhysicalCredits = PLAN_CREDITS[plan]?.physical ?? 0
-    const addonEmail = currentUser?.emailAddonCredits ?? 0
-    const addonPhysical = currentUser?.physicalAddonCredits ?? 0
-    const currentEmailCredits = currentUser?.emailCredits ?? 0
-    const currentPhysicalCredits = currentUser?.physicalCredits ?? 0
 
-    let newEmailTotal: number
-    let newPhysicalTotal: number
+    // Generate unique source base for idempotency:
+    // - Upgrades: "{subscriptionId}:upgrade:{fromPlan}:{toPlan}" (one transaction per upgrade transition)
+    // - Downgrades: "{subscriptionId}:downgrade:{fromPlan}:{toPlan}" (one transaction per downgrade transition)
+    // - Renewals: "{subscriptionId}:{periodStart}" (one transaction per billing period)
+    // The credit type is appended to make email and physical transactions unique
+    const transactionSourceBase = isUpgrade
+      ? `${subscription.id}:upgrade:${previousPlan}:${plan}`
+      : isDowngrade
+        ? `${subscription.id}:downgrade:${previousPlan}:${plan}`
+        : `${subscription.id}:${safePeriodStart.toISOString()}`
 
-    if (isUpgrade) {
-      // Upgrade: Add new plan credits to existing credits
-      // Example: User has 6 email + 1 physical, upgrades to Paper & Pixels (24 email, 3 physical)
-      // Result: 6 + 24 = 30 email, 1 + 3 = 4 physical
-      newEmailTotal = currentEmailCredits + planEmailCredits
-      newPhysicalTotal = currentPhysicalCredits + planPhysicalCredits
-      console.log("[Subscription Handler] Plan upgrade detected - stacking credits", {
+    // ATOMIC TRANSACTION: All credit operations must succeed or fail together
+    // This prevents inconsistent state where credit transaction is recorded but user balance not updated
+    await prisma.$transaction(async (tx) => {
+      // Get current credits within transaction for consistency
+      const currentUser = await tx.user.findUnique({
+        where: { id: user.id },
+        select: { emailAddonCredits: true, physicalAddonCredits: true, emailCredits: true, physicalCredits: true },
+      })
+
+      if (!currentUser) {
+        throw new Error(`User not found during credit grant: ${user.id}`)
+      }
+
+      const addonEmail = currentUser.emailAddonCredits ?? 0
+      const addonPhysical = currentUser.physicalAddonCredits ?? 0
+      const currentEmailCredits = currentUser.emailCredits ?? 0
+      const currentPhysicalCredits = currentUser.physicalCredits ?? 0
+
+      let newEmailTotal: number
+      let newPhysicalTotal: number
+
+      if (isUpgrade) {
+        // Upgrade: Add new plan credits to existing credits (reward loyalty)
+        // Example: User has 6 email + 1 physical, upgrades to Paper & Pixels (24 email, 3 physical)
+        // Result: 6 + 24 = 30 email, 1 + 3 = 4 physical
+        newEmailTotal = currentEmailCredits + planEmailCredits
+        newPhysicalTotal = currentPhysicalCredits + planPhysicalCredits
+        console.log("[Subscription Handler] Plan UPGRADE detected - stacking credits", {
+          subscriptionId: subscription.id,
+          previousPlan,
+          newPlan: plan,
+          currentEmailCredits,
+          currentPhysicalCredits,
+          planEmailCredits,
+          planPhysicalCredits,
+          newEmailTotal,
+          newPhysicalTotal,
+        })
+      } else if (isDowngrade) {
+        // Downgrade: Reset to new plan credits + addon credits (prevent credit hoarding)
+        // Example: User has 20 email + 3 physical, downgrades to Digital Capsule (9 email, 0 physical)
+        // Result: 9 + addonEmail, 0 + addonPhysical (NOT 20 + 9!)
+        newEmailTotal = planEmailCredits + addonEmail
+        newPhysicalTotal = planPhysicalCredits + addonPhysical
+        console.log("[Subscription Handler] Plan DOWNGRADE detected - resetting credits", {
+          subscriptionId: subscription.id,
+          previousPlan,
+          newPlan: plan,
+          currentEmailCredits,
+          currentPhysicalCredits,
+          planEmailCredits,
+          planPhysicalCredits,
+          addonEmail,
+          addonPhysical,
+          newEmailTotal,
+          newPhysicalTotal,
+        })
+      } else {
+        // New subscription or renewal: Set to plan credits + addon credits
+        newEmailTotal = planEmailCredits + addonEmail
+        newPhysicalTotal = planPhysicalCredits + addonPhysical
+        console.log("[Subscription Handler] New subscription or renewal - setting plan credits", {
+          subscriptionId: subscription.id,
+          plan,
+          planChangeType,
+          planEmailCredits,
+          planPhysicalCredits,
+          addonEmail,
+          addonPhysical,
+          newEmailTotal,
+          newPhysicalTotal,
+        })
+      }
+
+      // Record audit trail for plan credit grant
+      if (planEmailCredits > 0) {
+        await tx.creditTransaction.create({
+          data: {
+            userId: user.id,
+            creditType: "email",
+            transactionType: "grant_subscription",
+            amount: planEmailCredits,
+            balanceBefore: currentEmailCredits,
+            balanceAfter: newEmailTotal,
+            source: `${transactionSourceBase}:email`,
+            metadata: {
+              plan,
+              subscriptionId: subscription.id,
+              periodStart: safePeriodStart.toISOString(),
+              periodEnd: safePeriodEnd.toISOString(),
+              planChangeType,
+              previousPlan,
+            },
+          },
+        })
+      }
+
+      if (planPhysicalCredits > 0) {
+        await tx.creditTransaction.create({
+          data: {
+            userId: user.id,
+            creditType: "physical",
+            transactionType: "grant_subscription",
+            amount: planPhysicalCredits,
+            balanceBefore: currentPhysicalCredits,
+            balanceAfter: newPhysicalTotal,
+            source: `${transactionSourceBase}:physical`,
+            metadata: {
+              plan,
+              subscriptionId: subscription.id,
+              periodStart: safePeriodStart.toISOString(),
+              periodEnd: safePeriodEnd.toISOString(),
+              planChangeType,
+              previousPlan,
+            },
+          },
+        })
+      }
+
+      // Update user with new credit totals
+      await tx.user.update({
+        where: { id: user.id },
+        data: {
+          planType: plan,
+          emailCredits: newEmailTotal,
+          physicalCredits: newPhysicalTotal,
+          creditExpiresAt: safePeriodEnd,
+        },
+      })
+
+      console.log("[Subscription Handler] Credits granted (within transaction)", {
         subscriptionId: subscription.id,
-        previousPlan: existingSubscription.plan,
-        newPlan: plan,
-        currentEmailCredits,
-        currentPhysicalCredits,
+        userId: user.id,
+        planChangeType,
         planEmailCredits,
         planPhysicalCredits,
+        addonEmailPreserved: addonEmail,
+        addonPhysicalPreserved: addonPhysical,
         newEmailTotal,
         newPhysicalTotal,
       })
-    } else {
-      // New subscription or renewal: Set to plan credits + addon credits
-      newEmailTotal = planEmailCredits + addonEmail
-      newPhysicalTotal = planPhysicalCredits + addonPhysical
-      console.log("[Subscription Handler] New subscription or renewal - setting plan credits", {
-        subscriptionId: subscription.id,
-        plan,
-        planEmailCredits,
-        planPhysicalCredits,
-        addonEmail,
-        addonPhysical,
-        newEmailTotal,
-        newPhysicalTotal,
-      })
-    }
-
-    // Record audit trail for plan credit grant
-    if (planEmailCredits > 0) {
-      await prisma.creditTransaction.create({
-        data: {
-          userId: user.id,
-          creditType: "email",
-          transactionType: "grant_subscription",
-          amount: planEmailCredits,
-          balanceBefore: currentUser?.emailCredits ?? 0,
-          balanceAfter: newEmailTotal,
-          source: subscription.id,
-          metadata: {
-            plan,
-            subscriptionId: subscription.id,
-            periodStart: safePeriodStart.toISOString(),
-            periodEnd: safePeriodEnd.toISOString(),
-          },
-        },
-      })
-    }
-
-    if (planPhysicalCredits > 0) {
-      await prisma.creditTransaction.create({
-        data: {
-          userId: user.id,
-          creditType: "physical",
-          transactionType: "grant_subscription",
-          amount: planPhysicalCredits,
-          balanceBefore: currentUser?.physicalCredits ?? 0,
-          balanceAfter: newPhysicalTotal,
-          source: subscription.id,
-          metadata: {
-            plan,
-            subscriptionId: subscription.id,
-            periodStart: safePeriodStart.toISOString(),
-            periodEnd: safePeriodEnd.toISOString(),
-          },
-        },
-      })
-    }
-
-    // Update user with new credit totals (plan + addon preserved)
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        planType: plan,
-        emailCredits: newEmailTotal,
-        physicalCredits: newPhysicalTotal,
-        creditExpiresAt: safePeriodEnd,
-      },
-    })
-
-    console.log("[Subscription Handler] Credits granted", {
-      subscriptionId: subscription.id,
-      userId: user.id,
-      planEmailCredits,
-      planPhysicalCredits,
-      addonEmailPreserved: addonEmail,
-      addonPhysicalPreserved: addonPhysical,
-      newEmailTotal,
-      newPhysicalTotal,
     })
   }
 
@@ -333,103 +390,122 @@ export async function handleSubscriptionDeleted(subscription: Stripe.Subscriptio
     subscriptionId: subscription.id,
   })
 
-  // Update subscription status
-  await prisma.subscription.update({
+  // Get subscription and user info BEFORE transaction for post-transaction operations
+  const existingSub = await prisma.subscription.findUnique({
     where: { stripeSubscriptionId: subscription.id },
-    data: { status: "canceled" },
+    select: { userId: true },
   })
 
-  // Get user for cache invalidation
-  const sub = await prisma.subscription.findUnique({
-    where: { stripeSubscriptionId: subscription.id },
-  })
+  if (!existingSub) {
+    console.warn("[Subscription Handler] Subscription not found for deletion", {
+      subscriptionId: subscription.id,
+    })
+    return
+  }
 
-  if (sub) {
-    // Invalidate entitlements cache
-    await invalidateEntitlementsCache(sub.userId)
+  const userId = existingSub.userId
 
-    // Clear credits with transaction and audit trail
-    await prisma.$transaction(async (tx) => {
-      // Get current balances for audit
-      const currentUser = await tx.user.findUnique({
-        where: { id: sub.userId },
-        select: { emailCredits: true, physicalCredits: true },
-      })
+  // ATOMIC TRANSACTION: Subscription status + credit clearing must succeed or fail together
+  // This prevents inconsistent state where subscription is canceled but credits remain
+  await prisma.$transaction(async (tx) => {
+    // Update subscription status INSIDE transaction
+    await tx.subscription.update({
+      where: { stripeSubscriptionId: subscription.id },
+      data: { status: "canceled" },
+    })
 
-      if (currentUser) {
-        // Record email credit removal if any credits existed
-        if (currentUser.emailCredits > 0) {
-          await tx.creditTransaction.create({
-            data: {
-              userId: sub.userId,
-              creditType: "email",
-              transactionType: "deduct_cancel",
-              amount: -currentUser.emailCredits,
-              balanceBefore: currentUser.emailCredits,
-              balanceAfter: 0,
-              source: subscription.id,
-              metadata: {
-                reason: "subscription_canceled",
-                subscriptionId: subscription.id,
-              },
+    // Get current balances for audit trail
+    const currentUser = await tx.user.findUnique({
+      where: { id: userId },
+      select: { emailCredits: true, physicalCredits: true },
+    })
+
+    if (currentUser) {
+      // Record email credit removal if any credits existed
+      if (currentUser.emailCredits > 0) {
+        await tx.creditTransaction.create({
+          data: {
+            userId,
+            creditType: "email",
+            transactionType: "deduct_cancel",
+            amount: -currentUser.emailCredits,
+            balanceBefore: currentUser.emailCredits,
+            balanceAfter: 0,
+            source: `${subscription.id}:cancel`,
+            metadata: {
+              reason: "subscription_canceled",
+              subscriptionId: subscription.id,
             },
-          })
-        }
-
-        // Record physical credit removal if any credits existed
-        if (currentUser.physicalCredits > 0) {
-          await tx.creditTransaction.create({
-            data: {
-              userId: sub.userId,
-              creditType: "physical",
-              transactionType: "deduct_cancel",
-              amount: -currentUser.physicalCredits,
-              balanceBefore: currentUser.physicalCredits,
-              balanceAfter: 0,
-              source: subscription.id,
-              metadata: {
-                reason: "subscription_canceled",
-                subscriptionId: subscription.id,
-              },
-            },
-          })
-        }
+          },
+        })
       }
 
-      // Clear all credits and plan
-      await tx.user.update({
-        where: { id: sub.userId },
-        data: {
-          planType: null,
-          emailCredits: 0,
-          physicalCredits: 0,
-          emailAddonCredits: 0,
-          physicalAddonCredits: 0,
-          creditExpiresAt: null,
-        },
-      })
-    })
-
-    // Send cancellation email
-    const user = await prisma.user.findUnique({
-      where: { id: sub.userId },
-    })
-
-    if (user) {
-      await sendBillingEmail("subscription-canceled", sub.userId, user.email, {
-        subscriptionId: subscription.id,
-        canceledAt: new Date().toISOString(),
-      })
+      // Record physical credit removal if any credits existed
+      if (currentUser.physicalCredits > 0) {
+        await tx.creditTransaction.create({
+          data: {
+            userId,
+            creditType: "physical",
+            transactionType: "deduct_cancel",
+            amount: -currentUser.physicalCredits,
+            balanceBefore: currentUser.physicalCredits,
+            balanceAfter: 0,
+            source: `${subscription.id}:cancel`,
+            metadata: {
+              reason: "subscription_canceled",
+              subscriptionId: subscription.id,
+            },
+          },
+        })
+      }
     }
 
-    // Record audit event
-    await recordBillingAudit(sub.userId, AuditEventType.SUBSCRIPTION_CANCELED, {
+    // Clear all credits and plan
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        planType: null,
+        emailCredits: 0,
+        physicalCredits: 0,
+        emailAddonCredits: 0,
+        physicalAddonCredits: 0,
+        creditExpiresAt: null,
+      },
+    })
+
+    console.log("[Subscription Handler] Subscription and credits cleared (within transaction)", {
       subscriptionId: subscription.id,
+      userId,
+    })
+  })
+
+  // NON-CRITICAL operations AFTER transaction completes
+  // These can fail without affecting data consistency
+
+  // Invalidate entitlements cache
+  await invalidateEntitlementsCache(userId)
+
+  // Send cancellation email
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { email: true },
+  })
+
+  if (user) {
+    await sendBillingEmail("subscription-canceled", userId, user.email, {
+      subscriptionId: subscription.id,
+      canceledAt: new Date().toISOString(),
     })
   }
 
+  // Record audit event
+  await recordBillingAudit(userId, AuditEventType.SUBSCRIPTION_CANCELED, {
+    subscriptionId: subscription.id,
+  })
+
   console.log("[Subscription Handler] Subscription cancellation processed", {
     subscriptionId: subscription.id,
+    userId,
   })
 }
 

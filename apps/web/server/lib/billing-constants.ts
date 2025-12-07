@@ -8,6 +8,65 @@ export const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }>
 }
 
 /**
+ * Plan hierarchy for upgrade/downgrade detection.
+ * Higher index = higher tier plan.
+ */
+const PLAN_HIERARCHY: readonly PlanType[] = ["DIGITAL_CAPSULE", "PAPER_PIXELS"] as const
+
+/**
+ * Plan change type for credit handling logic.
+ * - "upgrade": User moved to a higher tier (stack credits)
+ * - "downgrade": User moved to a lower tier (reset to new plan + addons)
+ * - "same": No plan change
+ * - "new": New subscription (no previous plan)
+ */
+export type PlanChangeType = "upgrade" | "downgrade" | "same" | "new"
+
+/**
+ * Compare two plans to determine the type of change.
+ *
+ * @param fromPlan - Previous plan (null for new subscriptions)
+ * @param toPlan - New plan
+ * @returns Type of plan change
+ */
+export function comparePlans(
+  fromPlan: PlanType | null | undefined,
+  toPlan: PlanType
+): PlanChangeType {
+  if (!fromPlan) return "new"
+  if (fromPlan === toPlan) return "same"
+
+  const fromIndex = PLAN_HIERARCHY.indexOf(fromPlan)
+  const toIndex = PLAN_HIERARCHY.indexOf(toPlan)
+
+  if (fromIndex === -1 || toIndex === -1) {
+    console.warn("[Billing] Unknown plan in comparison", { fromPlan, toPlan })
+    return "same"
+  }
+
+  return toIndex > fromIndex ? "upgrade" : "downgrade"
+}
+
+/**
+ * Determine if credits should be stacked (upgrade only).
+ *
+ * Credit stacking rules:
+ * - Upgrade: Stack new credits on top of existing (reward loyalty)
+ * - Downgrade: Reset to new plan + addons (prevent credit hoarding)
+ * - New/Renewal: Set to plan + addons
+ *
+ * @param fromPlan - Previous plan
+ * @param toPlan - New plan
+ * @returns true if credits should be stacked
+ */
+export function shouldStackCredits(
+  fromPlan: PlanType | null | undefined,
+  toPlan: PlanType
+): boolean {
+  return comparePlans(fromPlan, toPlan) === "upgrade"
+}
+
+/**
  * Map Stripe price ID to PlanType.
  *
  * This is essential for detecting plan changes when users upgrade/downgrade
