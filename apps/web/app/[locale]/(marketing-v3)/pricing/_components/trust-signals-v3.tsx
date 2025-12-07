@@ -3,6 +3,7 @@
 import * as React from "react"
 import { motion, useInView } from "framer-motion"
 import { Zap, Lock, CreditCard, Shield, RefreshCw, Globe, LucideIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
 interface TrustSignal {
@@ -11,44 +12,28 @@ interface TrustSignal {
   description: string
 }
 
-interface TrustSignalsV3Props {
-  signals?: TrustSignal[]
+const iconMap: Record<string, LucideIcon> = {
+  zap: Zap,
+  lock: Lock,
+  "credit-card": CreditCard,
+  shield: Shield,
+  "refresh-cw": RefreshCw,
+  globe: Globe,
 }
 
-const defaultSignals: TrustSignal[] = [
-  {
-    icon: Zap,
-    title: "INSTANT SETUP",
-    description: "Get started in under 2 minutes",
-  },
-  {
-    icon: Lock,
-    title: "BANK-LEVEL SECURITY",
-    description: "AES-256 encryption for all data",
-  },
-  {
-    icon: CreditCard,
-    title: "NO HIDDEN FEES",
-    description: "What you see is what you pay",
-  },
-  {
-    icon: Shield,
-    title: "GDPR COMPLIANT",
-    description: "Your data, your privacy rights",
-  },
-  {
-    icon: RefreshCw,
-    title: "CANCEL ANYTIME",
-    description: "No contracts, no commitments",
-  },
-  {
-    icon: Globe,
-    title: "GLOBAL DELIVERY",
-    description: "Send letters anywhere in the world",
-  },
-]
+export function TrustSignalsV3() {
+  const t = useTranslations("pricing")
+  const trustData = t.raw("trust") as Array<{
+    icon: string
+    title: string
+    description: string
+  }>
 
-export function TrustSignalsV3({ signals = defaultSignals }: TrustSignalsV3Props) {
+  const signals: TrustSignal[] = trustData.map((item) => ({
+    icon: iconMap[item.icon] || Zap,
+    title: item.title,
+    description: item.description,
+  }))
   const containerRef = React.useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-50px" })
 

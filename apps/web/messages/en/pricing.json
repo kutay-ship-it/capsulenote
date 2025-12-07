@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "title": "Pricing - Capsule Note",
-    "description": "Choose the perfect plan for your letter writing journey. Start free, upgrade when ready."
+    "title": "Pricing | Capsule Note",
+    "description": "Simple, transparent pricing for time capsule letters. Start free, upgrade when you need more."
   },
   "upgrade": {
     "loading": "Loading...",
@@ -32,133 +32,195 @@
       }
     }
   },
-  "popularBadge": "Most Popular",
+  "popularBadge": "MOST POPULAR",
+  "card": {
+    "popularBadge": "MOST POPULAR",
+    "enterpriseBadge": "CUSTOM",
+    "bestValue": "BEST\nVALUE"
+  },
   "hero": {
-    "badge": "Transparent Pricing",
-    "title": "Choose Your Plan",
-    "subtitle": "Start writing to your future self today. All plans include encrypted storage and reliable delivery. No credit card required to start.",
-    "socialProof": "Join 1,000+ letter writers"
+    "badge": "SIMPLE PRICING",
+    "title": "CHOOSE YOUR PLAN",
+    "subtitle": "Start free, upgrade when you're ready. No hidden fees, no surprises.",
+    "socialProof": "10,000+ letters delivered",
+    "stats": {
+      "uptime": { "value": "99.9%", "label": "Uptime" },
+      "rating": { "value": "4.9/5", "label": "Rating" },
+      "users": { "value": "10K+", "label": "Users" }
+    }
+  },
+  "toggle": {
+    "monthly": "MONTHLY",
+    "yearly": "YEARLY",
+    "savings": "SAVE 40%"
   },
   "tiers": [
     {
-      "name": "Digital Capsule",
-      "price": 9,
-      "interval": "year",
-      "intervalLabel": "year",
-      "description": "For personal letters to yourself—purely digital delivery.",
-      "features": ["9 email deliveries / year", "Schedule up to 100 years out", "Timezone-aware reminders", "Encrypted storage"],
-      "cta": "Choose Digital",
-      "priceKey": "STRIPE_PRICE_DIGITAL_ANNUAL"
+      "name": "Starter",
+      "monthlyPrice": 0,
+      "yearlyPrice": 0,
+      "interval": "month",
+      "description": "Perfect for trying out time capsule letters and occasional reflections.",
+      "features": [
+        "3 letters per month",
+        "Email delivery",
+        "7-day scheduling ahead",
+        "Basic text editor",
+        "Community support"
+      ],
+      "cta": "START FREE",
+      "ctaHref": "/sign-up",
+      "variant": "default"
     },
     {
-      "name": "Paper & Pixels",
-      "price": 29,
-      "interval": "year",
-      "intervalLabel": "year",
-      "description": "For gifting and tangible keepsakes—email plus premium mail.",
-      "features": ["24 email deliveries / year", "3 physical letters / year", "Address confirmation reminders", "Priority delivery routing"],
-      "cta": "Choose Paper & Pixels",
-      "priceKey": "STRIPE_PRICE_PAPER_ANNUAL",
-      "highlighted": true,
-      "popular": true
+      "name": "Pro",
+      "monthlyPrice": 12,
+      "yearlyPrice": 79,
+      "interval": "month",
+      "description": "For dedicated writers who want to build a meaningful practice.",
+      "features": [
+        "Unlimited letters",
+        "Email + physical mail",
+        "Schedule years ahead",
+        "Rich text editor",
+        "Letter templates",
+        "Arrive-by scheduling",
+        "Priority support"
+      ],
+      "cta": "START PRO TRIAL",
+      "ctaHref": "/sign-up?plan=pro",
+      "variant": "popular"
+    },
+    {
+      "name": "Enterprise",
+      "monthlyPrice": "Custom",
+      "yearlyPrice": "Custom",
+      "interval": "month",
+      "description": "For teams and organizations with advanced needs.",
+      "features": [
+        "Everything in Pro",
+        "Team collaboration",
+        "Admin dashboard",
+        "Custom branding",
+        "API access",
+        "Dedicated support",
+        "SLA guarantee"
+      ],
+      "cta": "CONTACT SALES",
+      "ctaHref": "/contact",
+      "variant": "enterprise"
     }
   ],
   "trust": [
-    { "title": "Yearly Credits", "description": "Use within your plan year" },
-    { "title": "Bank-Level Security", "description": "AES-256 encryption" },
-    { "title": "Secure Payments", "description": "Powered by Stripe" },
-    { "title": "Cancel Anytime", "description": "No long-term contracts" }
+    { "icon": "zap", "title": "INSTANT SETUP", "description": "Get started in under 2 minutes" },
+    { "icon": "lock", "title": "BANK-LEVEL SECURITY", "description": "AES-256 encryption for all data" },
+    { "icon": "credit-card", "title": "NO HIDDEN FEES", "description": "What you see is what you pay" },
+    { "icon": "shield", "title": "GDPR COMPLIANT", "description": "Your data, your privacy rights" },
+    { "icon": "refresh-cw", "title": "CANCEL ANYTIME", "description": "No contracts, no commitments" },
+    { "icon": "globe", "title": "GLOBAL DELIVERY", "description": "Send letters anywhere in the world" }
   ],
-  "matrixTitle": "Compare Plans",
-  "matrixSubtitle": "See exactly what's included in each plan",
   "matrix": {
-    "headers": { "feature": "Features", "digital": "Digital Capsule", "paper": "Paper & Pixels" },
+    "title": "COMPARE ALL FEATURES",
+    "subtitle": "See exactly what you get with each plan",
+    "mobileNote": "Scroll horizontally to view all plans",
+    "headers": {
+      "feature": "Feature",
+      "free": "Starter",
+      "pro": "Pro",
+      "enterprise": "Enterprise"
+    },
     "categories": [
       {
-        "name": "Core Features",
+        "name": "Letters",
         "features": [
-          { "name": "Email credits / year", "digital": "9", "paper": "24" },
-          { "name": "Physical mail credits / year", "digital": "0", "paper": "3" },
-          { "name": "Schedule ahead", "digital": "100 years", "paper": "100 years" },
-          { "name": "Encrypted storage", "digital": true, "paper": true },
-          { "name": "Timezone-aware delivery", "digital": true, "paper": true }
+          { "name": "Letters per month", "free": "3", "pro": "Unlimited", "enterprise": "Unlimited" },
+          { "name": "Rich text editor", "free": false, "pro": true, "enterprise": true },
+          { "name": "Letter templates", "free": false, "pro": true, "enterprise": true },
+          { "name": "Photo attachments", "free": false, "pro": true, "enterprise": true }
         ]
       },
       {
-        "name": "Physical Mail",
+        "name": "Delivery",
         "features": [
-          { "name": "Physical mail delivery", "digital": false, "paper": true },
-          { "name": "Address verification", "digital": false, "paper": true },
-          { "name": "Arrive-by scheduling", "digital": false, "paper": true },
-          { "name": "Premium paper quality", "digital": false, "paper": true },
-          { "name": "One-time trial ($4.99)", "digital": true, "paper": "Included" }
+          { "name": "Email delivery", "free": true, "pro": true, "enterprise": true },
+          { "name": "Physical mail", "free": false, "pro": true, "enterprise": true },
+          { "name": "Scheduling ahead", "free": "7 days", "pro": "10 years", "enterprise": "10 years" },
+          { "name": "Arrive-by mode", "free": false, "pro": true, "enterprise": true, "tooltip": "Schedule letters to arrive by a specific date" }
+        ]
+      },
+      {
+        "name": "Security",
+        "features": [
+          { "name": "End-to-end encryption", "free": true, "pro": true, "enterprise": true },
+          { "name": "2FA authentication", "free": true, "pro": true, "enterprise": true },
+          { "name": "SOC 2 compliance", "free": false, "pro": false, "enterprise": true }
         ]
       },
       {
         "name": "Support",
         "features": [
-          { "name": "Email support", "digital": true, "paper": true },
-          { "name": "Priority support", "digital": false, "paper": true }
+          { "name": "Community support", "free": true, "pro": true, "enterprise": true },
+          { "name": "Priority email support", "free": false, "pro": true, "enterprise": true },
+          { "name": "Dedicated account manager", "free": false, "pro": false, "enterprise": true },
+          { "name": "SLA guarantee", "free": false, "pro": false, "enterprise": true }
         ]
       }
-    ],
-    "mobileNote": "Scroll horizontally to see all features"
+    ]
   },
   "faq": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Everything you need to know about pricing and billing",
-    "contact": { "text": "Still have questions?", "link": "Contact our support team" },
+    "title": "FREQUENTLY ASKED QUESTIONS",
+    "subtitle": "Everything you need to know about our pricing and plans",
+    "contact": {
+      "text": "Still have questions?",
+      "link": "Contact us"
+    },
     "items": [
       {
-        "question": "What happens after the free trial?",
-        "answer": "Your 14-day free trial gives you full access to Pro features. After the trial, you'll be charged the monthly or annual rate you selected. You can cancel anytime before the trial ends with no charge."
+        "question": "Can I try Capsule Note for free?",
+        "answer": "Yes! Our Starter plan is completely free and includes 3 letters per month with email delivery. It's a great way to experience the magic of time capsule letters."
       },
       {
-        "question": "Can I cancel anytime?",
-        "answer": "Yes! You can cancel your subscription at any time from your billing settings. You'll continue to have access until the end of your billing period, and no further charges will be made."
+        "question": "What happens when my letter is delivered?",
+        "answer": "On your scheduled delivery date, we'll send your letter via your chosen method (email or physical mail). Email letters arrive instantly, while physical letters are sent with tracking."
       },
       {
-        "question": "How do physical mail credits work?",
-        "answer": "Paper & Pixels members get 3 physical mail credits per year included with their subscription. Additional physical mail credits cost $7.99 each. Digital Capsule users can try physical mail once for $4.99."
+        "question": "Can I cancel my subscription anytime?",
+        "answer": "Absolutely. You can cancel your Pro subscription at any time. Your existing scheduled letters will still be delivered, and you'll retain access until the end of your billing period."
       },
       {
-        "question": "What payment methods do you accept?",
-        "answer": "We accept all major credit cards (Visa, Mastercard, American Express, Discover) processed securely through Stripe. We don't store your payment information on our servers."
+        "question": "How secure are my letters?",
+        "answer": "We use bank-level AES-256 encryption for all letter content. Your letters are encrypted before storage and only decrypted for delivery. Not even our team can read your letters."
       },
       {
-        "question": "Is there a discount for buying credits in bulk?",
-        "answer": "Yes! Volume discounts apply when purchasing additional credits. Buy 5+ credits for 10% off, 10+ for 15% off, 25+ for 20% off, or 50+ for 25% off."
+        "question": "What's the difference between Email and Physical mail delivery?",
+        "answer": "Email delivery sends your letter to your inbox instantly on the scheduled date. Physical mail prints your letter on premium paper and mails it to your address via USPS or international carriers."
       },
       {
-        "question": "What happens to my letters if I cancel?",
-        "answer": "Your letters remain in your account even after canceling. You can still view and export them. However, you won't be able to schedule new deliveries until you resubscribe."
-      },
-      {
-        "question": "Do you offer refunds?",
-        "answer": "We offer a 30-day money-back guarantee. If you're not satisfied within the first 30 days, contact support for a full refund. No questions asked."
-      },
-      {
-        "question": "Can I upgrade or downgrade my plan?",
-        "answer": "Yes! You can change your plan anytime. Upgrades take effect immediately with prorated billing. Downgrades take effect at the end of your current billing period."
+        "question": "Can I schedule a letter for 10 years from now?",
+        "answer": "Yes! Pro and Enterprise plans allow scheduling up to 10 years ahead. We recommend using our 'Arrive-by' mode for important dates to ensure timely delivery."
       }
     ]
   },
   "cta": {
-    "title": "Start Your Free Trial Today",
-    "description": "Join thousands of people writing meaningful letters to their future selves. Start with 14 days free, cancel anytime.",
+    "title": "START YOUR TIME CAPSULE JOURNEY",
+    "description": "Join thousands of people sending meaningful letters to their future selves. Start free, upgrade anytime.",
     "badges": [
-      "No credit card required",
       "14-day free trial",
-      "Cancel anytime",
-      "30-day money-back guarantee"
+      "No credit card required",
+      "Cancel anytime"
     ],
-    "primary": "Start Free Trial",
-    "secondary": "Start Free Forever",
+    "primary": "GET STARTED FREE",
+    "secondary": "VIEW DEMO",
     "questions": "Questions?",
-    "contact": "Contact our support team"
+    "contact": "Contact us",
+    "guarantees": [
+      { "icon": "refresh-cw", "text": "14-day money-back guarantee" },
+      { "icon": "shield", "text": "Bank-level encryption" },
+      { "icon": "mail", "text": "99.9% delivery rate" }
+    ]
   },
   "footer": {
-    "copyright": "© {year} Capsule Note™ Time-Capsule Letters. Built with intention and privacy in mind.",
+    "copyright": "© {year} Capsule Note\u2122 Time-Capsule Letters. Built with intention and privacy in mind.",
     "privacy": "Privacy",
     "terms": "Terms",
     "home": "Home"

@@ -3,21 +3,11 @@
 import * as React from "react"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { Timer, Star, Users } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
-interface PricingHeroV3Props {
-  badge?: string
-  title?: string
-  subtitle?: string
-  socialProofText?: string
-}
-
-export function PricingHeroV3({
-  badge = "SIMPLE PRICING",
-  title = "CHOOSE YOUR PLAN",
-  subtitle = "Start free, upgrade when you're ready. No hidden fees, no surprises.",
-  socialProofText = "10,000+ letters delivered",
-}: PricingHeroV3Props) {
+export function PricingHeroV3() {
+  const t = useTranslations("pricing.hero")
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [isMounted, setIsMounted] = React.useState(false)
 
@@ -35,12 +25,17 @@ export function PricingHeroV3({
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
   const y = useTransform(scrollYProgress, [0, 0.5], [0, 50])
 
-  // Animated stats
+  // Animated stats from translations
   const stats = [
-    { icon: Timer, value: "99.9%", label: "Uptime" },
-    { icon: Star, value: "4.9/5", label: "Rating" },
-    { icon: Users, value: "10K+", label: "Users" },
+    { icon: Timer, value: t("stats.uptime.value"), label: t("stats.uptime.label") },
+    { icon: Star, value: t("stats.rating.value"), label: t("stats.rating.label") },
+    { icon: Users, value: t("stats.users.value"), label: t("stats.users.label") },
   ]
+
+  const badge = t("badge")
+  const title = t("title")
+  const subtitle = t("subtitle")
+  const socialProofText = t("socialProof")
 
   return (
     <section

@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import { motion, useInView } from "framer-motion"
-import { ArrowRight, Shield, RefreshCw, Mail, Sparkles } from "lucide-react"
+import { ArrowRight, Shield, RefreshCw, Mail, Sparkles, LucideIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
@@ -18,25 +19,50 @@ interface PricingCTAV3Props {
   contactLinkText?: string
 }
 
+const iconMap: Record<string, LucideIcon> = {
+  "refresh-cw": RefreshCw,
+  shield: Shield,
+  mail: Mail,
+}
+
 export function PricingCTAV3({
-  title = "START YOUR TIME CAPSULE JOURNEY",
-  description = "Join thousands of people sending meaningful letters to their future selves. Start free, upgrade anytime.",
-  badges = ["14-day free trial", "No credit card required", "Cancel anytime"],
-  primaryCta = "GET STARTED FREE",
+  title,
+  description,
+  badges,
+  primaryCta,
   primaryCtaHref = "/sign-up",
-  secondaryCta = "VIEW DEMO",
+  secondaryCta,
   secondaryCtaHref = "/demo",
-  contactText = "Questions?",
-  contactLinkText = "Contact us",
+  contactText,
+  contactLinkText,
 }: PricingCTAV3Props) {
+  const t = useTranslations("pricing.cta")
   const containerRef = React.useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-100px" })
 
-  const guaranteeItems = [
-    { icon: RefreshCw, text: "14-day money-back guarantee" },
-    { icon: Shield, text: "Bank-level encryption" },
-    { icon: Mail, text: "99.9% delivery rate" },
-  ]
+  const effectiveTitle = title || t("title")
+  const effectiveDescription = description || t("description")
+  const effectivePrimaryCta = primaryCta || t("primary")
+  const effectiveSecondaryCta = secondaryCta || t("secondary")
+  const effectiveContactText = contactText || t("questions")
+  const effectiveContactLinkText = contactLinkText || t("contact")
+  const effectiveBadges = badges || (t.raw("badges") as string[])
+
+  const guaranteeData = t.raw("guarantees") as Array<{
+    icon: string
+    text: string
+  }> | undefined
+
+  const guaranteeItems = guaranteeData
+    ? guaranteeData.map((item) => ({
+        icon: iconMap[item.icon] || RefreshCw,
+        text: item.text,
+      }))
+    : [
+        { icon: RefreshCw, text: "14-day money-back guarantee" },
+        { icon: Shield, text: "Bank-level encryption" },
+        { icon: Mail, text: "99.9% delivery rate" },
+      ]
 
   return (
     <div ref={containerRef} className="w-full">
@@ -99,7 +125,7 @@ export function PricingCTAV3({
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              {title}
+              {effectiveTitle}
             </motion.h2>
 
             {/* Description */}
@@ -109,7 +135,7 @@ export function PricingCTAV3({
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
-              {description}
+              {effectiveDescription}
             </motion.p>
 
             {/* Trust Badges */}
@@ -119,7 +145,7 @@ export function PricingCTAV3({
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.5, delay: 0.6 }}
             >
-              {badges.map((badge, index) => (
+              {effectiveBadges.map((badge, index) => (
                 <motion.div
                   key={badge}
                   className={cn(
@@ -162,7 +188,7 @@ export function PricingCTAV3({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {primaryCta}
+                  {effectivePrimaryCta}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </motion.button>
               </Link>
@@ -182,7 +208,7 @@ export function PricingCTAV3({
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  {secondaryCta}
+                  {effectiveSecondaryCta}
                 </motion.button>
               </Link>
             </motion.div>
@@ -211,12 +237,12 @@ export function PricingCTAV3({
               animate={isInView ? { opacity: 1 } : { opacity: 0 }}
               transition={{ delay: 1.1 }}
             >
-              {contactText}{" "}
+              {effectiveContactText}{" "}
               <a
                 href="mailto:support@capsulenote.com"
                 className="underline underline-offset-2 hover:text-charcoal transition-colors"
               >
-                {contactLinkText}
+                {effectiveContactLinkText}
               </a>
             </motion.p>
           </div>

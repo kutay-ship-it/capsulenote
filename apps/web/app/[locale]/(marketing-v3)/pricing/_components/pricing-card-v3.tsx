@@ -3,6 +3,7 @@
 import * as React from "react"
 import { motion, useInView } from "framer-motion"
 import { Check, ArrowRight, Sparkles } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Link } from "@/i18n/routing"
 
@@ -17,6 +18,8 @@ interface PricingCardV3Props {
   priceId?: string
   variant?: "default" | "popular" | "enterprise"
   popularBadgeText?: string
+  enterpriseBadgeText?: string
+  bestValueText?: string
   index?: number
 }
 
@@ -30,9 +33,15 @@ export function PricingCardV3({
   ctaHref = "/sign-up",
   priceId,
   variant = "default",
-  popularBadgeText = "MOST POPULAR",
+  popularBadgeText,
+  enterpriseBadgeText,
+  bestValueText,
   index = 0,
 }: PricingCardV3Props) {
+  const t = useTranslations("pricing.card")
+  const effectivePopularBadge = popularBadgeText || t("popularBadge")
+  const effectiveEnterpriseBadge = enterpriseBadgeText || t("enterpriseBadge")
+  const effectiveBestValue = bestValueText || t("bestValue")
   const cardRef = React.useRef<HTMLDivElement>(null)
   const isInView = useInView(cardRef, { once: true, margin: "-100px" })
   const [isHovered, setIsHovered] = React.useState(false)
@@ -139,7 +148,7 @@ export function PricingCardV3({
           >
             <span className="flex items-center gap-1.5">
               <Sparkles className="h-3 w-3" />
-              {popularBadgeText}
+              {effectivePopularBadge}
             </span>
           </motion.div>
         )}
@@ -154,7 +163,7 @@ export function PricingCardV3({
             )}
             style={{ borderRadius: "2px" }}
           >
-            CUSTOM
+            {effectiveEnterpriseBadge}
           </div>
         )}
 
@@ -306,7 +315,7 @@ export function PricingCardV3({
             )}
             style={{ borderRadius: "50%" }}
           >
-            BEST<br />VALUE
+            {effectiveBestValue}
           </div>
         </motion.div>
       )}

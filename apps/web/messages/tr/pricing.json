@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "title": "Fiyatlandırma - Capsule Note",
-    "description": "Mektup yolculuğun için en uygun planı seç. Ücretsiz başla, hazır olunca yükselt."
+    "title": "Fiyatlandırma | Capsule Note",
+    "description": "Zaman kapsülü mektupları için basit, şeffaf fiyatlandırma. Ücretsiz başla, ihtiyacın olunca yükselt."
   },
   "upgrade": {
     "loading": "Yükleniyor...",
@@ -32,144 +32,192 @@
       }
     }
   },
-  "popularBadge": "En Popüler",
+  "popularBadge": "EN POPÜLER",
+  "card": {
+    "popularBadge": "EN POPÜLER",
+    "enterpriseBadge": "ÖZEL",
+    "bestValue": "EN\nİYİ"
+  },
   "hero": {
-    "badge": "Şeffaf Fiyatlandırma",
-    "title": "Planını Seç",
-    "subtitle": "Gelecekteki kendine bugün yazmaya başla. Tüm planlarda şifreli depolama ve güvenilir teslimat var. Başlamak için kredi kartı gerekmez.",
-    "socialProof": "1.000+ mektup yazarı topluluğumuza katıldı"
+    "badge": "ŞEFFAF FİYATLANDIRMA",
+    "title": "PLANINI SEÇ",
+    "subtitle": "Ücretsiz başla, hazır olduğunda yükselt. Gizli ücret yok, sürpriz yok.",
+    "socialProof": "10.000+ mektup teslim edildi",
+    "stats": {
+      "uptime": { "value": "99,9%", "label": "Çalışma Süresi" },
+      "rating": { "value": "4,9/5", "label": "Puan" },
+      "users": { "value": "10B+", "label": "Kullanıcı" }
+    }
+  },
+  "toggle": {
+    "monthly": "AYLIK",
+    "yearly": "YILLIK",
+    "savings": "%40 TASARRUF"
   },
   "tiers": [
     {
-      "name": "Dijital Kapsül",
-      "price": 9,
-      "interval": "year",
-      "intervalLabel": "yıl",
-      "description": "Kendine yazdığın mektuplar için — tamamen dijital teslimat.",
+      "name": "Başlangıç",
+      "monthlyPrice": 0,
+      "yearlyPrice": 0,
+      "interval": "ay",
+      "description": "Zaman kapsülü mektuplarını denemek ve ara sıra düşüncelerini yazmak için mükemmel.",
       "features": [
-        "Yılda 9 e-posta teslimatı",
-        "100 yıl sonrasına kadar planlama",
-        "Saat dilimine duyarlı hatırlatmalar",
-        "Şifreli depolama"
+        "Ayda 3 mektup",
+        "E-posta ile teslimat",
+        "7 gün önceden planlama",
+        "Basit metin editörü",
+        "Topluluk desteği"
       ],
-      "cta": "Dijital'i Seç",
-      "priceKey": "STRIPE_PRICE_DIGITAL_ANNUAL"
+      "cta": "ÜCRETSİZ BAŞLA",
+      "ctaHref": "/sign-up",
+      "variant": "default"
     },
     {
-      "name": "Kağıt & Pikseller",
-      "price": 29,
-      "interval": "year",
-      "intervalLabel": "yıl",
-      "description": "Hediyeler ve somut anılar için — e-posta artı fiziksel posta.",
+      "name": "Pro",
+      "monthlyPrice": 12,
+      "yearlyPrice": 79,
+      "interval": "ay",
+      "description": "Anlamlı bir yazma pratiği oluşturmak isteyen özenli yazarlar için.",
       "features": [
-        "Yılda 24 e-posta teslimatı",
-        "Yılda 3 fiziksel mektup",
-        "Adres doğrulama hatırlatmaları",
-        "Öncelikli teslimat"
+        "Sınırsız mektup",
+        "E-posta + fiziksel posta",
+        "Yıllar önceden planlama",
+        "Zengin metin editörü",
+        "Mektup şablonları",
+        "Varış zamanı planlaması",
+        "Öncelikli destek"
       ],
-      "cta": "Kağıt & Pikseller'i Seç",
-      "priceKey": "STRIPE_PRICE_PAPER_ANNUAL",
-      "highlighted": true,
-      "popular": true
+      "cta": "PRO DENEMESİNİ BAŞLAT",
+      "ctaHref": "/sign-up?plan=pro",
+      "variant": "popular"
+    },
+    {
+      "name": "Kurumsal",
+      "monthlyPrice": "Özel",
+      "yearlyPrice": "Özel",
+      "interval": "ay",
+      "description": "Gelişmiş ihtiyaçları olan takımlar ve kuruluşlar için.",
+      "features": [
+        "Pro'daki her şey",
+        "Takım işbirliği",
+        "Yönetici paneli",
+        "Özel markalama",
+        "API erişimi",
+        "Özel destek",
+        "SLA garantisi"
+      ],
+      "cta": "SATIŞLA İLETİŞİME GEÇ",
+      "ctaHref": "/contact",
+      "variant": "enterprise"
     }
   ],
-  "matrixTitle": "Planları Karşılaştır",
-  "matrixSubtitle": "Her planda neler olduğunu net bir şekilde gör",
   "trust": [
-    { "title": "Yıllık Krediler", "description": "Plan yılında kullan" },
-    { "title": "Banka Güvenliği", "description": "AES-256 şifreleme" },
-    { "title": "Güvenli Ödemeler", "description": "Stripe altyapısı" },
-    { "title": "İstediğin Zaman İptal", "description": "Taahhüt yok" }
+    { "icon": "zap", "title": "ANINDA KURULUM", "description": "2 dakikadan kısa sürede başla" },
+    { "icon": "lock", "title": "BANKA SEVİYESİ GÜVENLİK", "description": "Tüm veriler için AES-256 şifreleme" },
+    { "icon": "credit-card", "title": "GİZLİ ÜCRET YOK", "description": "Ne görürsen onu ödersin" },
+    { "icon": "shield", "title": "KVKK UYUMLU", "description": "Senin verin, senin gizlilik hakların" },
+    { "icon": "refresh-cw", "title": "İSTEDİĞİN ZAMAN İPTAL", "description": "Sözleşme yok, taahhüt yok" },
+    { "icon": "globe", "title": "DÜNYA ÇAPINDA TESLİMAT", "description": "Dünyanın her yerine mektup gönder" }
   ],
   "matrix": {
-    "headers": { "feature": "Özellikler", "free": "Ücretsiz", "pro": "Pro", "enterprise": "Kurumsal" },
+    "title": "TÜM ÖZELLİKLERİ KARŞILAŞTIR",
+    "subtitle": "Her planda tam olarak ne alacağını gör",
+    "mobileNote": "Tüm planları görmek için yana kaydır",
+    "headers": {
+      "feature": "Özellik",
+      "free": "Başlangıç",
+      "pro": "Pro",
+      "enterprise": "Kurumsal"
+    },
     "categories": [
       {
-        "name": "Temel özellikler",
+        "name": "Mektuplar",
         "features": [
-          { "name": "Ayda mektup", "free": "3", "pro": "Sınırsız", "enterprise": "Sınırsız" },
-          { "name": "E-posta teslimatı", "free": true, "pro": true, "enterprise": true },
-          { "name": "Fiziksel posta teslimatı", "free": false, "pro": true, "enterprise": true },
-          { "name": "Aylık ücretsiz fiziksel posta", "free": "0", "pro": "2", "enterprise": "Özel" },
-          { "name": "Şifreli depolama", "free": true, "pro": true, "enterprise": true },
-          { "name": "Mektup şablonları", "free": "Temel", "pro": "Premium", "enterprise": "Özel" }
+          { "name": "Aylık mektup sayısı", "free": "3", "pro": "Sınırsız", "enterprise": "Sınırsız" },
+          { "name": "Zengin metin editörü", "free": false, "pro": true, "enterprise": true },
+          { "name": "Mektup şablonları", "free": false, "pro": true, "enterprise": true },
+          { "name": "Fotoğraf ekleri", "free": false, "pro": true, "enterprise": true }
         ]
       },
       {
-        "name": "Gelişmiş özellikler",
+        "name": "Teslimat",
         "features": [
-          { "name": "Gelişmiş planlama", "free": false, "pro": true, "enterprise": true },
-          { "name": "Tam zamanında modu", "free": false, "pro": true, "enterprise": true },
-          { "name": "Tekrarlayan mektuplar", "free": false, "pro": true, "enterprise": true },
-          { "name": "Özel marka", "free": false, "pro": false, "enterprise": true },
-          { "name": "API erişimi", "free": false, "pro": false, "enterprise": true },
-          { "name": "Webhook'lar", "free": false, "pro": false, "enterprise": true }
+          { "name": "E-posta ile teslimat", "free": true, "pro": true, "enterprise": true },
+          { "name": "Fiziksel posta", "free": false, "pro": true, "enterprise": true },
+          { "name": "İleri planlama", "free": "7 gün", "pro": "10 yıl", "enterprise": "10 yıl" },
+          { "name": "Varış zamanı modu", "free": false, "pro": true, "enterprise": true, "tooltip": "Mektupların belirli bir tarihe kadar ulaşmasını planla" }
         ]
       },
       {
-        "name": "Destek & Analitik",
+        "name": "Güvenlik",
         "features": [
-          { "name": "Destek", "free": "Topluluk", "pro": "Öncelikli", "enterprise": "Özel" },
-          { "name": "Analitik", "free": "Temel", "pro": "Gelişmiş", "enterprise": "Özel" },
-          { "name": "SLA", "free": false, "pro": false, "enterprise": true },
-          { "name": "Özel yönetici", "free": false, "pro": false, "enterprise": true }
+          { "name": "Uçtan uca şifreleme", "free": true, "pro": true, "enterprise": true },
+          { "name": "2FA doğrulama", "free": true, "pro": true, "enterprise": true },
+          { "name": "SOC 2 uyumluluğu", "free": false, "pro": false, "enterprise": true }
+        ]
+      },
+      {
+        "name": "Destek",
+        "features": [
+          { "name": "Topluluk desteği", "free": true, "pro": true, "enterprise": true },
+          { "name": "Öncelikli e-posta desteği", "free": false, "pro": true, "enterprise": true },
+          { "name": "Özel hesap yöneticisi", "free": false, "pro": false, "enterprise": true },
+          { "name": "SLA garantisi", "free": false, "pro": false, "enterprise": true }
         ]
       }
-    ],
-    "mobileNote": "Tüm özellikleri görmek için yana kaydır"
+    ]
   },
   "faq": {
-    "title": "Sık Sorulan Sorular",
-    "subtitle": "Fiyatlandırma ve faturalama hakkında bilmen gerekenler",
-    "contact": { "text": "Hâlâ soruların mı var?", "link": "Destek ekibimizle iletişime geç" },
+    "title": "SIK SORULAN SORULAR",
+    "subtitle": "Fiyatlandırma ve planlarımız hakkında bilmen gereken her şey",
+    "contact": {
+      "text": "Hâlâ soruların mı var?",
+      "link": "Bize ulaş"
+    },
     "items": [
       {
-        "question": "Ücretsiz denemeden sonra ne olur?",
-        "answer": "14 günlük ücretsiz deneme, Pro özelliklerinin tamamını açar. Deneme bitince seçtiğin aylık veya yıllık ücret uygulanır. Deneme bitmeden istediğin zaman iptal edebilirsin."
+        "question": "Capsule Note'u ücretsiz deneyebilir miyim?",
+        "answer": "Evet! Başlangıç planımız tamamen ücretsiz ve e-posta ile teslimat dahil ayda 3 mektup içeriyor. Zaman kapsülü mektuplarının büyüsünü deneyimlemenin harika bir yolu."
       },
       {
-        "question": "İstediğim zaman iptal edebilir miyim?",
-        "answer": "Elbette. Faturalama ayarlarından istediğin zaman iptal edebilirsin. Fatura döneminin sonuna kadar erişimin devam eder, ek ücret alınmaz."
+        "question": "Mektubum teslim edildiğinde ne olur?",
+        "answer": "Planladığın teslimat tarihinde, mektubunu seçtiğin yöntemle (e-posta veya fiziksel posta) göndeririz. E-posta mektupları anında ulaşır, fiziksel mektuplar ise takipli olarak gönderilir."
       },
       {
-        "question": "Fiziksel posta kredileri nasıl çalışır?",
-        "answer": "Pro üyeleri ayda 2 ücretsiz fiziksel posta hakkı alır. Ek postalar ABD için 3,50$, uluslararası için 5,50$'dır. Krediler devretmez ama istediğin zaman ek satın alabilirsin."
+        "question": "Aboneliğimi istediğim zaman iptal edebilir miyim?",
+        "answer": "Kesinlikle. Pro aboneliğini istediğin zaman iptal edebilirsin. Mevcut planlanmış mektupların yine de teslim edilecek ve fatura döneminin sonuna kadar erişimin devam edecek."
       },
       {
-        "question": "Hangi ödeme yöntemlerini kabul ediyorsunuz?",
-        "answer": "Tüm büyük kredi kartlarını Stripe üzerinden güvenle kabul ediyoruz. Ödeme bilgilerini kendi sunucularımızda saklamıyoruz."
+        "question": "Mektuplarım ne kadar güvende?",
+        "answer": "Tüm mektup içerikleri için banka seviyesinde AES-256 şifreleme kullanıyoruz. Mektupların depolanmadan önce şifrelenir ve sadece teslimat için çözülür. Ekibimiz bile mektuplarını okuyamaz."
       },
       {
-        "question": "Yıllık planlarda indirim var mı?",
-        "answer": "Var! Yıllık ödeme ile aylığa göre %17 tasarruf edersin: 228$/yıl yerine 189$/yıl ödersin."
+        "question": "E-posta ve Fiziksel posta teslimatı arasındaki fark nedir?",
+        "answer": "E-posta teslimatı, mektubunu planlanan tarihte anında gelen kutuna gönderir. Fiziksel posta, mektubunu premium kağıda yazdırır ve USPS veya uluslararası taşıyıcılar aracılığıyla adresine postalar."
       },
       {
-        "question": "İptal edersem mektuplarım ne olur?",
-        "answer": "Mektupların hesabında kalır, görüntüleyebilir ve dışa aktarabilirsin. Ama yeniden abone olana kadar yeni teslimatlar planlayamazsın."
-      },
-      {
-        "question": "İade yapıyor musunuz?",
-        "answer": "Evet, 30 günlük para iade garantisi sunuyoruz. İlk 30 gün içinde memnun kalmazsan tam iade alabilirsin."
-      },
-      {
-        "question": "Planımı yükseltebilir veya düşürebilir miyim?",
-        "answer": "Tabii. Planını istediğin zaman değiştirebilirsin. Yükseltmeler hemen ve orantılı faturalamayla etkinleşir; düşürmeler dönem sonunda geçerli olur."
+        "question": "Şu andan 10 yıl sonrası için mektup planlayabilir miyim?",
+        "answer": "Evet! Pro ve Kurumsal planlar 10 yıl öncesine kadar planlama yapmanı sağlar. Önemli tarihler için zamanında teslimatı garantilemek için 'Varış zamanı' modunu kullanmanı öneririz."
       }
     ]
   },
   "cta": {
-    "title": "Ücretsiz Denemene Hemen Başla",
-    "description": "Gelecekteki kendine anlamlı mektuplar yazan binlerce kişiye katıl. 14 gün ücretsiz dene, istediğin zaman iptal et.",
+    "title": "ZAMAN KAPSÜLÜ YOLCULUĞUNA BAŞLA",
+    "description": "Gelecekteki kendilerine anlamlı mektuplar gönderen binlerce kişiye katıl. Ücretsiz başla, istediğin zaman yükselt.",
     "badges": [
-      "Kredi kartı gerekmez",
       "14 gün ücretsiz deneme",
-      "İstediğin zaman iptal",
-      "30 gün para iadesi garantisi"
+      "Kredi kartı gerekmez",
+      "İstediğin zaman iptal"
     ],
-    "primary": "Ücretsiz Denemeyi Başlat",
-    "secondary": "Sonsuza Dek Ücretsiz Başla",
+    "primary": "ÜCRETSİZ BAŞLA",
+    "secondary": "DEMOYU İZLE",
     "questions": "Soruların mı var?",
-    "contact": "Destek ekibimizle iletişime geç"
+    "contact": "Bize ulaş",
+    "guarantees": [
+      { "icon": "refresh-cw", "text": "14 gün para iade garantisi" },
+      { "icon": "shield", "text": "Banka seviyesi şifreleme" },
+      { "icon": "mail", "text": "%99,9 teslimat oranı" }
+    ]
   },
   "footer": {
     "copyright": "© {year} Capsule Note™ Zaman Kapsülü Mektupları. Özen ve gizlilikle yapıldı.",
