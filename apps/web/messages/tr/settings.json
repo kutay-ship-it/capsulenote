@@ -207,7 +207,9 @@
       "featurePremium": "Premium özellikler",
       "yearlyPrice": "$29",
       "perYear": "/yıl",
-      "upgradeNow": "Şimdi Yükselt"
+      "upgradeNow": "Şimdi Yükselt",
+      "checkoutOpened": "Ödeme yeni sekmede açıldı",
+      "checkoutOpenedDescription": "Satın almayı tamamlayın. Geri döndüğünüzde bu sayfa güncellenecek."
     }
   },
   "privacy": {

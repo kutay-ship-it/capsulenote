@@ -401,7 +401,11 @@ function DigitalCapsuleMailPanel({
     startTransition(async () => {
       const result = await createTrialPhysicalCheckoutSession()
       if (result.success && result.data?.url) {
-        window.location.href = result.data.url
+        // Open in new tab (consistent with other payment flows)
+        window.open(result.data.url, "_blank")
+        toast.info(t("checkoutOpened"), {
+          description: t("checkoutOpenedDescription"),
+        })
         onClose()
       } else if (!result.success) {
         toast.error("Failed to start checkout", {
@@ -416,7 +420,11 @@ function DigitalCapsuleMailPanel({
     try {
       const result = await createUpgradeSession()
       if (result.success) {
-        window.location.href = result.data.url
+        // Open in new tab (consistent with other payment flows)
+        window.open(result.data.url, "_blank")
+        toast.info(t("checkoutOpened"), {
+          description: t("checkoutOpenedDescription"),
+        })
         onClose()
       } else {
         toast.error("Failed to start upgrade", {

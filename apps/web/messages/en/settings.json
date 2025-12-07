@@ -207,7 +207,9 @@
       "featurePremium": "Premium features",
       "yearlyPrice": "$29",
       "perYear": "/year",
-      "upgradeNow": "Upgrade Now"
+      "upgradeNow": "Upgrade Now",
+      "checkoutOpened": "Checkout opened in new tab",
+      "checkoutOpenedDescription": "Complete your purchase. This page will refresh when you return."
     }
   },
   "privacy": {
