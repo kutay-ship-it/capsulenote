@@ -1,21 +1,21 @@
 {
   "metadata": {
     "title": "Fiyatlandırma - Capsule Note",
-    "description": "Mektup yolculuğun için en uygun planı seç. Ücretsiz başla, hazır olduğunda yükselt."
+    "description": "Mektup yolculuğun için en uygun planı seç. Ücretsiz başla, hazır olunca yükselt."
   },
   "upgrade": {
     "loading": "Yükleniyor...",
     "errors": {
       "alreadySubscribed": {
         "title": "Zaten aktif bir aboneliğin var",
-        "description": "Aboneliğini faturalandırma ayarlarından yönetebilirsin"
+        "description": "Aboneliğini faturalama ayarlarından yönetebilirsin"
       },
       "invalidPlan": {
         "title": "Geçersiz plan seçildi",
         "description": "Sayfayı yenileyip tekrar dene"
       },
       "unauthorized": {
-        "title": "Devam etmek için lütfen giriş yap",
+        "title": "Devam etmek için giriş yap",
         "description": "Abone olmak için bir hesaba ihtiyacın var"
       },
       "payment": {
@@ -34,10 +34,10 @@
   },
   "popularBadge": "En Popüler",
   "hero": {
-    "badge": "Şeffaf fiyat",
-    "title": "Planını seç",
+    "badge": "Şeffaf Fiyatlandırma",
+    "title": "Planını Seç",
     "subtitle": "Gelecekteki kendine bugün yazmaya başla. Tüm planlarda şifreli depolama ve güvenilir teslimat var. Başlamak için kredi kartı gerekmez.",
-    "socialProof": "1.000+ mektup yazarı katıldı"
+    "socialProof": "1.000+ mektup yazarı topluluğumuza katıldı"
   },
   "tiers": [
     {
@@ -48,11 +48,11 @@
       "description": "Kendine yazdığın mektuplar için — tamamen dijital teslimat.",
       "features": [
         "Yılda 9 e-posta teslimatı",
-        "100 yıla kadar planlama",
-        "Saat dilimi bilincinde hatırlatmalar",
+        "100 yıl sonrasına kadar planlama",
+        "Saat dilimine duyarlı hatırlatmalar",
         "Şifreli depolama"
       ],
-      "cta": "Dijital'i seç",
+      "cta": "Dijital'i Seç",
       "priceKey": "STRIPE_PRICE_DIGITAL_ANNUAL"
     },
     {
@@ -60,26 +60,26 @@
       "price": 29,
       "interval": "year",
       "intervalLabel": "yıl",
-      "description": "Hediye ve somut hatıralar için — e-posta artı premium posta.",
+      "description": "Hediyeler ve somut anılar için — e-posta artı fiziksel posta.",
       "features": [
         "Yılda 24 e-posta teslimatı",
         "Yılda 3 fiziksel mektup",
         "Adres doğrulama hatırlatmaları",
-        "Öncelikli teslimat yönlendirme"
+        "Öncelikli teslimat"
       ],
-      "cta": "Kağıt & Pikseller'i seç",
+      "cta": "Kağıt & Pikseller'i Seç",
       "priceKey": "STRIPE_PRICE_PAPER_ANNUAL",
       "highlighted": true,
       "popular": true
     }
   ],
-  "matrixTitle": "Planları karşılaştır",
-  "matrixSubtitle": "Her planda neler olduğunu net şekilde gör",
+  "matrixTitle": "Planları Karşılaştır",
+  "matrixSubtitle": "Her planda neler olduğunu net bir şekilde gör",
   "trust": [
-    { "title": "Yıllık krediler", "description": "Plan yılında kullan" },
-    { "title": "Banka seviyesinde güvenlik", "description": "AES-256 şifreleme" },
-    { "title": "Güvenli ödemeler", "description": "Stripe altyapısı" },
-    { "title": "İstediğin zaman iptal", "description": "Uzun vadeli taahhüt yok" }
+    { "title": "Yıllık Krediler", "description": "Plan yılında kullan" },
+    { "title": "Banka Güvenliği", "description": "AES-256 şifreleme" },
+    { "title": "Güvenli Ödemeler", "description": "Stripe altyapısı" },
+    { "title": "İstediğin Zaman İptal", "description": "Taahhüt yok" }
   ],
   "matrix": {
     "headers": { "feature": "Özellikler", "free": "Ücretsiz", "pro": "Pro", "enterprise": "Kurumsal" },
@@ -119,46 +119,46 @@
     "mobileNote": "Tüm özellikleri görmek için yana kaydır"
   },
   "faq": {
-    "title": "Sık sorulan sorular",
+    "title": "Sık Sorulan Sorular",
     "subtitle": "Fiyatlandırma ve faturalama hakkında bilmen gerekenler",
     "contact": { "text": "Hâlâ soruların mı var?", "link": "Destek ekibimizle iletişime geç" },
     "items": [
       {
         "question": "Ücretsiz denemeden sonra ne olur?",
-        "answer": "14 günlük ücretsiz deneme, Pro özelliklerinin tamamını açar. Sonrasında seçtiğin aylık veya yıllık ücret uygulanır. Deneme bitmeden istediğin zaman iptal edebilirsin."
+        "answer": "14 günlük ücretsiz deneme, Pro özelliklerinin tamamını açar. Deneme bitince seçtiğin aylık veya yıllık ücret uygulanır. Deneme bitmeden istediğin zaman iptal edebilirsin."
       },
       {
         "question": "İstediğim zaman iptal edebilir miyim?",
-        "answer": "Evet. Faturalama ayarlarından istediğin zaman iptal edebilirsin. Fatura döneminin sonuna kadar erişimin devam eder, ek ücret alınmaz."
+        "answer": "Elbette. Faturalama ayarlarından istediğin zaman iptal edebilirsin. Fatura döneminin sonuna kadar erişimin devam eder, ek ücret alınmaz."
       },
       {
         "question": "Fiziksel posta kredileri nasıl çalışır?",
-        "answer": "Pro üyeleri ayda 2 ücretsiz fiziksel posta alır. Ek postalar ABD için 3,50$, uluslararası için 5,50$'dır. Krediler devretmez, istediğin zaman ek satın alabilirsin."
+        "answer": "Pro üyeleri ayda 2 ücretsiz fiziksel posta hakkı alır. Ek postalar ABD için 3,50$, uluslararası için 5,50$'dır. Krediler devretmez ama istediğin zaman ek satın alabilirsin."
       },
       {
         "question": "Hangi ödeme yöntemlerini kabul ediyorsunuz?",
         "answer": "Tüm büyük kredi kartlarını Stripe üzerinden güvenle kabul ediyoruz. Ödeme bilgilerini kendi sunucularımızda saklamıyoruz."
       },
       {
-        "question": "Yıllık planlar için indirim var mı?",
-        "answer": "Evet. Aylığa göre %17 tasarruf edersin: 228$/yıl yerine 189$/yıl ödersin."
+        "question": "Yıllık planlarda indirim var mı?",
+        "answer": "Var! Yıllık ödeme ile aylığa göre %17 tasarruf edersin: 228$/yıl yerine 189$/yıl ödersin."
       },
       {
         "question": "İptal edersem mektuplarım ne olur?",
-        "answer": "Mektupların hesabında kalır ve görüntüleyip dışa aktarabilirsin. Ancak yeniden abone olana kadar yeni teslimatlar planlayamazsın."
+        "answer": "Mektupların hesabında kalır, görüntüleyebilir ve dışa aktarabilirsin. Ama yeniden abone olana kadar yeni teslimatlar planlayamazsın."
       },
       {
         "question": "İade yapıyor musunuz?",
-        "answer": "30 günlük para iade garantisi sunuyoruz. İlk 30 gün içinde memnun kalmazsan tam iade alabilirsin."
+        "answer": "Evet, 30 günlük para iade garantisi sunuyoruz. İlk 30 gün içinde memnun kalmazsan tam iade alabilirsin."
       },
       {
         "question": "Planımı yükseltebilir veya düşürebilir miyim?",
-        "answer": "Evet. Planını istediğin zaman değiştirebilirsin. Yükseltmeler hemen ve orantılı faturalamayla etkinleşir; düşürmeler dönem sonunda geçerli olur."
+        "answer": "Tabii. Planını istediğin zaman değiştirebilirsin. Yükseltmeler hemen ve orantılı faturalamayla etkinleşir; düşürmeler dönem sonunda geçerli olur."
       }
     ]
   },
   "cta": {
-    "title": "Ücretsiz denemene hemen başla",
+    "title": "Ücretsiz Denemene Hemen Başla",
     "description": "Gelecekteki kendine anlamlı mektuplar yazan binlerce kişiye katıl. 14 gün ücretsiz dene, istediğin zaman iptal et.",
     "badges": [
       "Kredi kartı gerekmez",
@@ -166,13 +166,13 @@
       "İstediğin zaman iptal",
       "30 gün para iadesi garantisi"
     ],
-    "primary": "Ücretsiz denemeyi başlat",
-    "secondary": "Sonsuza dek ücretsiz başla",
+    "primary": "Ücretsiz Denemeyi Başlat",
+    "secondary": "Sonsuza Dek Ücretsiz Başla",
     "questions": "Soruların mı var?",
     "contact": "Destek ekibimizle iletişime geç"
   },
   "footer": {
-    "copyright": "© {year} Capsule Note™ Zaman Kapsülü Mektupları. Özen ve gizlilikle inşa edildi.",
+    "copyright": "© {year} Capsule Note™ Zaman Kapsülü Mektupları. Özen ve gizlilikle yapıldı.",
     "privacy": "Gizlilik",
     "terms": "Şartlar",
     "home": "Ana Sayfa"

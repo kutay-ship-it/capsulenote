@@ -2,52 +2,52 @@
   "about": {
     "meta": {
       "title": "Hakkımızda | Capsule Note",
-      "description": "Capsule Note'un insanların anlamlı zaman kapsülü mektuplarıyla gelecekteki benlikleriyle bağlantı kurmasına yardımcı olma misyonunu keşfedin."
+      "description": "Capsule Note'un anlamlı zaman kapsülü mektuplarıyla insanları gelecekteki benlikleriyle buluşturma misyonunu keşfedin."
     },
     "hero": {
       "badge": "Hakkımızda",
       "title": "Capsule Note Hakkında",
-      "description": "2024'ten beri insanların zaman aracılığıyla anlamlı mesajlar göndermesine yardımcı oluyoruz."
+      "description": "2024'ten bu yana, insanların zamanda yolculuk yapan anlamlı mesajlar göndermesine yardımcı oluyoruz."
     },
     "sections": {
       "mission": {
         "title": "Misyonumuz",
         "content": [
-          "Capsule Note olarak, yansıtmanın gücüne ve gelecekteki benliğinizle bağlantı kurmanın önemine inanıyoruz. Anlık iletişimin dünyasında, farklı bir şey inşa ediyoruz—şimdiki düşünceleriniz ile gelecekteki anlarınız arasında bir köprü.",
-          "Misyonumuz, insanların düşüncelerini, hayallerini, hedeflerini ve anılarını gelecekte tam da doğru anda teslim edilmek üzere saklamalarına yardımcı olmaktır. İster büyük bir etkinlikten önce bir cesaret mektubu, ister bir dönüm noktası üzerine düşünceler, ister sadece gelecekteki benliğinizin hatırlamasını istediğiniz sözler olsun."
+          "Capsule Note olarak, özüne dönmenin gücüne ve gelecekteki benliğinizle bağlantı kurmanın önemine inanıyoruz. Anlık iletişimin hâkim olduğu bir dünyada, farklı bir şey inşa ediyoruz — bugünkü düşünceleriniz ile yarınki anlarınız arasında bir köprü.",
+          "Misyonumuz, insanların düşüncelerini, hayallerini, hedeflerini ve anılarını gelecekte tam doğru anda teslim edilmek üzere saklamalarına yardımcı olmak. İster önemli bir etkinlik öncesi cesaret mektubu, ister bir dönüm noktası üzerine düşünceler, ister sadece gelecekteki benliğinizin hatırlamasını istediğiniz sözler olsun — biz buradayız."
         ],
-        "highlight": "Bugün yazdığınız her mektup, gelecekteki benliğinize bir hediye olur—kim olduğunuzun bir fotoğrafı, tam da ihtiyacınız olduğunda teslim edilir."
+        "highlight": "Bugün yazdığınız her mektup, gelecekteki benliğinize bir hediye olur — kim olduğunuzun bir anı, tam ihtiyacınız olduğunda teslim edilir."
       },
       "story": {
         "title": "Hikayemiz",
         "content": [
-          "Capsule Note, basit bir fikirden doğdu: Ya kendinize gelecekte bir mektup gönderebilseydiniz? Sadece bir hatırlatıcı veya takvim bildirimi değil, bugün kim olduğunuzu yakalayan gerçek, düşünceli bir mesaj.",
-          "Capsule Note'u, geçmiş benliğinizden sözler almanın ne kadar anlamlı olabileceğini fark ettikten sonra inşa etmeye başladık. Yeni bir işe başlamadan önce yazılan, bir yıllık yıldönümünüzde ulaşan bir mektup. On yıl önce kendinize yazdığınız doğum günü dilekleri. Zor bir dönemde kaleme aldığınız, başarılı olduğunuzda teslim edilen cesaretlendirici sözler.",
-          "Bugün, zaman kapsülü mektuplarını güvenli, güvenilir ve keyifli hale getirmeye kendimizi adadık. İnşa ettiğimiz her özellik, sözlerinizi anları gelene kadar güvende tutmamız için bize duyduğunuz güveni onurlandırmak için tasarlanmıştır."
+          "Capsule Note, basit bir fikirden doğdu: Ya kendinize gelecekte bir mektup gönderebilseydiniz? Sadece bir hatırlatıcı veya takvim bildirimi değil — bugün kim olduğunuzu yakalayan gerçek, düşünceli bir mesaj.",
+          "Capsule Note'u, geçmiş benliğinizden gelen sözlerin ne kadar anlamlı olabileceğini fark ettikten sonra inşa etmeye başladık. Yeni bir işe başlamadan önce yazdığınız, tam bir yıllık yıldönümünüzde ulaşan bir mektup. On yıl önce kendinize yazdığınız doğum günü dilekleri. Zor bir dönemde kaleme aldığınız, başarıya ulaştığınızda teslim edilen cesaretlendirici sözler.",
+          "Bugün, zaman kapsülü mektuplarını güvenli, güvenilir ve keyifli hale getirmeye kendimizi adadık. Geliştirdiğimiz her özellik, sözlerinizi zamanı gelene kadar güvende tutmamız için bize duyduğunuz güveni onurlandırmak üzere tasarlanmıştır."
         ]
       },
       "values": {
         "title": "Değerlerimiz",
-        "intro": "Yaptığımız her şey üç temel ilkeyle yönlendirilir:"
+        "intro": "Yaptığımız her şey üç temel ilkeyle şekilleniyor:"
       }
     },
     "values": {
       "privacy": {
         "title": "Önce Gizlilik",
-        "description": "Mektuplarınız uçtan uca şifrelenir. Kelimenin tam anlamıyla onları okuyamayız. Sözleriniz yalnızca sizindir."
+        "description": "Mektuplarınız uçtan uca şifrelenir. Biz bile okuyamayız. Sözleriniz yalnızca sizindir."
       },
       "time": {
         "title": "Zaman Önemlidir",
-        "description": "Planlanmış teslim zamanlarınıza son derece özen gösteriyoruz. %99,95 zamanında teslimat taahhüdümüzdür."
+        "description": "Planladığınız teslim zamanlarına son derece özen gösteriyoruz. %99,95 zamanında teslimat taahhüdümüzdür."
       },
       "words": {
         "title": "Sözler Kalıcıdır",
-        "description": "Söylemeye değer şeyler saklamaya değerdir. Kalıcılık ve güvenilirlik için inşa ediyoruz."
+        "description": "Söylenmeye değer şeyler saklanmaya değerdir. Kalıcılık ve güvenilirlik için inşa ediyoruz."
       }
     },
     "cta": {
       "title": "Gelecekteki Benliğinize Yazmaya Hazır mısınız?",
-      "description": "İlk zaman kapsülü mektubunuzu bugün başlatın. Başlamak ücretsiz ve sözleriniz tam da ihtiyacınız olduğunda sizi bekliyor olacak.",
+      "description": "İlk zaman kapsülü mektubunuzu bugün yazın. Başlamak ücretsiz — sözleriniz tam ihtiyacınız olduğunda sizi bekliyor olacak.",
       "primaryButton": "İlk Mektubunuzu Yazın",
       "secondaryButton": "Fiyatları Gör"
     }
@@ -61,11 +61,11 @@
     "hero": {
       "badge": "İletişim",
       "title": "Bize Ulaşın",
-      "description": "Bir sorunuz mu var, geri bildiriminiz mi ya da sadece merhaba mı demek istiyorsunuz? Sizden haber almaktan mutluluk duyarız."
+      "description": "Bir sorunuz, öneriniz mi var ya da sadece merhaba mı demek istiyorsunuz? Sizden haber almaktan mutluluk duyarız."
     },
     "formSection": {
       "title": "Bize Mesaj Gönderin",
-      "description": "Aşağıdaki formu doldurun, en kısa sürede size geri dönelim."
+      "description": "Aşağıdaki formu doldurun, en kısa sürede size dönüş yapalım."
     },
     "form": {
       "name": "Adınız",
@@ -87,7 +87,7 @@
       "sending": "Gönderiliyor...",
       "success": {
         "title": "Mesaj Gönderildi!",
-        "description": "Bize ulaştığınız için teşekkürler. 24-48 saat içinde size geri döneceğiz.",
+        "description": "Bize ulaştığınız için teşekkürler. 24-48 saat içinde size dönüş yapacağız.",
         "sendAnother": "Başka Bir Mesaj Gönder"
       }
     },
@@ -117,11 +117,11 @@
   "privacy": {
     "meta": {
       "title": "Gizlilik Politikası | Capsule Note",
-      "description": "Capsule Note'un verilerinizi ve gizliliğinizi nasıl koruduğunu öğrenin. Kapsamlı gizlilik politikamızı okuyun."
+      "description": "Capsule Note'un verilerinizi ve gizliliğinizi nasıl koruduğunu öğrenin. Kapsamlı gizlilik politikamızı inceleyin."
     },
     "hero": {
       "badge": "Gizlilik Politikası",
-      "title": "Gizliliğiniz Önemlidir",
+      "title": "Gizliliğiniz Bizim İçin Önemli",
       "description": "Kişisel bilgilerinizi korumaya ve bunları nasıl kullandığımız konusunda şeffaf olmaya kararlıyız."
     },
     "common": {
@@ -133,12 +133,12 @@
         "title": "Giriş",
         "content": [
           "Bu Gizlilik Politikası, zaman kapsülü mektup hizmetimizi kullandığınızda Capsule Note'un (\"biz\", \"bize\" veya \"bizim\") kişisel bilgilerinizi nasıl topladığını, kullandığını ve koruduğunu açıklar.",
-          "Capsule Note'u kullanarak, bu politikaya uygun olarak bilgilerin toplanmasını ve kullanılmasını kabul etmiş olursunuz. Bu Gizlilik Politikasında açıklananlar dışında bilgilerinizi hiç kimseyle kullanmayacak veya paylaşmayacağız."
+          "Capsule Note'u kullanarak, bu politikaya uygun olarak bilgilerinizin toplanmasını ve kullanılmasını kabul etmiş olursunuz. Bu Gizlilik Politikası'nda açıklananlar dışında bilgilerinizi hiç kimseyle paylaşmayız."
         ]
       },
       "collection": {
         "title": "Topladığımız Bilgiler",
-        "intro": "Hizmetimizi sağlamak ve geliştirmek için çeşitli türde bilgiler topluyoruz:",
+        "intro": "Hizmetimizi sunmak ve iyileştirmek için çeşitli türde bilgiler topluyoruz:",
         "account": {
           "title": "Hesap Bilgileri",
           "items": [
@@ -160,7 +160,7 @@
         "usage": {
           "title": "Kullanım Bilgileri",
           "items": [
-            "Log verileri (IP adresi, tarayıcı türü, ziyaret edilen sayfalar)",
+            "Günlük verileri (IP adresi, tarayıcı türü, ziyaret edilen sayfalar)",
             "Cihaz bilgileri (işletim sistemi, cihaz türü)",
             "Analitik verileri (özellik kullanımı, oturum süresi)"
           ]
@@ -173,11 +173,11 @@
           "Hesabınızı oluşturmak ve yönetmek",
           "Mektuplarınızı planlanan zamanda teslim etmek",
           "İşlemsel e-postalar göndermek (onaylar, teslimat bildirimleri)",
-          "Hizmetimizi geliştirmek ve yeni özellikler geliştirmek",
+          "Hizmetimizi iyileştirmek ve yeni özellikler geliştirmek",
           "Destek taleplerinize yanıt vermek",
           "Dolandırıcılık veya kötüye kullanımı tespit etmek ve önlemek"
         ],
-        "highlight": "Kişisel bilgilerinizi asla üçüncü taraflara satmayız. Mektup içeriğinizi asla reklam veya pazarlama amaçlı kullanmayız."
+        "highlight": "Kişisel bilgilerinizi asla üçüncü taraflara satmayız. Mektup içeriğinizi asla reklam veya pazarlama amacıyla kullanmayız."
       },
       "storage": {
         "title": "Veri Depolama ve Güvenlik",
@@ -186,10 +186,10 @@
           "Tüm mektup içeriği AES-256-GCM şifrelemesi kullanılarak şifrelenir",
           "Veriler güvenli, SOC 2 uyumlu altyapıda depolanır",
           "Tüm veri iletimi TLS 1.3 şifrelemesi kullanır",
-          "Düzenli güvenlik denetimleri ve sızma testleri",
-          "Sıkı erişim kontrolleri ve çalışan eğitimi"
+          "Düzenli güvenlik denetimleri ve sızma testleri yapılır",
+          "Sıkı erişim kontrolleri ve çalışan eğitimleri uygulanır"
         ],
-        "retention": "Hesabınız aktif olduğu sürece verilerinizi saklıyoruz. Hesabınızı silerseniz, yasal amaçlarla saklamamız gereken durumlar dışında kişisel verilerinizi 30 gün içinde sileceğiz."
+        "retention": "Hesabınız aktif olduğu sürece verilerinizi saklıyoruz. Hesabınızı silerseniz, yasal nedenlerle saklamamız gereken durumlar dışında kişisel verilerinizi 30 gün içinde sileriz."
       },
       "sharing": {
         "title": "Bilgi Paylaşımı",
@@ -209,7 +209,7 @@
             { "service": "Inngest", "purpose": "İş planlama", "data": "Teslimat meta verileri" }
           ]
         },
-        "noSelling": "Kişisel bilgilerinizi asla pazarlama amaçlarıyla üçüncü taraflara satmıyoruz, kiralamıyoruz veya paylaşmıyoruz."
+        "noSelling": "Kişisel bilgilerinizi asla pazarlama amacıyla üçüncü taraflara satmıyoruz, kiralamıyoruz veya paylaşmıyoruz."
       },
       "cookies": {
         "title": "Çerezler ve İzleme",
@@ -232,12 +232,12 @@
         "title": "Haklarınız",
         "intro": "Kişisel verilerinizle ilgili aşağıdaki haklara sahipsiniz:",
         "items": [
-          "Erişim: Kişisel verilerinizin bir kopyasını talep edin",
-          "Düzeltme: Hatalı kişisel verileri düzeltin",
-          "Silme: Kişisel verilerinizin silinmesini talep edin",
-          "Taşınabilirlik: Verilerinizi makine tarafından okunabilir bir formatta dışa aktarın",
-          "İtiraz: Verilerinizin belirli işlemlerine itiraz edin",
-          "Kısıtlama: Verilerinizin sınırlı işlenmesini talep edin"
+          "Erişim: Kişisel verilerinizin bir kopyasını talep edebilirsiniz",
+          "Düzeltme: Hatalı kişisel verilerinizi düzelttirebilirsiniz",
+          "Silme: Kişisel verilerinizin silinmesini talep edebilirsiniz",
+          "Taşınabilirlik: Verilerinizi makine tarafından okunabilir formatta dışa aktarabilirsiniz",
+          "İtiraz: Verilerinizin belirli işlemlerine itiraz edebilirsiniz",
+          "Kısıtlama: Verilerinizin sınırlı işlenmesini talep edebilirsiniz"
         ],
         "exportButton": "Verilerimi Dışa Aktar",
         "deleteButton": "Hesabımı Sil"
@@ -251,7 +251,7 @@
           "Yerel veri koruma yetkilinize şikayette bulunabilirsiniz",
           "Gerektiğinde Veri Koruma Etki Değerlendirmeleri yapıyoruz"
         ],
-        "legal": "Yasal işleme gerekçelerimiz şunları içerir: sözleşme ifası (mektuplarınızın teslimi), onay (pazarlama iletişimleri) ve meşru menfaatler (hizmetimizi geliştirme, dolandırıcılığı önleme)."
+        "legal": "Yasal işleme gerekçelerimiz: sözleşme ifası (mektuplarınızın teslimi), onay (pazarlama iletişimleri) ve meşru menfaatler (hizmetimizi iyileştirme, dolandırıcılığı önleme)."
       },
       "contact": {
         "title": "Bize Ulaşın",
@@ -261,8 +261,8 @@
       "changes": {
         "title": "Politika Değişiklikleri",
         "content": [
-          "Bu Gizlilik Politikasını zaman zaman güncelleyebiliriz. Önemli değişiklikleri bu sayfada yeni politikayı yayınlayarak ve \"Son güncelleme\" tarihini güncelleyerek bildireceğiz.",
-          "Önemli değişiklikler için, değişiklikler yürürlüğe girmeden en az 30 gün önce e-posta yoluyla da bilgilendireceğiz."
+          "Bu Gizlilik Politikası'nı zaman zaman güncelleyebiliriz. Önemli değişiklikleri bu sayfada yeni politikayı yayınlayarak ve \"Son güncelleme\" tarihini güncelleyerek bildiririz.",
+          "Önemli değişiklikler için, değişiklikler yürürlüğe girmeden en az 30 gün önce e-posta ile de bilgilendirme yaparız."
         ]
       }
     }
@@ -275,8 +275,8 @@
     },
     "hero": {
       "badge": "Güvenlik",
-      "title": "Mektuplarınız, Korunuyor",
-      "description": "Güvenlik bir sonradan düşünce değildir—inşa ettiğimiz her şeyin temelidir."
+      "title": "Mektuplarınız Güvende",
+      "description": "Güvenlik sonradan eklenen bir özellik değil — inşa ettiğimiz her şeyin temelidir."
     },
     "pillars": {
       "encryption": {
@@ -285,27 +285,27 @@
       },
       "infrastructure": {
         "title": "Altyapı",
-        "description": "Çok katmanlı korumaya sahip kurumsal düzeyde bulut altyapısı."
+        "description": "Çok katmanlı koruma sağlayan kurumsal düzeyde bulut altyapısı."
       },
       "access": {
         "title": "Erişim Kontrolü",
-        "description": "Sıkı erişim kontrolleri yalnızca sizin mektuplarınızı okumanızı sağlar."
+        "description": "Sıkı erişim kontrolleri sayesinde mektuplarınızı yalnızca siz okuyabilirsiniz."
       }
     },
     "sections": {
       "overview": {
         "title": "Güvenlik Genel Bakış",
         "content": [
-          "Capsule Note olarak, en kişisel düşüncelerinizi ve anılarınızı bize emanet ettiğinizi anlıyoruz. Bu sorumluluğu ciddiye alıyoruz ve platformumuzu güvenliği temel bir ilke olarak inşa ettik.",
-          "Güvenlik mimarimiz \"sıfır bilgi\" konsepti etrafında tasarlanmıştır—yani istesek bile mektup içeriğinize erişemeyiz. Mektuplarınız sunucularımızda şifrelenir ve şifresini çözecek anahtarlar yalnızca sizde bulunur."
+          "Capsule Note olarak, en kişisel düşüncelerinizi ve anılarınızı bize emanet ettiğinizin farkındayız. Bu sorumluluğu ciddiye alıyoruz ve platformumuzu güvenliği temel ilke olarak inşa ettik.",
+          "Güvenlik mimarimiz \"sıfır bilgi\" konsepti üzerine tasarlanmıştır — yani istesek bile mektup içeriğinize erişemeyiz. Mektuplarınız sunucularımızda şifrelenir ve şifreyi çözecek anahtarlar yalnızca sizde bulunur."
         ]
       },
       "encryption": {
         "title": "Şifreleme",
-        "intro": "Tüm mektup içeriği endüstri standardı şifreleme algoritmaları kullanılarak şifrelenir:",
+        "intro": "Tüm mektup içeriği endüstri standardı şifreleme algoritmaları kullanılarak korunur:",
         "highlight": {
           "title": "Sıfır Bilgi Mimarisi",
-          "description": "Mektuplarınızı okuyamayız. İçeriğiniz, hesabınızdan türetilen anahtarlar kullanılarak depolamadan önce şifrelenir, bu da mektup içeriğinize erişmemizi matematiksel olarak imkansız kılar."
+          "description": "Mektuplarınızı okuyamayız. İçeriğiniz, hesabınızdan türetilen anahtarlar kullanılarak depolamadan önce şifrelenir — bu da mektup içeriğinize erişmemizi matematiksel olarak imkansız kılar."
         },
         "specs": {
           "title": "Teknik Özellikler",
@@ -314,18 +314,18 @@
           "transport": "İletim",
           "nonce": "Nonce"
         },
-        "zeroKnowledge": "Her mektup benzersiz bir nonce ile şifrelenir, böylece özdeş içerik bile farklı şifreli metin üretir. Mevcut tüm içeriği yeniden şifrelemeden periyodik anahtar güncellemelerine izin vermek için anahtar rotasyonu desteklenir."
+        "zeroKnowledge": "Her mektup benzersiz bir nonce ile şifrelenir, böylece aynı içerik bile farklı şifreli metin üretir. Mevcut içeriği yeniden şifrelemeden periyodik anahtar güncellemelerine olanak tanıyan anahtar rotasyonu da desteklenir."
       },
       "infrastructure": {
         "title": "Altyapı Güvenliği",
-        "intro": "Altyapımız, çok katmanlı güvenliğe sahip kurumsal düzeyde bulut platformları üzerine inşa edilmiştir:",
+        "intro": "Altyapımız, çok katmanlı güvenlik sağlayan kurumsal düzeyde bulut platformları üzerine inşa edilmiştir:",
         "features": [
           "SOC 2 Tip II uyumlu bulut altyapısı",
           "Durağan ve aktarım halinde veritabanı şifrelemesi",
-          "Anlık kurtarma ile otomatik günlük yedeklemeler",
+          "Anlık kurtarma destekli otomatik günlük yedeklemeler",
           "DDoS koruması ve Web Uygulaması Güvenlik Duvarı (WAF)",
           "Ağ izolasyonu ve VPC mimarisi",
-          "Düzenli güvenlik açığı taraması ve yama"
+          "Düzenli güvenlik açığı taraması ve yama uygulaması"
         ]
       },
       "access": {
@@ -335,9 +335,9 @@
           "Tüm yönetici erişimi için çok faktörlü kimlik doğrulama",
           "En az ayrıcalık ilkesiyle rol tabanlı erişim kontrolü (RBAC)",
           "Tüm veri erişiminin kapsamlı denetim kaydı",
-          "Düzenli erişim incelemeleri ve sertifikasyonu",
+          "Düzenli erişim incelemeleri ve sertifikasyonlar",
           "Güvenli geliştirme uygulamaları ve kod incelemesi",
-          "Çalışan güvenlik eğitimi ve geçmiş kontrolleri"
+          "Çalışan güvenlik eğitimi ve özgeçmiş kontrolleri"
         ]
       },
       "compliance": {
@@ -346,18 +346,18 @@
         "certifications": [
           { "name": "GDPR", "description": "AB veri koruma gereksinimleriyle uyumlu" },
           { "name": "CCPA", "description": "Kaliforniya gizlilik gereksinimleriyle uyumlu" },
-          { "name": "TLS 1.3", "description": "En son taşıma katmanı güvenlik protokolü" },
+          { "name": "TLS 1.3", "description": "En güncel taşıma katmanı güvenlik protokolü" },
           { "name": "AES-256", "description": "Askeri düzeyde şifreleme standardı" }
         ]
       },
       "reporting": {
         "title": "Güvenlik Raporlama",
-        "intro": "Tüm güvenlik raporlarını ciddiye alıyoruz ve güvenlik araştırma topluluğunun Capsule Note'u güvende tutmaya yönelik çabalarını takdir ediyoruz.",
+        "intro": "Tüm güvenlik raporlarını ciddiye alıyoruz ve güvenlik araştırma topluluğunun Capsule Note'u güvende tutmaya yönelik çabalarına değer veriyoruz.",
         "contact": {
           "title": "Bir Güvenlik Açığı Bildirin",
-          "description": "Capsule Note'ta bir güvenlik açığı bulduğunuza inanıyorsanız, lütfen sorumlu bir şekilde bildirin:"
+          "description": "Capsule Note'ta bir güvenlik açığı keşfettiğinize inanıyorsanız, lütfen sorumlu bir şekilde bildirin:"
         },
-        "process": "Raporunuzun alındığını 48 saat içinde onaylayacak ve soruşturmamız hakkında düzenli güncellemeler sağlayacağız. Sorumlu açıklama uygulamalarını takip eden güvenlik araştırmacılarına karşı yasal işlem başlatmıyoruz."
+        "process": "Raporunuzun alındığını 48 saat içinde onaylayacak ve soruşturmamız hakkında düzenli güncellemeler sağlayacağız. Sorumlu açıklama ilkelerine uyan güvenlik araştırmacılarına karşı yasal işlem başlatmıyoruz."
       }
     }
   },
@@ -365,7 +365,7 @@
   "terms": {
     "meta": {
       "title": "Kullanım Şartları | Capsule Note",
-      "description": "Capsule Note'un zaman kapsülü mektup hizmetini kullanmak için şartları ve koşulları okuyun."
+      "description": "Capsule Note'un zaman kapsülü mektup hizmetini kullanmak için geçerli şartları ve koşulları inceleyin."
     },
     "hero": {
       "badge": "Kullanım Şartları",
@@ -380,20 +380,20 @@
       "acceptance": {
         "title": "Şartların Kabulü",
         "content": [
-          "Capsule Note'a (\"Hizmet\") erişerek veya kullanarak, bu Kullanım Şartları'na (\"Şartlar\") bağlı olmayı kabul ediyorsunuz. Bu şartların herhangi bir bölümüne katılmıyorsanız, Hizmete erişemezsiniz.",
-          "Bu Şartlar, Hizmete erişen veya kullanan tüm ziyaretçiler, kullanıcılar ve diğerleri için geçerlidir. Hizmeti kullanarak, en az 16 yaşında olduğunuzu beyan edersiniz."
+          "Capsule Note'a (\"Hizmet\") erişerek veya kullanarak, bu Kullanım Şartları'na (\"Şartlar\") bağlı olmayı kabul etmiş olursunuz. Bu şartların herhangi bir bölümünü kabul etmiyorsanız, Hizmete erişemezsiniz.",
+          "Bu Şartlar, Hizmete erişen veya kullanan tüm ziyaretçiler, kullanıcılar ve diğer kişiler için geçerlidir. Hizmeti kullanarak, en az 16 yaşında olduğunuzu beyan etmiş olursunuz."
         ],
-        "warning": "Bu Şartları kabul etmiyorsanız, lütfen Hizmetimizi kullanmayın. Süregelen kullanımınız bu Şartları kabul ettiğiniz anlamına gelir."
+        "warning": "Bu Şartları kabul etmiyorsanız, lütfen Hizmetimizi kullanmayın. Hizmeti kullanmaya devam etmeniz, bu Şartları kabul ettiğiniz anlamına gelir."
       },
       "description": {
         "title": "Hizmet Açıklaması",
-        "intro": "Capsule Note, şunları yapmanızı sağlayan bir zaman kapsülü mektup hizmetidir:",
+        "intro": "Capsule Note, aşağıdakileri yapmanızı sağlayan bir zaman kapsülü mektup hizmetidir:",
         "features": [
-          "Gelecekte teslim edilmek üzere mektuplar yazın ve kaydedin",
-          "Mektupları e-posta yoluyla kendinize veya başkalarına teslim edilmek üzere planlayın",
-          "İsteğe bağlı olarak posta yoluyla fiziksel mektuplar gönderin",
-          "Mektup koleksiyonunuzu saklayın ve yönetin",
-          "Mektuplarınıza herhangi bir cihazdan erişin"
+          "Gelecekte teslim edilmek üzere mektuplar yazma ve kaydetme",
+          "Mektupları e-posta yoluyla kendinize veya başkalarına teslim edilmek üzere planlama",
+          "İsteğe bağlı olarak posta yoluyla fiziksel mektuplar gönderme",
+          "Mektup koleksiyonunuzu saklama ve yönetme",
+          "Mektuplarınıza herhangi bir cihazdan erişme"
         ]
       },
       "accounts": {
@@ -413,8 +413,8 @@
           "items": [
             "Hesabınız altındaki tüm faaliyetlerden siz sorumlusunuz",
             "Yetkisiz erişimi derhal bize bildirmelisiniz",
-            "Hizmeti herhangi bir yasadışı amaç için kullanmamalısınız",
-            "Geçerli tüm yasa ve düzenlemelere uymalısınız"
+            "Hizmeti herhangi bir yasadışı amaçla kullanmamalısınız",
+            "Yürürlükteki tüm yasa ve düzenlemelere uymalısınız"
           ]
         }
       },
@@ -423,10 +423,10 @@
         "intro": "Hizmetin bazı özellikleri ödeme gerektirir:",
         "items": [
           "Fiyatlar mümkün olduğunda yerel para biriminizde görüntülenir",
-          "Tüm ödemeler Stripe aracılığıyla güvenli bir şekilde işlenir",
+          "Tüm ödemeler Stripe aracılığıyla güvenli şekilde işlenir",
           "Abonelikler iptal edilmediği sürece otomatik olarak yenilenir",
           "Aboneliğinizi istediğiniz zaman hesap ayarlarınızdan iptal edebilirsiniz",
-          "Kullanılmayan krediler hesabınız aktif olduğu sürece sona ermez"
+          "Kullanılmayan krediler hesabınız aktif olduğu sürece geçerliliğini korur"
         ],
         "refunds": {
           "title": "İade Politikası",
@@ -435,47 +435,47 @@
       },
       "content": {
         "title": "Kullanıcı İçeriği",
-        "ownership": "Mektuplarınız, taslaklar ve yüklediğiniz veya oluşturduğunuz diğer materyaller dahil olmak üzere Capsule Note'ta oluşturduğunuz tüm içeriğin sahipliğini korursunuz.",
-        "license": "Hizmeti kullanarak, içeriğinizi yalnızca Hizmeti sağlamak amacıyla depolamak, işlemek ve iletmek için bize sınırlı bir lisans verirsiniz. İçeriğinizi onayınız olmadan başka bir amaç için kullanmayacağız.",
+        "ownership": "Mektuplarınız, taslaklarınız ve yüklediğiniz veya oluşturduğunuz diğer materyaller dahil olmak üzere Capsule Note'ta oluşturduğunuz tüm içeriğin sahipliği size aittir.",
+        "license": "Hizmeti kullanarak, içeriğinizi yalnızca Hizmeti sağlamak amacıyla depolamak, işlemek ve iletmek için bize sınırlı bir lisans vermiş olursunuz. İçeriğinizi onayınız olmadan başka bir amaçla kullanmayız.",
         "encryption": "Mektup içeriğiniz şifrelenir ve biz ona erişemeyiz. Bu, mektuplarınızın içeriğini izleyemeyeceğimiz, inceleyemeyeceğimiz veya denetleyemeyeceğimiz anlamına gelir."
       },
       "prohibited": {
         "title": "Yasaklanan Kullanımlar",
-        "intro": "Capsule Note'u aşağıdakilerden herhangi biri için kullanamazsınız:",
+        "intro": "Capsule Note'u aşağıdaki amaçlarla kullanamazsınız:",
         "items": [
-          "Başkalarına tehdit edici, taciz edici veya istismara yönelik içerik göndermek",
+          "Başkalarına tehdit edici, taciz edici veya kötü niyetli içerik göndermek",
           "Spam veya istenmeyen ticari mesajlar göndermek",
-          "Başka bir kişi veya kuruluşu taklit etmek",
+          "Başka bir kişi veya kuruluşun kimliğine bürünmek",
           "Sistemlerimize yetkisiz erişim sağlamaya çalışmak",
           "Diğer kullanıcıların Hizmeti kullanmasını engellemek",
-          "Herhangi bir geçerli yasa veya düzenlemeyi ihlal etmek",
-          "Kötü amaçlı yazılım veya diğer zararlı kodları iletmek",
+          "Yürürlükteki herhangi bir yasa veya düzenlemeyi ihlal etmek",
+          "Kötü amaçlı yazılım veya zararlı kod iletmek",
           "İzinsiz Hizmete erişmek için otomatik sistemler kullanmak"
         ],
-        "warning": "Bu şartların ihlali, hesabınızın derhal feshedilmesine ve uygulanabilir olduğunda kolluk kuvvetlerine sevk edilmesine neden olabilir."
+        "warning": "Bu şartların ihlali, hesabınızın derhal feshedilmesine ve gerektiğinde kolluk kuvvetlerine bildirilmesine yol açabilir."
       },
       "intellectual": {
         "title": "Fikri Mülkiyet",
-        "ownership": "Hizmet ve orijinal içeriği (kullanıcı içeriği hariç), özellikleri ve işlevselliği Capsule Note'a aittir ve uluslararası telif hakkı, ticari marka ve diğer fikri mülkiyet yasaları ile korunmaktadır.",
-        "restrictions": "Hizmetimizin herhangi bir bölümünü kopyalayamaz, değiştiremez, dağıtamaz, satamaz veya kiralayamazsınız, ne de yazılımımızın kaynak kodunu tersine mühendislik yapamaz veya çıkarmaya çalışamazsınız."
+        "ownership": "Hizmet ve orijinal içeriği (kullanıcı içeriği hariç), özellikleri ve işlevselliği Capsule Note'a aittir ve uluslararası telif hakkı, ticari marka ve diğer fikri mülkiyet yasalarıyla korunmaktadır.",
+        "restrictions": "Hizmetimizin herhangi bir bölümünü kopyalayamaz, değiştiremez, dağıtamaz, satamaz veya kiralayamazsınız. Yazılımımızın kaynak kodunu tersine mühendislik yoluyla elde etmeye veya çıkarmaya çalışamazsınız."
       },
       "termination": {
         "title": "Fesih",
         "byUser": {
           "title": "Sizin Tarafınızdan Fesih",
-          "content": "Hesabınızı istediğiniz zaman hesap ayarlarınızdan feshedebilirsiniz. Fesih üzerine, planlanmış mektuplarınız iptal edilecek ve verileriniz 30 gün içinde silinecektir."
+          "content": "Hesabınızı istediğiniz zaman hesap ayarlarınızdan feshedebilirsiniz. Fesih üzerine planlanmış mektuplarınız iptal edilir ve verileriniz 30 gün içinde silinir."
         },
         "byUs": {
           "title": "Tarafımızdan Fesih",
-          "content": "Bu Şartları ihlal ederseniz, hesabınızı önceden haber vermeksizin derhal feshedebilir veya askıya alabiliriz. Ayrıca 90 gün önceden kullanıcılara haber vererek Hizmeti tamamen sonlandırabiliriz."
+          "content": "Bu Şartları ihlal etmeniz halinde, hesabınızı önceden haber vermeksizin derhal feshedebilir veya askıya alabiliriz. Ayrıca 90 gün önceden kullanıcılara bildirerek Hizmeti tamamen sonlandırma hakkını saklı tutarız."
         },
         "effects": {
           "title": "Feshin Etkileri",
           "items": [
-            "Hizmeti kullanma hakkınız derhal sona erecektir",
-            "Tüm planlanmış mektuplar iptal edilecektir",
-            "Verileriniz 30 gün içinde silinecektir",
-            "Ön ödemeli krediler iade edilmediği sürece kaybedilecektir"
+            "Hizmeti kullanma hakkınız derhal sona erer",
+            "Tüm planlanmış mektuplar iptal edilir",
+            "Verileriniz 30 gün içinde silinir",
+            "Ön ödemeli krediler iade edilmediği sürece geçerliliğini yitirir"
           ]
         }
       },
@@ -483,15 +483,15 @@
         "title": "Sorumluluk Reddi",
         "content": [
           "Hizmet, satılabilirlik, belirli bir amaca uygunluk ve ihlal etmeme garantileri dahil ancak bunlarla sınırlı olmamak üzere, açık veya zımni herhangi bir garanti olmaksızın \"olduğu gibi\" ve \"mevcut olduğu şekliyle\" sağlanır.",
-          "Hizmetin kesintisiz, güvenli veya hatasız olacağını garanti etmiyoruz. %99,95 zamanında teslim için çabalamamıza rağmen, mektupların her koşulda tam zamanında teslim edileceğini garanti etmiyoruz."
+          "Hizmetin kesintisiz, güvenli veya hatasız olacağını garanti etmiyoruz. %99,95 zamanında teslimat için çaba göstermemize rağmen, mektupların her koşulda tam zamanında teslim edileceğini garanti edemeyiz."
         ],
-        "highlight": "Güvenilir teslimat için çabalamamıza rağmen, kontrolümüz dışındaki faktörler (e-posta filtreleme, sunucu sorunları vb.) zaman zaman teslimat zamanlamasını etkileyebilir."
+        "highlight": "Güvenilir teslimat için çaba göstermemize rağmen, kontrolümüz dışındaki faktörler (e-posta filtreleme, sunucu sorunları vb.) zaman zaman teslimat zamanlamasını etkileyebilir."
       },
       "liability": {
         "title": "Sorumluluğun Sınırlandırılması",
         "content": [
-          "Yasaların izin verdiği azami ölçüde, Capsule Note, Hizmeti kullanımınızdan kaynaklanan dolaylı, arızi, özel, sonuç olarak ortaya çıkan veya cezai zararlardan sorumlu olmayacaktır.",
-          "Bu, kâr, itibar, kullanım, veri veya diğer maddi olmayan kayıplar için zararları içerir ancak bunlarla sınırlı değildir, bu tür zararların olasılığı hakkında bilgilendirilmiş olsak bile."
+          "Yasaların izin verdiği azami ölçüde, Capsule Note, Hizmeti kullanımınızdan kaynaklanan dolaylı, arızi, özel, sonuç olarak ortaya çıkan veya cezai zararlardan sorumlu tutulamaz.",
+          "Bu, kâr, itibar, kullanım, veri veya diğer maddi olmayan kayıplar için zararları içerir ancak bunlarla sınırlı değildir — bu tür zararların olasılığı konusunda bilgilendirilmiş olsak bile."
         ],
         "maxLiability": {
           "title": "Azami Sorumluluk:",
@@ -501,15 +501,15 @@
       "governing": {
         "title": "Geçerli Hukuk",
         "content": [
-          "Bu Şartlar, Capsule Note'un kurulduğu yargı yetkisinin yasalarına göre, kanun ihtilafı hükümleri dikkate alınmaksızın yönetilecek ve yorumlanacaktır.",
-          "Bu Şartlardan veya Hizmetten kaynaklanan herhangi bir anlaşmazlık, geçerli tahkim birliğinin kurallarına uygun olarak bağlayıcı tahkim yoluyla çözülecektir."
+          "Bu Şartlar, Capsule Note'un kurulduğu yargı yetkisinin yasalarına göre, kanunlar ihtilafı hükümleri dikkate alınmaksızın yönetilir ve yorumlanır.",
+          "Bu Şartlardan veya Hizmetten kaynaklanan herhangi bir anlaşmazlık, geçerli tahkim kuruluşunun kurallarına uygun olarak bağlayıcı tahkim yoluyla çözülecektir."
         ]
       },
       "changes": {
         "title": "Şartlardaki Değişiklikler",
         "content": [
-          "Bu Şartları istediğimiz zaman değiştirme hakkını saklı tutuyoruz. Önemli değişiklikleri bu sayfada güncellenmiş Şartları yayınlayarak ve \"Son güncelleme\" tarihini güncelleyerek bildireceğiz.",
-          "Önemli değişiklikler için, değişiklikler yürürlüğe girmeden en az 30 gün önce e-posta yoluyla bilgilendireceğiz. Değişiklikler yürürlüğe girdikten sonra Hizmeti kullanmaya devam etmeniz, yeni Şartları kabul ettiğiniz anlamına gelir."
+          "Bu Şartları istediğimiz zaman değiştirme hakkını saklı tutuyoruz. Önemli değişiklikleri bu sayfada güncellenmiş Şartları yayınlayarak ve \"Son güncelleme\" tarihini güncelleyerek bildiririz.",
+          "Önemli değişiklikler için, değişiklikler yürürlüğe girmeden en az 30 gün önce e-posta ile bilgilendirme yaparız. Değişiklikler yürürlüğe girdikten sonra Hizmeti kullanmaya devam etmeniz, yeni Şartları kabul ettiğiniz anlamına gelir."
         ],
         "questions": "Şartlarımız hakkında sorularınız mı var?"
       }
