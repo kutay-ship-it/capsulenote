@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { getTranslations } from "next-intl/server"
 import { CustomResetPasswordForm } from "@/components/auth/custom-reset-password"
 
 export const metadata: Metadata = {
@@ -9,15 +10,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function ResetPasswordPage() {
+export default async function ResetPasswordPage() {
+  const t = await getTranslations("auth.resetPasswordPage")
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20">
       <div className="w-full max-w-md px-4">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Reset Password</h1>
-          <p className="mt-2 text-muted-foreground">
-            We’ll email you a verification code to set a new password.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
         </div>
         <CustomResetPasswordForm />
       </div>

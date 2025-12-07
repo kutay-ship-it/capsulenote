@@ -1,4 +1,17 @@
 {
+  "page": {
+    "title": "Welcome to Capsule Note!",
+    "hasDraft": {
+      "subtitle": "Your letter is ready to finish and send.",
+      "button": "Continue My Letter",
+      "hint": "Review and edit before sending"
+    },
+    "noDraft": {
+      "subtitle": "Let's write your first letter to the future.",
+      "button": "Write My First Letter",
+      "hint": "Create a message to your future self"
+    }
+  },
   "checking": {
     "title": "Checking for draft..."
   },

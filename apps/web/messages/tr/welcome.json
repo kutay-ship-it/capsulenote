@@ -1,4 +1,17 @@
 {
+  "page": {
+    "title": "Capsule Note'a Hoş Geldin!",
+    "hasDraft": {
+      "subtitle": "Mektubun tamamlanmaya ve gönderilmeye hazır.",
+      "button": "Mektubuma Devam Et",
+      "hint": "Göndermeden önce gözden geçir ve düzenle"
+    },
+    "noDraft": {
+      "subtitle": "Geleceğe ilk mektubunu yazalım.",
+      "button": "İlk Mektubumu Yaz",
+      "hint": "Gelecekteki kendine bir mesaj oluştur"
+    }
+  },
   "checking": {
     "title": "Taslak kontrol ediliyor..."
   },

@@ -41,12 +41,12 @@ export default function WelcomePage() {
             </div>
             <div className="space-y-2">
               <h2 className="font-mono text-2xl font-bold uppercase tracking-wide text-charcoal">
-                Welcome to Capsule Note!
+                {t("page.title")}
               </h2>
               <p className="font-mono text-sm text-gray-secondary">
                 {hasDraft
-                  ? "Your letter is ready to finish and send."
-                  : "Let's write your first letter to the future."}
+                  ? t("page.hasDraft.subtitle")
+                  : t("page.noDraft.subtitle")}
               </p>
             </div>
 
@@ -57,13 +57,13 @@ export default function WelcomePage() {
                 style={{ borderRadius: "2px" }}
               >
                 <Link href="/letters/new">
-                  {hasDraft ? "Continue My Letter" : "Write My First Letter"}
+                  {hasDraft
+                    ? t("page.hasDraft.button")
+                    : t("page.noDraft.button")}
                 </Link>
               </Button>
               <p className="font-mono text-xs text-charcoal/60">
-                {hasDraft
-                  ? "Review and edit before sending"
-                  : "Create a message to your future self"}
+                {hasDraft ? t("page.hasDraft.hint") : t("page.noDraft.hint")}
               </p>
             </div>
           </div>

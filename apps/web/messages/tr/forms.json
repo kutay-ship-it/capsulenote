@@ -221,5 +221,31 @@
       },
       "upgrade": "Yükselt"
     }
+  },
+  "writeLetter": {
+    "hero": {
+      "title": "Mektup Yazmayı Dene",
+      "subtitle": "Hemen yazmaya başla • Kayıt gerekmez • Yerel olarak kaydedilir"
+    },
+    "trustSection": {
+      "title": "Neden Capsule Note?",
+      "features": {
+        "encryption": {
+          "icon": "🔒",
+          "title": "Uçtan Uca Şifreli",
+          "description": "AES-256-GCM şifreleme. Mektuplarını yalnızca sen okuyabilirsin."
+        },
+        "delivery": {
+          "icon": "⏰",
+          "title": "%99,95 Zamanında Teslimat",
+          "description": "Dayanıklı iş akışları mektuplarının tam zamanında ulaşmasını sağlar."
+        },
+        "free": {
+          "icon": "🌱",
+          "title": "Sonsuza Kadar Ücretsiz Plan",
+          "description": "Ayda 5 mektup, her zaman ücretsiz. Sınırsız için istediğin zaman yükselt."
+        }
+      }
+    }
   }
 }

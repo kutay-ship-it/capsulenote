@@ -221,5 +221,31 @@
       },
       "upgrade": "Upgrade"
     }
+  },
+  "writeLetter": {
+    "hero": {
+      "title": "Try Writing a Letter",
+      "subtitle": "Start writing immediately • No sign-up required • Saved locally"
+    },
+    "trustSection": {
+      "title": "Why Capsule Note?",
+      "features": {
+        "encryption": {
+          "icon": "🔒",
+          "title": "End-to-End Encrypted",
+          "description": "AES-256-GCM encryption. Only you can read your letters."
+        },
+        "delivery": {
+          "icon": "⏰",
+          "title": "99.95% On-Time Delivery",
+          "description": "Durable workflows ensure your letters arrive exactly on schedule."
+        },
+        "free": {
+          "icon": "🌱",
+          "title": "Free Forever Plan",
+          "description": "5 letters per month, always free. Upgrade anytime for unlimited."
+        }
+      }
+    }
   }
 }
