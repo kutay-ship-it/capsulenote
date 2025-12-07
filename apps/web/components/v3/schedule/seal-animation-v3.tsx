@@ -145,7 +145,7 @@ export function SealAnimationV3({
 
         {/* Confetti Burst */}
         <AnimatePresence>
-          {showConfetti && <BrutalistConfetti count={50} originY="40vh" />}
+          {showConfetti && <BrutalistConfetti count={50} />}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">

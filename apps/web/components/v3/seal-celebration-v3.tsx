@@ -75,7 +75,7 @@ export function SealCelebrationV3({
         <DialogTitle className="sr-only">{t("sealing")}</DialogTitle>
         {/* Confetti */}
         <AnimatePresence>
-          {showConfetti && <BrutalistConfetti count={40} originY="40vh" />}
+          {showConfetti && <BrutalistConfetti count={40} />}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">

@@ -13,7 +13,7 @@ export function UnlockAnimationV3() {
       className="flex flex-col items-center justify-center space-y-8"
     >
       {/* Confetti burst */}
-      <BrutalistConfetti count={50} originY="50vh" />
+      <BrutalistConfetti count={50} />
 
       {/* Breaking seal animation */}
       <motion.div

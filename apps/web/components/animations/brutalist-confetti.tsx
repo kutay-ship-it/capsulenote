@@ -16,8 +16,9 @@ interface ConfettiParticle {
   id: number
   isSquare: boolean
   size: number
-  targetX: string
-  targetY: string
+  // Use pixel offsets for reliable animation
+  offsetX: number
+  offsetY: number
   rotation: number
   duration: number
   delay: number
@@ -27,18 +28,12 @@ interface ConfettiParticle {
 interface BrutalistConfettiProps {
   /** Number of confetti particles (default: 50) */
   count?: number
-  /** Origin X position in viewport units (default: "50vw") */
-  originX?: string
-  /** Origin Y position in viewport units (default: "40vh") */
-  originY?: string
   /** Called when all particles have finished animating */
   onComplete?: () => void
 }
 
 export function BrutalistConfetti({
   count = 50,
-  originX = "50vw",
-  originY = "40vh",
   onComplete,
 }: BrutalistConfettiProps) {
   // Check for reduced motion preference
@@ -48,17 +43,22 @@ export function BrutalistConfetti({
   }, [])
 
   // Pre-generate all particle properties ONCE on mount
-  // This fixes the critical bug where Math.random() was called during render
+  // Uses pixel offsets for reliable burst animation from center
   const particles = React.useMemo<ConfettiParticle[]>(() => {
+    // Calculate burst distance based on viewport
+    const burstX = typeof window !== "undefined" ? window.innerWidth * 0.5 : 400
+    const burstY = typeof window !== "undefined" ? window.innerHeight * 0.6 : 500
+
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       isSquare: Math.random() > 0.3,
       size: 8 + Math.random() * 14,
-      targetX: `${15 + Math.random() * 70}vw`,
-      targetY: `${Math.random() * 100}vh`,
+      // Random burst direction from center
+      offsetX: (Math.random() - 0.5) * burstX * 2,
+      offsetY: (Math.random() - 0.3) * burstY * 2, // Bias slightly upward
       rotation: Math.random() * 720 - 360,
-      duration: 1.8 + Math.random() * 1.2,
-      delay: Math.random() * 0.4,
+      duration: 1.5 + Math.random() * 1,
+      delay: Math.random() * 0.3,
       color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)] ?? "#3D9A8B",
     }))
   }, [count])
@@ -78,21 +78,21 @@ export function BrutalistConfetti({
   }
 
   return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50">
+    <div className="pointer-events-none fixed inset-0 overflow-hidden z-[9999]">
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
           initial={{
             opacity: 1,
-            x: originX,
-            y: originY,
+            x: 0,
+            y: 0,
             scale: 0,
             rotate: 0,
           }}
           animate={{
             opacity: [1, 1, 0],
-            x: particle.targetX,
-            y: particle.targetY,
+            x: particle.offsetX,
+            y: particle.offsetY,
             scale: [0, 1.2, 0.8],
             rotate: particle.rotation,
           }}
@@ -108,6 +108,11 @@ export function BrutalistConfetti({
           onAnimationComplete={handleAnimationComplete}
           className="absolute"
           style={{
+            // Position at center of viewport
+            left: "50%",
+            top: "40%",
+            marginLeft: -particle.size / 2,
+            marginTop: -particle.size / 2,
             width: particle.size,
             height: particle.size,
             backgroundColor: particle.color,
