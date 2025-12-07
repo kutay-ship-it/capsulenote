@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Clock, Globe, Info } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import {
   Tooltip,
   TooltipContent,
@@ -17,11 +18,11 @@ interface TimePickerV3Props {
   disabled?: boolean
 }
 
-// Common time presets
-const TIME_PRESETS = [
-  { label: "MORNING", value: "09:00", description: "9:00 AM" },
-  { label: "NOON", value: "12:00", description: "12:00 PM" },
-  { label: "EVENING", value: "18:00", description: "6:00 PM" },
+// Common time preset values (labels will be translated)
+const TIME_PRESET_VALUES = [
+  { key: "morning", value: "09:00" },
+  { key: "noon", value: "12:00" },
+  { key: "evening", value: "18:00" },
 ]
 
 function formatTimezone(timezone: string): { full: string; short: string } {
@@ -67,6 +68,7 @@ export function TimePickerV3({
   timezone,
   disabled = false,
 }: TimePickerV3Props) {
+  const t = useTranslations("schedule.timePicker")
   const timezoneInfo = formatTimezone(timezone)
   const displayTime = formatTimeDisplay(value)
 
@@ -80,7 +82,7 @@ export function TimePickerV3({
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Delivery Time
+          {t("title")}
         </p>
         <TooltipProvider>
           <Tooltip>
@@ -102,12 +104,12 @@ export function TimePickerV3({
               }}
             >
               <p className="text-xs text-charcoal">
-                <span className="font-bold">Your timezone:</span>
+                <span className="font-bold">{t("timezone")}</span>
                 <br />
                 {timezoneInfo.full}
               </p>
               <p className="mt-2 text-[10px] text-charcoal/60">
-                Delivery time is based on your local timezone.
+                {t("timezoneNote")}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -116,7 +118,7 @@ export function TimePickerV3({
 
       {/* Time Presets */}
       <div className="grid grid-cols-3 gap-2">
-        {TIME_PRESETS.map((preset) => (
+        {TIME_PRESET_VALUES.map((preset) => (
           <button
             key={preset.value}
             type="button"
@@ -133,10 +135,10 @@ export function TimePickerV3({
             style={{ borderRadius: "2px" }}
           >
             <span className="text-[10px] font-bold uppercase tracking-wider">
-              {preset.label}
+              {t(`presets.${preset.key}`)}
             </span>
             <span className="text-xs text-charcoal/70">
-              {preset.description}
+              {t(`times.${preset.key}`)}
             </span>
           </button>
         ))}
@@ -145,7 +147,7 @@ export function TimePickerV3({
       {/* Custom Time Input */}
       <div className="space-y-2">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Or choose exact time
+          {t("exactTime")}
         </p>
         <div
           className={cn(
@@ -188,7 +190,7 @@ export function TimePickerV3({
       >
         <Globe className="h-4 w-4 text-charcoal/40" strokeWidth={2} />
         <p className="font-mono text-[10px] text-charcoal/50">
-          Time shown in <span className="font-bold text-charcoal/70">{timezone}</span>
+          {t("timeShownIn", { timezone })}
         </p>
       </div>
     </div>

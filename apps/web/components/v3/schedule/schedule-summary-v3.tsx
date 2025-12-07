@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
 import type { DeliveryChannel } from "./channel-selector-v3"
 import type { PrintOptions, MailDeliveryMode } from "./mail-config-v3"
 import type { ShippingAddress } from "@/server/actions/addresses"
@@ -67,6 +68,7 @@ export function ScheduleSummaryV3({
   isSubmitting = false,
   disabled = false,
 }: ScheduleSummaryV3Props) {
+  const t = useTranslations("schedule.summary")
   const hasEmail = channels.includes("email")
   const hasMail = channels.includes("mail")
   const isBoth = hasEmail && hasMail
@@ -91,7 +93,7 @@ export function ScheduleSummaryV3({
     return `${displayHours}:${minutes.toString().padStart(2, "0")} ${ampm}`
   }
 
-  const recipientDisplay = recipientType === "myself" ? "Future You" : recipientName || recipientEmail
+  const recipientDisplay = recipientType === "myself" ? t("futureYou") : recipientName || recipientEmail
 
   return (
     <div className="space-y-6">
@@ -102,13 +104,13 @@ export function ScheduleSummaryV3({
           style={{ borderRadius: "2px" }}
         >
           <Stamp className="h-3 w-3" strokeWidth={2} />
-          <span>Final Review</span>
+          <span>{t("badge")}</span>
         </div>
         <h2 className="font-mono text-xl font-bold uppercase tracking-wider text-charcoal">
-          Ready to Seal Your Letter?
+          {t("title")}
         </h2>
         <p className="mt-1 font-mono text-xs text-charcoal/60 uppercase tracking-wider">
-          Review your delivery settings
+          {t("subtitle")}
         </p>
       </div>
 
@@ -120,7 +122,7 @@ export function ScheduleSummaryV3({
         {/* Letter Title */}
         <div className="border-b-2 border-dashed border-charcoal/20 pb-4 mb-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-1">
-            Your Letter
+            {t("yourLetter")}
           </p>
           <p className="font-mono text-sm font-bold text-charcoal line-clamp-2">
             &ldquo;{letterTitle}&rdquo;
@@ -142,13 +144,13 @@ export function ScheduleSummaryV3({
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                Delivery Date
+                {t("deliveryDate")}
               </p>
               <p className="font-mono text-xs font-bold text-charcoal">
                 {format(deliveryDate, "EEEE, MMMM d, yyyy")}
               </p>
               <p className="font-mono text-[10px] text-duck-blue font-bold">
-                at {formatTimeDisplay(deliveryTime)} • {daysFromNow === 1 ? "Tomorrow" : `${daysFromNow} days from now`}
+                at {formatTimeDisplay(deliveryTime)} • {daysFromNow === 1 ? t("tomorrow") : t("daysFromNow", { count: daysFromNow })}
               </p>
             </div>
           </div>
@@ -175,10 +177,10 @@ export function ScheduleSummaryV3({
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                Delivery Method
+                {t("deliveryMethod")}
               </p>
               <p className="font-mono text-xs font-bold text-charcoal">
-                {isBoth ? "Email + Physical Mail" : hasEmail ? "Email Only" : "Physical Mail Only"}
+                {isBoth ? t("methods.both") : hasEmail ? t("methods.emailOnly") : t("methods.physicalOnly")}
               </p>
             </div>
           </div>
@@ -204,7 +206,7 @@ export function ScheduleSummaryV3({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                  Email Recipient
+                  {t("emailRecipient")}
                 </p>
                 <p className="font-mono text-xs font-bold text-charcoal truncate">
                   {recipientDisplay}
@@ -230,7 +232,7 @@ export function ScheduleSummaryV3({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                  Shipping To
+                  {t("shippingTo")}
                 </p>
                 <p className="font-mono text-xs font-bold text-charcoal">
                   {shippingAddress.name}
@@ -246,7 +248,7 @@ export function ScheduleSummaryV3({
                   <div className="flex items-center gap-2 mt-1.5">
                     <span className="inline-flex items-center gap-1 font-mono text-[10px] text-teal-primary">
                       <BookOpen className="h-3 w-3" strokeWidth={2} />
-                      Double-sided
+                      {t("doubleSided")}
                     </span>
                   </div>
                 )}
@@ -267,13 +269,13 @@ export function ScheduleSummaryV3({
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                Lock Date
+                {t("lockDate")}
               </p>
               <p className="font-mono text-xs font-bold text-charcoal">
                 {format(lockDate, "MMMM d, yyyy")}
               </p>
               <p className="font-mono text-[10px] text-charcoal/60">
-                No edits after this date
+                {t("noEditsAfter")}
               </p>
             </div>
           </div>
@@ -284,14 +286,14 @@ export function ScheduleSummaryV3({
             style={{ borderRadius: "2px" }}
           >
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-2">
-              Credit Usage
+              {t("creditUsage")}
             </p>
             <div className="space-y-1.5">
               {hasEmail && (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Mail className="h-3.5 w-3.5 text-charcoal/60" strokeWidth={2} />
-                    <span className="font-mono text-xs text-charcoal">Email Delivery</span>
+                    <span className="font-mono text-xs text-charcoal">{t("emailDelivery")}</span>
                   </div>
                   <span className="font-mono text-xs font-bold text-charcoal">
                     {emailCredits} → {emailCredits - 1}
@@ -302,7 +304,7 @@ export function ScheduleSummaryV3({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <FileText className="h-3.5 w-3.5 text-charcoal/60" strokeWidth={2} />
-                    <span className="font-mono text-xs text-charcoal">Physical Mail</span>
+                    <span className="font-mono text-xs text-charcoal">{t("physicalMail")}</span>
                   </div>
                   <span className="font-mono text-xs font-bold text-charcoal">
                     {physicalCredits} → {physicalCredits - mailCost}
@@ -311,9 +313,9 @@ export function ScheduleSummaryV3({
               )}
               {totalCost > 0 && (
                 <div className="flex items-center justify-between pt-1.5 border-t border-charcoal/10">
-                  <span className="font-mono text-xs font-bold text-charcoal">Total</span>
+                  <span className="font-mono text-xs font-bold text-charcoal">{t("total")}</span>
                   <span className="font-mono text-xs font-bold text-charcoal">
-                    {totalCost} credit{totalCost !== 1 ? "s" : ""}
+                    {totalCost} {totalCost !== 1 ? t("credits") : t("credit")}
                   </span>
                 </div>
               )}
@@ -329,7 +331,7 @@ export function ScheduleSummaryV3({
       >
         <Lock className="h-4 w-4 text-charcoal/50 flex-shrink-0 mt-0.5" strokeWidth={2} />
         <p className="font-mono text-[10px] text-charcoal/60 leading-relaxed">
-          <span className="font-bold text-charcoal">Once sealed</span>, this letter will be encrypted and locked until delivery. You won&apos;t be able to read or edit it again until it arrives.
+          {t("sealWarning")}
         </p>
       </div>
 
@@ -342,10 +344,10 @@ export function ScheduleSummaryV3({
           <Stamp className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" strokeWidth={2} />
           <div className="space-y-1">
             <p className="font-mono text-[10px] text-charcoal font-bold leading-relaxed">
-              IMPORTANT: Physical Mail Content Is Final
+              {t("physicalMailWarning.title")}
             </p>
             <p className="font-mono text-[10px] text-charcoal/70 leading-relaxed">
-              Your letter content will be sealed immediately for printing. Unlike email, you <span className="font-bold">cannot edit the physical letter</span> after scheduling, even before the delivery date.
+              {t("physicalMailWarning.description")}
             </p>
           </div>
         </div>
@@ -362,7 +364,7 @@ export function ScheduleSummaryV3({
           style={{ borderRadius: "2px" }}
         >
           <ArrowLeft className="h-4 w-4" strokeWidth={2} />
-          Back
+          {t("buttons.back")}
         </Button>
         <Button
           type="button"
@@ -374,12 +376,12 @@ export function ScheduleSummaryV3({
           {isSubmitting ? (
             <>
               <Clock className="h-4 w-4 animate-pulse" strokeWidth={2} />
-              Sealing...
+              {t("buttons.sealing")}
             </>
           ) : (
             <>
               <Stamp className="h-4 w-4" strokeWidth={2} />
-              Seal & Schedule
+              {t("buttons.sealAndSchedule")}
             </>
           )}
         </Button>

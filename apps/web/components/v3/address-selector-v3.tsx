@@ -26,6 +26,7 @@ import {
   type ShippingAddressInput,
   type AddressVerificationResponse,
 } from "@/server/actions/addresses"
+import { useTranslations } from "next-intl"
 
 interface AddressSelectorV3Props {
   value: string | null
@@ -38,6 +39,7 @@ export function AddressSelectorV3({
   onChange,
   disabled = false,
 }: AddressSelectorV3Props) {
+  const t = useTranslations("schedule.addressSelector")
   const [addresses, setAddresses] = React.useState<ShippingAddress[]>([])
   const [isLoading, setIsLoading] = React.useState(true)
   const [showAddForm, setShowAddForm] = React.useState(false)
@@ -63,13 +65,13 @@ export function AddressSelectorV3({
             onChange(null)
           }
         } else if (isMountedRef.current && !result.success) {
-          toast.error("Failed to load addresses", {
+          toast.error(t("loadFailed"), {
             description: result.error.message,
           })
         }
       } catch (error) {
         if (isMountedRef.current) {
-          toast.error("Failed to load addresses")
+          toast.error(t("loadFailed"))
         }
       } finally {
         if (isMountedRef.current) {
@@ -96,12 +98,12 @@ export function AddressSelectorV3({
           onChange(null)
         }
       } else {
-        toast.error("Failed to load addresses", {
+        toast.error(t("loadFailed"), {
           description: result.error.message,
         })
       }
     } catch (error) {
-      toast.error("Failed to load addresses")
+      toast.error(t("loadFailed"))
     } finally {
       setIsLoading(false)
     }
@@ -115,18 +117,18 @@ export function AddressSelectorV3({
     try {
       const result = await createVerifiedShippingAddress(addressData, verification)
       if (result.success) {
-        toast.success("Address saved!")
+        toast.success(t("saved"))
         setAddresses((prev) => [result.data, ...prev])
         setShowAddForm(false)
         // Auto-select the newly created address
         onChange(result.data.id, result.data)
       } else {
-        toast.error("Failed to save address", {
+        toast.error(t("saveFailed"), {
           description: result.error.message,
         })
       }
     } catch (error) {
-      toast.error("Failed to save address")
+      toast.error(t("saveFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -137,19 +139,19 @@ export function AddressSelectorV3({
     try {
       const result = await deleteShippingAddress(id)
       if (result.success) {
-        toast.success("Address deleted")
+        toast.success(t("deleted"))
         setAddresses((prev) => prev.filter((a) => a.id !== id))
         // Clear selection if we deleted the selected address
         if (value === id) {
           onChange(null)
         }
       } else {
-        toast.error("Failed to delete address", {
+        toast.error(t("deleteFailed"), {
           description: result.error.message,
         })
       }
     } catch (error) {
-      toast.error("Failed to delete address")
+      toast.error(t("deleteFailed"))
     } finally {
       setDeletingId(null)
     }
@@ -174,7 +176,7 @@ export function AddressSelectorV3({
       >
         <Loader2 className="h-4 w-4 animate-spin text-charcoal/50" strokeWidth={2} />
         <span className="font-mono text-xs text-charcoal/50 uppercase tracking-wider">
-          Loading addresses...
+          {t("loading")}
         </span>
       </div>
     )
@@ -263,10 +265,10 @@ export function AddressSelectorV3({
                       >
                         <AlertDialogHeader>
                           <AlertDialogTitle className="font-mono text-xl uppercase tracking-wide text-charcoal">
-                            Delete Address?
+                            {t("deleteDialog.title")}
                           </AlertDialogTitle>
                           <AlertDialogDescription className="font-mono text-sm text-charcoal/60">
-                            This will permanently delete "{address.name}" from your saved addresses.
+                            {t("deleteDialog.description", { name: address.name })}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="gap-3">
@@ -274,14 +276,14 @@ export function AddressSelectorV3({
                             className="border-2 border-charcoal bg-white hover:bg-off-white font-mono uppercase"
                             style={{ borderRadius: "2px" }}
                           >
-                            Cancel
+                            {t("deleteDialog.cancel")}
                           </AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDeleteAddress(address.id)}
                             className="border-2 border-charcoal bg-coral hover:bg-coral/90 text-white font-mono uppercase"
                             style={{ borderRadius: "2px" }}
                           >
-                            Delete
+                            {t("deleteDialog.delete")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -303,10 +305,10 @@ export function AddressSelectorV3({
           <MapPin className="h-8 w-8 text-charcoal/30" strokeWidth={1.5} />
           <div className="text-center">
             <p className="font-mono text-xs font-bold text-charcoal/50 uppercase tracking-wider">
-              No Saved Addresses
+              {t("empty.title")}
             </p>
             <p className="font-mono text-[10px] text-charcoal/40 mt-1">
-              Add an address to send physical letters
+              {t("empty.description")}
             </p>
           </div>
         </div>
@@ -321,14 +323,14 @@ export function AddressSelectorV3({
           <div className="flex items-center gap-2 mb-4">
             <Plus className="h-4 w-4 text-charcoal" strokeWidth={2} />
             <p className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
-              Add New Address
+              {t("addNew")}
             </p>
           </div>
           <AddressFormV3
             onSubmit={handleAddAddress}
             onCancel={() => setShowAddForm(false)}
             isSubmitting={isSubmitting}
-            submitLabel="Save Address"
+            submitLabel={t("saveAddress")}
           />
         </div>
       )}
@@ -344,7 +346,7 @@ export function AddressSelectorV3({
           style={{ borderRadius: "2px" }}
         >
           <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-          Add New Address
+          {t("addNew")}
         </Button>
       )}
     </div>

@@ -1,0 +1,293 @@
+{
+  "wizard": {
+    "title": "Schedule Delivery",
+    "steps": {
+      "dateTime": "Date & Time",
+      "delivery": "Delivery",
+      "confirm": "Confirm"
+    },
+    "buttons": {
+      "continueToDelivery": "Continue to Delivery",
+      "reviewAndConfirm": "Review & Confirm"
+    },
+    "toasts": {
+      "selectDate": "Please select a delivery date",
+      "completeSettings": "Please complete all delivery settings",
+      "physicalMailUnlocked": "Physical mail unlocked!",
+      "physicalMailUnlockedDescription": "You can now configure your physical letter delivery.",
+      "scheduleFailed": "Failed to schedule delivery",
+      "tryAgain": "Please try again"
+    }
+  },
+  "dateSelector": {
+    "title": "When Should This Letter Arrive?",
+    "subtitle": "Choose a meaningful date for your future self",
+    "quickPicks": "Quick Picks",
+    "meaningfulDates": "Meaningful Dates",
+    "customDate": "Custom Date",
+    "pickDate": "Pick a specific date...",
+    "birthdayHint": "Add your birthday in settings to unlock this option",
+    "presets": {
+      "6months": "6 MONTHS",
+      "1year": "1 YEAR",
+      "3years": "3 YEARS",
+      "5years": "5 YEARS",
+      "10years": "10 YEARS",
+      "nextBirthday": "NEXT BIRTHDAY",
+      "newYear": "NEW YEAR"
+    }
+  },
+  "timePicker": {
+    "title": "Delivery Time",
+    "presets": {
+      "morning": "MORNING",
+      "noon": "NOON",
+      "evening": "EVENING"
+    },
+    "times": {
+      "morning": "9:00 AM",
+      "noon": "12:00 PM",
+      "evening": "6:00 PM"
+    },
+    "timezone": "Your timezone:",
+    "timezoneNote": "Delivery time is based on your local timezone.",
+    "exactTime": "Or choose exact time",
+    "timeShownIn": "Time shown in {timezone}"
+  },
+  "channelSelector": {
+    "title": "How Should This Letter Arrive?",
+    "subtitle": "Choose your delivery method",
+    "email": {
+      "label": "EMAIL",
+      "description": "Instant digital delivery straight to your inbox on the scheduled date"
+    },
+    "physical": {
+      "label": "PHYSICAL MAIL",
+      "description": "Real paper and ink, printed and delivered to your mailbox"
+    },
+    "credits": "CREDITS",
+    "locked": "LOCKED",
+    "upgradeRequired": "Upgrade Required",
+    "tryFor": "Try for $4.99",
+    "sendBoth": "Send Both",
+    "creditsTotal": "(+{count} credits total)",
+    "doubleDelivery": {
+      "title": "Double Delivery",
+      "description": "Your letter will arrive both digitally and physically on the same day"
+    }
+  },
+  "emailConfig": {
+    "title": "Email Delivery Settings",
+    "subtitle": "Configure your email delivery",
+    "recipient": "Recipient",
+    "sendToMyself": "Send to Myself",
+    "sendToSomeoneElse": "Someone Else",
+    "enterEmail": "Enter their email",
+    "recipientName": "Recipient Name (optional)",
+    "namePlaceholder": "Their name...",
+    "recipientEmail": "Recipient Email",
+    "emailPlaceholder": "their@email.com",
+    "subjectLine": "Subject Line (optional)",
+    "defaultSubject": "A Letter from Your Past Self",
+    "subjectHint": "Default: 'A Letter from Your Past Self'"
+  },
+  "mailConfig": {
+    "title": "Physical Mail Settings",
+    "subtitle": "Configure your physical letter delivery",
+    "deliveryMode": "Delivery Mode",
+    "sendOn": "Send On:",
+    "arriveBy": "Arrive By:",
+    "sendOnDescription": "Your letter ships on the selected date.",
+    "arriveByDescription": "We ship early so your letter arrives 2 days before the selected date",
+    "internationalNote": "International: Expect longer transit times and limited tracking",
+    "sendOnDate": "Send On Date",
+    "sendOnDateDescription": "Mailed on your chosen date",
+    "arriveByDate": "Arrive By Date",
+    "arriveByDateDescription": "Arrives 2 days early",
+    "arrivalTooSoon": "Arrival Date Too Soon",
+    "leadTimeRequired": "We need at least {days} days lead time for physical mail delivery",
+    "internationalMailDate": "International Mail Date",
+    "estimatedMailDate": "Estimated Mail Date",
+    "shippingAddress": "Shipping Address",
+    "internationalTransit": "International First Class: {days} days typical transit",
+    "domesticTransit": "USPS First Class Mail: {days} business days typical transit",
+    "internationalTracking": "International tracking is limited beyond US borders"
+  },
+  "summary": {
+    "badge": "Final Review",
+    "title": "Ready to Seal Your Letter?",
+    "subtitle": "Review your delivery settings",
+    "yourLetter": "Your Letter",
+    "deliveryDate": "Delivery Date",
+    "tomorrow": "Tomorrow",
+    "daysFromNow": "{count} days from now",
+    "deliveryMethod": "Delivery Method",
+    "methods": {
+      "both": "Email + Physical Mail",
+      "emailOnly": "Email Only",
+      "physicalOnly": "Physical Mail Only"
+    },
+    "emailRecipient": "Email Recipient",
+    "futureYou": "Future You",
+    "shippingTo": "Shipping To",
+    "doubleSided": "Double-sided",
+    "lockDate": "Lock Date",
+    "noEditsAfter": "No edits after this date",
+    "creditUsage": "Credit Usage",
+    "emailDelivery": "Email Delivery",
+    "physicalMail": "Physical Mail",
+    "total": "Total",
+    "credit": "credit",
+    "credits": "credits",
+    "sealWarning": "Once sealed, this letter will be encrypted and locked until delivery. You won't be able to read or edit it.",
+    "physicalMailWarning": {
+      "title": "IMPORTANT: Physical Mail Content Is Final",
+      "description": "Your letter content will be sealed immediately for printing. Unlike email, you cannot edit the physical mail version after scheduling, even before the lock date."
+    },
+    "buttons": {
+      "back": "Back",
+      "sealing": "Sealing...",
+      "sealAndSchedule": "Seal & Schedule"
+    }
+  },
+  "countdown": {
+    "deliveringIn": "Delivering In",
+    "units": {
+      "day": "DAY",
+      "days": "DAYS",
+      "hour": "HOUR",
+      "hours": "HOURS",
+      "week": "WEEK",
+      "weeks": "WEEKS",
+      "month": "MONTH",
+      "months": "MONTHS",
+      "year": "YEAR",
+      "years": "YEARS"
+    },
+    "at": "at {time}",
+    "toggleTimeline": {
+      "show": "Show Journey Details",
+      "hide": "Hide Journey Details"
+    }
+  },
+  "existingDeliveries": {
+    "title": "This letter has {count} scheduled {count, plural, one {delivery} other {deliveries}}",
+    "email": "Email",
+    "physicalMail": "Physical Mail",
+    "to": "to {recipient}",
+    "emailRecipient": "Email recipient",
+    "mailRecipient": "Mail recipient",
+    "status": {
+      "scheduled": "Scheduled",
+      "processing": "Processing",
+      "sent": "Sent",
+      "failed": "Failed",
+      "canceled": "Canceled"
+    },
+    "showLess": "Show less",
+    "showMore": "Show {count} more",
+    "manageOnLetterPage": "Manage on letter page"
+  },
+  "timeline": {
+    "title": "Your Letter's Journey",
+    "steps": {
+      "now": "NOW",
+      "lock": "LOCK",
+      "print": "PRINT",
+      "mail": "MAIL",
+      "transit": "TRANSIT",
+      "delivery": "DELIVERY"
+    },
+    "descriptions": {
+      "scheduleYourLetter": "Schedule your letter",
+      "noMoreEdits": "No more edits allowed",
+      "emailArrives": "Email arrives in inbox",
+      "letterGoesToPrint": "Letter goes to print",
+      "entersPostalSystem": "Enters postal system",
+      "businessDays": "{days} business days",
+      "arrivesAtDoor": "Arrives at your door",
+      "letterShips": "Letter ships",
+      "approximateDays": "~{days} days"
+    },
+    "lockWarning": {
+      "title": "After lock:",
+      "description": "Your letter is encrypted and cannot be edited or canceled. This ensures reliable delivery."
+    }
+  },
+  "sealAnimation": {
+    "sealing": "Sealing Your Letter...",
+    "encrypting": "Encrypting & Scheduling",
+    "scheduled": "Scheduled!",
+    "letterSealed": "Letter Sealed!",
+    "lockedUntilDelivery": "Your message is now locked until delivery",
+    "yourLetter": "Your Letter",
+    "arrivesOn": "Arrives On",
+    "at": "at {time}",
+    "timing": {
+      "today": "Today!",
+      "tomorrow": "Tomorrow!",
+      "daysFromNow": "{count} days from now"
+    },
+    "units": {
+      "day": "Day",
+      "days": "Days",
+      "week": "Week",
+      "weeks": "Weeks",
+      "month": "Month",
+      "months": "Months"
+    },
+    "deliveringTo": "Delivering to",
+    "redirecting": "Redirecting to your letter..."
+  },
+  "addressSelector": {
+    "loading": "Loading addresses...",
+    "loadFailed": "Failed to load addresses",
+    "saved": "Address saved!",
+    "saveFailed": "Failed to save address",
+    "deleted": "Address deleted",
+    "deleteFailed": "Failed to delete address",
+    "empty": {
+      "title": "No Saved Addresses",
+      "description": "Add an address to send physical letters"
+    },
+    "addNew": "Add New Address",
+    "saveAddress": "Save Address",
+    "deleteDialog": {
+      "title": "Delete Address?",
+      "description": "This will permanently delete \"{name}\" from your saved addresses.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    }
+  },
+  "creditWarning": {
+    "subscriptionRequired": "Subscription Required",
+    "insufficientCredits": "Insufficient Credits",
+    "noSubscription": "You need an active subscription to schedule letter deliveries. Subscribe to get credits and start sending letters to your future self.",
+    "noEmailCredits": "No email credits remaining.",
+    "noPhysicalCredits": "No physical mail credits remaining.",
+    "noCredits": "No email or physical mail credits remaining.",
+    "addCreditsHint": "Add credits to schedule delivery, or your letter will be saved as a draft.",
+    "email": "email",
+    "mail": "mail",
+    "viewPlans": "View Plans",
+    "addEmailCredits": "Add Email Credits",
+    "addMailCredits": "Add Mail Credits",
+    "opening": "Opening...",
+    "checkoutOpened": "Checkout opened in new tab",
+    "checkoutOpenedDescription": "Complete your purchase to add credits. This page will refresh when you return.",
+    "subscriptionRequiredError": "Subscription required",
+    "subscribeFirst": "Please subscribe to a plan first before purchasing additional credits.",
+    "checkoutFailed": "Failed to start checkout",
+    "tryAgain": "Please try again"
+  },
+  "printOptions": {
+    "color": {
+      "title": "Color Printing",
+      "description": "Print your letter in full color"
+    },
+    "doubleSided": {
+      "title": "Double-Sided",
+      "description": "Print on both sides of the paper"
+    }
+  }
+}

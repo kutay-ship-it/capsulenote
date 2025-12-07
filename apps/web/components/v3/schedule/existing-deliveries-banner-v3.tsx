@@ -5,6 +5,7 @@ import Link from "next/link"
 import { format } from "date-fns"
 import { Mail, FileText, Clock, ChevronDown, ChevronUp, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import type { DeliveryChannel, DeliveryStatus } from "@prisma/client"
 
 interface DeliveryInfo {
@@ -26,12 +27,12 @@ interface ExistingDeliveriesBannerV3Props {
   letterId: string
 }
 
-const STATUS_LABELS: Record<DeliveryStatus, string> = {
-  scheduled: "Scheduled",
-  processing: "Processing",
-  sent: "Sent",
-  failed: "Failed",
-  canceled: "Canceled",
+const STATUS_KEYS: Record<DeliveryStatus, string> = {
+  scheduled: "status.scheduled",
+  processing: "status.processing",
+  sent: "status.sent",
+  failed: "status.failed",
+  canceled: "status.canceled",
 }
 
 const STATUS_COLORS: Record<DeliveryStatus, string> = {
@@ -46,6 +47,7 @@ export function ExistingDeliveriesBannerV3({
   deliveries,
   letterId,
 }: ExistingDeliveriesBannerV3Props) {
+  const t = useTranslations("schedule.existingDeliveries")
   const [isExpanded, setIsExpanded] = React.useState(false)
 
   // Filter to only show active deliveries (not canceled/failed)
@@ -69,7 +71,7 @@ export function ExistingDeliveriesBannerV3({
     }
     // For mail, we only have the shipping address ID - show generic label
     // Could be enhanced to include shipping address name in the query
-    return delivery.channel === "email" ? "Email recipient" : "Mail recipient"
+    return delivery.channel === "email" ? t("emailRecipient") : t("mailRecipient")
   }
 
   return (
@@ -86,7 +88,7 @@ export function ExistingDeliveriesBannerV3({
           <Clock className="h-3.5 w-3.5 text-charcoal" strokeWidth={2} />
         </div>
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal">
-          This letter has {activeDeliveries.length} scheduled deliver{activeDeliveries.length === 1 ? "y" : "ies"}
+          {t("title", { count: activeDeliveries.length })}
         </p>
       </div>
 
@@ -116,7 +118,7 @@ export function ExistingDeliveriesBannerV3({
             {/* Delivery Info */}
             <div className="flex-1 min-w-0">
               <p className="font-mono text-xs font-bold text-charcoal truncate">
-                {delivery.channel === "email" ? "Email" : "Physical Mail"} to {getRecipient(delivery)}
+                {delivery.channel === "email" ? t("email") : t("physicalMail")} {t("to")} {getRecipient(delivery)}
               </p>
               <p className="font-mono text-[10px] text-charcoal/60">
                 {format(new Date(delivery.deliverAt), "MMM d, yyyy 'at' h:mm a")}
@@ -131,7 +133,7 @@ export function ExistingDeliveriesBannerV3({
               )}
               style={{ borderRadius: "2px" }}
             >
-              {STATUS_LABELS[delivery.status]}
+              {t(STATUS_KEYS[delivery.status])}
             </span>
           </div>
         ))}
@@ -147,12 +149,12 @@ export function ExistingDeliveriesBannerV3({
           {isExpanded ? (
             <>
               <ChevronUp className="h-3 w-3" strokeWidth={2} />
-              Show less
+              {t("showLess")}
             </>
           ) : (
             <>
               <ChevronDown className="h-3 w-3" strokeWidth={2} />
-              Show {activeDeliveries.length - 2} more
+              {t("showMore", { count: activeDeliveries.length - 2 })}
             </>
           )}
         </button>
@@ -164,7 +166,7 @@ export function ExistingDeliveriesBannerV3({
           href={`/letters/${letterId}`}
           className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70 hover:text-charcoal transition-colors"
         >
-          Manage on letter page
+          {t("manageOnLetterPage")}
           <ArrowRight className="h-3 w-3" strokeWidth={2} />
         </Link>
       </div>

@@ -5,6 +5,7 @@ import { format, subDays } from "date-fns"
 import { Calendar, Truck, AlertTriangle, Info, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
 import type { ShippingAddress } from "@/server/actions/addresses"
 import {
@@ -62,6 +63,8 @@ export function MailConfigV3({
   transitDays: _transitDays, // Deprecated, now calculated from country
   disabled = false,
 }: MailConfigV3Props) {
+  const t = useTranslations("schedule.mailConfig")
+
   // Get country from selected address for transit calculation
   const countryCode = selectedAddress?.country ?? "US"
   const isInternational = isInternationalDestination(countryCode)
@@ -84,10 +87,10 @@ export function MailConfigV3({
       {/* Section Header */}
       <div>
         <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
-          Physical Mail Settings
+          {t("title")}
         </h3>
         <p className="mt-1 font-mono text-[10px] text-charcoal/60 uppercase tracking-wider">
-          Configure your physical letter delivery
+          {t("subtitle")}
         </p>
       </div>
 
@@ -95,7 +98,7 @@ export function MailConfigV3({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-            Delivery Mode
+            {t("deliveryMode")}
           </p>
           <TooltipProvider>
             <Tooltip>
@@ -115,14 +118,14 @@ export function MailConfigV3({
                 }}
               >
                 <p className="text-xs text-charcoal">
-                  <span className="font-bold">Send On:</span> Your letter ships on the selected date.
+                  <span className="font-bold">{t("sendOn")}</span> {t("sendOnDescription")}
                 </p>
                 <p className="mt-2 text-xs text-charcoal">
-                  <span className="font-bold">Arrive By:</span> We ship early so your letter arrives <span className="font-bold text-teal-primary">2 days before</span> your selected date—giving you a buffer for any postal delays.
+                  <span className="font-bold">{t("arriveBy")}</span> {t("arriveByDescription")}
                 </p>
                 {isInternational && (
                   <p className="mt-2 text-xs text-coral">
-                    <span className="font-bold">International:</span> Expect longer transit times (7-14+ additional days).
+                    {t("internationalNote")}
                   </p>
                 )}
               </TooltipContent>
@@ -157,9 +160,9 @@ export function MailConfigV3({
                 <div className="h-2 w-2 bg-white" style={{ borderRadius: "50%" }} />
               )}
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider">Send On Date</span>
+            <span className="text-xs font-bold uppercase tracking-wider">{t("sendOnDate")}</span>
             <span className="text-[10px] text-charcoal/60 text-center">
-              Mailed on your chosen date
+              {t("sendOnDateDescription")}
             </span>
           </button>
 
@@ -195,13 +198,13 @@ export function MailConfigV3({
               "text-xs font-bold uppercase tracking-wider",
               deliveryMode === "arrive_by" && "text-white"
             )}>
-              Arrive By Date
+              {t("arriveByDate")}
             </span>
             <span className={cn(
               "text-[10px] text-center",
               deliveryMode === "arrive_by" ? "text-white/70" : "text-charcoal/60"
             )}>
-              Arrives 2 days early
+              {t("arriveByDateDescription")}
             </span>
           </button>
         </div>
@@ -229,10 +232,10 @@ export function MailConfigV3({
                     <AlertTriangle className="h-4 w-4 text-coral flex-shrink-0 mt-0.5" strokeWidth={2} />
                     <div>
                       <p className="font-mono text-[10px] font-bold text-coral uppercase tracking-wider">
-                        Arrival Date Too Soon
+                        {t("arrivalTooSoon")}
                       </p>
                       <p className="font-mono text-[10px] text-charcoal/70 mt-1">
-                        We need at least {estimate.totalLeadDays} days lead time for printing and shipping{isInternational ? " (international delivery)" : ""}. Please choose a later arrival date.
+                        {t("leadTimeRequired", { days: estimate.totalLeadDays })}
                       </p>
                     </div>
                   </>
@@ -255,7 +258,7 @@ export function MailConfigV3({
                     </div>
                     <div>
                       <p className="font-mono text-[10px] font-bold text-charcoal uppercase tracking-wider">
-                        {isInternational ? "International Mail Date" : "Estimated Mail Date"}
+                        {isInternational ? t("internationalMailDate") : t("estimatedMailDate")}
                       </p>
                       <p className={cn(
                         "font-mono text-xs font-bold mt-0.5",
@@ -268,7 +271,7 @@ export function MailConfigV3({
                       </p>
                       {isInternational && (
                         <p className="font-mono text-[10px] text-duck-yellow mt-1">
-                          ⚠️ International tracking is limited beyond US borders
+                          ⚠️ {t("internationalTracking")}
                         </p>
                       )}
                     </div>
@@ -283,7 +286,7 @@ export function MailConfigV3({
       {/* Shipping Address */}
       <div className="space-y-3">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Shipping Address <span className="text-coral">*</span>
+          {t("shippingAddress")} <span className="text-coral">*</span>
         </p>
         <AddressSelectorV3
           value={selectedAddressId}
@@ -307,9 +310,9 @@ export function MailConfigV3({
         )}
         <p className="font-mono text-[10px] text-charcoal/50">
           {isInternational ? (
-            <>International First Class: <span className="font-bold text-duck-yellow">{estimate.transitDays} days</span> typical transit</>
+            <>{t("internationalTransit", { days: estimate.transitDays })}</>
           ) : (
-            <>USPS First Class Mail: <span className="font-bold text-charcoal/70">{estimate.transitDays} business days</span> typical transit</>
+            <>{t("domesticTransit", { days: estimate.transitDays })}</>
           )}
         </p>
       </div>

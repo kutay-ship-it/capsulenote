@@ -4,6 +4,7 @@ import * as React from "react"
 import { Mail, FileText, Check, Sparkles, Lock, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 export type DeliveryChannel = "email" | "mail"
 
@@ -45,6 +46,7 @@ function ChannelCard({
   creditLabel,
   icon,
 }: ChannelCardProps) {
+  const t = useTranslations("schedule.channelSelector")
   const isEmail = channel === "email"
   const isExhausted = credits <= 0 && !isLocked && !canShowTrial
 
@@ -129,7 +131,7 @@ function ChannelCard({
         "text-base font-bold uppercase tracking-wider mb-1",
         isSelected && !isEmail && "text-white"
       )}>
-        {isLocked ? "LOCKED" : title}
+        {isLocked ? t("locked") : title}
       </h3>
 
       {/* Description */}
@@ -165,9 +167,9 @@ function ChannelCard({
         style={{ borderRadius: "2px" }}
       >
         {isLocked ? (
-          <span className="text-[10px] font-bold uppercase">Upgrade Required</span>
+          <span className="text-[10px] font-bold uppercase">{t("upgradeRequired")}</span>
         ) : canShowTrial ? (
-          <span className="text-[10px] font-bold uppercase">Try for $4.99</span>
+          <span className="text-[10px] font-bold uppercase">{t("tryFor")}</span>
         ) : (
           <>
             {isExhausted && (
@@ -192,6 +194,7 @@ export function ChannelSelectorV3({
   onPhysicalUpsellTriggered,
   disabled = false,
 }: ChannelSelectorV3Props) {
+  const t = useTranslations("schedule.channelSelector")
   const isEmailSelected = value.includes("email")
   const isMailSelected = value.includes("mail")
   const isBothSelected = isEmailSelected && isMailSelected
@@ -242,10 +245,10 @@ export function ChannelSelectorV3({
       {/* Section Header */}
       <div className="text-center">
         <h3 className="font-mono text-lg font-bold uppercase tracking-wider text-charcoal">
-          How Should This Letter Arrive?
+          {t("title")}
         </h3>
         <p className="mt-1 font-mono text-xs text-charcoal/60 uppercase tracking-wider">
-          Choose your delivery method
+          {t("subtitle")}
         </p>
       </div>
 
@@ -257,9 +260,9 @@ export function ChannelSelectorV3({
           onToggle={handleEmailToggle}
           credits={emailCredits}
           disabled={disabled}
-          title="EMAIL"
-          description="Instant digital delivery straight to your inbox on the scheduled date."
-          creditLabel="CREDITS"
+          title={t("email.label")}
+          description={t("email.description")}
+          creditLabel={t("credits")}
           icon={<Mail className="h-7 w-7" strokeWidth={2} />}
         />
         <ChannelCard
@@ -270,9 +273,9 @@ export function ChannelSelectorV3({
           isLocked={isPhysicalLocked}
           canShowTrial={canShowTrialOffer}
           disabled={disabled}
-          title="PHYSICAL MAIL"
-          description="Real paper and ink, printed and delivered to your doorstep."
-          creditLabel="CREDITS"
+          title={t("physical.label")}
+          description={t("physical.description")}
+          creditLabel={t("credits")}
           icon={<FileText className="h-7 w-7" strokeWidth={2} />}
         />
       </div>
@@ -304,10 +307,10 @@ export function ChannelSelectorV3({
           )}
         </div>
         <span className="text-sm font-bold uppercase tracking-wider">
-          Send Both
+          {t("sendBoth")}
         </span>
         <span className="text-xs text-charcoal/60">
-          (+{emailCredits > 0 && physicalCredits > 0 ? emailCredits + physicalCredits : "?"} credits total)
+          {t("creditsTotal", { count: emailCredits > 0 && physicalCredits > 0 ? emailCredits + physicalCredits : "?" })}
         </span>
       </button>
 
@@ -332,10 +335,10 @@ export function ChannelSelectorV3({
               </div>
               <div>
                 <p className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
-                  Double Delivery
+                  {t("doubleDelivery.title")}
                 </p>
                 <p className="mt-1 font-mono text-[11px] text-charcoal/70 leading-relaxed">
-                  Your letter will arrive both digitally and physically. The email arrives on your scheduled date, while the physical letter follows shortly after based on transit times.
+                  {t("doubleDelivery.description")}
                 </p>
               </div>
             </div>

@@ -4,6 +4,7 @@ import * as React from "react"
 import { User, Users, Mail, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 type RecipientType = "myself" | "someone-else"
 
@@ -32,6 +33,8 @@ export function EmailConfigV3({
   onSubjectChange,
   disabled = false,
 }: EmailConfigV3Props) {
+  const t = useTranslations("schedule.emailConfig")
+
   const handleRecipientTypeChange = (type: RecipientType) => {
     if (disabled) return
     onRecipientTypeChange(type)
@@ -48,17 +51,17 @@ export function EmailConfigV3({
       {/* Section Header */}
       <div>
         <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
-          Email Delivery Settings
+          {t("title")}
         </h3>
         <p className="mt-1 font-mono text-[10px] text-charcoal/60 uppercase tracking-wider">
-          Configure your email delivery
+          {t("subtitle")}
         </p>
       </div>
 
       {/* Recipient Type Selection */}
       <div className="space-y-3">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Recipient
+          {t("recipient")}
         </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {/* Send to Myself */}
@@ -87,7 +90,7 @@ export function EmailConfigV3({
             </div>
             <div className="flex-1 text-left">
               <p className="text-xs font-bold uppercase tracking-wider">
-                Send to Myself
+                {t("sendToMyself")}
               </p>
               <p className="text-[10px] text-charcoal/60 truncate">
                 {userEmail}
@@ -132,13 +135,13 @@ export function EmailConfigV3({
                 "text-xs font-bold uppercase tracking-wider",
                 recipientType === "someone-else" && "text-white"
               )}>
-                Someone Else
+                {t("sendToSomeoneElse")}
               </p>
               <p className={cn(
                 "text-[10px]",
                 recipientType === "someone-else" ? "text-white/70" : "text-charcoal/60"
               )}>
-                Enter their email
+                {t("enterEmail")}
               </p>
             </div>
           </button>
@@ -159,7 +162,7 @@ export function EmailConfigV3({
               {onRecipientNameChange && (
                 <div className="space-y-2">
                   <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                    Recipient Name (optional)
+                    {t("recipientName")}
                   </label>
                   <div
                     className={cn(
@@ -180,7 +183,7 @@ export function EmailConfigV3({
                       type="text"
                       value={recipientName}
                       onChange={(e) => onRecipientNameChange(e.target.value)}
-                      placeholder="Their name..."
+                      placeholder={t("namePlaceholder")}
                       disabled={disabled}
                       className="flex-1 bg-transparent font-mono text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none disabled:cursor-not-allowed"
                     />
@@ -191,7 +194,7 @@ export function EmailConfigV3({
               {/* Recipient Email (Required) */}
               <div className="space-y-2">
                 <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                  Recipient Email <span className="text-coral">*</span>
+                  {t("recipientEmail")} <span className="text-coral">*</span>
                 </label>
                 <div
                   className={cn(
@@ -212,7 +215,7 @@ export function EmailConfigV3({
                     type="email"
                     value={recipientEmail}
                     onChange={(e) => onRecipientEmailChange(e.target.value)}
-                    placeholder="their@email.com"
+                    placeholder={t("emailPlaceholder")}
                     disabled={disabled}
                     required
                     className="flex-1 bg-transparent font-mono text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none disabled:cursor-not-allowed"
@@ -228,7 +231,7 @@ export function EmailConfigV3({
       {onSubjectChange && (
         <div className="space-y-2">
           <label className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-            Subject Line (optional)
+            {t("subjectLine")}
           </label>
           <div
             className={cn(
@@ -249,13 +252,13 @@ export function EmailConfigV3({
               type="text"
               value={subject}
               onChange={(e) => onSubjectChange(e.target.value)}
-              placeholder="A Letter from Your Past Self"
+              placeholder={t("defaultSubject")}
               disabled={disabled}
               className="flex-1 bg-transparent font-mono text-sm text-charcoal placeholder:text-charcoal/40 focus:outline-none disabled:cursor-not-allowed"
             />
           </div>
           <p className="font-mono text-[9px] text-charcoal/40">
-            Default: &ldquo;A Letter from Your Past Self&rdquo;
+            {t("subjectHint")}
           </p>
         </div>
       )}

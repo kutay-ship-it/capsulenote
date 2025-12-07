@@ -9,6 +9,8 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { useTranslations } from "next-intl"
+import { BrutalistConfetti } from "@/components/animations/brutalist-confetti"
 
 interface SealAnimationV3Props {
   open: boolean
@@ -17,61 +19,6 @@ interface SealAnimationV3Props {
   deliveryDate: Date
   recipientEmail: string
   onComplete: () => void
-}
-
-// Brutalist confetti colors from design system
-const CONFETTI_COLORS = [
-  "#3D9A8B", // teal-primary
-  "#FFD93D", // duck-yellow
-  "#6FC2FF", // duck-blue
-  "#FF6B6B", // coral
-  "#383838", // charcoal
-]
-
-function BrutalistConfetti() {
-  const confettiCount = 50
-
-  return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50">
-      {Array.from({ length: confettiCount }).map((_, i) => {
-        const isSquare = Math.random() > 0.3
-        const size = 8 + Math.random() * 14
-
-        return (
-          <motion.div
-            key={i}
-            initial={{
-              opacity: 1,
-              x: "50vw",
-              y: "40vh",
-              scale: 0,
-              rotate: 0,
-            }}
-            animate={{
-              opacity: [1, 1, 0],
-              x: `${15 + Math.random() * 70}vw`,
-              y: `${Math.random() * 100}vh`,
-              scale: [0, 1.2, 0.8],
-              rotate: Math.random() * 720 - 360,
-            }}
-            transition={{
-              duration: 1.8 + Math.random() * 1.2,
-              ease: "easeOut",
-              delay: Math.random() * 0.4,
-            }}
-            className="absolute"
-            style={{
-              width: size,
-              height: size,
-              backgroundColor: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-              borderRadius: isSquare ? "2px" : "50%",
-              border: isSquare ? "2px solid #383838" : "none",
-            }}
-          />
-        )
-      })}
-    </div>
-  )
 }
 
 // Animated wax seal stamp
@@ -154,6 +101,7 @@ export function SealAnimationV3({
   recipientEmail,
   onComplete,
 }: SealAnimationV3Props) {
+  const t = useTranslations("schedule.sealAnimation")
   const [showConfetti, setShowConfetti] = React.useState(false)
   const [phase, setPhase] = React.useState<"stamping" | "sealed">("stamping")
 
@@ -197,7 +145,7 @@ export function SealAnimationV3({
 
         {/* Confetti Burst */}
         <AnimatePresence>
-          {showConfetti && <BrutalistConfetti />}
+          {showConfetti && <BrutalistConfetti count={50} originY="40vh" />}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">
@@ -218,7 +166,7 @@ export function SealAnimationV3({
                 transition={{ delay: 0.4 }}
                 className="mt-6 font-mono text-xl font-bold uppercase tracking-wide text-charcoal"
               >
-                Sealing Your Letter...
+                {t("sealing")}
               </motion.h2>
 
               <motion.div
@@ -234,7 +182,7 @@ export function SealAnimationV3({
                   style={{ borderRadius: "50%" }}
                 />
                 <span className="font-mono text-xs uppercase tracking-wider text-charcoal/60">
-                  Encrypting & Scheduling
+                  {t("encrypting")}
                 </span>
               </motion.div>
             </motion.div>
@@ -256,7 +204,7 @@ export function SealAnimationV3({
                   style={{ borderRadius: "2px" }}
                 >
                   <Check className="h-3 w-3" strokeWidth={3} />
-                  <span>Scheduled!</span>
+                  <span>{t("scheduled")}</span>
                 </motion.div>
 
                 {/* Success Icon */}
@@ -276,7 +224,7 @@ export function SealAnimationV3({
                   transition={{ delay: 0.3 }}
                   className="font-mono text-2xl font-bold uppercase tracking-wide text-white"
                 >
-                  Letter Sealed!
+                  {t("letterSealed")}
                 </motion.h2>
 
                 <motion.p
@@ -285,7 +233,7 @@ export function SealAnimationV3({
                   transition={{ delay: 0.4 }}
                   className="mt-1 font-mono text-xs text-white/80 uppercase tracking-wider"
                 >
-                  Your message is now locked until delivery
+                  {t("lockedUntilDelivery")}
                 </motion.p>
               </div>
 
@@ -307,7 +255,7 @@ export function SealAnimationV3({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                      Your Letter
+                      {t("yourLetter")}
                     </p>
                     <p className="font-mono text-xs font-bold text-charcoal truncate">
                       &ldquo;{letterTitle}&rdquo;
@@ -331,21 +279,21 @@ export function SealAnimationV3({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                      Arrives On
+                      {t("arrivesOn")}
                     </p>
                     <p className="font-mono text-xs font-bold text-charcoal">
                       {formattedDate}
                     </p>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-[10px] text-charcoal/60">
-                        at {formattedTime}
+                        {t("at", { time: formattedTime })}
                       </span>
                       <span className="font-mono text-[10px] text-teal-primary font-bold">
                         {daysFromNow === 0
-                          ? "Today!"
+                          ? t("timing.today")
                           : daysFromNow === 1
-                            ? "Tomorrow!"
-                            : `${daysFromNow} days from now`}
+                            ? t("timing.tomorrow")
+                            : t("timing.daysFromNow", { count: daysFromNow })}
                       </span>
                     </div>
                   </div>
@@ -361,7 +309,7 @@ export function SealAnimationV3({
                   <div className="text-center">
                     <p className="font-mono text-2xl font-bold text-charcoal">{daysFromNow}</p>
                     <p className="font-mono text-[9px] uppercase tracking-wider text-charcoal/50">
-                      {daysFromNow === 1 ? "Day" : "Days"}
+                      {daysFromNow === 1 ? t("units.day") : t("units.days")}
                     </p>
                   </div>
                   <div
@@ -373,7 +321,7 @@ export function SealAnimationV3({
                       {Math.ceil(daysFromNow / 7)}
                     </p>
                     <p className="font-mono text-[9px] uppercase tracking-wider text-charcoal/50">
-                      {Math.ceil(daysFromNow / 7) === 1 ? "Week" : "Weeks"}
+                      {Math.ceil(daysFromNow / 7) === 1 ? t("units.week") : t("units.weeks")}
                     </p>
                   </div>
                   <div
@@ -385,7 +333,7 @@ export function SealAnimationV3({
                       {Math.ceil(daysFromNow / 30)}
                     </p>
                     <p className="font-mono text-[9px] uppercase tracking-wider text-charcoal/50">
-                      {Math.ceil(daysFromNow / 30) === 1 ? "Month" : "Months"}
+                      {Math.ceil(daysFromNow / 30) === 1 ? t("units.month") : t("units.months")}
                     </p>
                   </div>
                 </motion.div>
@@ -398,7 +346,7 @@ export function SealAnimationV3({
                   className="text-center py-2 border-t-2 border-dashed border-charcoal/20"
                 >
                   <p className="font-mono text-[10px] text-charcoal/50 uppercase tracking-wider">
-                    Delivering to
+                    {t("deliveringTo")}
                   </p>
                   <p className="font-mono text-xs font-bold text-charcoal mt-0.5">
                     {recipientEmail}
@@ -415,7 +363,7 @@ export function SealAnimationV3({
               >
                 <Clock className="h-4 w-4 text-charcoal/40" strokeWidth={2} />
                 <p className="font-mono text-[10px] text-charcoal/60 uppercase tracking-wider">
-                  Redirecting to your letter...
+                  {t("redirecting")}
                 </p>
               </motion.div>
             </motion.div>

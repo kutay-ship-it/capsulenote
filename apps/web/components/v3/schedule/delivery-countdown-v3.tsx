@@ -5,6 +5,7 @@ import { format, differenceInDays, differenceInWeeks, differenceInMonths, differ
 import { ChevronDown, ChevronUp, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 interface DeliveryCountdownV3Props {
   deliveryDate: Date
@@ -14,7 +15,7 @@ interface DeliveryCountdownV3Props {
   dstWarning?: string
 }
 
-function getCountdownUnits(deliveryDate: Date) {
+function getCountdownUnits(deliveryDate: Date, t: (key: string) => string) {
   const now = new Date()
   const totalDays = differenceInDays(deliveryDate, now)
   const weeks = differenceInWeeks(deliveryDate, now)
@@ -24,26 +25,26 @@ function getCountdownUnits(deliveryDate: Date) {
   // Determine which units to show based on duration
   if (totalDays < 7) {
     return [
-      { value: totalDays, label: totalDays === 1 ? "DAY" : "DAYS" },
-      { value: totalDays * 24, label: "HOURS" },
+      { value: totalDays, label: totalDays === 1 ? t("units.day") : t("units.days") },
+      { value: totalDays * 24, label: t("units.hours") },
     ]
   } else if (totalDays < 60) {
     return [
-      { value: totalDays, label: "DAYS" },
-      { value: weeks, label: weeks === 1 ? "WEEK" : "WEEKS" },
+      { value: totalDays, label: t("units.days") },
+      { value: weeks, label: weeks === 1 ? t("units.week") : t("units.weeks") },
     ]
   } else if (months < 24) {
     return [
-      { value: totalDays, label: "DAYS" },
-      { value: weeks, label: "WEEKS" },
-      { value: months, label: months === 1 ? "MONTH" : "MONTHS" },
+      { value: totalDays, label: t("units.days") },
+      { value: weeks, label: t("units.weeks") },
+      { value: months, label: months === 1 ? t("units.month") : t("units.months") },
     ]
   } else {
     return [
-      { value: totalDays, label: "DAYS" },
-      { value: weeks, label: "WEEKS" },
-      { value: months, label: "MONTHS" },
-      { value: years, label: years === 1 ? "YEAR" : "YEARS" },
+      { value: totalDays, label: t("units.days") },
+      { value: weeks, label: t("units.weeks") },
+      { value: months, label: t("units.months") },
+      { value: years, label: years === 1 ? t("units.year") : t("units.years") },
     ]
   }
 }
@@ -70,7 +71,8 @@ export function DeliveryCountdownV3({
   onToggleTimeline,
   dstWarning,
 }: DeliveryCountdownV3Props) {
-  const countdownUnits = getCountdownUnits(deliveryDate)
+  const t = useTranslations("schedule.countdown")
+  const countdownUnits = getCountdownUnits(deliveryDate, t)
   const formattedDate = format(deliveryDate, "EEEE, MMMM d, yyyy")
   const formattedTime = format(deliveryDate, "h:mm a")
   const shortTimezone = formatTimezone(timezone)
@@ -80,7 +82,7 @@ export function DeliveryCountdownV3({
       {/* Header */}
       <div className="text-center">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Delivering In
+          {t("deliveringIn")}
         </p>
       </div>
 
@@ -119,7 +121,7 @@ export function DeliveryCountdownV3({
           {formattedDate}
         </p>
         <p className="font-mono text-sm text-charcoal/70">
-          at {formattedTime}
+          {t("at", { time: formattedTime })}
         </p>
         <p className="font-mono text-xs text-charcoal/50">
           {timezone} ({shortTimezone})
@@ -160,7 +162,7 @@ export function DeliveryCountdownV3({
           )}
           style={{ borderRadius: "2px" }}
         >
-          <span>{showTimeline ? "Hide Journey Details" : "Show Journey Details"}</span>
+          <span>{showTimeline ? t("toggleTimeline.hide") : t("toggleTimeline.show")}</span>
           {showTimeline ? (
             <ChevronUp className="h-4 w-4" strokeWidth={2} />
           ) : (

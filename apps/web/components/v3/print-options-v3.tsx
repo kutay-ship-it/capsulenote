@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Palette, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 export interface PrintOptions {
   color: boolean
@@ -20,6 +21,8 @@ export function PrintOptionsV3({
   onChange,
   disabled = false,
 }: PrintOptionsV3Props) {
+  const t = useTranslations("schedule.printOptions")
+
   const handleColorChange = (color: boolean) => {
     onChange({ ...value, color })
   }
@@ -70,9 +73,9 @@ export function PrintOptionsV3({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <Palette className="h-4 w-4 text-charcoal/60 flex-shrink-0" strokeWidth={2} />
           <div className="min-w-0">
-            <p className="font-mono text-xs font-bold text-charcoal">Color Printing</p>
+            <p className="font-mono text-xs font-bold text-charcoal">{t("color.title")}</p>
             <p className="font-mono text-[10px] text-charcoal/50">
-              Print your letter in full color
+              {t("color.description")}
             </p>
           </div>
         </div>
@@ -118,9 +121,9 @@ export function PrintOptionsV3({
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <BookOpen className="h-4 w-4 text-charcoal/60 flex-shrink-0" strokeWidth={2} />
           <div className="min-w-0">
-            <p className="font-mono text-xs font-bold text-charcoal">Double-Sided</p>
+            <p className="font-mono text-xs font-bold text-charcoal">{t("doubleSided.title")}</p>
             <p className="font-mono text-[10px] text-charcoal/50">
-              Print on both sides of the paper
+              {t("doubleSided.description")}
             </p>
           </div>
         </div>

@@ -4,6 +4,7 @@ import * as React from "react"
 import { format, addMonths, addYears, setMonth, setDate } from "date-fns"
 import { Calendar as CalendarIcon, Gift, Sparkles, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Popover,
@@ -55,6 +56,7 @@ export function DateSelectorV3({
   minDate,
   disabled = false,
 }: DateSelectorV3Props) {
+  const t = useTranslations("schedule.dateSelector")
   const [calendarOpen, setCalendarOpen] = React.useState(false)
   const today = new Date()
 
@@ -62,26 +64,26 @@ export function DateSelectorV3({
   const quickPresets: DatePreset[] = [
     {
       id: "6months",
-      label: "6 MONTHS",
+      label: t("presets.6months"),
       sublabel: format(addMonths(today, 6), "MMM yyyy"),
       date: addMonths(today, 6),
     },
     {
       id: "1year",
-      label: "1 YEAR",
+      label: t("presets.1year"),
       sublabel: format(addYears(today, 1), "MMM yyyy"),
       date: addYears(today, 1),
       featured: true,
     },
     {
       id: "3years",
-      label: "3 YEARS",
+      label: t("presets.3years"),
       sublabel: format(addYears(today, 3), "MMM yyyy"),
       date: addYears(today, 3),
     },
     {
       id: "5years",
-      label: "5 YEARS",
+      label: t("presets.5years"),
       sublabel: format(addYears(today, 5), "MMM yyyy"),
       date: addYears(today, 5),
     },
@@ -92,7 +94,7 @@ export function DateSelectorV3({
       ? [
           {
             id: "birthday",
-            label: "NEXT BIRTHDAY",
+            label: t("presets.nextBirthday"),
             sublabel: format(calculateNextBirthday(userBirthday), "MMM d, yyyy"),
             date: calculateNextBirthday(userBirthday),
             icon: <Gift className="h-4 w-4" strokeWidth={2} />,
@@ -101,14 +103,14 @@ export function DateSelectorV3({
       : []),
     {
       id: "newyear",
-      label: "NEW YEAR",
+      label: t("presets.newYear"),
       sublabel: format(calculateNextNewYear(), "MMM d, yyyy"),
       date: calculateNextNewYear(),
       icon: <Sparkles className="h-4 w-4" strokeWidth={2} />,
     },
     {
       id: "10years",
-      label: "10 YEARS",
+      label: t("presets.10years"),
       sublabel: format(addYears(today, 10), "MMM yyyy"),
       date: addYears(today, 10),
       icon: <Clock className="h-4 w-4" strokeWidth={2} />,
@@ -141,17 +143,17 @@ export function DateSelectorV3({
       {/* Section Title */}
       <div className="text-center">
         <h3 className="font-mono text-lg font-bold uppercase tracking-wider text-charcoal">
-          When Should This Letter Arrive?
+          {t("title")}
         </h3>
         <p className="mt-1 font-mono text-xs text-charcoal/60 uppercase tracking-wider">
-          Choose a meaningful date for your future self
+          {t("subtitle")}
         </p>
       </div>
 
       {/* Quick Picks */}
       <div className="space-y-3">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Quick Picks
+          {t("quickPicks")}
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {quickPresets.map((preset) => (
@@ -194,7 +196,7 @@ export function DateSelectorV3({
       {/* Meaningful Dates */}
       <div className="space-y-3">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Meaningful Dates
+          {t("meaningfulDates")}
         </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {meaningfulPresets.map((preset) => (
@@ -240,7 +242,7 @@ export function DateSelectorV3({
       {/* Custom Date Picker */}
       <div className="space-y-3">
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Custom Date
+          {t("customDate")}
         </p>
         <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
           <PopoverTrigger asChild>
@@ -257,7 +259,7 @@ export function DateSelectorV3({
               style={{ borderRadius: "2px" }}
             >
               <span className="text-sm uppercase tracking-wider text-charcoal/60">
-                Pick a specific date...
+                {t("pickDate")}
               </span>
               <div
                 className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-duck-cream"
@@ -303,7 +305,7 @@ export function DateSelectorV3({
         >
           <Gift className="h-5 w-5 text-duck-yellow flex-shrink-0" strokeWidth={2} />
           <p className="font-mono text-[10px] text-charcoal/60 leading-relaxed">
-            <span className="font-bold text-charcoal">Add your birthday</span> in settings to unlock the &ldquo;Next Birthday&rdquo; preset for meaningful delivery dates.
+            {t("birthdayHint")}
           </p>
         </div>
       )}

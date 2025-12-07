@@ -5,6 +5,7 @@ import { format, subHours } from "date-fns"
 import { Lock, Mail, FileText, Printer, Truck, MapPin, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import { useTranslations } from "next-intl"
 
 type DeliveryChannel = "email" | "mail"
 type MailDeliveryMode = "send_on" | "arrive_by"
@@ -38,6 +39,7 @@ export function TimelineVisualizerV3({
   transitDays = 5,
   lockWindowHours = LOCK_WINDOW_HOURS,
 }: TimelineVisualizerV3Props) {
+  const t = useTranslations("schedule.timeline")
   const now = new Date()
   const lockDate = subHours(deliveryDate, lockWindowHours)
 
@@ -46,11 +48,11 @@ export function TimelineVisualizerV3({
     const baseSteps: TimelineStep[] = [
       {
         id: "now",
-        label: "NOW",
+        label: t("steps.now"),
         date: now,
         icon: <Clock className="h-4 w-4" strokeWidth={2} />,
         color: "charcoal",
-        description: "Schedule your letter",
+        description: t("descriptions.scheduleYourLetter"),
         isCurrent: true,
       },
     ]
@@ -59,19 +61,19 @@ export function TimelineVisualizerV3({
       baseSteps.push(
         {
           id: "lock",
-          label: "LOCK",
+          label: t("steps.lock"),
           date: lockDate,
           icon: <Lock className="h-4 w-4" strokeWidth={2} />,
           color: "duck-yellow",
-          description: "No more edits allowed",
+          description: t("descriptions.noMoreEdits"),
         },
         {
           id: "delivery",
-          label: "DELIVERY",
+          label: t("steps.delivery"),
           date: deliveryDate,
           icon: <Mail className="h-4 w-4" strokeWidth={2} />,
           color: "teal-primary",
-          description: "Email arrives in inbox",
+          description: t("descriptions.emailArrives"),
         }
       )
     } else {
@@ -84,43 +86,43 @@ export function TimelineVisualizerV3({
         baseSteps.push(
           {
             id: "lock",
-            label: "LOCK",
+            label: t("steps.lock"),
             date: mailLockDate,
             icon: <Lock className="h-4 w-4" strokeWidth={2} />,
             color: "duck-yellow",
-            description: "No more edits allowed",
+            description: t("descriptions.noMoreEdits"),
           },
           {
             id: "print",
-            label: "PRINT",
+            label: t("steps.print"),
             date: printDate,
             icon: <Printer className="h-4 w-4" strokeWidth={2} />,
             color: "duck-blue",
-            description: "Letter goes to print",
+            description: t("descriptions.letterGoesToPrint"),
           },
           {
             id: "mail",
-            label: "MAIL",
+            label: t("steps.mail"),
             date: actualSendDate,
             icon: <FileText className="h-4 w-4" strokeWidth={2} />,
             color: "duck-blue",
-            description: "Enters postal system",
+            description: t("descriptions.entersPostalSystem"),
           },
           {
             id: "transit",
-            label: "TRANSIT",
+            label: t("steps.transit"),
             date: actualSendDate,
             icon: <Truck className="h-4 w-4" strokeWidth={2} />,
             color: "charcoal",
-            description: `${transitDays} business days`,
+            description: t("descriptions.businessDays", { days: transitDays }),
           },
           {
             id: "delivery",
-            label: "DELIVERY",
+            label: t("steps.delivery"),
             date: deliveryDate,
             icon: <MapPin className="h-4 w-4" strokeWidth={2} />,
             color: "teal-primary",
-            description: "Arrives at your door",
+            description: t("descriptions.arrivesAtDoor"),
           }
         )
       } else {
@@ -128,34 +130,34 @@ export function TimelineVisualizerV3({
         baseSteps.push(
           {
             id: "lock",
-            label: "LOCK",
+            label: t("steps.lock"),
             date: lockDate,
             icon: <Lock className="h-4 w-4" strokeWidth={2} />,
             color: "duck-yellow",
-            description: "No more edits allowed",
+            description: t("descriptions.noMoreEdits"),
           },
           {
             id: "mail",
-            label: "MAIL",
+            label: t("steps.mail"),
             date: deliveryDate,
             icon: <FileText className="h-4 w-4" strokeWidth={2} />,
             color: "duck-blue",
-            description: "Letter ships",
+            description: t("descriptions.letterShips"),
           },
           {
             id: "transit",
-            label: "TRANSIT",
+            label: t("steps.transit"),
             date: deliveryDate,
             icon: <Truck className="h-4 w-4" strokeWidth={2} />,
             color: "charcoal",
-            description: `~${transitDays} days`,
+            description: t("descriptions.approximateDays", { days: transitDays }),
           }
         )
       }
     }
 
     return baseSteps
-  }, [channel, deliveryDate, lockDate, mailDeliveryMode, mailSendDate, transitDays, lockWindowHours, now])
+  }, [channel, deliveryDate, lockDate, mailDeliveryMode, mailSendDate, transitDays, lockWindowHours, now, t])
 
   const colorClasses = {
     charcoal: "bg-charcoal text-white border-charcoal",
@@ -180,7 +182,7 @@ export function TimelineVisualizerV3({
           style={{ borderRadius: "2px" }}
         />
         <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-          Your Letter&apos;s Journey
+          {t("title")}
         </p>
       </div>
 
@@ -318,7 +320,7 @@ export function TimelineVisualizerV3({
       >
         <Lock className="h-4 w-4 text-charcoal/50 flex-shrink-0 mt-0.5" strokeWidth={2} />
         <p className="font-mono text-[10px] text-charcoal/60 leading-relaxed">
-          <span className="font-bold text-charcoal">After lock:</span> Your letter is encrypted and cannot be edited or canceled. This ensures reliable delivery.
+          <span className="font-bold text-charcoal">{t("lockWarning.title")}</span> {t("lockWarning.description")}
         </p>
       </div>
     </div>

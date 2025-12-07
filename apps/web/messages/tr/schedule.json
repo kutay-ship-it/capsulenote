@@ -1,0 +1,293 @@
+{
+  "wizard": {
+    "title": "Teslimatı Planla",
+    "steps": {
+      "dateTime": "Tarih ve Saat",
+      "delivery": "Teslimat",
+      "confirm": "Onayla"
+    },
+    "buttons": {
+      "continueToDelivery": "Teslimata Devam Et",
+      "reviewAndConfirm": "İncele ve Onayla"
+    },
+    "toasts": {
+      "selectDate": "Lütfen bir teslimat tarihi seçin",
+      "completeSettings": "Lütfen tüm teslimat ayarlarını tamamlayın",
+      "physicalMailUnlocked": "Fiziksel posta açıldı!",
+      "physicalMailUnlockedDescription": "Artık fiziksel mektup teslimatınızı yapılandırabilirsiniz.",
+      "scheduleFailed": "Teslimat planlanamadı",
+      "tryAgain": "Lütfen tekrar deneyin"
+    }
+  },
+  "dateSelector": {
+    "title": "Bu Mektup Ne Zaman Ulaşsın?",
+    "subtitle": "Gelecekteki kendiniz için anlamlı bir tarih seçin",
+    "quickPicks": "Hızlı Seçenekler",
+    "meaningfulDates": "Anlamlı Tarihler",
+    "customDate": "Özel Tarih",
+    "pickDate": "Belirli bir tarih seçin...",
+    "birthdayHint": "Bu seçeneği açmak için ayarlardan doğum gününüzü ekleyin",
+    "presets": {
+      "6months": "6 AY",
+      "1year": "1 YIL",
+      "3years": "3 YIL",
+      "5years": "5 YIL",
+      "10years": "10 YIL",
+      "nextBirthday": "SONRAKİ DOĞUM GÜNÜ",
+      "newYear": "YENİ YIL"
+    }
+  },
+  "timePicker": {
+    "title": "Teslimat Saati",
+    "presets": {
+      "morning": "SABAH",
+      "noon": "ÖĞLE",
+      "evening": "AKŞAM"
+    },
+    "times": {
+      "morning": "09:00",
+      "noon": "12:00",
+      "evening": "18:00"
+    },
+    "timezone": "Saat diliminiz:",
+    "timezoneNote": "Teslimat saati yerel saat diliminize göre belirlenir.",
+    "exactTime": "Veya tam saat seçin",
+    "timeShownIn": "Gösterilen saat: {timezone}"
+  },
+  "channelSelector": {
+    "title": "Bu Mektup Nasıl Ulaşsın?",
+    "subtitle": "Teslimat yönteminizi seçin",
+    "email": {
+      "label": "E-POSTA",
+      "description": "Planlanan tarihte gelen kutunuza anında dijital teslimat"
+    },
+    "physical": {
+      "label": "FİZİKSEL POSTA",
+      "description": "Gerçek kağıt ve mürekkep, basılıp posta kutunuza teslim edilir"
+    },
+    "credits": "KREDİ",
+    "locked": "KİLİTLİ",
+    "upgradeRequired": "Yükseltme Gerekli",
+    "tryFor": "$4.99'a Dene",
+    "sendBoth": "İkisini de Gönder",
+    "creditsTotal": "(+{count} kredi toplam)",
+    "doubleDelivery": {
+      "title": "Çift Teslimat",
+      "description": "Mektubunuz aynı gün hem dijital hem de fiziksel olarak ulaşacak"
+    }
+  },
+  "emailConfig": {
+    "title": "E-posta Teslimat Ayarları",
+    "subtitle": "E-posta teslimatınızı yapılandırın",
+    "recipient": "Alıcı",
+    "sendToMyself": "Kendime Gönder",
+    "sendToSomeoneElse": "Başka Birine",
+    "enterEmail": "E-posta adresini girin",
+    "recipientName": "Alıcı Adı (isteğe bağlı)",
+    "namePlaceholder": "Adı...",
+    "recipientEmail": "Alıcı E-postası",
+    "emailPlaceholder": "eposta@ornek.com",
+    "subjectLine": "Konu Satırı (isteğe bağlı)",
+    "defaultSubject": "Geçmişteki Kendinden Bir Mektup",
+    "subjectHint": "Varsayılan: 'Geçmişteki Kendinden Bir Mektup'"
+  },
+  "mailConfig": {
+    "title": "Fiziksel Posta Ayarları",
+    "subtitle": "Fiziksel mektup teslimatınızı yapılandırın",
+    "deliveryMode": "Teslimat Modu",
+    "sendOn": "Gönderim Tarihi:",
+    "arriveBy": "Varış Tarihi:",
+    "sendOnDescription": "Mektubunuz seçilen tarihte postalanır.",
+    "arriveByDescription": "Mektubunuzun seçilen tarihten 2 gün önce ulaşması için erken gönderiyoruz",
+    "internationalNote": "Uluslararası: Daha uzun teslimat süreleri ve sınırlı takip bekleyin",
+    "sendOnDate": "Gönderim Tarihi",
+    "sendOnDateDescription": "Seçtiğiniz tarihte postalanır",
+    "arriveByDate": "Varış Tarihi",
+    "arriveByDateDescription": "2 gün erken varır",
+    "arrivalTooSoon": "Varış Tarihi Çok Yakın",
+    "leadTimeRequired": "Fiziksel posta teslimatı için en az {days} gün önceden planlama gerekiyor",
+    "internationalMailDate": "Uluslararası Posta Tarihi",
+    "estimatedMailDate": "Tahmini Posta Tarihi",
+    "shippingAddress": "Teslimat Adresi",
+    "internationalTransit": "Uluslararası Birinci Sınıf: {days} gün tipik teslimat",
+    "domesticTransit": "USPS Birinci Sınıf Posta: {days} iş günü tipik teslimat",
+    "internationalTracking": "Uluslararası takip ABD sınırları dışında sınırlıdır"
+  },
+  "summary": {
+    "badge": "Son İnceleme",
+    "title": "Mektubunuzu Mühürlemeye Hazır mısınız?",
+    "subtitle": "Teslimat ayarlarınızı gözden geçirin",
+    "yourLetter": "Mektubunuz",
+    "deliveryDate": "Teslimat Tarihi",
+    "tomorrow": "Yarın",
+    "daysFromNow": "{count} gün sonra",
+    "deliveryMethod": "Teslimat Yöntemi",
+    "methods": {
+      "both": "E-posta + Fiziksel Posta",
+      "emailOnly": "Sadece E-posta",
+      "physicalOnly": "Sadece Fiziksel Posta"
+    },
+    "emailRecipient": "E-posta Alıcısı",
+    "futureYou": "Gelecekteki Sen",
+    "shippingTo": "Gönderilecek Adres",
+    "doubleSided": "Çift taraflı",
+    "lockDate": "Kilitleme Tarihi",
+    "noEditsAfter": "Bu tarihten sonra düzenleme yapılamaz",
+    "creditUsage": "Kredi Kullanımı",
+    "emailDelivery": "E-posta Teslimatı",
+    "physicalMail": "Fiziksel Posta",
+    "total": "Toplam",
+    "credit": "kredi",
+    "credits": "kredi",
+    "sealWarning": "Mühürlendikten sonra bu mektup şifrelenir ve teslimat tarihine kadar kilitli kalır. Okuyamaz veya düzenleyemezsiniz.",
+    "physicalMailWarning": {
+      "title": "ÖNEMLİ: Fiziksel Posta İçeriği Kesindir",
+      "description": "Mektup içeriğiniz baskı için hemen mühürlenecek. E-postadan farklı olarak, planlamadan sonra fiziksel posta sürümünü düzenleyemezsiniz, kilitleme tarihinden önce bile."
+    },
+    "buttons": {
+      "back": "Geri",
+      "sealing": "Mühürleniyor...",
+      "sealAndSchedule": "Mühürle ve Planla"
+    }
+  },
+  "countdown": {
+    "deliveringIn": "Teslimata Kalan",
+    "units": {
+      "day": "GÜN",
+      "days": "GÜN",
+      "hour": "SAAT",
+      "hours": "SAAT",
+      "week": "HAFTA",
+      "weeks": "HAFTA",
+      "month": "AY",
+      "months": "AY",
+      "year": "YIL",
+      "years": "YIL"
+    },
+    "at": "saat {time}",
+    "toggleTimeline": {
+      "show": "Yolculuk Detaylarını Göster",
+      "hide": "Yolculuk Detaylarını Gizle"
+    }
+  },
+  "existingDeliveries": {
+    "title": "Bu mektubun {count} planlanmış teslimatı var",
+    "email": "E-posta",
+    "physicalMail": "Fiziksel Posta",
+    "to": "{recipient} adresine",
+    "emailRecipient": "E-posta alıcısı",
+    "mailRecipient": "Posta alıcısı",
+    "status": {
+      "scheduled": "Planlandı",
+      "processing": "İşleniyor",
+      "sent": "Gönderildi",
+      "failed": "Başarısız",
+      "canceled": "İptal Edildi"
+    },
+    "showLess": "Daha az göster",
+    "showMore": "{count} daha göster",
+    "manageOnLetterPage": "Mektup sayfasında yönet"
+  },
+  "timeline": {
+    "title": "Mektubunuzun Yolculuğu",
+    "steps": {
+      "now": "ŞİMDİ",
+      "lock": "KİLİTLE",
+      "print": "BASIM",
+      "mail": "POSTA",
+      "transit": "YOLDA",
+      "delivery": "TESLİMAT"
+    },
+    "descriptions": {
+      "scheduleYourLetter": "Mektubunuzu planlayın",
+      "noMoreEdits": "Artık düzenleme yapılamaz",
+      "emailArrives": "E-posta gelen kutusuna ulaşır",
+      "letterGoesToPrint": "Mektup basıma gider",
+      "entersPostalSystem": "Posta sistemine girer",
+      "businessDays": "{days} iş günü",
+      "arrivesAtDoor": "Kapınıza ulaşır",
+      "letterShips": "Mektup gönderilir",
+      "approximateDays": "~{days} gün"
+    },
+    "lockWarning": {
+      "title": "Kilitlemeden sonra:",
+      "description": "Mektubunuz şifrelenir ve düzenlenemez veya iptal edilemez. Bu güvenilir teslimatı sağlar."
+    }
+  },
+  "sealAnimation": {
+    "sealing": "Mektubunuz Mühürleniyor...",
+    "encrypting": "Şifreleniyor ve Planlanıyor",
+    "scheduled": "Planlandı!",
+    "letterSealed": "Mektup Mühürlendi!",
+    "lockedUntilDelivery": "Mesajınız teslimat tarihine kadar kilitli",
+    "yourLetter": "Mektubunuz",
+    "arrivesOn": "Varış Tarihi",
+    "at": "saat {time}",
+    "timing": {
+      "today": "Bugün!",
+      "tomorrow": "Yarın!",
+      "daysFromNow": "{count} gün sonra"
+    },
+    "units": {
+      "day": "Gün",
+      "days": "Gün",
+      "week": "Hafta",
+      "weeks": "Hafta",
+      "month": "Ay",
+      "months": "Ay"
+    },
+    "deliveringTo": "Teslim edilecek",
+    "redirecting": "Mektubunuza yönlendiriliyorsunuz..."
+  },
+  "addressSelector": {
+    "loading": "Adresler yükleniyor...",
+    "loadFailed": "Adresler yüklenemedi",
+    "saved": "Adres kaydedildi!",
+    "saveFailed": "Adres kaydedilemedi",
+    "deleted": "Adres silindi",
+    "deleteFailed": "Adres silinemedi",
+    "empty": {
+      "title": "Kayıtlı Adres Yok",
+      "description": "Fiziksel mektup göndermek için bir adres ekleyin"
+    },
+    "addNew": "Yeni Adres Ekle",
+    "saveAddress": "Adresi Kaydet",
+    "deleteDialog": {
+      "title": "Adres Silinsin mi?",
+      "description": "\"{name}\" kayıtlı adreslerinizden kalıcı olarak silinecek.",
+      "cancel": "İptal",
+      "delete": "Sil"
+    }
+  },
+  "creditWarning": {
+    "subscriptionRequired": "Abonelik Gerekli",
+    "insufficientCredits": "Yetersiz Kredi",
+    "noSubscription": "Mektup teslimatı planlamak için aktif bir abonelik gerekiyor. Abone olun ve gelecekteki kendinize mektup göndermeye başlayın.",
+    "noEmailCredits": "E-posta krediniz kalmadı.",
+    "noPhysicalCredits": "Fiziksel posta krediniz kalmadı.",
+    "noCredits": "E-posta veya fiziksel posta krediniz kalmadı.",
+    "addCreditsHint": "Teslimat planlamak için kredi ekleyin, aksi halde mektubunuz taslak olarak kaydedilecek.",
+    "email": "e-posta",
+    "mail": "posta",
+    "viewPlans": "Planları Görüntüle",
+    "addEmailCredits": "E-posta Kredisi Ekle",
+    "addMailCredits": "Posta Kredisi Ekle",
+    "opening": "Açılıyor...",
+    "checkoutOpened": "Ödeme yeni sekmede açıldı",
+    "checkoutOpenedDescription": "Kredi eklemek için satın almayı tamamlayın. Döndüğünüzde bu sayfa yenilenecek.",
+    "subscriptionRequiredError": "Abonelik gerekli",
+    "subscribeFirst": "Ek kredi satın almadan önce lütfen bir plana abone olun.",
+    "checkoutFailed": "Ödeme başlatılamadı",
+    "tryAgain": "Lütfen tekrar deneyin"
+  },
+  "printOptions": {
+    "color": {
+      "title": "Renkli Baskı",
+      "description": "Mektubunuzu tam renkli olarak yazdırın"
+    },
+    "doubleSided": {
+      "title": "Çift Taraflı",
+      "description": "Kağıdın her iki yüzüne yazdırın"
+    }
+  }
+}

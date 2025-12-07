@@ -2,61 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Stamp, Sparkles } from "lucide-react"
-
-// Brutalist confetti colors
-const CONFETTI_COLORS = [
-  "#3D9A8B", // teal-primary
-  "#FFD93D", // duck-yellow
-  "#6FC2FF", // duck-blue
-  "#FF6B6B", // coral
-  "#383838", // charcoal
-]
-
-function BrutalistConfetti() {
-  const confettiCount = 50
-
-  return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50">
-      {Array.from({ length: confettiCount }).map((_, i) => {
-        const isSquare = Math.random() > 0.3
-        const size = 10 + Math.random() * 16
-
-        return (
-          <motion.div
-            key={i}
-            initial={{
-              opacity: 1,
-              x: "50vw",
-              y: "50vh",
-              scale: 0,
-              rotate: 0,
-            }}
-            animate={{
-              opacity: [1, 1, 0],
-              x: `${15 + Math.random() * 70}vw`,
-              y: `${Math.random() * 100}vh`,
-              scale: [0, 1.2, 0.9],
-              rotate: Math.random() * 720 - 360,
-            }}
-            transition={{
-              duration: 1.8 + Math.random() * 0.8,
-              ease: "easeOut",
-              delay: Math.random() * 0.4,
-            }}
-            className="absolute"
-            style={{
-              width: size,
-              height: size,
-              backgroundColor: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-              borderRadius: isSquare ? "2px" : "50%",
-              border: isSquare ? "2px solid #383838" : "none",
-            }}
-          />
-        )
-      })}
-    </div>
-  )
-}
+import { BrutalistConfetti } from "@/components/animations/brutalist-confetti"
 
 export function UnlockAnimationV3() {
   return (
@@ -67,7 +13,7 @@ export function UnlockAnimationV3() {
       className="flex flex-col items-center justify-center space-y-8"
     >
       {/* Confetti burst */}
-      <BrutalistConfetti />
+      <BrutalistConfetti count={50} originY="50vh" />
 
       {/* Breaking seal animation */}
       <motion.div

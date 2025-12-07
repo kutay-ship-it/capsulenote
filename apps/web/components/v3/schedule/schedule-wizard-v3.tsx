@@ -6,6 +6,7 @@ import { format, setHours, setMinutes } from "date-fns"
 import { fromZonedTime } from "date-fns-tz"
 import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 import { toast } from "sonner"
+import { useTranslations } from "next-intl"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -77,10 +78,10 @@ interface WizardState {
   printOptions: PrintOptions
 }
 
-const STEPS: { number: WizardStep; label: string }[] = [
-  { number: 1, label: "Date & Time" },
-  { number: 2, label: "Delivery" },
-  { number: 3, label: "Confirm" },
+const STEP_KEYS: { number: WizardStep; key: "dateTime" | "delivery" | "confirm" }[] = [
+  { number: 1, key: "dateTime" },
+  { number: 2, key: "delivery" },
+  { number: 3, key: "confirm" },
 ]
 
 export function ScheduleWizardV3({
@@ -98,6 +99,7 @@ export function ScheduleWizardV3({
   hasUsedPhysicalTrial = false,
   existingDeliveries = [],
 }: ScheduleWizardV3Props) {
+  const t = useTranslations("schedule.wizard")
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -158,8 +160,8 @@ export function ScheduleWizardV3({
           }))
         }
         setPendingMailSelection(false)
-        toast.success("Physical mail unlocked!", {
-          description: "You can now configure your physical letter delivery.",
+        toast.success(t("toasts.physicalMailUnlocked"), {
+          description: t("toasts.physicalMailUnlockedDescription"),
         })
       }
     } catch (error) {
@@ -241,11 +243,11 @@ export function ScheduleWizardV3({
   // Navigation
   const goToStep = (step: WizardStep) => {
     if (step === 2 && !canProceedStep1) {
-      toast.error("Please select a delivery date")
+      toast.error(t("toasts.selectDate"))
       return
     }
     if (step === 3 && !canProceedStep2) {
-      toast.error("Please complete all delivery settings")
+      toast.error(t("toasts.completeSettings"))
       return
     }
     setCurrentStep(step)
@@ -290,7 +292,7 @@ export function ScheduleWizardV3({
 
     const deliverAt = getDeliveryDateTime()
     if (!deliverAt) {
-      toast.error("Please select a delivery date")
+      toast.error(t("toasts.selectDate"))
       return
     }
 
@@ -346,8 +348,8 @@ export function ScheduleWizardV3({
       setShowCelebration(true)
     } catch (error) {
       console.error("Failed to schedule delivery:", error)
-      toast.error("Failed to schedule delivery", {
-        description: "Please try again",
+      toast.error(t("toasts.scheduleFailed"), {
+        description: t("toasts.tryAgain"),
       })
       setIsSubmitting(false)
     }
@@ -393,7 +395,7 @@ export function ScheduleWizardV3({
               </button>
               <div className="flex-1 min-w-0">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
-                  Schedule Delivery
+                  {t("title")}
                 </p>
                 <p className="font-mono text-sm font-bold text-charcoal truncate">
                   &ldquo;{letterTitle}&rdquo;
@@ -403,7 +405,7 @@ export function ScheduleWizardV3({
 
             {/* Progress Steps */}
             <div className="flex items-center justify-between">
-              {STEPS.map((step, index) => (
+              {STEP_KEYS.map((step, index) => (
                 <React.Fragment key={step.number}>
                   <button
                     type="button"
@@ -439,10 +441,10 @@ export function ScheduleWizardV3({
                           : "text-charcoal/50"
                       )}
                     >
-                      {step.label}
+                      {t(`steps.${step.key}`)}
                     </span>
                   </button>
-                  {index < STEPS.length - 1 && (
+                  {index < STEP_KEYS.length - 1 && (
                     <div
                       className={cn(
                         "flex-1 h-0.5 mx-2",
@@ -520,7 +522,7 @@ export function ScheduleWizardV3({
                   className="w-full gap-2 h-14 bg-duck-blue hover:bg-duck-blue/90 text-charcoal font-mono text-sm uppercase tracking-wider border-2 border-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] hover:shadow-[6px_6px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:shadow-[4px_4px_0_theme(colors.charcoal)] disabled:hover:translate-y-0"
                   style={{ borderRadius: "2px" }}
                 >
-                  Continue to Delivery
+                  {t("buttons.continueToDelivery")}
                   <ArrowRight className="h-5 w-5" strokeWidth={2} />
                 </Button>
               </div>
@@ -591,7 +593,7 @@ export function ScheduleWizardV3({
                   className="w-full gap-2 h-14 bg-duck-blue hover:bg-duck-blue/90 text-charcoal font-mono text-sm uppercase tracking-wider border-2 border-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] hover:shadow-[6px_6px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:shadow-[4px_4px_0_theme(colors.charcoal)] disabled:hover:translate-y-0"
                   style={{ borderRadius: "2px" }}
                 >
-                  Review & Confirm
+                  {t("buttons.reviewAndConfirm")}
                   <ArrowRight className="h-5 w-5" strokeWidth={2} />
                 </Button>
               </div>

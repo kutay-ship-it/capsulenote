@@ -26,6 +26,7 @@ import referral from "./referral.json"
 import timeline from "./timeline.json"
 import redesign from "./redesign.json"
 import legal from "./legal.json"
+import schedule from "./schedule.json"
 
 const messages = {
   admin,
@@ -56,6 +57,7 @@ const messages = {
   timeline,
   redesign,
   legal,
+  schedule,
 }
 
 export default messages

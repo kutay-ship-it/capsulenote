@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { createAddOnCheckoutSession } from "@/server/actions/addons"
 import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
 import type { DeliveryChannel } from "@/components/v3/delivery-type-v3"
+import { useTranslations } from "next-intl"
 
 // ============================================================================
 // TYPES
@@ -36,6 +37,7 @@ export function CreditWarningBanner({
   className,
   onBeforeCheckout,
 }: CreditWarningBannerProps) {
+  const t = useTranslations("schedule.creditWarning")
   const [isPendingEmail, startTransitionEmail] = useTransition()
   const [isPendingPhysical, startTransitionPhysical] = useTransition()
 
@@ -72,21 +74,21 @@ export function CreditWarningBanner({
       if (result.success) {
         // Open in new tab so user doesn't lose their draft
         window.open(result.data.url, "_blank")
-        toast.info("Checkout opened in new tab", {
-          description: "Complete your purchase to add credits. This page will refresh when you return.",
+        toast.info(t("checkoutOpened"), {
+          description: t("checkoutOpenedDescription"),
         })
       } else {
         if (result.error.code === "NO_CUSTOMER") {
-          toast.error("Subscription required", {
-            description: "Please subscribe to a plan first before purchasing additional credits.",
+          toast.error(t("subscriptionRequiredError"), {
+            description: t("subscribeFirst"),
             action: {
-              label: "View Plans",
+              label: t("viewPlans"),
               onClick: () => window.open("/pricing", "_blank"),
             },
           })
         } else {
-          toast.error("Failed to start checkout", {
-            description: result.error.message || "Please try again",
+          toast.error(t("checkoutFailed"), {
+            description: result.error.message || t("tryAgain"),
           })
         }
       }
@@ -110,7 +112,7 @@ export function CreditWarningBanner({
           <AlertTriangle className="h-3.5 w-3.5 text-white" strokeWidth={2} />
         </div>
         <span className="font-mono text-xs font-bold uppercase tracking-wider text-coral">
-          {noSubscription ? "Subscription Required" : "Insufficient Credits"}
+          {noSubscription ? t("subscriptionRequired") : t("insufficientCredits")}
         </span>
       </div>
 
@@ -118,17 +120,16 @@ export function CreditWarningBanner({
       <p className="font-mono text-xs text-charcoal/70 leading-relaxed">
         {noSubscription ? (
           <>
-            You need an active subscription to schedule letter deliveries.
-            Subscribe to get credits and start sending letters to your future self.
+            {t("noSubscription")}
           </>
         ) : (
           <>
             {emailShort && physicalShort
-              ? "No email or physical mail credits remaining. "
+              ? t("noCredits")
               : emailShort
-                ? "No email credits remaining. "
-                : "No physical mail credits remaining. "}
-            Add credits to schedule delivery, or your letter will be saved as a draft.
+                ? t("noEmailCredits")
+                : t("noPhysicalCredits")}
+            {" "}{t("addCreditsHint")}
           </>
         )}
       </p>
@@ -151,7 +152,7 @@ export function CreditWarningBanner({
                 {eligibility.emailCredits}
               </span>
               <span className="font-mono text-[10px] text-charcoal/50 uppercase">
-                email
+                {t("email")}
               </span>
             </div>
           )}
@@ -170,7 +171,7 @@ export function CreditWarningBanner({
                 {eligibility.physicalCredits}
               </span>
               <span className="font-mono text-[10px] text-charcoal/50 uppercase">
-                mail
+                {t("mail")}
               </span>
             </div>
           )}
@@ -190,7 +191,7 @@ export function CreditWarningBanner({
             style={{ borderRadius: "2px" }}
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-            View Plans
+            {t("viewPlans")}
           </button>
         ) : (
           <>
@@ -209,12 +210,12 @@ export function CreditWarningBanner({
                 {isPendingEmail ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-                    Opening...
+                    {t("opening")}
                   </>
                 ) : (
                   <>
                     <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                    Add Email Credits
+                    {t("addEmailCredits")}
                   </>
                 )}
               </button>
@@ -234,12 +235,12 @@ export function CreditWarningBanner({
                 {isPendingPhysical ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-                    Opening...
+                    {t("opening")}
                   </>
                 ) : (
                   <>
                     <Plus className="h-3.5 w-3.5" strokeWidth={2} />
-                    Add Mail Credits
+                    {t("addMailCredits")}
                   </>
                 )}
               </button>

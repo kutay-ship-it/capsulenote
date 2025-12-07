@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { BrutalistConfetti } from "@/components/animations/brutalist-confetti"
 
 interface SealCelebrationV3Props {
   open: boolean
@@ -18,61 +19,6 @@ interface SealCelebrationV3Props {
   deliveryDate: Date
   recipientEmail: string
   onComplete: () => void
-}
-
-// Brutalist confetti colors
-const CONFETTI_COLORS = [
-  "#3D9A8B", // teal-primary
-  "#FFD93D", // duck-yellow
-  "#6FC2FF", // duck-blue
-  "#FF6B6B", // coral
-  "#383838", // charcoal
-]
-
-function BrutalistConfetti() {
-  const confettiCount = 40
-
-  return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50">
-      {Array.from({ length: confettiCount }).map((_, i) => {
-        const isSquare = Math.random() > 0.3
-        const size = 8 + Math.random() * 12
-
-        return (
-          <motion.div
-            key={i}
-            initial={{
-              opacity: 1,
-              x: "50vw",
-              y: "40vh",
-              scale: 0,
-              rotate: 0,
-            }}
-            animate={{
-              opacity: [1, 1, 0],
-              x: `${20 + Math.random() * 60}vw`,
-              y: `${Math.random() * 100}vh`,
-              scale: [0, 1, 0.8],
-              rotate: Math.random() * 720 - 360,
-            }}
-            transition={{
-              duration: 1.5 + Math.random() * 1,
-              ease: "easeOut",
-              delay: Math.random() * 0.3,
-            }}
-            className="absolute"
-            style={{
-              width: size,
-              height: size,
-              backgroundColor: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-              borderRadius: isSquare ? "2px" : "50%",
-              border: isSquare ? "2px solid #383838" : "none",
-            }}
-          />
-        )
-      })}
-    </div>
-  )
 }
 
 export function SealCelebrationV3({
@@ -124,7 +70,7 @@ export function SealCelebrationV3({
         <DialogTitle className="sr-only">Sealing your letter</DialogTitle>
         {/* Confetti */}
         <AnimatePresence>
-          {showConfetti && <BrutalistConfetti />}
+          {showConfetti && <BrutalistConfetti count={40} originY="40vh" />}
         </AnimatePresence>
 
         <AnimatePresence mode="wait">
