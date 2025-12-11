@@ -313,16 +313,16 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
           className="text-center mb-12"
         >
           <span
-            className="inline-flex items-center gap-2 border-2 border-charcoal bg-duck-yellow px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] mb-6"
+            className="inline-flex items-center gap-2 border-2 border-charcoal bg-duck-yellow px-3 sm:px-4 py-1.5 sm:py-2 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] mb-4 sm:mb-6"
             style={{ borderRadius: "2px" }}
           >
-            <PenLine className="h-4 w-4" strokeWidth={2} />
+            <PenLine className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={2} />
             {t("badge")}
           </span>
-          <h2 className="font-mono text-3xl font-bold uppercase tracking-wide text-charcoal sm:text-4xl md:text-5xl">
+          <h2 className="font-mono text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-wide text-charcoal">
             {t("title")}
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
+          <p className="mx-auto mt-3 sm:mt-4 max-w-2xl font-mono text-sm sm:text-base md:text-lg leading-relaxed text-charcoal/70">
             {t("description")}
           </p>
         </motion.div>
@@ -338,7 +338,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
           <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-6 items-start">
             {/* Left Column - Letter Editor */}
             <div
-              className="relative border-2 border-charcoal bg-white p-6 md:p-8 shadow-[4px_4px_0_theme(colors.charcoal)] min-h-[500px] flex flex-col"
+              className="relative border-2 border-charcoal bg-white p-4 sm:p-6 md:p-8 shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)] min-h-[350px] sm:min-h-[450px] md:min-h-[500px] flex flex-col"
               style={{ borderRadius: "2px" }}
             >
               {/* Floating badge */}
@@ -434,7 +434,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
             <div className="space-y-6">
               {/* Delivery Settings Card */}
               <div
-                className="relative border-2 border-charcoal bg-white p-6 shadow-[4px_4px_0_theme(colors.charcoal)]"
+                className="relative border-2 border-charcoal bg-white p-4 sm:p-6 shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]"
                 style={{ borderRadius: "2px" }}
               >
                 {/* Floating badge */}
@@ -640,7 +640,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
 
               {/* Actions Card */}
               <div
-                className="border-2 border-charcoal bg-duck-cream p-6 shadow-[4px_4px_0_theme(colors.charcoal)]"
+                className="border-2 border-charcoal bg-duck-cream p-4 sm:p-6 shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]"
                 style={{ borderRadius: "2px" }}
               >
                 <div className="space-y-4">

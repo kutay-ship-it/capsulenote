@@ -19,7 +19,7 @@ export function ProgressIndicator({
   className,
 }: ProgressIndicatorProps) {
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-2 sm:gap-3", className)}>
       {Array.from({ length: totalSteps }).map((_, index) => (
         <motion.div
           key={index}
@@ -30,7 +30,7 @@ export function ProgressIndicator({
         >
           <motion.div
             className={cn(
-              "w-3 h-3 border-2 border-charcoal transition-colors duration-300",
+              "w-2.5 h-2.5 sm:w-3 sm:h-3 border-2 border-charcoal transition-colors duration-300",
               index === currentStep
                 ? "bg-duck-yellow"
                 : index < currentStep
@@ -47,11 +47,11 @@ export function ProgressIndicator({
                 : {}
             }
           />
-          {/* Connection line */}
+          {/* Connection line - responsive width */}
           {index < totalSteps - 1 && (
             <div
               className={cn(
-                "absolute top-1/2 left-full w-3 h-0.5 -translate-y-1/2",
+                "absolute top-1/2 left-full w-2 sm:w-3 h-0.5 -translate-y-1/2",
                 index < currentStep ? "bg-teal-primary" : "bg-charcoal/20"
               )}
             />

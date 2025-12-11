@@ -218,7 +218,7 @@ async function LetterDetailContent({ id }: { id: string }) {
       {/* Main Letter Card */}
       <article
         className={cn(
-          "relative border-2 bg-white p-6 md:p-8",
+          "relative border-2 bg-white p-4 sm:p-6 md:p-8",
           "shadow-[2px_2px_0_theme(colors.charcoal)]",
           statusConfig.borderColor
         )}
@@ -238,7 +238,7 @@ async function LetterDetailContent({ id }: { id: string }) {
         </div>
 
         {/* Top-right action icons */}
-        <div className="absolute top-4 right-6 flex items-center gap-2">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-6 flex items-center gap-1.5 sm:gap-2">
           {/* Edit button - available when content can still be edited */}
           {canEdit && (
             <Link href={{ pathname: "/letters/[id]/edit", params: { id } }}>
@@ -296,7 +296,7 @@ async function LetterDetailContent({ id }: { id: string }) {
         </div>
 
         {/* Title */}
-        <h1 className="mt-4 mb-2 font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal">
+        <h1 className="mt-4 mb-2 font-mono text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal line-clamp-2">
           {letter.title || t("card.untitled")}
         </h1>
 
@@ -319,13 +319,13 @@ async function LetterDetailContent({ id }: { id: string }) {
 
         {/* State 2: Scheduled - show sealed/locked state */}
         {isScheduled && (
-          <div className="flex flex-col items-center justify-center text-center py-8 space-y-6">
+          <div className="flex flex-col items-center justify-center text-center py-6 sm:py-8 space-y-4 sm:space-y-6">
             {/* Wax Seal Icon */}
             <div
-              className="flex h-20 w-20 items-center justify-center border-4 border-charcoal bg-coral shadow-[4px_4px_0_theme(colors.charcoal)]"
+              className="flex h-16 sm:h-20 w-16 sm:w-20 items-center justify-center border-3 sm:border-4 border-charcoal bg-coral shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]"
               style={{ borderRadius: "50%" }}
             >
-              <Stamp className="h-10 w-10 text-white" strokeWidth={1.5} />
+              <Stamp className="h-8 sm:h-10 w-8 sm:w-10 text-white" strokeWidth={1.5} />
             </div>
 
             {/* Message */}
@@ -366,19 +366,19 @@ async function LetterDetailContent({ id }: { id: string }) {
 
         {/* State 3: Sent - show unlock CTA or opened status */}
         {isSent && (
-          <div className="flex flex-col items-center justify-center text-center py-8 space-y-6">
+          <div className="flex flex-col items-center justify-center text-center py-6 sm:py-8 space-y-4 sm:space-y-6">
             {/* Icon */}
             <div
               className={cn(
-                "flex h-20 w-20 items-center justify-center border-4 border-charcoal shadow-[4px_4px_0_theme(colors.charcoal)]",
+                "flex h-16 sm:h-20 w-16 sm:w-20 items-center justify-center border-3 sm:border-4 border-charcoal shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]",
                 hasBeenOpened ? "bg-teal-primary" : "bg-coral"
               )}
               style={{ borderRadius: "50%" }}
             >
               {hasBeenOpened ? (
-                <MailOpen className="h-10 w-10 text-white" strokeWidth={1.5} />
+                <MailOpen className="h-8 sm:h-10 w-8 sm:w-10 text-white" strokeWidth={1.5} />
               ) : (
-                <Stamp className="h-10 w-10 text-white" strokeWidth={1.5} />
+                <Stamp className="h-8 sm:h-10 w-8 sm:w-10 text-white" strokeWidth={1.5} />
               )}
             </div>
 
@@ -403,7 +403,7 @@ async function LetterDetailContent({ id }: { id: string }) {
               <Button
                 size="lg"
                 className={cn(
-                  "gap-3 h-14 font-mono text-sm uppercase tracking-wider border-4 border-charcoal shadow-[6px_6px_0_theme(colors.charcoal)] hover:shadow-[8px_8px_0_theme(colors.charcoal)] hover:-translate-y-1 transition-all",
+                  "gap-2 sm:gap-3 h-12 sm:h-14 font-mono text-xs sm:text-sm uppercase tracking-wider border-3 sm:border-4 border-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] sm:shadow-[6px_6px_0_theme(colors.charcoal)] hover:shadow-[5px_5px_0_theme(colors.charcoal)] sm:hover:shadow-[8px_8px_0_theme(colors.charcoal)] hover:-translate-y-1 transition-all",
                   hasBeenOpened
                     ? "bg-teal-primary hover:bg-teal-primary/90 text-white"
                     : "bg-coral hover:bg-coral/90 text-white"
@@ -412,12 +412,12 @@ async function LetterDetailContent({ id }: { id: string }) {
               >
                 {hasBeenOpened ? (
                   <>
-                    <MailOpen className="h-5 w-5" strokeWidth={2} />
+                    <MailOpen className="h-4 sm:h-5 w-4 sm:w-5" strokeWidth={2} />
                     {t("detail.buttons.viewFullLetter")}
                   </>
                 ) : (
                   <>
-                    <Stamp className="h-5 w-5" strokeWidth={2} />
+                    <Stamp className="h-4 sm:h-5 w-4 sm:w-5" strokeWidth={2} />
                     {t("detail.buttons.openTimeCapsule")}
                   </>
                 )}
@@ -453,31 +453,31 @@ async function LetterDetailContent({ id }: { id: string }) {
       {/* Schedule CTA - only if no deliveries */}
       {!hasDelivery && (
         <div
-          className="border-2 border-charcoal bg-duck-cream p-8 md:p-12 shadow-[2px_2px_0_theme(colors.charcoal)]"
+          className="border-2 border-charcoal bg-duck-cream p-6 sm:p-8 md:p-12 shadow-[2px_2px_0_theme(colors.charcoal)]"
           style={{ borderRadius: "2px" }}
         >
-          <div className="flex flex-col items-center justify-center text-center space-y-6">
+          <div className="flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6">
             {/* Icon */}
             <div
-              className="flex h-16 w-16 items-center justify-center border-2 border-charcoal bg-duck-yellow"
+              className="flex h-12 sm:h-16 w-12 sm:w-16 items-center justify-center border-2 border-charcoal bg-duck-yellow"
               style={{ borderRadius: "2px" }}
             >
-              <Calendar className="h-8 w-8 text-charcoal" strokeWidth={2} />
+              <Calendar className="h-6 sm:h-8 w-6 sm:w-8 text-charcoal" strokeWidth={2} />
             </div>
 
             {/* Message */}
             <div className="space-y-2 max-w-md">
-              <h2 className="font-mono text-xl md:text-2xl font-bold uppercase tracking-wide text-charcoal">
+              <h2 className="font-mono text-lg sm:text-xl md:text-2xl font-bold uppercase tracking-wide text-charcoal">
                 {t("detail.scheduleCtaSection.title")}
               </h2>
-              <p className="font-mono text-sm text-charcoal/70">
+              <p className="font-mono text-xs sm:text-sm text-charcoal/70">
                 {t("detail.scheduleCtaSection.description")}
               </p>
             </div>
 
             {/* CTA */}
             <Link href={{ pathname: "/letters/[id]/schedule", params: { id } }}>
-              <Button className="gap-2">
+              <Button className="gap-2 w-full sm:w-auto">
                 {t("detail.scheduleCta")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -488,15 +488,15 @@ async function LetterDetailContent({ id }: { id: string }) {
 
       {/* Danger Zone */}
       <div
-        className="border-2 border-charcoal/20 bg-white p-6"
+        className="border-2 border-charcoal/20 bg-white p-4 sm:p-6"
         style={{ borderRadius: "2px" }}
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal/60">
+            <h3 className="font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-charcoal/60">
               {t("detail.dangerZone.title")}
             </h3>
-            <p className="mt-1 font-mono text-xs text-charcoal/40">
+            <p className="mt-1 font-mono text-[10px] sm:text-xs text-charcoal/40">
               {hasDelivery
                 ? t("detail.dangerZone.descriptionWithDelivery")
                 : t("detail.dangerZone.descriptionWithoutDelivery")}
@@ -505,7 +505,7 @@ async function LetterDetailContent({ id }: { id: string }) {
           <Button
             variant="ghost"
             size="sm"
-            className="gap-2 font-mono text-xs uppercase tracking-wider text-coral/70 hover:text-coral hover:bg-coral/5"
+            className="w-full sm:w-auto gap-2 font-mono text-xs uppercase tracking-wider text-coral/70 hover:text-coral hover:bg-coral/5"
           >
             <Trash2 className="h-4 w-4" />
             {t("detail.dangerZone.delete")}

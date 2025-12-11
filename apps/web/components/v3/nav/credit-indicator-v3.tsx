@@ -670,9 +670,9 @@ export function CreditIndicatorV3({
         </button>
       </PopoverTrigger>
 
-      {/* Smart Adaptive Panel Popover */}
+      {/* Smart Adaptive Panel Popover - responsive width */}
       <PopoverContent
-        className="w-80 border-2 border-charcoal bg-white p-0 shadow-[4px_4px_0_theme(colors.charcoal)]"
+        className="w-[calc(100vw-2rem)] sm:w-80 max-w-80 border-2 border-charcoal bg-white p-0 shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]"
         style={{ borderRadius: "2px" }}
         align="end"
         sideOffset={8}
@@ -760,9 +760,9 @@ export function MailCreditIndicatorV3({
         </button>
       </PopoverTrigger>
 
-      {/* Popover Content - Different panel for Digital Capsule users */}
+      {/* Popover Content - Different panel for Digital Capsule users - responsive width */}
       <PopoverContent
-        className="w-80 border-2 border-charcoal bg-white p-0 shadow-[4px_4px_0_theme(colors.charcoal)]"
+        className="w-[calc(100vw-2rem)] sm:w-80 max-w-80 border-2 border-charcoal bg-white p-0 shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]"
         style={{ borderRadius: "2px" }}
         align="end"
         sideOffset={8}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { format, differenceInDays, startOfYear } from "date-fns"
 import { motion, useScroll, useTransform } from "framer-motion"
-import { ArrowRight, Mail, Lock } from "lucide-react"
+import { ArrowRight, Mail, Lock, Clock, Calendar } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import type { DeliveryTimelineItem } from "@/server/actions/redesign-dashboard"
@@ -12,9 +12,232 @@ interface EmotionalJourneyV2Props {
   deliveries: DeliveryTimelineItem[]
 }
 
+/**
+ * Hook to detect mobile viewport
+ * Returns true for screens < 640px (sm breakpoint)
+ */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640)
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  return isMobile
+}
+
+/**
+ * Mobile Journey Card - Simplified card for vertical mobile layout
+ */
+function MobileJourneyCard({
+  item,
+  t,
+}: {
+  item: DeliveryTimelineItem & { date: Date }
+  t: ReturnType<typeof useTranslations>
+}) {
+  const isSent = item.status === "sent"
+  const daysUntilDelivery = differenceInDays(item.date, new Date())
+  const isImminent = !isSent && daysUntilDelivery > 0 && daysUntilDelivery <= 7
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative"
+    >
+      {/* Card */}
+      <div
+        className={cn(
+          "relative bg-white border-2 p-4 shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]",
+          isSent ? "border-teal-primary" : "border-charcoal"
+        )}
+        style={{ borderRadius: "2px" }}
+      >
+        {/* Top Row: Date + Status Badge */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-charcoal/50" strokeWidth={2} />
+            <span
+              className={cn(
+                "font-mono text-xs font-bold uppercase tracking-wide",
+                isSent ? "text-teal-primary" : "text-charcoal"
+              )}
+            >
+              {format(item.date, "MMM d, yyyy")}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {isImminent && (
+              <span className="px-2 py-0.5 bg-teal-primary text-white font-mono text-[9px] font-bold uppercase tracking-wider rounded-[2px]">
+                {daysUntilDelivery === 1 ? t("tomorrow") : t("daysShort", { days: daysUntilDelivery })}
+              </span>
+            )}
+            {isSent ? (
+              <Mail className="w-4 h-4 text-teal-primary" strokeWidth={2} />
+            ) : (
+              <Lock className="w-4 h-4 text-charcoal/40" strokeWidth={2} />
+            )}
+          </div>
+        </div>
+
+        {/* Title */}
+        <h4
+          className={cn(
+            "font-mono text-sm font-bold leading-tight mb-2 line-clamp-2",
+            isSent ? "text-teal-primary" : "text-charcoal"
+          )}
+        >
+          {item.letter.title || t("untitledLetter")}
+        </h4>
+
+        {/* Description */}
+        <p className="font-mono text-xs text-charcoal/50 line-clamp-1 mb-3 leading-relaxed">
+          {isSent ? t("card.deliveredDescription") : t("card.scheduledDescription")}
+        </p>
+
+        {/* Dashed Separator */}
+        <div className="w-full border-t-2 border-dashed border-charcoal/10 mb-2" />
+
+        {/* Footer */}
+        <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-wider">
+          <span className={isSent ? "text-teal-primary" : "text-charcoal"}>
+            {isSent ? t("card.statusDelivered") : t("card.statusScheduled")}
+          </span>
+          <ArrowRight
+            className={cn("w-3 h-3", isSent ? "text-teal-primary" : "text-charcoal")}
+            strokeWidth={2}
+          />
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+/**
+ * Mobile Journey List - Vertical stacked layout for mobile devices
+ */
+function MobileJourneyList({
+  deliveries,
+  t,
+}: {
+  deliveries: DeliveryTimelineItem[]
+  t: ReturnType<typeof useTranslations>
+}) {
+  const now = new Date()
+
+  // Sort and filter deliveries
+  const sortedDeliveries = useMemo(() => {
+    return [...deliveries]
+      .filter((d) => d.status !== "failed")
+      .sort((a, b) => new Date(a.deliverAt).getTime() - new Date(b.deliverAt).getTime())
+      .map((d) => ({ ...d, date: new Date(d.deliverAt) }))
+  }, [deliveries])
+
+  // Split into past and future
+  const pastDeliveries = sortedDeliveries.filter((d) => d.date.getTime() <= now.getTime())
+  const futureDeliveries = sortedDeliveries.filter((d) => d.date.getTime() > now.getTime())
+
+  if (sortedDeliveries.length === 0) {
+    return (
+      <section className="w-full border-y-2 border-charcoal bg-duck-cream">
+        <div className="container py-12 text-center">
+          <h3 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal mb-3">
+            {t("emptyTitle")}
+          </h3>
+          <p className="font-mono text-xs text-charcoal/60">{t("emptySubtitle")}</p>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="w-full border-y-2 border-charcoal bg-duck-cream">
+      {/* Header */}
+      <div className="border-b-2 border-charcoal px-4 py-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-mono text-xs font-bold uppercase tracking-wide text-charcoal">
+            {t("sectionTitle")}
+          </h3>
+          <div className="flex gap-3 text-[10px] font-mono text-charcoal/60">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-teal-primary border border-teal-primary" />
+              <span>{t("legend.delivered")}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-white border border-charcoal" />
+              <span>{t("legend.waiting")}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 py-4 space-y-6">
+        {/* Past Deliveries Section */}
+        {pastDeliveries.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-teal-primary" strokeWidth={2} />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-teal-primary">
+                {t("legend.delivered")} ({pastDeliveries.length})
+              </span>
+            </div>
+            <div className="space-y-3">
+              {pastDeliveries.map((item) => (
+                <MobileJourneyCard key={item.id} item={item} t={t} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* NOW Indicator */}
+        <div className="relative py-2">
+          <div className="absolute inset-x-0 top-1/2 h-px bg-charcoal/10" />
+          <div className="relative flex justify-center">
+            <div className="bg-duck-cream px-3">
+              <div className="relative">
+                <div className="absolute top-0.5 left-0.5 w-full h-full bg-charcoal rounded-[2px]" />
+                <div className="relative bg-teal-primary px-3 py-1.5 border-2 border-teal-primary rounded-[2px]">
+                  <span className="font-mono text-[10px] font-bold uppercase text-white tracking-[0.15em]">
+                    {t("now")} • {format(now, "MMM d")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Future Deliveries Section */}
+        {futureDeliveries.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5 text-charcoal/60" strokeWidth={2} />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/60">
+                {t("legend.waiting")} ({futureDeliveries.length})
+              </span>
+            </div>
+            <div className="space-y-3">
+              {futureDeliveries.map((item) => (
+                <MobileJourneyCard key={item.id} item={item} t={t} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
 // V2: Smooth S-curves with gradient stroke
+// Mobile: Vertical stacked card list
+// Desktop: Horizontal scroll timeline
 export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
   const t = useTranslations("app.journey.timeline")
+  const isMobile = useIsMobile()
   const containerRef = useRef<HTMLDivElement>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [isMounted, setIsMounted] = useState(false)
@@ -259,6 +482,12 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
     )
   }
 
+  // Mobile: Show vertical stacked card list for better UX on small screens
+  if (isMobile) {
+    return <MobileJourneyList deliveries={deliveries} t={t} />
+  }
+
+  // Desktop: Show horizontal scroll timeline with parallax effects
   return (
     <section
       ref={containerRef}

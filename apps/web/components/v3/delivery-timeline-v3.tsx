@@ -86,10 +86,10 @@ export function DeliveryTimelineV3({
 
   return (
     <div
-      className="border-2 border-charcoal bg-white p-6 shadow-[2px_2px_0_theme(colors.charcoal)]"
+      className="border-2 border-charcoal bg-white p-4 sm:p-6 shadow-[2px_2px_0_theme(colors.charcoal)]"
       style={{ borderRadius: "2px" }}
     >
-      <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal mb-4">
+      <h2 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wider text-charcoal mb-4">
         {t("timeline.title")}
       </h2>
 
@@ -112,7 +112,7 @@ export function DeliveryTimelineV3({
             <div
               key={delivery.id}
               className={cn(
-                "flex items-center gap-4 border-2 border-l-4 p-4",
+                "flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 border-2 border-l-4 p-3 sm:p-4",
                 isDelivered && "border-teal-primary bg-white",
                 isFailed && "border-coral bg-white",
                 isScheduled && "border-duck-blue bg-white",
@@ -121,32 +121,57 @@ export function DeliveryTimelineV3({
               )}
               style={{ borderRadius: "2px" }}
             >
-              {/* Icon */}
-              <div
-                className={cn(
-                  "flex h-10 w-10 flex-shrink-0 items-center justify-center border-2 border-charcoal",
-                  isDelivered && "bg-teal-primary text-white",
-                  isFailed && "bg-coral text-white",
-                  isScheduled && "bg-duck-blue text-charcoal",
-                  isProcessing && "bg-duck-yellow text-charcoal",
-                  isCanceled && "bg-charcoal/20 text-charcoal/50"
-                )}
-                style={{ borderRadius: "2px" }}
-              >
-                {isDelivered && (
-                  <CheckCircle2 className="h-5 w-5" strokeWidth={2} />
-                )}
-                {isFailed && <AlertCircle className="h-5 w-5" strokeWidth={2} />}
-                {isScheduled && <Clock className="h-5 w-5" strokeWidth={2} />}
-                {isProcessing && (
-                  <Clock className="h-5 w-5 animate-pulse" strokeWidth={2} />
-                )}
-                {isCanceled && <X className="h-5 w-5" strokeWidth={2} />}
+              {/* Top row: Icon and status on mobile */}
+              <div className="flex items-center gap-3 sm:gap-4">
+                {/* Icon */}
+                <div
+                  className={cn(
+                    "flex h-8 sm:h-10 w-8 sm:w-10 flex-shrink-0 items-center justify-center border-2 border-charcoal",
+                    isDelivered && "bg-teal-primary text-white",
+                    isFailed && "bg-coral text-white",
+                    isScheduled && "bg-duck-blue text-charcoal",
+                    isProcessing && "bg-duck-yellow text-charcoal",
+                    isCanceled && "bg-charcoal/20 text-charcoal/50"
+                  )}
+                  style={{ borderRadius: "2px" }}
+                >
+                  {isDelivered && (
+                    <CheckCircle2 className="h-4 sm:h-5 w-4 sm:w-5" strokeWidth={2} />
+                  )}
+                  {isFailed && <AlertCircle className="h-4 sm:h-5 w-4 sm:w-5" strokeWidth={2} />}
+                  {isScheduled && <Clock className="h-4 sm:h-5 w-4 sm:w-5" strokeWidth={2} />}
+                  {isProcessing && (
+                    <Clock className="h-4 sm:h-5 w-4 sm:w-5 animate-pulse" strokeWidth={2} />
+                  )}
+                  {isCanceled && <X className="h-4 sm:h-5 w-4 sm:w-5" strokeWidth={2} />}
+                </div>
+
+                {/* Content - inline on mobile next to icon */}
+                <div className="flex-1 min-w-0 sm:hidden">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-mono text-xs font-bold uppercase tracking-wide text-charcoal">
+                      {delivery.channel === "email" ? t("channel.email") : t("channel.mail")}
+                    </span>
+                    <span
+                      className={cn(
+                        "px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider",
+                        isDelivered && "bg-teal-primary text-white",
+                        isFailed && "bg-coral text-white",
+                        isScheduled && "bg-duck-blue text-charcoal",
+                        isProcessing && "bg-duck-yellow text-charcoal",
+                        isCanceled && "bg-charcoal/30 text-charcoal/70"
+                      )}
+                      style={{ borderRadius: "2px" }}
+                    >
+                      {t(`status.${delivery.status}`)}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              {/* Content */}
+              {/* Content - full on desktop */}
               <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="hidden sm:flex flex-wrap items-center gap-2">
                   <span className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal">
                     {delivery.channel === "email" ? t("channel.email") : t("channel.mail")}
                   </span>
@@ -165,26 +190,26 @@ export function DeliveryTimelineV3({
                   </span>
                 </div>
 
-                <p className="mt-1 font-mono text-xs text-charcoal/60">
+                <p className="font-mono text-[10px] sm:text-xs text-charcoal/60 sm:mt-1">
                   {deliveryDate}
                 </p>
 
                 {delivery.channel === "email" &&
                   delivery.emailDelivery?.toEmail && (
-                    <p className="font-mono text-xs text-charcoal/40">
+                    <p className="font-mono text-[10px] sm:text-xs text-charcoal/40 truncate">
                       To: {delivery.emailDelivery.toEmail}
                     </p>
                   )}
 
                 {/* Physical mail sealed status indicator */}
                 {delivery.channel === "mail" && delivery.mailDelivery?.sealedAt && (
-                  <div className="flex items-center gap-1.5 mt-1">
+                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
                     <Stamp className="h-3 w-3 text-coral" strokeWidth={2} />
-                    <span className="font-mono text-[10px] text-coral uppercase tracking-wider">
+                    <span className="font-mono text-[9px] sm:text-[10px] text-coral uppercase tracking-wider">
                       {t("timeline.sealedForPrint")}
                     </span>
                     {delivery.mailDelivery.lobScheduleMode === "immediate" && delivery.mailDelivery.lobSendDate && (
-                      <span className="font-mono text-[10px] text-charcoal/50">
+                      <span className="font-mono text-[9px] sm:text-[10px] text-charcoal/50">
                         • {t("timeline.ships", { date: format(new Date(delivery.mailDelivery.lobSendDate), "MMM d", { locale: dateFnsLocale }) })}
                       </span>
                     )}
@@ -192,7 +217,7 @@ export function DeliveryTimelineV3({
                 )}
 
                 {isFailed && delivery.lastError && (
-                  <p className="mt-1 font-mono text-xs text-coral">
+                  <p className="mt-1 font-mono text-[10px] sm:text-xs text-coral line-clamp-2">
                     {delivery.lastError}
                   </p>
                 )}
@@ -207,8 +232,8 @@ export function DeliveryTimelineV3({
                   )}
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Actions - Stack vertically on mobile */}
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-shrink-0">
                 {/* Cancel button for scheduled */}
                 {canCancel && (
                   <CancelDeliveryDialogV3
@@ -220,9 +245,9 @@ export function DeliveryTimelineV3({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="font-mono text-xs uppercase tracking-wider text-coral hover:text-coral hover:bg-coral/10"
+                      className="flex-1 sm:flex-none font-mono text-[10px] sm:text-xs uppercase tracking-wider text-coral hover:text-coral hover:bg-coral/10"
                     >
-                      <X className="h-4 w-4 mr-1" strokeWidth={2} />
+                      <X className="h-3 sm:h-4 w-3 sm:w-4 mr-1" strokeWidth={2} />
                       {t("timeline.actions.cancel")}
                     </Button>
                   </CancelDeliveryDialogV3>
@@ -232,14 +257,15 @@ export function DeliveryTimelineV3({
                 {canCancel && (
                   <Link
                     href={{ pathname: "/letters/[id]/schedule", params: { id: letterId } }}
+                    className="flex-1 sm:flex-none"
                   >
                     <Button
                       variant="outline"
                       size="sm"
-                      className="font-mono text-xs uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
+                      className="w-full font-mono text-[10px] sm:text-xs uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
                       style={{ borderRadius: "2px" }}
                     >
-                      <Calendar className="h-4 w-4 mr-1" strokeWidth={2} />
+                      <Calendar className="h-3 sm:h-4 w-3 sm:w-4 mr-1" strokeWidth={2} />
                       {t("timeline.actions.reschedule")}
                     </Button>
                   </Link>
@@ -252,12 +278,12 @@ export function DeliveryTimelineV3({
                     size="sm"
                     onClick={() => handleRetry(delivery.id)}
                     disabled={retryingId === delivery.id}
-                    className="font-mono text-xs uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
+                    className="flex-1 sm:flex-none font-mono text-[10px] sm:text-xs uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
                     style={{ borderRadius: "2px" }}
                   >
                     <RotateCcw
                       className={cn(
-                        "h-4 w-4 mr-1",
+                        "h-3 sm:h-4 w-3 sm:w-4 mr-1",
                         retryingId === delivery.id && "animate-spin"
                       )}
                       strokeWidth={2}

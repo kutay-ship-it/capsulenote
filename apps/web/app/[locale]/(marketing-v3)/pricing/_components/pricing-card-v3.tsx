@@ -52,28 +52,28 @@ export function PricingCardV3({
   // Stagger delay based on index
   const delay = index * 0.15
 
-  // Card styles based on variant
+  // Card styles based on variant - with mobile-friendly reduced shadows
   const cardStyles = {
     default: {
       bg: "bg-white",
       border: "border-charcoal",
       text: "text-charcoal",
-      shadow: "shadow-[4px_4px_0_theme(colors.charcoal)]",
-      hoverShadow: "hover:shadow-[8px_8px_0_theme(colors.charcoal)]",
+      shadow: "shadow-[3px_3px_0_theme(colors.charcoal)] sm:shadow-[4px_4px_0_theme(colors.charcoal)]",
+      hoverShadow: "hover:shadow-[5px_5px_0_theme(colors.charcoal)] sm:hover:shadow-[8px_8px_0_theme(colors.charcoal)]",
     },
     popular: {
       bg: "bg-duck-blue",
       border: "border-charcoal",
       text: "text-charcoal",
-      shadow: "shadow-[8px_8px_0_theme(colors.charcoal)]",
-      hoverShadow: "hover:shadow-[12px_12px_0_theme(colors.charcoal)]",
+      shadow: "shadow-[4px_4px_0_theme(colors.charcoal)] sm:shadow-[8px_8px_0_theme(colors.charcoal)]",
+      hoverShadow: "hover:shadow-[6px_6px_0_theme(colors.charcoal)] sm:hover:shadow-[12px_12px_0_theme(colors.charcoal)]",
     },
     enterprise: {
       bg: "bg-charcoal",
       border: "border-charcoal",
       text: "text-white",
-      shadow: "shadow-[4px_4px_0_theme(colors.duck-yellow)]",
-      hoverShadow: "hover:shadow-[8px_8px_0_theme(colors.duck-yellow)]",
+      shadow: "shadow-[3px_3px_0_theme(colors.duck-yellow)] sm:shadow-[4px_4px_0_theme(colors.duck-yellow)]",
+      hoverShadow: "hover:shadow-[5px_5px_0_theme(colors.duck-yellow)] sm:hover:shadow-[8px_8px_0_theme(colors.duck-yellow)]",
     },
   }
 
@@ -93,17 +93,17 @@ export function PricingCardV3({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Layered Background Cards for Popular Tier */}
+      {/* Layered Background Cards for Popular Tier - Reduced on mobile */}
       {isPopular && (
         <>
           {/* Bottom layer - charcoal */}
           <div
-            className="absolute inset-0 border-2 border-charcoal bg-charcoal translate-x-4 translate-y-4"
+            className="absolute inset-0 border-2 border-charcoal bg-charcoal translate-x-2 translate-y-2 sm:translate-x-4 sm:translate-y-4"
             style={{ borderRadius: "2px" }}
           />
           {/* Middle layer - duck-yellow */}
           <div
-            className="absolute inset-0 border-2 border-charcoal bg-duck-yellow translate-x-2 translate-y-2"
+            className="absolute inset-0 border-2 border-charcoal bg-duck-yellow translate-x-1 translate-y-1 sm:translate-x-2 sm:translate-y-2"
             style={{ borderRadius: "2px" }}
           />
         </>
@@ -293,10 +293,10 @@ export function PricingCardV3({
         </Link>
       </motion.article>
 
-      {/* Decorative Seal for Popular Tier */}
+      {/* Decorative Seal for Popular Tier - Smaller on mobile */}
       {isPopular && (
         <motion.div
-          className="absolute -right-4 -top-4 z-20"
+          className="absolute -right-2 -top-2 sm:-right-4 sm:-top-4 z-20"
           initial={{ scale: 0, rotate: -30 }}
           animate={isInView ? { scale: 1, rotate: isHovered ? 5 : -5 } : { scale: 0, rotate: -30 }}
           transition={{
@@ -308,10 +308,10 @@ export function PricingCardV3({
         >
           <div
             className={cn(
-              "h-16 w-16 flex items-center justify-center",
+              "h-12 w-12 sm:h-16 sm:w-16 flex items-center justify-center",
               "border-2 border-charcoal bg-coral",
-              "font-mono text-[8px] font-bold uppercase leading-tight text-white text-center",
-              "shadow-[3px_3px_0_theme(colors.charcoal)]"
+              "font-mono text-[7px] sm:text-[8px] font-bold uppercase leading-tight text-white text-center",
+              "shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)]"
             )}
             style={{ borderRadius: "50%" }}
           >

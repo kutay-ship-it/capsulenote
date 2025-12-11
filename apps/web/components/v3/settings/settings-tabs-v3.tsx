@@ -81,50 +81,52 @@ export function SettingsTabsV3({
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      {/* Brutalist Tab List */}
-      <TabsList
-        className="inline-flex h-auto w-full justify-start gap-0 rounded-none border-2 border-charcoal bg-white p-0"
-        style={{ borderRadius: "2px" }}
-      >
-        {TAB_CONFIG.map((tab, index) => (
-          <TabsTrigger
-            key={tab.value}
-            value={tab.value}
-            className={cn(
-              "relative flex items-center gap-2 rounded-none px-3 py-3 sm:px-4 font-mono text-xs font-bold uppercase tracking-wider transition-all",
-              "data-[state=active]:bg-charcoal data-[state=active]:text-white data-[state=active]:shadow-none",
-              "data-[state=inactive]:bg-white data-[state=inactive]:text-charcoal data-[state=inactive]:hover:bg-off-white",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-duck-blue focus-visible:ring-offset-0",
-              // Add border between tabs
-              index > 0 && "border-l-2 border-charcoal"
-            )}
-            style={{ borderRadius: "0" }}
-          >
-            {tab.icon}
-            <span className="hidden sm:inline">{t(tab.value)}</span>
-          </TabsTrigger>
-        ))}
-      </TabsList>
+      {/* Brutalist Tab List - Horizontal scroll on mobile */}
+      <div className="overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+        <TabsList
+          className="inline-flex h-auto w-max sm:w-full justify-start gap-0 rounded-none border-2 border-charcoal bg-white p-0"
+          style={{ borderRadius: "2px" }}
+        >
+          {TAB_CONFIG.map((tab, index) => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className={cn(
+                "relative flex items-center gap-1.5 sm:gap-2 rounded-none px-2.5 py-2.5 sm:px-4 sm:py-3 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap",
+                "data-[state=active]:bg-charcoal data-[state=active]:text-white data-[state=active]:shadow-none",
+                "data-[state=inactive]:bg-white data-[state=inactive]:text-charcoal data-[state=inactive]:hover:bg-off-white",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-duck-blue focus-visible:ring-offset-0",
+                // Add border between tabs
+                index > 0 && "border-l-2 border-charcoal"
+              )}
+              style={{ borderRadius: "0" }}
+            >
+              {tab.icon}
+              <span className="hidden sm:inline">{t(tab.value)}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
 
       {/* Tab Content */}
-      <TabsContent value="account" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-        <div className="space-y-6">{accountContent}</div>
+      <TabsContent value="account" className="mt-4 sm:mt-6 focus-visible:outline-none focus-visible:ring-0">
+        <div className="space-y-4 sm:space-y-6">{accountContent}</div>
       </TabsContent>
 
-      <TabsContent value="billing" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-        <div className="space-y-6">{billingContent}</div>
+      <TabsContent value="billing" className="mt-4 sm:mt-6 focus-visible:outline-none focus-visible:ring-0">
+        <div className="space-y-4 sm:space-y-6">{billingContent}</div>
       </TabsContent>
 
-      <TabsContent value="addresses" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-        <div className="space-y-6">{addressesContent}</div>
+      <TabsContent value="addresses" className="mt-4 sm:mt-6 focus-visible:outline-none focus-visible:ring-0">
+        <div className="space-y-4 sm:space-y-6">{addressesContent}</div>
       </TabsContent>
 
-      <TabsContent value="privacy" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-        <div className="space-y-6">{privacyContent}</div>
+      <TabsContent value="privacy" className="mt-4 sm:mt-6 focus-visible:outline-none focus-visible:ring-0">
+        <div className="space-y-4 sm:space-y-6">{privacyContent}</div>
       </TabsContent>
 
-      <TabsContent value="referrals" className="mt-6 focus-visible:outline-none focus-visible:ring-0">
-        <div className="space-y-6">{referralsContent}</div>
+      <TabsContent value="referrals" className="mt-4 sm:mt-6 focus-visible:outline-none focus-visible:ring-0">
+        <div className="space-y-4 sm:space-y-6">{referralsContent}</div>
       </TabsContent>
     </Tabs>
   )

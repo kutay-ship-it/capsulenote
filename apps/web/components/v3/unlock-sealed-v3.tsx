@@ -69,12 +69,12 @@ export function UnlockSealedV3({
       >
         {/* Envelope */}
         <div
-          className="relative w-72 h-52 mx-auto border-4 border-charcoal bg-white shadow-[8px_8px_0_theme(colors.charcoal)] flex flex-col items-center justify-center"
+          className="relative w-56 sm:w-72 h-40 sm:h-52 mx-auto border-3 sm:border-4 border-charcoal bg-white shadow-[4px_4px_0_theme(colors.charcoal)] sm:shadow-[8px_8px_0_theme(colors.charcoal)] flex flex-col items-center justify-center"
           style={{ borderRadius: "2px" }}
         >
           {/* Inner border decoration */}
           <div
-            className="absolute inset-3 border-2 border-dashed border-charcoal/20"
+            className="absolute inset-2 sm:inset-3 border-2 border-dashed border-charcoal/20"
             style={{ borderRadius: "2px" }}
           />
 
@@ -91,15 +91,15 @@ export function UnlockSealedV3({
               repeat: Infinity,
               repeatDelay: 0.5,
             }}
-            className="relative w-20 h-20 border-4 border-charcoal bg-coral flex items-center justify-center z-10"
+            className="relative w-16 sm:w-20 h-16 sm:h-20 border-3 sm:border-4 border-charcoal bg-coral flex items-center justify-center z-10"
             style={{ borderRadius: "50%" }}
           >
-            <Stamp className="h-10 w-10 text-white" strokeWidth={1.5} />
+            <Stamp className="h-8 sm:h-10 w-8 sm:w-10 text-white" strokeWidth={1.5} />
           </motion.div>
 
           {/* Letter peeking out effect */}
           <div
-            className="absolute -top-2 left-1/2 -translate-x-1/2 w-56 h-8 border-2 border-charcoal border-b-0 bg-duck-cream"
+            className="absolute -top-2 left-1/2 -translate-x-1/2 w-44 sm:w-56 h-6 sm:h-8 border-2 border-charcoal border-b-0 bg-duck-cream"
             style={{ borderRadius: "2px 2px 0 0" }}
           />
         </div>
@@ -126,14 +126,14 @@ export function UnlockSealedV3({
         </div>
 
         {/* Dates */}
-        <div className="flex items-center justify-center gap-4 text-center">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-charcoal/50" strokeWidth={2} />
             <span className="font-mono text-[10px] text-charcoal/60 uppercase tracking-wider">
               Written {formattedWrittenDate}
             </span>
           </div>
-          <div className="w-1 h-1 bg-charcoal/30" style={{ borderRadius: "50%" }} />
+          <div className="hidden sm:block w-1 h-1 bg-charcoal/30" style={{ borderRadius: "50%" }} />
           <div className="flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5 text-charcoal/50" strokeWidth={2} />
             <span className="font-mono text-[10px] text-charcoal/60 uppercase tracking-wider">
@@ -152,10 +152,10 @@ export function UnlockSealedV3({
         <Button
           onClick={onUnlock}
           size="lg"
-          className="w-full max-w-xs gap-3 h-14 bg-coral hover:bg-coral/90 text-white font-mono text-sm uppercase tracking-wider border-4 border-charcoal shadow-[6px_6px_0_theme(colors.charcoal)] hover:shadow-[8px_8px_0_theme(colors.charcoal)] hover:-translate-y-1 transition-all"
+          className="w-full max-w-xs gap-2 sm:gap-3 h-12 sm:h-14 bg-coral hover:bg-coral/90 text-white font-mono text-xs sm:text-sm uppercase tracking-wider border-3 sm:border-4 border-charcoal shadow-[4px_4px_0_theme(colors.charcoal)] sm:shadow-[6px_6px_0_theme(colors.charcoal)] hover:shadow-[5px_5px_0_theme(colors.charcoal)] sm:hover:shadow-[8px_8px_0_theme(colors.charcoal)] hover:-translate-y-1 transition-all"
           style={{ borderRadius: "2px" }}
         >
-          <Stamp className="h-5 w-5" strokeWidth={2} />
+          <Stamp className="h-4 sm:h-5 w-4 sm:w-5" strokeWidth={2} />
           Break the Seal
         </Button>
       </motion.div>

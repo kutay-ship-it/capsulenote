@@ -27,10 +27,10 @@ export function UnlockAnimationV3() {
           times: [0, 0.3, 0.6, 1],
           ease: "easeInOut",
         }}
-        className="relative w-28 h-28 border-4 border-charcoal bg-coral flex items-center justify-center shadow-[6px_6px_0_theme(colors.charcoal)]"
+        className="relative w-20 sm:w-28 h-20 sm:h-28 border-3 sm:border-4 border-charcoal bg-coral flex items-center justify-center shadow-[4px_4px_0_theme(colors.charcoal)] sm:shadow-[6px_6px_0_theme(colors.charcoal)]"
         style={{ borderRadius: "50%" }}
       >
-        <Stamp className="h-14 w-14 text-white" strokeWidth={1.5} />
+        <Stamp className="h-10 sm:h-14 w-10 sm:w-14 text-white" strokeWidth={1.5} />
 
         {/* Breaking cracks effect */}
         <motion.div
@@ -57,23 +57,23 @@ export function UnlockAnimationV3() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="flex flex-col items-center gap-3"
+        className="flex flex-col items-center gap-2 sm:gap-3 px-4"
       >
         <div className="flex items-center gap-2">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
           >
-            <Sparkles className="h-5 w-5 text-teal-primary" strokeWidth={2} />
+            <Sparkles className="h-4 sm:h-5 w-4 sm:w-5 text-teal-primary" strokeWidth={2} />
           </motion.div>
-          <span className="font-mono text-lg font-bold uppercase tracking-wider text-charcoal">
+          <span className="font-mono text-sm sm:text-lg font-bold uppercase tracking-wider text-charcoal text-center">
             Opening your time capsule...
           </span>
         </div>
 
         {/* Progress bar */}
         <motion.div
-          className="w-48 h-2 border-2 border-charcoal bg-white overflow-hidden"
+          className="w-40 sm:w-48 h-2 border-2 border-charcoal bg-white overflow-hidden"
           style={{ borderRadius: "2px" }}
         >
           <motion.div

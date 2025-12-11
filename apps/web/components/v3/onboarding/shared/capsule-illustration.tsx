@@ -6,30 +6,50 @@ import { cn } from "@/lib/utils"
 interface CapsuleIllustrationProps {
   state?: "closed" | "sealed"
   size?: "sm" | "md" | "lg"
+  /** Use responsive sizing based on viewport - recommended for mobile */
+  responsive?: boolean
   className?: string
 }
 
 /**
  * Animated time capsule illustration
  * Used in welcome and ready steps
+ *
+ * When responsive=true, uses CSS-based sizing that adapts to mobile:
+ * - lg: 120px mobile → 160px desktop
+ * - md: 100px mobile → 120px desktop
+ * - sm: 60px mobile → 80px desktop
  */
 export function CapsuleIllustration({
   state = "closed",
   size = "md",
+  responsive = true,
   className,
 }: CapsuleIllustrationProps) {
-  const sizes = {
+  // Fixed pixel sizes for non-responsive usage
+  const fixedSizes = {
     sm: { width: 80, height: 100 },
     md: { width: 120, height: 150 },
     lg: { width: 160, height: 200 },
   }
 
-  const { width, height } = sizes[size]
+  // Responsive CSS class names
+  const responsiveClasses = {
+    sm: "w-[60px] h-[75px] sm:w-[80px] sm:h-[100px]",
+    md: "w-[100px] h-[125px] sm:w-[120px] sm:h-[150px]",
+    lg: "w-[120px] h-[150px] sm:w-[140px] sm:h-[175px] md:w-[160px] md:h-[200px]",
+  }
+
+  const { width, height } = fixedSizes[size]
 
   return (
     <motion.div
-      className={cn("relative", className)}
-      style={{ width, height }}
+      className={cn(
+        "relative",
+        responsive ? responsiveClasses[size] : "",
+        className
+      )}
+      style={responsive ? undefined : { width, height }}
       animate={
         state === "closed"
           ? { scale: [1, 1.02, 1] }
@@ -144,11 +164,12 @@ export function CapsuleIllustration({
 
 /**
  * Flow illustration showing Write -> Wait -> Receive
+ * Responsive: scales down on mobile
  */
 export function FlowIllustration({ className }: { className?: string }) {
   return (
     <motion.div
-      className={cn("flex items-center justify-center gap-4", className)}
+      className={cn("flex items-center justify-center gap-2 sm:gap-4", className)}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -188,20 +209,20 @@ function FlowStep({
 }) {
   return (
     <motion.div
-      className="flex flex-col items-center gap-2"
+      className="flex flex-col items-center gap-1 sm:gap-2"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
     >
       <div
         className={cn(
-          "w-16 h-16 border-2 border-charcoal flex items-center justify-center shadow-[3px_3px_0_theme(colors.charcoal)]",
+          "w-12 h-12 sm:w-16 sm:h-16 border-2 border-charcoal flex items-center justify-center shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)]",
           color
         )}
         style={{ borderRadius: "2px" }}
       >
         <motion.span
-          className="text-2xl"
+          className="text-lg sm:text-2xl"
           animate={
             animated
               ? { rotate: [0, 10, -10, 0] }
@@ -214,7 +235,7 @@ function FlowStep({
           {emoji}
         </motion.span>
       </div>
-      <span className="font-mono text-[10px] uppercase tracking-wider text-charcoal font-bold">
+      <span className="font-mono text-[8px] sm:text-[10px] uppercase tracking-wider text-charcoal font-bold">
         {label}
       </span>
     </motion.div>
@@ -229,8 +250,8 @@ function FlowArrow({ delay }: { delay: number }) {
       animate={{ opacity: 1, scaleX: 1 }}
       transition={{ delay }}
     >
-      <div className="w-8 h-0.5 bg-charcoal" />
-      <div className="w-0 h-0 border-t-4 border-b-4 border-l-8 border-transparent border-l-charcoal" />
+      <div className="w-4 sm:w-8 h-0.5 bg-charcoal" />
+      <div className="w-0 h-0 border-t-[3px] border-b-[3px] border-l-[6px] sm:border-t-4 sm:border-b-4 sm:border-l-8 border-transparent border-l-charcoal" />
     </motion.div>
   )
 }

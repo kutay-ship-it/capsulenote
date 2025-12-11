@@ -35,6 +35,18 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+  // Scroll lock when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+    }
+  }, [isMobileMenuOpen])
+
   return (
     <>
       <header
@@ -121,9 +133,12 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-cream pt-20 md:hidden"
+            className="fixed inset-0 z-40 bg-cream pt-20 md:hidden overflow-y-auto"
+            style={{
+              paddingBottom: "env(safe-area-inset-bottom, 0px)",
+            }}
           >
-            <div className="container px-4">
+            <div className="container px-4 pb-6">
               <div className="flex flex-col gap-2 py-6">
                 {navLinks.map((link, i) => (
                   <motion.div

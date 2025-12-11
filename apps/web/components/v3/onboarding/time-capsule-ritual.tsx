@@ -85,7 +85,7 @@ export function TimeCapsuleRitual({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleSkip()}>
       <DialogContent
-        className="max-w-2xl p-0 border-3 border-charcoal bg-cream shadow-[8px_8px_0_theme(colors.charcoal)] overflow-hidden"
+        className="max-w-2xl p-0 border-3 border-charcoal bg-cream shadow-[4px_4px_0_theme(colors.charcoal)] sm:shadow-[6px_6px_0_theme(colors.charcoal)] md:shadow-[8px_8px_0_theme(colors.charcoal)] overflow-hidden flex flex-col max-h-[calc(100dvh-2rem)]"
         style={{ borderRadius: "2px", borderWidth: "3px" }}
         onPointerDownOutside={(e) => e.preventDefault()}
       >
@@ -109,8 +109,8 @@ export function TimeCapsuleRitual({
           </button>
         </div>
 
-        {/* Content Area */}
-        <div className="relative overflow-hidden" style={{ minHeight: "400px" }}>
+        {/* Content Area - flexible height for mobile */}
+        <div className="relative overflow-hidden min-h-0 flex-1">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -119,7 +119,7 @@ export function TimeCapsuleRitual({
               animate="center"
               exit="exit"
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="p-6 md:p-8"
+              className="p-4 sm:p-6 md:p-8"
             >
               {currentStep === 0 && <StepWelcome t={t} />}
               {currentStep === 1 && <StepHowItWorks t={t} />}
@@ -129,46 +129,57 @@ export function TimeCapsuleRitual({
           </AnimatePresence>
         </div>
 
-        {/* Footer with Navigation */}
-        <div className="flex items-center justify-between p-4 border-t-2 border-dashed border-charcoal/20">
-          {/* Back Button */}
-          <div>
-            {currentStep > 0 && currentStep < totalSteps - 1 && (
+        {/* Footer with Navigation - responsive layout */}
+        <div className="flex flex-col gap-3 p-3 sm:p-4 border-t-2 border-dashed border-charcoal/20 sm:flex-row sm:items-center sm:justify-between shrink-0">
+          {/* Mobile: Skip at top, Desktop: Back button */}
+          <div className="flex items-center justify-between sm:justify-start">
+            {/* Back Button - hidden on first/last step */}
+            {currentStep > 0 && currentStep < totalSteps - 1 ? (
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={goBack}
                 className={cn(
-                  "flex items-center gap-2 border-2 border-charcoal bg-white px-4 py-2 font-mono text-xs uppercase tracking-wider transition-all",
+                  "flex items-center gap-1.5 sm:gap-2 border-2 border-charcoal bg-white px-3 sm:px-4 py-2 font-mono text-xs uppercase tracking-wider transition-all",
                   "hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal)]",
                   "shadow-[2px_2px_0_theme(colors.charcoal)]"
                 )}
                 style={{ borderRadius: "2px" }}
               >
-                <ArrowLeft className="h-3.5 w-3.5" />
-                {t("navigation.back")}
+                <ArrowLeft className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                <span className="hidden sm:inline">{t("navigation.back")}</span>
               </motion.button>
+            ) : (
+              <div className="w-0 sm:w-auto" />
             )}
+
+            {/* Skip Link - visible on mobile, centered on desktop */}
+            <button
+              onClick={handleSkip}
+              className="font-mono text-[10px] text-charcoal/40 uppercase tracking-wider hover:text-charcoal/60 transition-colors sm:hidden"
+            >
+              {t("navigation.skip")}
+            </button>
           </div>
 
-          {/* Skip Link */}
+          {/* Skip Link - desktop only, centered */}
           <button
             onClick={handleSkip}
-            className="font-mono text-[10px] text-charcoal/40 uppercase tracking-wider hover:text-charcoal/60 transition-colors"
+            className="hidden sm:block font-mono text-[10px] text-charcoal/40 uppercase tracking-wider hover:text-charcoal/60 transition-colors"
           >
             {t("navigation.skip")}
           </button>
 
-          {/* Next/Complete Buttons */}
+          {/* Next/Complete Buttons - stack on mobile */}
           {currentStep < totalSteps - 1 ? (
             <motion.button
               onClick={goNext}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.98 }}
               className={cn(
-                "flex items-center gap-2 border-2 border-charcoal bg-duck-yellow px-6 py-2.5 font-mono text-sm font-bold uppercase tracking-wider transition-all",
-                "shadow-[3px_3px_0_theme(colors.charcoal)]",
-                "hover:shadow-[5px_5px_0_theme(colors.charcoal)]"
+                "flex items-center justify-center gap-2 border-2 border-charcoal bg-duck-yellow px-4 sm:px-6 py-2.5 font-mono text-sm font-bold uppercase tracking-wider transition-all w-full sm:w-auto",
+                "shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)]",
+                "hover:shadow-[3px_3px_0_theme(colors.charcoal)] sm:hover:shadow-[5px_5px_0_theme(colors.charcoal)]"
               )}
               style={{ borderRadius: "2px" }}
             >
@@ -176,15 +187,15 @@ export function TimeCapsuleRitual({
               <ArrowRight className="h-4 w-4" />
             </motion.button>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 w-full sm:w-auto">
               <motion.button
                 onClick={handleExplore}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
-                  "flex items-center gap-2 border-2 border-charcoal bg-white px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider transition-all",
+                  "flex items-center justify-center gap-2 border-2 border-charcoal bg-white px-4 py-2.5 font-mono text-xs font-bold uppercase tracking-wider transition-all w-full sm:w-auto order-2 sm:order-1",
                   "shadow-[2px_2px_0_theme(colors.charcoal)]",
-                  "hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
+                  "hover:shadow-[3px_3px_0_theme(colors.charcoal)] sm:hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
                 )}
                 style={{ borderRadius: "2px" }}
               >
@@ -195,9 +206,9 @@ export function TimeCapsuleRitual({
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
-                  "flex items-center gap-2 border-2 border-charcoal bg-teal-primary text-white px-6 py-2.5 font-mono text-sm font-bold uppercase tracking-wider transition-all",
-                  "shadow-[3px_3px_0_theme(colors.charcoal)]",
-                  "hover:shadow-[5px_5px_0_theme(colors.charcoal)]"
+                  "flex items-center justify-center gap-2 border-2 border-charcoal bg-teal-primary text-white px-4 sm:px-6 py-2.5 font-mono text-sm font-bold uppercase tracking-wider transition-all w-full sm:w-auto order-1 sm:order-2",
+                  "shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)]",
+                  "hover:shadow-[3px_3px_0_theme(colors.charcoal)] sm:hover:shadow-[5px_5px_0_theme(colors.charcoal)]"
                 )}
                 style={{ borderRadius: "2px" }}
               >
@@ -228,7 +239,7 @@ function StepWelcome({ t }: { t: (key: string) => string }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="font-mono text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal mt-6 mb-3"
+        className="font-mono text-xl sm:text-2xl md:text-3xl font-bold uppercase tracking-wide text-charcoal mt-4 sm:mt-6 mb-2 sm:mb-3"
       >
         {t("welcome.title")}
       </motion.h2>
@@ -280,7 +291,7 @@ function StepHowItWorks({ t }: { t: (key: string) => string }) {
         </span>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 w-full">
         {steps.map((step, index) => {
           const Icon = step.icon
           return (
@@ -292,12 +303,12 @@ function StepHowItWorks({ t }: { t: (key: string) => string }) {
               className="relative"
             >
               <div
-                className="border-2 border-charcoal p-4 bg-white shadow-[3px_3px_0_theme(colors.charcoal)]"
+                className="border-2 border-charcoal p-3 sm:p-4 bg-white shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)]"
                 style={{ borderRadius: "2px" }}
               >
                 {/* Step number */}
                 <div
-                  className="absolute -top-3 -left-3 w-8 h-8 bg-charcoal text-white flex items-center justify-center font-mono text-sm font-bold"
+                  className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 w-6 h-6 sm:w-8 sm:h-8 bg-charcoal text-white flex items-center justify-center font-mono text-xs sm:text-sm font-bold"
                   style={{ borderRadius: "50%" }}
                 >
                   {index + 1}
@@ -306,21 +317,21 @@ function StepHowItWorks({ t }: { t: (key: string) => string }) {
                 {/* Icon */}
                 <div
                   className={cn(
-                    "w-12 h-12 mx-auto flex items-center justify-center border-2 border-charcoal mb-3",
+                    "w-10 h-10 sm:w-12 sm:h-12 mx-auto flex items-center justify-center border-2 border-charcoal mb-2 sm:mb-3",
                     step.color
                   )}
                   style={{ borderRadius: "2px" }}
                 >
-                  <Icon className="h-6 w-6 text-charcoal" strokeWidth={2} />
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-charcoal" strokeWidth={2} />
                 </div>
 
                 {/* Label */}
-                <h4 className="font-mono text-sm font-bold uppercase tracking-wide text-charcoal mb-1">
+                <h4 className="font-mono text-xs sm:text-sm font-bold uppercase tracking-wide text-charcoal mb-1">
                   {t(step.labelKey)}
                 </h4>
 
                 {/* Description */}
-                <p className="font-mono text-[10px] text-charcoal/50">
+                <p className="font-mono text-[9px] sm:text-[10px] text-charcoal/50">
                   {t(step.descKey)}
                 </p>
               </div>
@@ -360,14 +371,14 @@ function StepSecurity({ t }: { t: (key: string) => string }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-20 h-20 bg-teal-primary/10 border-2 border-teal-primary flex items-center justify-center mb-6"
+        className="w-16 h-16 sm:w-20 sm:h-20 bg-teal-primary/10 border-2 border-teal-primary flex items-center justify-center mb-4 sm:mb-6"
         style={{ borderRadius: "50%" }}
       >
         <motion.div
           animate={{ rotate: [0, 5, -5, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
-          <span className="text-4xl">🔐</span>
+          <span className="text-2xl sm:text-4xl">🔐</span>
         </motion.div>
       </motion.div>
 
@@ -375,7 +386,7 @@ function StepSecurity({ t }: { t: (key: string) => string }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="font-mono text-xl font-bold uppercase tracking-wide text-charcoal mb-2"
+        className="font-mono text-lg sm:text-xl font-bold uppercase tracking-wide text-charcoal mb-2"
       >
         {t("security.title")}
       </motion.h3>
@@ -448,7 +459,7 @@ function StepReady({ t }: { t: (key: string) => string }) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="font-mono text-2xl font-bold uppercase tracking-wide text-charcoal mt-6 mb-2"
+        className="font-mono text-xl sm:text-2xl font-bold uppercase tracking-wide text-charcoal mt-4 sm:mt-6 mb-2"
       >
         {t("ready.title")}
       </motion.h3>

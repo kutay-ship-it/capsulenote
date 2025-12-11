@@ -62,7 +62,7 @@ export function UnlockRevealedV3({
 
       {/* Letter Card */}
       <div
-        className="relative border-4 border-charcoal bg-white shadow-[8px_8px_0_theme(colors.charcoal)]"
+        className="relative border-3 sm:border-4 border-charcoal bg-white shadow-[4px_4px_0_theme(colors.charcoal)] sm:shadow-[8px_8px_0_theme(colors.charcoal)]"
         style={{ borderRadius: "2px" }}
       >
         {/* Paper texture lines */}
@@ -76,7 +76,7 @@ export function UnlockRevealedV3({
         />
 
         {/* Header */}
-        <div className="relative border-b-4 border-charcoal bg-duck-yellow p-6 md:p-8">
+        <div className="relative border-b-3 sm:border-b-4 border-charcoal bg-duck-yellow p-4 sm:p-6 md:p-8">
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div className="space-y-2">
@@ -110,7 +110,7 @@ export function UnlockRevealedV3({
         </div>
 
         {/* Letter Content */}
-        <div className="relative p-6 md:p-8 md:px-12 min-h-[50vh]">
+        <div className="relative p-4 sm:p-6 md:p-8 md:px-12 min-h-[40vh] sm:min-h-[50vh]">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -121,7 +121,7 @@ export function UnlockRevealedV3({
         </div>
 
         {/* Footer */}
-        <div className="border-t-4 border-dashed border-charcoal/20 bg-duck-cream p-6 md:p-8">
+        <div className="border-t-3 sm:border-t-4 border-dashed border-charcoal/20 bg-duck-cream p-4 sm:p-6 md:p-8">
           <p className="font-mono text-xs text-charcoal/50 uppercase tracking-wider text-center italic">
             "{t("quote")}"
           </p>
@@ -133,22 +133,22 @@ export function UnlockRevealedV3({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-4"
+        className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4"
       >
         <Button
           variant="outline"
           onClick={onReplay}
-          className="gap-2 border-2 border-charcoal bg-white hover:bg-duck-cream font-mono text-xs uppercase tracking-wider shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
+          className="w-full sm:w-auto gap-2 border-2 border-charcoal bg-white hover:bg-duck-cream font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[3px_3px_0_theme(colors.charcoal)] sm:hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
           style={{ borderRadius: "2px" }}
         >
           <RotateCcw className="h-4 w-4" strokeWidth={2} />
           {t("replayOpening")}
         </Button>
 
-        <Link href="/letters">
+        <Link href="/letters" className="w-full sm:w-auto">
           <Button
             variant="outline"
-            className="gap-2 border-2 border-charcoal bg-white hover:bg-duck-cream font-mono text-xs uppercase tracking-wider shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
+            className="w-full gap-2 border-2 border-charcoal bg-white hover:bg-duck-cream font-mono text-xs uppercase tracking-wider shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[3px_3px_0_theme(colors.charcoal)] sm:hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
             style={{ borderRadius: "2px" }}
           >
             <ArrowLeft className="h-4 w-4" strokeWidth={2} />
@@ -156,9 +156,9 @@ export function UnlockRevealedV3({
           </Button>
         </Link>
 
-        <Link href="/letters/new">
+        <Link href="/letters/new" className="w-full sm:w-auto">
           <Button
-            className="gap-2 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs uppercase tracking-wider border-2 border-charcoal shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
+            className="w-full gap-2 bg-teal-primary hover:bg-teal-primary/90 text-white font-mono text-xs uppercase tracking-wider border-2 border-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] sm:shadow-[3px_3px_0_theme(colors.charcoal)] hover:shadow-[3px_3px_0_theme(colors.charcoal)] sm:hover:shadow-[4px_4px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
             style={{ borderRadius: "2px" }}
           >
             <PenLine className="h-4 w-4" strokeWidth={2} />

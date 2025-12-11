@@ -49,8 +49,8 @@ export function PricingTiersV3({
         savingsLabel={toggleLabels.savings}
       />
 
-      {/* Pricing Cards */}
-      <div className="grid gap-8 md:grid-cols-3 md:gap-6 lg:gap-8">
+      {/* Pricing Cards - 1 column mobile, 2 columns tablet, 3 columns desktop */}
+      <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 sm:gap-4 md:gap-6 lg:gap-8">
         {tiers.map((tier, index) => (
           <PricingCardV3
             key={tier.name}
