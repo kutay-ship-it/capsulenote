@@ -139,7 +139,7 @@ export async function CheckoutSuccess({ subscription }: CheckoutSuccessProps) {
         <p>
           {t.rich("success.manageSubscription", {
             link: (chunks) => (
-              <Link href="/settings/billing" className="text-primary hover:underline">
+              <Link href={{ pathname: "/settings", query: { tab: "billing" } }} className="text-primary hover:underline">
                 {t("success.billingSettings")}
               </Link>
             ),

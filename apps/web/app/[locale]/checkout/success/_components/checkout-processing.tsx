@@ -85,7 +85,7 @@ export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
                 <Link href="/journey">{t("processing.goToDashboard")}</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href="/settings/billing">{t("processing.viewBilling")}</Link>
+                <Link href={{ pathname: "/settings", query: { tab: "billing" } }}>{t("processing.viewBilling")}</Link>
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -186,7 +186,7 @@ export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
         <p>
           {t.rich("success.manageSubscription", {
             link: (chunks) => (
-              <Link href="/settings/billing" className="text-primary hover:underline">
+              <Link href={{ pathname: "/settings", query: { tab: "billing" } }} className="text-primary hover:underline">
                 {t("success.billingSettings")}
               </Link>
             ),

@@ -314,7 +314,7 @@ export async function scheduleDelivery(
             message: 'No mail credits remaining',
             details: {
               action: 'purchase_credits',
-              url: '/settings/billing'
+              url: '/settings?tab=billing'
             }
           }
         }

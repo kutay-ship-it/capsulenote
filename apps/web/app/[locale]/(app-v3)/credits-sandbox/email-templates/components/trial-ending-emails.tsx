@@ -13,7 +13,7 @@ export function TrialEndingEmails({ variation }: EmailProps) {
     daysRemaining: 3,
     trialEndsDate: "January 20, 2025",
     monthlyAmount: "$2.22",
-    billingUrl: "https://capsulenote.com/settings/billing",
+    billingUrl: "https://capsulenote.com/settings?tab=billing",
     dashboardUrl: "https://capsulenote.com/dashboard",
   }
 

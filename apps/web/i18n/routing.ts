@@ -31,7 +31,6 @@ export const routing = defineRouting({
     "/unlock/[id]": "/unlock/[id]",
     "/deliveries": "/deliveries",
     "/settings": "/settings",
-    "/settings/billing": "/settings/billing",
     "/support": "/support",
     "/journey": "/journey",
     "/view/[token]": "/view/[token]",

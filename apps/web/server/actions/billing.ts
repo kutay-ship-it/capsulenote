@@ -77,7 +77,7 @@ export async function createCheckoutSession(input: {
           message: "You already have an active subscription",
           details: {
             subscriptionId: existingSubscription.id,
-            manageUrl: "/settings/billing",
+            manageUrl: "/settings?tab=billing",
           },
         },
       }

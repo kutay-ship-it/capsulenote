@@ -78,7 +78,7 @@ export function BillingSummary({ translations }: BillingSummaryProps) {
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
-                  onClick={() => router.push("/settings/billing")}
+                  onClick={() => router.push("/settings?tab=billing")}
                   className="border-2 border-charcoal bg-charcoal font-mono text-cream hover:bg-gray-800"
                   style={{ borderRadius: "2px" }}
                 >

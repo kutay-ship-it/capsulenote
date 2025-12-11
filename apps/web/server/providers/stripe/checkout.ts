@@ -131,7 +131,7 @@ export async function createBillingPortalSession(
 ): Promise<Stripe.BillingPortal.Session> {
   return await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+    return_url: `${env.NEXT_PUBLIC_APP_URL}/settings?tab=billing`,
   })
 }
 

@@ -593,7 +593,7 @@ export class SettingsPage {
   }
 
   async gotoBilling() {
-    await this.page.goto("/settings/billing")
+    await this.page.goto("/settings?tab=billing")
   }
 
   async gotoProfile() {

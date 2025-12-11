@@ -65,7 +65,7 @@ function getActionHref(code: ErrorCode, email?: string): string {
     case "email_not_verified":
       return "/sign-in"
     case "pending_subscription_not_found":
-      return "/settings/billing"
+      return "/settings?tab=billing"
     case "unknown":
     default:
       return "/subscribe"

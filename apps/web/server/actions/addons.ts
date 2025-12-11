@@ -128,8 +128,8 @@ export async function createAddOnCheckoutSession(input: {
           quantity,
         },
       ],
-      success_url: successUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
-      cancel_url: cancelUrl || `${env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+      success_url: successUrl || `${env.NEXT_PUBLIC_APP_URL}/settings?tab=billing`,
+      cancel_url: cancelUrl || `${env.NEXT_PUBLIC_APP_URL}/settings?tab=billing`,
       // Session metadata - used by checkout.session.completed webhook (PRIMARY fulfillment)
       metadata: {
         userId: user.id,

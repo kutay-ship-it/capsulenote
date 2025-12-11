@@ -174,7 +174,7 @@ function VariationA({ amount, invoiceNumber, invoiceUrl, pdfUrl, dashboardUrl }:
             borderRadius: "0 0 2px 2px"
           }}>
             <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", textAlign: "center" }}>
-              <a href={dashboardUrl} style={{ color: "#FFDE00" }}>Dashboard</a> · <a href={`${dashboardUrl}/settings/billing`} style={{ color: "#FFDE00" }}>Billing Settings</a>
+              <a href={dashboardUrl} style={{ color: "#FFDE00" }}>Dashboard</a> · <a href={`${dashboardUrl}/settings?tab=billing`} style={{ color: "#FFDE00" }}>Billing Settings</a>
             </div>
           </td>
         </tr>
@@ -330,7 +330,7 @@ function VariationB({ amount, invoiceNumber, invoiceUrl, pdfUrl, dashboardUrl }:
         <tr>
           <td style={{ padding: "32px 0", textAlign: "center" }}>
             <div style={{ fontSize: "11px", color: "#666666" }}>
-              <a href={dashboardUrl} style={{ color: "#383838" }}>Dashboard</a> · <a href={`${dashboardUrl}/settings/billing`} style={{ color: "#383838" }}>Billing</a>
+              <a href={dashboardUrl} style={{ color: "#383838" }}>Dashboard</a> · <a href={`${dashboardUrl}/settings?tab=billing`} style={{ color: "#383838" }}>Billing</a>
             </div>
           </td>
         </tr>

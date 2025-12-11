@@ -167,7 +167,7 @@ describe("Billing Server Actions", () => {
         if (!result.success) {
           expect(result.error.code).toBe(ErrorCodes.ALREADY_SUBSCRIBED)
           expect((result.error.details as any)?.subscriptionId).toBe("sub_existing")
-          expect((result.error.details as any)?.manageUrl).toBe("/settings/billing")
+          expect((result.error.details as any)?.manageUrl).toBe("/settings?tab=billing")
         }
       })
 

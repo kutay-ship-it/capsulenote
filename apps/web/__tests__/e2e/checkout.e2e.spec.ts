@@ -187,7 +187,7 @@ test.describe("Checkout & Subscription Flows", () => {
       // This requires authentication
       test.skip(true, "Requires authenticated user")
 
-      await page.goto("/settings/billing")
+      await page.goto("/settings?tab=billing")
 
       const billingLink = page.locator('text="Manage Billing"')
         .or(page.locator('text="Billing"'))
@@ -197,7 +197,7 @@ test.describe("Checkout & Subscription Flows", () => {
     })
 
     test("billing page should redirect unauthenticated users", async ({ page }) => {
-      await page.goto("/settings/billing")
+      await page.goto("/settings?tab=billing")
 
       // Should redirect to sign-in
       await expect(page).toHaveURL(/\/sign-in/)
