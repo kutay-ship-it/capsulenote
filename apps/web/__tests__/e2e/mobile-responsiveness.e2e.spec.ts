@@ -149,6 +149,30 @@ test.describe("Marketing Pages - Mobile Responsiveness", () => {
           }
         }
       })
+
+      test("Feature matrix should show accordion on mobile", async ({ page }) => {
+        await page.goto("/pricing")
+        await page.waitForLoadState("networkidle")
+
+        // Desktop table should be hidden on mobile
+        const desktopTable = page.locator(".hidden.md\\:block").first()
+        await expect(desktopTable).toBeHidden()
+
+        // Mobile accordion cards should be visible
+        const mobileAccordion = page.locator(".md\\:hidden").first()
+        await expect(mobileAccordion).toBeVisible()
+
+        // Accordion buttons should be touch-friendly (min 48px height)
+        const accordionButtons = await page.locator(".md\\:hidden button").all()
+        expect(accordionButtons.length).toBeGreaterThan(0)
+
+        for (const button of accordionButtons.slice(0, 3)) {
+          const box = await button.boundingBox()
+          if (box) {
+            expect(box.height).toBeGreaterThanOrEqual(44) // WCAG touch target
+          }
+        }
+      })
     })
   }
 })
@@ -208,7 +232,8 @@ test.describe("App Pages - Mobile Responsiveness", () => {
 // ============================================================================
 
 test.describe("Component Mobile Tests", () => {
-  const viewport = MOBILE_VIEWPORTS[0] // Use smallest viewport (iPhone SE)
+  // Use smallest viewport (iPhone SE) - we know index 0 exists
+  const viewport = MOBILE_VIEWPORTS[0]!
 
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height })
@@ -287,7 +312,8 @@ test.describe("Component Mobile Tests", () => {
 // ============================================================================
 
 test.describe("Brutalist Design - Mobile Shadow Tests", () => {
-  const viewport = MOBILE_VIEWPORTS[0] // iPhone SE
+  // Use smallest viewport (iPhone SE) - we know index 0 exists
+  const viewport = MOBILE_VIEWPORTS[0]!
 
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height })

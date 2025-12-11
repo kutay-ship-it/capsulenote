@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { motion, useInView } from "framer-motion"
-import { Check, Minus, HelpCircle } from "lucide-react"
+import { motion, useInView, AnimatePresence } from "framer-motion"
+import { Check, Minus, HelpCircle, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface FeatureItem {
@@ -29,11 +29,11 @@ interface FeatureMatrixV3Props {
   mobileNote?: string
 }
 
-function FeatureValue({ value }: { value: boolean | string }) {
+function FeatureValue({ value, inline = false }: { value: boolean | string; inline?: boolean }) {
   if (typeof value === "boolean") {
     return value ? (
       <motion.div
-        className="flex items-center justify-center"
+        className={cn("flex items-center", inline ? "justify-start" : "justify-center")}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 500, damping: 25 }}
@@ -46,13 +46,120 @@ function FeatureValue({ value }: { value: boolean | string }) {
         </div>
       </motion.div>
     ) : (
-      <div className="flex items-center justify-center">
+      <div className={cn("flex items-center", inline ? "justify-start" : "justify-center")}>
         <Minus className="h-5 w-5 text-charcoal/30" strokeWidth={2} />
       </div>
     )
   }
   return (
     <span className="font-mono text-sm text-charcoal">{value}</span>
+  )
+}
+
+// Mobile tier card component for accordion view
+interface MobileTierCardProps {
+  tierName: string
+  tierLabel: string
+  categories: FeatureCategory[]
+  isExpanded: boolean
+  onToggle: () => void
+  isHighlighted?: boolean
+}
+
+function MobileTierCard({
+  tierName,
+  tierLabel,
+  categories,
+  isExpanded,
+  onToggle,
+  isHighlighted = false,
+}: MobileTierCardProps) {
+  return (
+    <div
+      className={cn(
+        "border-2 border-charcoal bg-white",
+        isHighlighted && "border-duck-blue bg-duck-blue/5",
+        "shadow-[3px_3px_0_theme(colors.charcoal)]"
+      )}
+      style={{ borderRadius: "2px" }}
+    >
+      {/* Accordion Header - Touch-friendly (48px min height) */}
+      <button
+        onClick={onToggle}
+        className={cn(
+          "w-full min-h-[48px] p-4 flex items-center justify-between",
+          "transition-colors duration-150",
+          isHighlighted && "bg-duck-blue/10"
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
+            {tierLabel}
+          </span>
+          {isHighlighted && (
+            <span
+              className="px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider bg-duck-blue text-charcoal border border-charcoal"
+              style={{ borderRadius: "2px" }}
+            >
+              Popular
+            </span>
+          )}
+        </div>
+        <ChevronDown
+          className={cn(
+            "h-5 w-5 text-charcoal transition-transform duration-200",
+            isExpanded && "rotate-180"
+          )}
+          strokeWidth={2}
+        />
+      </button>
+
+      {/* Accordion Content */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t-2 border-charcoal">
+              {categories.map((category) => (
+                <div key={category.name}>
+                  {/* Category Header */}
+                  <div className="px-4 py-2 bg-cream border-b border-charcoal/20">
+                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal/70">
+                      {category.name}
+                    </span>
+                  </div>
+
+                  {/* Features */}
+                  <div className="divide-y divide-charcoal/10">
+                    {category.features.map((feature) => {
+                      const value = feature[tierName as keyof FeatureItem]
+                      return (
+                        <div
+                          key={feature.name}
+                          className="flex items-center justify-between px-4 py-3"
+                        >
+                          <span className="font-mono text-xs text-charcoal flex-1 pr-3">
+                            {feature.name}
+                          </span>
+                          <div className="flex-shrink-0">
+                            <FeatureValue value={value as boolean | string} inline />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
@@ -64,20 +171,42 @@ export function FeatureMatrixV3({
     pro: "Pro",
     enterprise: "Enterprise",
   },
-  mobileNote = "Scroll horizontally to view all plans",
+  mobileNote = "Tap a plan to see features",
 }: FeatureMatrixV3Props) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-50px" })
+  const [expandedTier, setExpandedTier] = React.useState<string | null>("pro") // Pro expanded by default
+
+  const tiers = [
+    { name: "free", label: headers.free, isHighlighted: false },
+    { name: "pro", label: headers.pro, isHighlighted: true },
+    { name: "enterprise", label: headers.enterprise, isHighlighted: false },
+  ]
 
   return (
     <div ref={containerRef} className="w-full">
-      {/* Mobile Scroll Note */}
-      <p className="mb-4 font-mono text-xs text-charcoal/60 text-center md:hidden">
-        {mobileNote}
-      </p>
+      {/* Mobile Accordion View */}
+      <div className="md:hidden space-y-3">
+        <p className="mb-4 font-mono text-xs text-charcoal/60 text-center">
+          {mobileNote}
+        </p>
+        {tiers.map((tier) => (
+          <MobileTierCard
+            key={tier.name}
+            tierName={tier.name}
+            tierLabel={tier.label}
+            categories={categories}
+            isExpanded={expandedTier === tier.name}
+            onToggle={() =>
+              setExpandedTier((prev) => (prev === tier.name ? null : tier.name))
+            }
+            isHighlighted={tier.isHighlighted}
+          />
+        ))}
+      </div>
 
-      {/* Matrix Container */}
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <div
           className="min-w-[640px] border-2 border-charcoal bg-white"
           style={{ borderRadius: "2px" }}
