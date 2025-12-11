@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useTransition } from "react"
-import { useTranslations } from "next-intl"
+import { useTranslations, useLocale } from "next-intl"
 import {
   Mail,
   Calendar,
@@ -41,6 +41,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 import { createLetter } from "@/server/actions/letters"
 import { scheduleDelivery } from "@/server/actions/deliveries"
 import { getUserTimezone } from "@/lib/utils"
+import { formatWeekdayShortDate } from "@/lib/date-formatting"
 import { TemplateSelectorV3 } from "@/components/v3/template-selector-v3"
 import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-type-v3"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
@@ -250,6 +251,7 @@ interface LetterEditorV3Props {
 
 export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEditorV3Props) {
   const t = useTranslations("letters.editor")
+  const locale = useLocale()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -1052,12 +1054,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
                         {t("scheduledFor")}
                       </p>
                       <p className="font-mono text-xs text-charcoal truncate">
-                        {deliveryDate.toLocaleDateString("en-US", {
-                          weekday: "short",
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })}
+                        {formatWeekdayShortDate(deliveryDate, locale)}
                       </p>
                     </div>
                   </div>
