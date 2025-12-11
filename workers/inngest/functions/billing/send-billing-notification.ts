@@ -148,7 +148,7 @@ export const sendBillingNotification = inngest.createFunction(
               </table>
 
               <!-- CTA -->
-              <a href="${settingsUrl}/billing" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+              <a href="${settingsUrl}?tab=billing" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
                 Manage Subscription
               </a>
 
@@ -194,7 +194,7 @@ export const sendBillingNotification = inngest.createFunction(
               </table>
 
               <!-- CTA -->
-              <a href="${settingsUrl}/billing" style="display: inline-block; background-color: #FF6B6B; color: #ffffff; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+              <a href="${settingsUrl}?tab=billing" style="display: inline-block; background-color: #FF6B6B; color: #ffffff; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
                 Update Payment Method
               </a>
             `, "#FF6B6B"),

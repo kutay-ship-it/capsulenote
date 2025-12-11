@@ -32,7 +32,7 @@ import { ratelimit } from "@/server/lib/redis"
  * Resend webhook event structure
  */
 interface ResendWebhookEvent {
-  type: "email.opened" | "email.clicked" | "email.bounced" | "email.complained"
+  type: "email.sent" | "email.delivered" | "email.opened" | "email.clicked" | "email.bounced" | "email.complained" | "email.delivery_delayed"
   created_at: string
   data: {
     email_id: string
@@ -197,6 +197,72 @@ async function processResendWebhook(
   const { email_id } = data
 
   switch (type) {
+    case "email.sent": {
+      // Email was accepted by Resend and queued for delivery
+      // No action needed - this is informational
+      console.log("[Resend Webhook] Email sent/queued", {
+        emailId: email_id,
+      })
+      break
+    }
+
+    case "email.delivered": {
+      // Email was successfully delivered to the recipient's mail server
+      // Update delivery status to confirm successful delivery
+      const emailDelivery = await prisma.emailDelivery.findFirst({
+        where: { resendMessageId: email_id },
+        include: { delivery: true },
+      })
+
+      if (emailDelivery) {
+        // Only update if delivery is still in 'sent' status
+        // Don't override 'failed' status if it was set by a bounce
+        if (emailDelivery.delivery.status === "sent") {
+          await prisma.auditEvent.create({
+            data: {
+              userId: emailDelivery.delivery.userId,
+              type: "delivery.confirmed",
+              data: {
+                deliveryId: emailDelivery.deliveryId,
+                emailId: email_id,
+                confirmedAt: new Date().toISOString(),
+              },
+            },
+          })
+        }
+        console.log("[Resend Webhook] Email delivered", {
+          deliveryId: emailDelivery.deliveryId,
+          emailId: email_id,
+        })
+      } else {
+        console.warn("[Resend Webhook] Email delivery not found for delivered event", {
+          emailId: email_id,
+        })
+      }
+      break
+    }
+
+    case "email.delivery_delayed": {
+      // Email delivery was delayed (temporary issue)
+      // Log for monitoring but don't change status - Resend will retry
+      const emailDelivery = await prisma.emailDelivery.findFirst({
+        where: { resendMessageId: email_id },
+      })
+
+      if (emailDelivery) {
+        console.warn("[Resend Webhook] Email delivery delayed", {
+          deliveryId: emailDelivery.deliveryId,
+          emailId: email_id,
+          reason: data.reason,
+        })
+      } else {
+        console.warn("[Resend Webhook] Email delivery not found for delayed event", {
+          emailId: email_id,
+        })
+      }
+      break
+    }
+
     case "email.opened": {
       // Update email delivery with open count
       const emailDelivery = await prisma.emailDelivery.findFirst({
@@ -257,8 +323,12 @@ async function processResendWebhook(
       })
 
       if (emailDelivery) {
-        // Use transaction to update both delivery and email_delivery atomically
+        // Use transaction to update delivery, email_delivery, and add to suppression list
+        const suppressionReason = type === "email.bounced" ? "bounce" : "complaint"
+        const recipientEmail = emailDelivery.toEmail
+
         await prisma.$transaction([
+          // Update delivery status
           prisma.delivery.update({
             where: { id: emailDelivery.deliveryId },
             data: {
@@ -266,25 +336,90 @@ async function processResendWebhook(
               lastError: `Email ${type}: ${data.reason || "Unknown reason"}`,
             },
           }),
+          // Increment bounce counter
           prisma.emailDelivery.update({
             where: { deliveryId: emailDelivery.deliveryId },
             data: {
               bounces: { increment: 1 },
             },
           }),
+          // Add to suppression list (upsert to handle duplicates)
+          prisma.emailSuppressionList.upsert({
+            where: { email: recipientEmail },
+            create: {
+              email: recipientEmail,
+              reason: suppressionReason,
+              source: "resend_webhook",
+              sourceData: {
+                email_id,
+                event_type: type,
+                reason: data.reason,
+                delivery_id: emailDelivery.deliveryId,
+              },
+            },
+            update: {
+              // If already suppressed, update with latest reason
+              reason: suppressionReason,
+              source: "resend_webhook",
+              sourceData: {
+                email_id,
+                event_type: type,
+                reason: data.reason,
+                delivery_id: emailDelivery.deliveryId,
+              },
+            },
+          }),
         ])
 
-        console.log("[Resend Webhook] Email failed", {
+        console.log("[Resend Webhook] Email failed, added to suppression list", {
           deliveryId: emailDelivery.deliveryId,
           emailId: email_id,
           eventType: type,
           reason: data.reason,
+          recipientEmail,
         })
       } else {
-        console.warn("[Resend Webhook] Email delivery not found for failure event", {
-          emailId: email_id,
-          eventType: type,
-        })
+        // Even without delivery record, add to suppression list if we have the email
+        const recipientEmails = data.to || []
+        if (recipientEmails.length > 0) {
+          const suppressionReason = type === "email.bounced" ? "bounce" : "complaint"
+
+          for (const recipientEmail of recipientEmails) {
+            await prisma.emailSuppressionList.upsert({
+              where: { email: recipientEmail },
+              create: {
+                email: recipientEmail,
+                reason: suppressionReason,
+                source: "resend_webhook",
+                sourceData: {
+                  email_id,
+                  event_type: type,
+                  reason: data.reason,
+                },
+              },
+              update: {
+                reason: suppressionReason,
+                source: "resend_webhook",
+                sourceData: {
+                  email_id,
+                  event_type: type,
+                  reason: data.reason,
+                },
+              },
+            })
+          }
+
+          console.warn("[Resend Webhook] Email delivery not found but added to suppression list", {
+            emailId: email_id,
+            eventType: type,
+            recipientEmails,
+          })
+        } else {
+          console.warn("[Resend Webhook] Email delivery not found for failure event", {
+            emailId: email_id,
+            eventType: type,
+          })
+        }
       }
       break
     }

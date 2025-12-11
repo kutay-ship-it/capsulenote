@@ -11,6 +11,11 @@ export interface EmailOptions {
   text?: string
   replyTo?: string
   headers?: Record<string, string>
+  /**
+   * List-Unsubscribe URL for CAN-SPAM compliance
+   * @example "https://capsulenote.com/settings/notifications"
+   */
+  unsubscribeUrl?: string
 }
 
 export interface EmailResult {

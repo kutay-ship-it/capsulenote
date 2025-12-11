@@ -8,6 +8,31 @@ import { getEmailProvider } from "../../providers/email"
 import { loadMessages } from "@/lib/i18n/load-messages"
 import type { Locale } from "@/i18n/routing"
 
+/**
+ * Get email sender configuration for notifications
+ * This is a simplified version - the full implementation is in workers/inngest/lib/email-config.ts
+ */
+function getEmailSender(type: "notification" | "delivery") {
+  const envVar = type === "notification" ? "EMAIL_FROM_NOTIFICATION" : "EMAIL_FROM_DELIVERY"
+  const fromAddress = process.env[envVar] || process.env.EMAIL_FROM || "Capsule Note <no-reply@letter.capsulenote.com>"
+
+  // Parse "Display Name <email@domain.com>" format
+  const match = fromAddress.match(/^"?([^"<]+)"?\s*<([^>]+)>$/)
+  if (match && match[1] && match[2]) {
+    return {
+      from: fromAddress,
+      email: match[2].trim(),
+      displayName: match[1].trim(),
+    }
+  }
+
+  return {
+    from: fromAddress,
+    email: fromAddress,
+    displayName: "Capsule Note",
+  }
+}
+
 export interface PaymentConfirmationEmailOptions {
   email: string
   plan: string
@@ -128,12 +153,16 @@ ${m.text.expiryNotice}
 ${m.support.replace("{email}", options.nextSteps.supportEmail)}
     `.trim()
 
+    const sender = getEmailSender('notification')
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://capsulenote.com'
+
     const result = await provider.send({
-      from: "Capsule Note <no-reply@letter.capsulenote.com>",
+      from: sender.from,
       to: options.email,
       subject: m.subject.replace("{plan}", planName),
       html,
       text,
+      unsubscribeUrl: `${baseUrl}/settings/notifications`,
     })
 
     if (result.success) {

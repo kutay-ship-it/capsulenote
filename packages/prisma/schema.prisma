@@ -541,6 +541,33 @@ model FailedWebhook {
 }
 
 // ============================================================================
+// EMAIL SUPPRESSION LIST - Bounce/Complaint Management
+// ============================================================================
+
+enum SuppressionReason {
+  bounce       // Hard bounce - invalid address
+  complaint    // User marked as spam
+  unsubscribe  // User unsubscribed
+
+  @@map("suppression_reason")
+}
+
+/// Email addresses that should not receive emails
+/// Populated from webhook events (bounces, complaints) and unsubscribe requests
+model EmailSuppressionList {
+  id         String            @id @default(uuid()) @db.Uuid
+  email      String            @db.Citext
+  reason     SuppressionReason
+  source     String            // "resend_webhook", "postmark_webhook", "user_request"
+  sourceData Json?             @map("source_data") // Original webhook data for debugging
+  createdAt  DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([email])
+  @@index([reason])
+  @@map("email_suppression_list")
+}
+
+// ============================================================================
 // PENDING SUBSCRIPTIONS - Anonymous Checkout Support
 // ============================================================================
 

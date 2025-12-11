@@ -5,22 +5,10 @@ import { generateLetterCreatedEmail, generateLetterCreatedEmailText } from "../t
 import type { Locale } from "../lib/i18n/load-messages"
 import { loadMessages } from "../lib/i18n/load-messages"
 import { getEmailSender } from "../lib/email-config"
+import { createLogger } from "../lib/logger"
 
-/**
- * Structured logger for workers
- * In production, this should use the shared logger from apps/web/server/lib/logger.ts
- */
-const logger = {
-  info: (message: string, meta?: Record<string, unknown>) => {
-    console.log(JSON.stringify({ level: 'info', message, ...meta, timestamp: new Date().toISOString() }))
-  },
-  error: (message: string, meta?: Record<string, unknown>) => {
-    console.error(JSON.stringify({ level: 'error', message, ...meta, timestamp: new Date().toISOString() }))
-  },
-  warn: (message: string, meta?: Record<string, unknown>) => {
-    console.warn(JSON.stringify({ level: 'warn', message, ...meta, timestamp: new Date().toISOString() }))
-  },
-}
+// Create logger with service context
+const logger = createLogger({ service: "send-letter-created-email" })
 
 /**
  * Get email provider abstraction
@@ -248,6 +236,7 @@ export const sendLetterCreatedEmail = inngest.createFunction(
           headers: {
             "X-Idempotency-Key": idempotencyKey,
           },
+          unsubscribeUrl: `${baseUrl}/settings/notifications`,
         })
 
         // Check if send was successful
@@ -287,16 +276,30 @@ export const sendLetterCreatedEmail = inngest.createFunction(
           throw error
         }
 
+        const errorMessage = error instanceof Error ? error.message : String(error)
+
         logger.error("Email send failed", {
           letterId,
           userId,
-          error: error instanceof Error ? error.message : String(error),
+          error: errorMessage,
         })
 
-        // For confirmation emails, don't retry on errors (less critical than delivery emails)
-        throw new NonRetriableError(
-          error instanceof Error ? error.message : "Email send failed"
-        )
+        // For confirmation emails, only retry on network/transient errors
+        // Provider rejections (400-level) should not retry
+        const isTransient = errorMessage.includes('ECONNREFUSED') ||
+          errorMessage.includes('ETIMEDOUT') ||
+          errorMessage.includes('network') ||
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('503') ||
+          errorMessage.includes('502')
+
+        if (isTransient) {
+          // Let Inngest retry on transient errors
+          throw new Error(errorMessage)
+        }
+
+        // Non-retryable for other errors (provider rejections, validation, etc.)
+        throw new NonRetriableError(errorMessage)
       }
     })
 

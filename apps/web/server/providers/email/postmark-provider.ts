@@ -17,6 +17,16 @@ export class PostmarkEmailProvider implements EmailProvider {
 
   async send(options: EmailOptions): Promise<EmailResult> {
     try {
+      // Build Postmark headers array for custom headers
+      const postmarkHeaders: Array<{ Name: string; Value: string }> = []
+
+      if (options.unsubscribeUrl) {
+        postmarkHeaders.push(
+          { Name: "List-Unsubscribe", Value: `<${options.unsubscribeUrl}>` },
+          { Name: "List-Unsubscribe-Post", Value: "List-Unsubscribe=One-Click" }
+        )
+      }
+
       const response = await fetch("https://api.postmarkapp.com/email", {
         method: "POST",
         headers: {
@@ -36,6 +46,7 @@ export class PostmarkEmailProvider implements EmailProvider {
           ReplyTo: options.replyTo,
           TrackOpens: true,
           TrackLinks: "HtmlOnly",
+          Headers: postmarkHeaders.length > 0 ? postmarkHeaders : undefined,
         }),
       })
 

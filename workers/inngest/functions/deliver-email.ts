@@ -15,6 +15,19 @@ import {
 import { createLogger, logBufferSerializationDetected } from "../lib/logger"
 import { assertRealBuffer } from "../lib/buffer-utils"
 
+/**
+ * Check if an email is suppressed (bounced/complained)
+ */
+async function checkEmailSuppression(email: string): Promise<{
+  isSuppressed: boolean
+  reason?: string
+}> {
+  const { checkEmailSuppression } = await import(
+    "../../../apps/web/server/lib/email-suppression"
+  )
+  return checkEmailSuppression(email)
+}
+
 // Create logger with service context
 const logger = createLogger({ service: "deliver-email" })
 
@@ -391,6 +404,54 @@ export const deliverEmail = inngest.createFunction(
       }
     })
 
+    // Check suppression list before sending
+    // This prevents sending to addresses that have bounced or complained
+    await step.run("check-suppression", async () => {
+      const recipientEmail = delivery.emailDelivery!.toEmail
+      const suppression = await checkEmailSuppression(recipientEmail)
+
+      if (suppression.isSuppressed) {
+        logger.warn("Recipient email is suppressed, skipping delivery", {
+          deliveryId,
+          recipientEmail,
+          reason: suppression.reason,
+        })
+
+        // Update delivery to failed with suppression reason
+        await prisma.$transaction([
+          prisma.delivery.update({
+            where: { id: deliveryId },
+            data: {
+              status: "failed",
+              lastError: `Email suppressed: ${suppression.reason}`,
+            },
+          }),
+          prisma.auditEvent.create({
+            data: {
+              userId: delivery.userId,
+              type: "delivery.suppressed",
+              data: {
+                deliveryId,
+                letterId: delivery.letterId,
+                recipientEmail,
+                suppressionReason: suppression.reason,
+              },
+            },
+          }),
+        ])
+
+        // Non-retryable - don't send to suppressed addresses
+        throw new NonRetriableError(
+          `Email suppressed: ${recipientEmail} (reason: ${suppression.reason})`
+        )
+      }
+
+      logger.info("Recipient not suppressed, proceeding with delivery", {
+        deliveryId,
+        recipientEmail,
+      })
+    })
+
     // Decrypt letter content
     // CRITICAL: Fetch encrypted data FRESH inside this step to avoid Buffer serialization issues.
     // When data crosses Inngest step boundaries, Buffer objects get JSON-serialized to
@@ -474,6 +535,60 @@ export const deliverEmail = inngest.createFunction(
         day: 'numeric',
         year: 'numeric'
       })
+
+      // Generate plain text version for accessibility and email clients that prefer text
+      // Strip HTML tags and convert basic formatting
+      const stripHtml = (html: string): string => {
+        return html
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<\/p>/gi, '\n\n')
+          .replace(/<\/div>/gi, '\n')
+          .replace(/<\/li>/gi, '\n')
+          .replace(/<li>/gi, '• ')
+          .replace(/<[^>]+>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\n{3,}/g, '\n\n')
+          .trim()
+      }
+
+      const bodyText = stripHtml(decryptedContent.bodyHtml)
+
+      const emailText = `
+CAPSULE NOTE
+Letters to Your Future Self
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✉️ Letter Delivered
+
+From Your Past Self
+Written on ${writtenDate}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"${delivery.letter.title}"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${bodyText}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+View Full Letter: ${unlockUrl}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Capsule Note
+Letters to your future self
+
+My Letters: ${lettersUrl}
+Journey: ${journeyUrl}
+      `.trim()
       const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -585,9 +700,11 @@ export const deliverEmail = inngest.createFunction(
           to: delivery.emailDelivery!.toEmail,
           subject: delivery.emailDelivery!.subject,
           html: emailHtml,
+          text: emailText,
           headers: {
             "X-Idempotency-Key": idempotencyKey,
           },
+          unsubscribeUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings/notifications`,
         })
 
         // Check if send was successful
@@ -655,9 +772,11 @@ export const deliverEmail = inngest.createFunction(
             to: delivery.emailDelivery!.toEmail,
             subject: delivery.emailDelivery!.subject,
             html: emailHtml,
+            text: emailText,
             headers: {
               "X-Idempotency-Key": idempotencyKey,
             },
+            unsubscribeUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings/notifications`,
           })
 
           if (!result.success) {
