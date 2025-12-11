@@ -20,7 +20,7 @@ async function main() {
         name: "Digital Capsule",
         plan: "DIGITAL_CAPSULE",
         interval: "year",
-        amountCents: 900,
+        amountCents: 222,
         features: {
           emailCredits: 6,
           physicalCredits: 0,
@@ -29,7 +29,7 @@ async function main() {
         sortOrder: 1,
       },
       update: {
-        amountCents: 900,
+        amountCents: 222,
         features: {
           emailCredits: 6,
           physicalCredits: 0,

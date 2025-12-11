@@ -125,7 +125,7 @@ export function PhysicalMailUpgradeModal({
                   {t("plans.digital.title")}
                 </p>
                 <div className="flex items-baseline justify-center gap-0.5">
-                  <span className="font-mono text-lg font-bold text-charcoal/60">$9</span>
+                  <span className="font-mono text-lg font-bold text-charcoal/60">$2.22</span>
                   <span className="font-mono text-[10px] text-charcoal/40">/yr</span>
                 </div>
               </div>

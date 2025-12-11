@@ -10,7 +10,7 @@ interface EmailProps {
  */
 export function PaymentFailedEmails({ variation }: EmailProps) {
   const sampleData = {
-    amount: "$9.00",
+    amount: "$2.22",
     attemptCount: 2,
     billingUrl: "https://capsulenote.com/settings/billing",
     dashboardUrl: "https://capsulenote.com/dashboard",

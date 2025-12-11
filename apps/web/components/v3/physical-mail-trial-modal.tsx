@@ -139,7 +139,7 @@ export function PhysicalMailTrialModal({
               {t("priceLabel")}
             </p>
             <div className="flex items-baseline justify-center gap-1">
-              <span className="font-mono text-3xl font-bold text-charcoal">$4.99</span>
+              <span className="font-mono text-3xl font-bold text-charcoal">$7.77</span>
               <span className="font-mono text-xs text-charcoal/60">{t("oneTime")}</span>
             </div>
             <p className="mt-2 font-mono text-[10px] text-charcoal/50">

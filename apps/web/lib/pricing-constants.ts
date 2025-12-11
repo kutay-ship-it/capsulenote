@@ -34,7 +34,7 @@ export interface PricingTier {
  */
 export const CREDIT_ADDON_BASE_PRICES: Record<CreditAddonType, number> = {
   email: 0.99,
-  physical: 7.99,
+  physical: 7.77,
 }
 
 /**
@@ -57,11 +57,11 @@ export const CREDIT_ADDON_TIERS: Record<CreditAddonType, PricingTier[]> = {
     { minQuantity: 50, maxQuantity: null, unitPrice: 0.74, discountPercent: 25 },
   ],
   physical: [
-    { minQuantity: 1, maxQuantity: 4, unitPrice: 7.99, discountPercent: 0 },
-    { minQuantity: 5, maxQuantity: 9, unitPrice: 7.19, discountPercent: 10 },
-    { minQuantity: 10, maxQuantity: 24, unitPrice: 6.79, discountPercent: 15 },
-    { minQuantity: 25, maxQuantity: 49, unitPrice: 6.39, discountPercent: 20 },
-    { minQuantity: 50, maxQuantity: null, unitPrice: 5.99, discountPercent: 25 },
+    { minQuantity: 1, maxQuantity: 4, unitPrice: 7.77, discountPercent: 0 },
+    { minQuantity: 5, maxQuantity: 9, unitPrice: 6.99, discountPercent: 10 },
+    { minQuantity: 10, maxQuantity: 24, unitPrice: 6.60, discountPercent: 15 },
+    { minQuantity: 25, maxQuantity: 49, unitPrice: 6.22, discountPercent: 20 },
+    { minQuantity: 50, maxQuantity: null, unitPrice: 5.83, discountPercent: 25 },
   ],
 }
 

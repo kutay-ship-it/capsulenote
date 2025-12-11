@@ -74,9 +74,9 @@
     },
     {
       "name": "Pro",
-      "monthlyPrice": 12,
-      "yearlyPrice": 79,
-      "interval": "month",
+      "monthlyPrice": 0.19,
+      "yearlyPrice": 2.22,
+      "interval": "year",
       "description": "For dedicated writers who want to build a meaningful practice.",
       "features": [
         "Unlimited letters",

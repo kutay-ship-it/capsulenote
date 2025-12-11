@@ -10,7 +10,7 @@ interface EmailProps {
  */
 export function PaymentReceiptEmails({ variation }: EmailProps) {
   const sampleData = {
-    amount: "$9.00",
+    amount: "$2.22",
     invoiceNumber: "INV-2025-001234",
     invoiceUrl: "https://stripe.com/invoice/abc123",
     pdfUrl: "https://stripe.com/invoice/abc123.pdf",
