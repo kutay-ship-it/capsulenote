@@ -189,7 +189,7 @@ function SmartAdaptivePanel({ type, currentCredits, onClose }: SmartAdaptivePane
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info(t("checkoutOpened"), {
           description: t("checkoutOpenedDescription"),
         })
@@ -403,7 +403,7 @@ function DigitalCapsuleMailPanel({
       const result = await createTrialPhysicalCheckoutSession()
       if (result.success && result.data?.url) {
         // Open in new tab (consistent with other payment flows)
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info(t("checkoutOpened"), {
           description: t("checkoutOpenedDescription"),
         })
@@ -422,7 +422,7 @@ function DigitalCapsuleMailPanel({
       const result = await createUpgradeSession()
       if (result.success) {
         // Open in new tab (consistent with other payment flows)
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info(t("checkoutOpened"), {
           description: t("checkoutOpenedDescription"),
         })

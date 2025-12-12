@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getLetterTemplates, type LetterTemplate } from "@/server/actions/templates"
+import { sanitizeTemplateHtml } from "@/lib/sanitize"
 import { cn } from "@/lib/utils"
 
 interface TemplateSelectorProps {
@@ -151,7 +152,7 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
                       </div>
                       <div
                         className="mt-3 prose prose-sm max-h-24 overflow-hidden font-mono text-xs text-charcoal/60"
-                        dangerouslySetInnerHTML={{ __html: template.promptText }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeTemplateHtml(template.promptText) }}
                       />
                       <div className="mt-3 flex justify-end">
                         <span className="font-mono text-xs uppercase tracking-wide text-duck-blue group-hover:text-charcoal">

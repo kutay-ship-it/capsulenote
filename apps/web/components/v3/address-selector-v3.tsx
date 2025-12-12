@@ -248,6 +248,7 @@ export function AddressSelectorV3({
                           className="h-7 w-7 text-charcoal/40 hover:text-coral hover:bg-coral/10"
                           onClick={(e) => e.stopPropagation()}
                           disabled={disabled || deletingId === address.id}
+                          aria-label={`Delete address for ${address.name}`}
                         >
                           {deletingId === address.id ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />

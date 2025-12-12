@@ -39,7 +39,7 @@ export function PhysicalMailTrialModal({
       const result = await createTrialPhysicalCheckoutSession()
       if (result.success && result.data?.url) {
         // Open in new tab like other credit purchases (preserves current page state)
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info(t("checkoutOpened") ?? "Checkout opened in new tab", {
           description: t("checkoutOpenedDescription") ?? "Complete your purchase. This page will refresh when you return.",
         })

@@ -108,7 +108,7 @@ function QuantityStepper({ type, currentCredits }: QuantityStepperProps) {
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info("Checkout opened in new tab")
       } else {
         toast.error(result.error.message)
@@ -332,7 +332,7 @@ function QuickPackSelector({ type, currentCredits }: { type: CreditType; current
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info("Checkout opened in new tab")
       } else {
         toast.error(result.error.message)
@@ -430,7 +430,7 @@ function UrgencyAwarePanel({ type, currentCredits }: UrgencyAwarePanelProps) {
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info("Checkout opened in new tab")
       } else {
         toast.error(result.error.message)
@@ -612,7 +612,7 @@ function CombinedCreditPanel() {
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info("Checkout opened in new tab")
       } else {
         toast.error(result.error.message)
@@ -769,7 +769,7 @@ function InlineCreditAdder({ type }: { type: CreditType }) {
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
       } else {
         toast.error(result.error.message)
       }
@@ -893,7 +893,7 @@ function SmartAdaptivePanel({ type, currentCredits }: SmartAdaptivePanelProps) {
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info("Checkout opened in new tab")
       } else {
         toast.error(result.error.message)
@@ -1137,7 +1137,7 @@ function CreditGaugeMeter({ type, currentCredits, maxCredits = 50 }: CreditGauge
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info("Checkout opened in new tab")
       } else {
         toast.error(result.error.message)
@@ -1410,7 +1410,7 @@ function SmartRecommendationCard({
       })
 
       if (result.success) {
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info("Checkout opened in new tab")
       } else {
         toast.error(result.error.message)

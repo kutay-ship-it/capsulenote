@@ -73,7 +73,7 @@ export function CreditWarningBanner({
 
       if (result.success) {
         // Open in new tab so user doesn't lose their draft
-        window.open(result.data.url, "_blank")
+        window.open(result.data.url, "_blank", "noopener,noreferrer")
         toast.info(t("checkoutOpened"), {
           description: t("checkoutOpenedDescription"),
         })
@@ -83,7 +83,7 @@ export function CreditWarningBanner({
             description: t("subscribeFirst"),
             action: {
               label: t("viewPlans"),
-              onClick: () => window.open("/pricing", "_blank"),
+              onClick: () => window.open("/pricing", "_blank", "noopener,noreferrer"),
             },
           })
         } else {
@@ -182,7 +182,7 @@ export function CreditWarningBanner({
       <div className="flex flex-wrap gap-2">
         {noSubscription ? (
           <button
-            onClick={() => window.open("/pricing", "_blank")}
+            onClick={() => window.open("/pricing", "_blank", "noopener,noreferrer")}
             className={cn(
               "flex items-center gap-2 border-2 border-charcoal bg-duck-yellow px-4 py-2",
               "font-mono text-xs font-bold uppercase tracking-wider text-charcoal",
