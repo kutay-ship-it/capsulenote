@@ -159,8 +159,16 @@ export async function POST(req: Request) {
     const signatureHeader = headerPayload.get("lob-signature")
     const timestampHeader = headerPayload.get("lob-signature-timestamp")
 
-    // 3. Verify signature if secret is configured
-    if (env.LOB_WEBHOOK_SECRET) {
+    // 3. Verify signature - REQUIRED in production
+    if (!env.LOB_WEBHOOK_SECRET) {
+      // In production, webhook secret is mandatory for security
+      if (process.env.NODE_ENV === "production") {
+        console.error("[Lob Webhook] CRITICAL: LOB_WEBHOOK_SECRET not configured in production")
+        return new Response("Server misconfiguration", { status: 500 })
+      }
+      // In development, warn but allow (for testing with Lob sandbox)
+      console.warn("[Lob Webhook] No webhook secret configured - accepting unsigned webhooks (dev only)")
+    } else {
       const verification = verifyLobSignature(
         payload,
         signatureHeader,
@@ -178,8 +186,6 @@ export async function POST(req: Request) {
       }
 
       console.log("[Lob Webhook] Signature verified", { timestamp: verification.timestamp })
-    } else {
-      console.warn("[Lob Webhook] No webhook secret configured, skipping signature verification")
     }
 
     // 4. Parse event

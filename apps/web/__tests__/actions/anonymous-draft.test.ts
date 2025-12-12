@@ -38,7 +38,6 @@ const mockAnonymousDraftFindUnique = vi.fn()
 const mockAnonymousDraftCreate = vi.fn()
 const mockAnonymousDraftUpdate = vi.fn()
 const mockAnonymousDraftDelete = vi.fn()
-const mockUserFindUnique = vi.fn()
 
 vi.mock("@/server/lib/db", () => ({
   prisma: {
@@ -50,10 +49,13 @@ vi.mock("@/server/lib/db", () => ({
       update: (...args: any[]) => mockAnonymousDraftUpdate(...args),
       delete: (...args: any[]) => mockAnonymousDraftDelete(...args),
     },
-    user: {
-      findUnique: (...args: any[]) => mockUserFindUnique(...args),
-    },
   },
+}))
+
+// Mock requireUser - returns authenticated user from session
+const mockRequireUser = vi.fn()
+vi.mock("@/server/lib/auth", () => ({
+  requireUser: () => mockRequireUser(),
 }))
 
 // Mock crypto.randomUUID
@@ -490,11 +492,30 @@ describe("Anonymous Draft Server Actions", () => {
   // --------------------------------------------------------------------------
 
   describe("claimAnonymousDraft", () => {
+    // Default mock user for authenticated tests
+    const mockAuthenticatedUser = { id: "user_123", email: "user@example.com" }
+
+    beforeEach(() => {
+      // Default: authenticated user
+      mockRequireUser.mockResolvedValue(mockAuthenticatedUser)
+    })
+
+    describe("Authentication", () => {
+      it("should return error when user is not authenticated", async () => {
+        mockRequireUser.mockRejectedValue(new Error("Unauthorized"))
+
+        const result = await claimAnonymousDraft("draft_123")
+
+        expect(result.success).toBe(false)
+        expect(result.error).toBe("Unauthorized")
+      })
+    })
+
     describe("Validation", () => {
       it("should return error when draft not found", async () => {
         mockAnonymousDraftFindUnique.mockResolvedValue(null)
 
-        const result = await claimAnonymousDraft("nonexistent_draft", "user_123")
+        const result = await claimAnonymousDraft("nonexistent_draft")
 
         expect(result.success).toBe(false)
         expect(result.error).toBe("Draft not found")
@@ -507,21 +528,10 @@ describe("Anonymous Draft Server Actions", () => {
         })
         mockAnonymousDraftFindUnique.mockResolvedValue(claimedDraft)
 
-        const result = await claimAnonymousDraft(claimedDraft.id, "user_123")
+        const result = await claimAnonymousDraft(claimedDraft.id)
 
         expect(result.success).toBe(false)
         expect(result.error).toBe("Draft already claimed")
-      })
-
-      it("should return error when user not found", async () => {
-        const draft = createMockDraft()
-        mockAnonymousDraftFindUnique.mockResolvedValue(draft)
-        mockUserFindUnique.mockResolvedValue(null)
-
-        const result = await claimAnonymousDraft(draft.id, "nonexistent_user")
-
-        expect(result.success).toBe(false)
-        expect(result.error).toBe("User not found")
       })
     })
 
@@ -532,10 +542,9 @@ describe("Anonymous Draft Server Actions", () => {
           email: "different@example.com",
         })
         mockAnonymousDraftFindUnique.mockResolvedValue(draft)
-        mockUserFindUnique.mockResolvedValue({ email: "user@example.com" })
         mockAnonymousDraftUpdate.mockResolvedValue({ ...draft, claimedAt: new Date() })
 
-        const result = await claimAnonymousDraft(draft.id, "user_123")
+        const result = await claimAnonymousDraft(draft.id)
 
         expect(result.success).toBe(true)
       })
@@ -547,39 +556,38 @@ describe("Anonymous Draft Server Actions", () => {
           email: "user@example.com",
         })
         mockAnonymousDraftFindUnique.mockResolvedValue(draft)
-        mockUserFindUnique.mockResolvedValue({ email: "user@example.com" })
         mockAnonymousDraftUpdate.mockResolvedValue({ ...draft, claimedAt: new Date() })
 
-        const result = await claimAnonymousDraft(draft.id, "user_123")
+        const result = await claimAnonymousDraft(draft.id)
 
         expect(result.success).toBe(true)
       })
 
       it("should allow claim by email match (case insensitive)", async () => {
         mockCookieGet.mockReturnValue({ value: "different_session" })
+        mockRequireUser.mockResolvedValue({ id: "user_123", email: "USER@Example.COM" })
         const draft = createMockDraft({
           sessionId: "original_session",
           email: "user@example.com",
         })
         mockAnonymousDraftFindUnique.mockResolvedValue(draft)
-        mockUserFindUnique.mockResolvedValue({ email: "USER@Example.COM" })
         mockAnonymousDraftUpdate.mockResolvedValue({ ...draft, claimedAt: new Date() })
 
-        const result = await claimAnonymousDraft(draft.id, "user_123")
+        const result = await claimAnonymousDraft(draft.id)
 
         expect(result.success).toBe(true)
       })
 
       it("should reject claim when neither sessionId nor email matches", async () => {
         mockCookieGet.mockReturnValue({ value: "different_session" })
+        mockRequireUser.mockResolvedValue({ id: "user_123", email: "different@example.com" })
         const draft = createMockDraft({
           sessionId: "original_session",
           email: "original@example.com",
         })
         mockAnonymousDraftFindUnique.mockResolvedValue(draft)
-        mockUserFindUnique.mockResolvedValue({ email: "different@example.com" })
 
-        const result = await claimAnonymousDraft(draft.id, "user_123")
+        const result = await claimAnonymousDraft(draft.id)
 
         expect(result.success).toBe(false)
         expect(result.error).toBe("Not authorized to claim this draft")
@@ -587,19 +595,36 @@ describe("Anonymous Draft Server Actions", () => {
     })
 
     describe("Claim Process", () => {
-      it("should update draft with claimedAt and claimedByUserId", async () => {
+      it("should update draft with claimedAt and authenticated user id", async () => {
         const draft = createMockDraft({ id: "claim_test_draft" })
         mockAnonymousDraftFindUnique.mockResolvedValue(draft)
-        mockUserFindUnique.mockResolvedValue({ email: "user@example.com" })
         mockAnonymousDraftUpdate.mockResolvedValue({ ...draft, claimedAt: new Date() })
 
-        await claimAnonymousDraft(draft.id, "user_123")
+        await claimAnonymousDraft(draft.id)
 
         expect(mockAnonymousDraftUpdate).toHaveBeenCalledWith({
           where: { id: "claim_test_draft" },
           data: {
             claimedAt: expect.any(Date),
-            claimedByUserId: "user_123",
+            claimedByUserId: "user_123", // From mockAuthenticatedUser
+          },
+        })
+      })
+
+      it("should use authenticated user id, not any caller-supplied value", async () => {
+        // This test verifies the security fix - userId comes from auth, not caller
+        const draft = createMockDraft({ id: "security_test_draft" })
+        mockRequireUser.mockResolvedValue({ id: "authenticated_user_456", email: "user@example.com" })
+        mockAnonymousDraftFindUnique.mockResolvedValue(draft)
+        mockAnonymousDraftUpdate.mockResolvedValue({ ...draft, claimedAt: new Date() })
+
+        await claimAnonymousDraft(draft.id)
+
+        expect(mockAnonymousDraftUpdate).toHaveBeenCalledWith({
+          where: { id: "security_test_draft" },
+          data: {
+            claimedAt: expect.any(Date),
+            claimedByUserId: "authenticated_user_456", // From requireUser, not caller
           },
         })
       })
@@ -609,7 +634,7 @@ describe("Anonymous Draft Server Actions", () => {
       it("should return error on database failure", async () => {
         mockAnonymousDraftFindUnique.mockRejectedValue(new Error("Database error"))
 
-        const result = await claimAnonymousDraft("draft_123", "user_123")
+        const result = await claimAnonymousDraft("draft_123")
 
         expect(result.success).toBe(false)
         expect(result.error).toBe("Database error")

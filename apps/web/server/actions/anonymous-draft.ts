@@ -17,6 +17,7 @@
 
 import { prisma } from "@/server/lib/db"
 import { cookies } from "next/headers"
+import { requireUser } from "@/server/lib/auth"
 
 export interface DraftContent {
   title: string
@@ -200,13 +201,16 @@ export async function getAnonymousDrafts(): Promise<{
 /**
  * Claim draft for authenticated user
  *
- * Called after user signs up to link their draft to their account
+ * Called after user signs up to link their draft to their account.
+ * SECURITY: Uses requireUser() to get the authenticated user's ID from Clerk,
+ * ignoring any caller-supplied userId to prevent auth bypass.
  */
 export async function claimAnonymousDraft(
-  draftId: string,
-  userId: string
+  draftId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // SECURITY: Get authenticated user from session, not from caller
+    const authenticatedUser = await requireUser()
     const sessionId = await getSessionId()
 
     // Verify draft belongs to this session or user's email
@@ -222,20 +226,10 @@ export async function claimAnonymousDraft(
       return { success: false, error: "Draft already claimed" }
     }
 
-    // Get user email to verify ownership
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true },
-    })
-
-    if (!user) {
-      return { success: false, error: "User not found" }
-    }
-
     // Verify ownership (either by sessionId or email match)
     const isOwner =
       draft.sessionId === sessionId ||
-      draft.email.toLowerCase() === user.email.toLowerCase()
+      draft.email.toLowerCase() === authenticatedUser.email.toLowerCase()
 
     if (!isOwner) {
       return { success: false, error: "Not authorized to claim this draft" }
@@ -246,7 +240,7 @@ export async function claimAnonymousDraft(
       where: { id: draftId },
       data: {
         claimedAt: new Date(),
-        claimedByUserId: userId,
+        claimedByUserId: authenticatedUser.id,
       },
     })
 
