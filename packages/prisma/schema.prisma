@@ -564,6 +564,8 @@ model EmailSuppressionList {
 
   @@unique([email])
   @@index([reason])
+  @@index([createdAt])
+  @@index([source])
   @@map("email_suppression_list")
 }
 

@@ -58,6 +58,20 @@ export async function sendPaymentConfirmationEmail(
   options: PaymentConfirmationEmailOptions
 ): Promise<EmailResult> {
   try {
+    // Check suppression before sending
+    const { checkEmailSuppression } = await import("../email-suppression")
+    const suppression = await checkEmailSuppression(options.email)
+    if (suppression.isSuppressed) {
+      console.log("[Payment Confirmation] Skipping - email suppressed", {
+        email: options.email,
+        reason: suppression.reason,
+      })
+      return {
+        success: false,
+        error: `Email suppressed: ${suppression.reason}`,
+      }
+    }
+
     const provider = await getEmailProvider()
 
     const locale: Locale = (options.locale as Locale) || "en"
