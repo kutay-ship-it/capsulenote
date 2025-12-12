@@ -23,7 +23,9 @@ export async function generateLetterCreatedEmail({
   const messages = await loadMessages(locale)
   const m = messages.emails.letterCreated
 
-  const greeting = sanitizedFirstName ? `Welcome, ${sanitizedFirstName}!` : "Letter Created!"
+  const greeting = sanitizedFirstName
+    ? m.greetingWithName.replace("{name}", sanitizedFirstName)
+    : m.greetingNoName
 
   // Replace dashboard with letters/journey
   const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
@@ -48,7 +50,7 @@ export async function generateLetterCreatedEmail({
           <tr>
             <td style="text-align: center; padding-bottom: 32px;">
               <div style="font-size: 22px; color: #383838;">Capsule Note</div>
-              <div style="font-size: 11px; color: #666666; margin-top: 4px;">Letters to Your Future Self</div>
+              <div style="font-size: 11px; color: #666666; margin-top: 4px;">${m.tagline}</div>
             </td>
           </tr>
 
@@ -83,8 +85,8 @@ export async function generateLetterCreatedEmail({
                     </h1>
 
                     <p style="font-size: 15px; color: #666666; margin: 0 0 40px 0; text-align: center; line-height: 1.7;">
-                      Your letter has been saved and encrypted.<br />
-                      Ready to schedule it for future delivery?
+                      ${m.savedMessage}<br />
+                      ${m.schedulePrompt}
                     </p>
 
                     <!-- Letter Title Card -->
@@ -113,8 +115,8 @@ export async function generateLetterCreatedEmail({
                                 <div style="width: 32px; height: 32px; background-color: #6FC2FF; border: 2px solid #383838; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; font-weight: bold; color: #383838;">1</div>
                               </td>
                               <td style="padding-left: 12px; vertical-align: middle;">
-                                <div style="font-size: 14px; font-weight: bold; color: #383838;">Review Your Letter</div>
-                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">Make sure it says exactly what you want</div>
+                                <div style="font-size: 14px; font-weight: bold; color: #383838;">${m.stepsSection.review.title}</div>
+                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">${m.stepsSection.review.description}</div>
                               </td>
                             </tr>
                           </table>
@@ -135,8 +137,8 @@ export async function generateLetterCreatedEmail({
                                 <div style="width: 32px; height: 32px; background-color: #FFDE00; border: 2px solid #383838; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; font-weight: bold; color: #383838;">2</div>
                               </td>
                               <td style="padding-left: 12px; vertical-align: middle;">
-                                <div style="font-size: 14px; font-weight: bold; color: #383838;">Schedule Delivery</div>
-                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">Pick when future-you should receive it</div>
+                                <div style="font-size: 14px; font-weight: bold; color: #383838;">${m.stepsSection.schedule.title}</div>
+                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">${m.stepsSection.schedule.description}</div>
                               </td>
                             </tr>
                           </table>
@@ -157,8 +159,8 @@ export async function generateLetterCreatedEmail({
                                 <div style="width: 32px; height: 32px; background-color: #38C1B0; border: 2px solid #383838; border-radius: 50%; text-align: center; line-height: 28px; font-size: 14px; font-weight: bold; color: #ffffff;">&#10003;</div>
                               </td>
                               <td style="padding-left: 12px; vertical-align: middle;">
-                                <div style="font-size: 14px; font-weight: bold; color: #383838;">Receive &amp; Reflect</div>
-                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">A gift from your past self arrives</div>
+                                <div style="font-size: 14px; font-weight: bold; color: #383838;">${m.stepsSection.receive.title}</div>
+                                <div style="font-size: 13px; color: #666666; margin-top: 4px;">${m.stepsSection.receive.description}</div>
                               </td>
                             </tr>
                           </table>
@@ -186,9 +188,9 @@ export async function generateLetterCreatedEmail({
           <tr>
             <td style="padding: 32px 0; text-align: center;">
               <div style="font-size: 11px; color: #666666; margin-bottom: 16px;">
-                <a href="${lettersUrl}" style="color: #383838; text-decoration: none;">My Letters</a>
+                <a href="${lettersUrl}" style="color: #383838; text-decoration: none;">${m.nav.letters}</a>
                 <span style="margin: 0 8px; color: #383838;">&#183;</span>
-                <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">Journey</a>
+                <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">${m.nav.journey}</a>
               </div>
               <div style="font-size: 11px; color: #666666;">
                 <a href="${settingsUrl}/notifications" style="color: #383838; text-decoration: underline;">${m.footer.manage}</a>
@@ -215,7 +217,9 @@ export async function generateLetterCreatedEmailText({
   const m = messages.emails.letterCreated
 
   const sanitizedTitle = letterTitle.replace(/"/g, '\\"')
-  const greeting = userFirstName ? `Welcome, ${userFirstName}!` : "Letter Created!"
+  const greeting = userFirstName
+    ? m.greetingWithName.replace("{name}", userFirstName)
+    : m.greetingNoName
 
   // Replace dashboard with letters/journey
   const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
@@ -224,34 +228,34 @@ export async function generateLetterCreatedEmailText({
 
   return `
 CAPSULE NOTE
-Letters to Your Future Self
+${m.tagline}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ${greeting}
 
-Your letter has been saved and encrypted.
-Ready to schedule it for future delivery?
+${m.savedMessage}
+${m.schedulePrompt}
 
-YOUR LETTER
+${m.yourLetter}
 ─────────────────
 "${sanitizedTitle}"
 
 ${m.whatsNext}
 ─────────────────
-1. Review Your Letter - Make sure it says exactly what you want
-2. Schedule Delivery - Pick when future-you should receive it
-3. Receive & Reflect - A gift from your past self arrives
+1. ${m.stepsSection.review.title} - ${m.stepsSection.review.description}
+2. ${m.stepsSection.schedule.title} - ${m.stepsSection.schedule.description}
+3. ${m.stepsSection.receive.title} - ${m.stepsSection.receive.description}
 
-View your letter: ${letterUrl}
+${m.viewLetter}: ${letterUrl}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-My Letters: ${lettersUrl}
-Journey: ${journeyUrl}
+${m.nav.letters}: ${lettersUrl}
+${m.nav.journey}: ${journeyUrl}
 
-Manage notifications: ${settingsUrl}/notifications
+${m.footer.manage}: ${settingsUrl}/notifications
 
-Sent with Capsule Note
+${m.sentWith}
   `.trim()
 }

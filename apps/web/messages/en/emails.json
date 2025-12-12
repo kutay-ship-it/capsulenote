@@ -37,6 +37,31 @@
     "subheadNoName": "Your letter has been safely saved and encrypted.",
     "letterTitleLabel": "Letter Title",
     "whatsNext": "What's Next?",
+    "greetingWithName": "Welcome, {name}!",
+    "greetingNoName": "Letter Created!",
+    "tagline": "Letters to Your Future Self",
+    "savedMessage": "Your letter has been saved and encrypted.",
+    "schedulePrompt": "Ready to schedule it for future delivery?",
+    "yourLetter": "YOUR LETTER",
+    "stepsSection": {
+      "review": {
+        "title": "Review Your Letter",
+        "description": "Make sure it says exactly what you want"
+      },
+      "schedule": {
+        "title": "Schedule Delivery",
+        "description": "Pick when future-you should receive it"
+      },
+      "receive": {
+        "title": "Receive & Reflect",
+        "description": "A gift from your past self arrives"
+      }
+    },
+    "nav": {
+      "letters": "My Letters",
+      "journey": "Journey"
+    },
+    "sentWith": "Sent with Capsule Note",
     "steps": [
       "📧 Schedule delivery to receive your letter at the perfect time",
       "✏️ Edit or add details whenever inspiration strikes",
@@ -62,13 +87,83 @@
       "dashboard": "Go to Dashboard"
     }
   },
+  "letterDelivery": {
+    "subject": "Your Letter Has Arrived ✉️",
+    "headline": "Letter Delivered",
+    "tagline": "Letters to Your Future Self",
+    "fromPastSelf": "From Your Past Self",
+    "writtenOn": "Written on {date}",
+    "viewFullLetter": "View Full Letter",
+    "footer": {
+      "reason": "You're receiving this because you scheduled a letter to yourself on Capsule Note.",
+      "tagline": "Capsule Note - Letters to your future self"
+    },
+    "text": {
+      "headline": "CAPSULE NOTE",
+      "tagline": "Letters to Your Future Self",
+      "delivered": "Letter Delivered",
+      "fromPastSelf": "From Your Past Self",
+      "writtenOn": "Written on {date}",
+      "viewFullLetter": "View Full Letter"
+    }
+  },
+  "billingNotifications": {
+    "trialEnding": {
+      "subject": "Your free trial ends in {days} days",
+      "headline": "Your Trial is Ending Soon",
+      "body": "Your 14-day free trial of Capsule Note Pro will end in {days} days.",
+      "trialEndsLabel": "Trial Ends",
+      "afterTrialNotice": "After this date, you'll be charged $9/month to continue using Pro features.",
+      "manageSubscription": "Manage Subscription",
+      "cancelNotice": "If you do not want to continue, you can cancel anytime before your trial ends."
+    },
+    "paymentFailed": {
+      "subject": "Payment failed for your Capsule Note subscription",
+      "headline": "Payment Failed",
+      "body": "We were unable to process your payment of {amount}.",
+      "attemptLabel": "Attempt #{count}",
+      "retryNotice": "Your payment method will be tried again automatically, but please update it to avoid subscription cancellation.",
+      "updatePaymentMethod": "Update Payment Method"
+    },
+    "subscriptionCanceled": {
+      "subject": "Your Capsule Note subscription has been canceled",
+      "headline": "Subscription Canceled",
+      "body": "Your Capsule Note Pro subscription has been canceled.",
+      "accessNotice": "You will continue to have access to Pro features until the end of your current billing period. Your letters remain safe and encrypted.",
+      "reactivate": "Reactivate Subscription",
+      "comeBack": "We'd love to have you back anytime."
+    },
+    "paymentReceipt": {
+      "subject": "Receipt for your Capsule Note payment",
+      "headline": "Payment Successful",
+      "body": "Thank you for your payment! Here are the details:",
+      "receiptLabel": "Receipt",
+      "amountLabel": "Amount",
+      "invoiceLabel": "Invoice",
+      "viewInvoice": "View Invoice",
+      "downloadPdf": "Download PDF"
+    }
+  },
   "deliveryScheduled": {
     "subject": "✓ Delivery Scheduled: \"{title}\"",
     "headline": "✓ Delivery Scheduled",
     "subhead": "Your letter to your future self is all set!",
     "greeting": "Hi {name}",
+    "greetingDefault": "Hello",
+    "bodySummary": "we've locked in your delivery. Here's the summary:",
+    "tagline": "Time Capsule for Your Thoughts",
     "body": "Great news! Your letter \"{title}\" has been scheduled for delivery.",
     "detailsLabel": "Delivery Details",
+    "timeline": {
+      "now": "Now",
+      "nowDescription": "Letter encrypted & scheduled",
+      "delivery": "Delivery"
+    },
+    "labels": {
+      "letter": "Letter",
+      "deliveryMethod": "Delivery Method",
+      "recipient": "Recipient"
+    },
     "fields": {
       "date": "Delivery Date:",
       "method": "Delivery Method:",
@@ -77,6 +172,14 @@
     "methods": {
       "email": "Email",
       "mail": "Physical Mail"
+    },
+    "buttons": {
+      "viewDetails": "View Details",
+      "editDelivery": "Edit Delivery"
+    },
+    "nav": {
+      "letters": "My Letters",
+      "journey": "Journey"
     },
     "nextTitle": "What happens next?",
     "bullets": [
@@ -89,13 +192,14 @@
     "dashboardCta": "dashboard",
     "change": "Need to make changes? Visit your dashboard to manage all your letters and deliveries.",
     "footer": {
-      "sentWith": "Sent with ❤️ by Capsule Note",
+      "sentWith": "Sent with Capsule Note",
       "tagline": "Letters to your future self"
     },
     "text": {
       "headline": "✓ DELIVERY SCHEDULED",
       "body": "Great news! Your letter \"{title}\" has been scheduled for delivery.",
       "details": "DELIVERY DETAILS",
+      "deliveryTimeline": "DELIVERY TIMELINE",
       "whatNext": "WHAT HAPPENS NEXT?",
       "bullets": [
         "Your letter is safely stored and encrypted",
@@ -104,6 +208,8 @@
         "You can view or update the delivery anytime from your dashboard"
       ],
       "view": "VIEW DELIVERY DETAILS",
+      "viewUrl": "View delivery details",
+      "editUrl": "Edit delivery",
       "change": "Need to make changes? Visit your dashboard to manage all your letters and deliveries:"
     }
   }

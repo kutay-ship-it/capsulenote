@@ -136,6 +136,7 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
                 profile: {
                   select: {
                     displayName: true,
+                    locale: true,
                   },
                 },
               },
@@ -186,6 +187,24 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
       }
     })
 
+    // Check if email is suppressed (bounced/complained)
+    const suppression = await step.run("check-suppression", async () => {
+      const { checkEmailSuppression } = await import(
+        "../../../apps/web/server/lib/email-suppression"
+      )
+      return checkEmailSuppression(delivery.user.email!)
+    })
+
+    if (suppression.isSuppressed) {
+      logger.info("Skipping delivery-scheduled email - address suppressed", {
+        deliveryId,
+        userId,
+        email: delivery.user.email,
+        reason: suppression.reason,
+      })
+      return { skipped: true, reason: `suppressed:${suppression.reason}` }
+    }
+
     // Determine recipient email
     const recipientEmail = delivery.channel === "email"
       ? (delivery.emailDelivery?.toEmail ?? delivery.user.email!)
@@ -197,7 +216,7 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
     const dashboardUrl = `${baseUrl}/dashboard?utm_source=email&utm_medium=notification&utm_campaign=delivery_scheduled`
 
     const userLocale: Locale =
-      ((delivery.user.profile as any)?.preferredLocale as Locale | undefined) || "en"
+      (delivery.user.profile?.locale as Locale | undefined) || "en"
 
     const deliveryDate = formatDeliveryDate(new Date(delivery.deliverAt), userLocale)
 

@@ -8,10 +8,13 @@
  * - Payment receipt
  *
  * Uses existing email provider abstraction.
+ * Supports localization based on user's language preference.
  */
 
 import { inngest } from "../../client"
+import { prisma } from "@dearme/prisma"
 import { getEmailSender } from "../../lib/email-config"
+import { loadMessages, type Locale } from "../../lib/i18n/load-messages"
 
 /**
  * Get email provider
@@ -22,10 +25,24 @@ async function getEmailProvider() {
 }
 
 /**
- * Format currency amount
+ * Format currency amount with locale awareness
  */
-function formatAmount(amountCents: number, currency: string): string {
-  return `$${(amountCents / 100).toFixed(2)} ${currency.toUpperCase()}`
+function formatAmount(amountCents: number, currency: string, locale: Locale): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amountCents / 100)
+}
+
+/**
+ * Format date with locale awareness
+ */
+function formatDate(dateStr: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(dateStr))
 }
 
 /**
@@ -47,6 +64,38 @@ export const sendBillingNotification = inngest.createFunction(
       email,
     })
 
+    // Check if email is suppressed (bounced/complained)
+    const suppression = await step.run("check-suppression", async () => {
+      const { checkEmailSuppression } = await import(
+        "../../../../apps/web/server/lib/email-suppression"
+      )
+      return checkEmailSuppression(email)
+    })
+
+    if (suppression.isSuppressed) {
+      console.log("[Billing Notification] Skipping - email suppressed", {
+        template,
+        userId,
+        email,
+        reason: suppression.reason,
+      })
+      return { skipped: true, reason: `suppressed:${suppression.reason}` }
+    }
+
+    // Fetch user's locale preference
+    const userLocale = await step.run("fetch-locale", async () => {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: { profile: true },
+      })
+      return (user?.profile?.locale as Locale) || "en"
+    })
+
+    // Load translated messages
+    const messages = await step.run("load-messages", async () => {
+      return loadMessages(userLocale)
+    })
+
     // Get email sender configuration
     const sender = getEmailSender("notification")
 
@@ -56,6 +105,7 @@ export const sendBillingNotification = inngest.createFunction(
       const lettersUrl = `${appUrl}/letters`
       const journeyUrl = `${appUrl}/journey`
       const settingsUrl = `${appUrl}/settings`
+      const m = messages.emails.billingNotifications
 
       // Variation B - Soft Brutalist email wrapper
       const wrapEmail = (content: string, accentColor: string = "#38C1B0") => `
@@ -111,13 +161,10 @@ export const sendBillingNotification = inngest.createFunction(
 
       switch (template) {
         case "trial-ending": {
-          const trialEndsDate = new Date(data.trialEndsAt as string).toLocaleDateString('en-US', {
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-          })
+          const t = m.trialEnding
+          const trialEndsDate = formatDate(data.trialEndsAt as string, userLocale)
           return {
-            subject: "Your free trial ends in 3 days",
+            subject: t.subject.replace("{days}", String(data.daysRemaining)),
             html: wrapEmail(`
               <!-- Icon -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
@@ -129,40 +176,41 @@ export const sendBillingNotification = inngest.createFunction(
               </table>
 
               <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
-                Your Trial is Ending Soon
+                ${t.headline}
               </h1>
 
               <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
-                Your 14-day free trial of Capsule Note Pro will end in <strong>${data.daysRemaining} days</strong>.
+                ${t.body.replace("{days}", `<strong>${data.daysRemaining}</strong>`)}
               </p>
 
               <!-- Details Box -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #F4EFE2; border: 1px solid rgba(56,56,56,0.15); border-radius: 2px; margin-bottom: 32px;">
                 <tr>
                   <td style="padding: 20px;">
-                    <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 8px;">Trial Ends</div>
+                    <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 8px;">${t.trialEndsLabel}</div>
                     <div style="font-size: 18px; color: #383838; font-weight: bold;">${trialEndsDate}</div>
-                    <div style="font-size: 13px; color: #666666; margin-top: 8px;">After this date, you'll be charged $9/month to continue using Pro features.</div>
+                    <div style="font-size: 13px; color: #666666; margin-top: 8px;">${t.afterTrialNotice}</div>
                   </td>
                 </tr>
               </table>
 
               <!-- CTA -->
               <a href="${settingsUrl}?tab=billing" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                Manage Subscription
+                ${t.manageSubscription}
               </a>
 
               <p style="font-size: 13px; color: #666666; margin: 24px 0 0 0;">
-                If you do not want to continue, you can cancel anytime before your trial ends.
+                ${t.cancelNotice}
               </p>
             `, "#FFDE00"),
           }
         }
 
         case "payment-failed": {
-          const amount = formatAmount(data.amountDue as number, data.currency as string)
+          const t = m.paymentFailed
+          const amount = formatAmount(data.amountDue as number, data.currency as string, userLocale)
           return {
-            subject: "Payment failed for your Capsule Note subscription",
+            subject: t.subject,
             html: wrapEmail(`
               <!-- Icon -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
@@ -174,11 +222,11 @@ export const sendBillingNotification = inngest.createFunction(
               </table>
 
               <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
-                Payment Failed
+                ${t.headline}
               </h1>
 
               <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
-                We were unable to process your payment of <strong>${amount}</strong>.
+                ${t.body.replace("{amount}", `<strong>${amount}</strong>`)}
               </p>
 
               <!-- Warning Box -->
@@ -186,8 +234,8 @@ export const sendBillingNotification = inngest.createFunction(
                 <tr>
                   <td style="padding: 20px;">
                     <div style="font-size: 14px; color: #383838;">
-                      <strong>Attempt #${data.attemptCount}</strong><br />
-                      Your payment method will be tried again automatically, but please update it to avoid subscription cancellation.
+                      <strong>${t.attemptLabel.replace("{count}", String(data.attemptCount))}</strong><br />
+                      ${t.retryNotice}
                     </div>
                   </td>
                 </tr>
@@ -195,15 +243,16 @@ export const sendBillingNotification = inngest.createFunction(
 
               <!-- CTA -->
               <a href="${settingsUrl}?tab=billing" style="display: inline-block; background-color: #FF6B6B; color: #ffffff; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                Update Payment Method
+                ${t.updatePaymentMethod}
               </a>
             `, "#FF6B6B"),
           }
         }
 
-        case "subscription-canceled":
+        case "subscription-canceled": {
+          const t = m.subscriptionCanceled
           return {
-            subject: "Your Capsule Note subscription has been canceled",
+            subject: t.subject,
             html: wrapEmail(`
               <!-- Icon -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
@@ -215,11 +264,11 @@ export const sendBillingNotification = inngest.createFunction(
               </table>
 
               <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
-                Subscription Canceled
+                ${t.headline}
               </h1>
 
               <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
-                Your Capsule Note Pro subscription has been canceled.
+                ${t.body}
               </p>
 
               <!-- Info Box -->
@@ -227,7 +276,7 @@ export const sendBillingNotification = inngest.createFunction(
                 <tr>
                   <td style="padding: 20px;">
                     <div style="font-size: 14px; color: #383838;">
-                      You will continue to have access to Pro features until the end of your current billing period. Your letters remain safe and encrypted.
+                      ${t.accessNotice}
                     </div>
                   </td>
                 </tr>
@@ -235,19 +284,21 @@ export const sendBillingNotification = inngest.createFunction(
 
               <!-- CTA -->
               <a href="${appUrl}/pricing" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                Reactivate Subscription
+                ${t.reactivate}
               </a>
 
               <p style="font-size: 13px; color: #666666; margin: 24px 0 0 0;">
-                We'd love to have you back anytime.
+                ${t.comeBack}
               </p>
             `, "#383838"),
           }
+        }
 
         case "payment-receipt": {
-          const amount = formatAmount(data.amountPaid as number, data.currency as string)
+          const t = m.paymentReceipt
+          const amount = formatAmount(data.amountPaid as number, data.currency as string, userLocale)
           return {
-            subject: "Receipt for your Capsule Note payment",
+            subject: t.subject,
             html: wrapEmail(`
               <!-- Icon -->
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
@@ -259,11 +310,11 @@ export const sendBillingNotification = inngest.createFunction(
               </table>
 
               <h1 style="font-size: 24px; font-weight: normal; color: #383838; margin: 24px 0 8px 0;">
-                Payment Successful
+                ${t.headline}
               </h1>
 
               <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
-                Thank you for your payment! Here are the details:
+                ${t.body}
               </p>
 
               <!-- Receipt Box -->
@@ -271,7 +322,7 @@ export const sendBillingNotification = inngest.createFunction(
                 <tr>
                   <td style="background-color: #FFDE00; padding: 12px 20px; border-bottom: 2px solid #383838;">
                     <span style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; color: #383838;">
-                      &#128203; Receipt
+                      &#128203; ${t.receiptLabel}
                     </span>
                   </td>
                 </tr>
@@ -280,13 +331,13 @@ export const sendBillingNotification = inngest.createFunction(
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
                         <td style="padding: 8px 0;">
-                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">Amount</div>
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">${t.amountLabel}</div>
                           <div style="font-size: 24px; color: #383838; font-weight: bold; margin-top: 4px;">${amount}</div>
                         </td>
                       </tr>
                       <tr>
                         <td style="padding: 8px 0; border-top: 1px dashed rgba(56,56,56,0.2);">
-                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">Invoice</div>
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">${t.invoiceLabel}</div>
                           <div style="font-size: 14px; color: #383838; margin-top: 4px;">${data.invoiceNumber}</div>
                         </td>
                       </tr>
@@ -300,12 +351,12 @@ export const sendBillingNotification = inngest.createFunction(
                 <tr>
                   <td style="padding-right: 12px;">
                     <a href="${data.invoiceUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                      View Invoice
+                      ${t.viewInvoice}
                     </a>
                   </td>
                   <td>
                     <a href="${data.pdfUrl}" style="display: inline-block; background-color: #ffffff; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                      Download PDF
+                      ${t.downloadPdf}
                     </a>
                   </td>
                 </tr>
@@ -322,12 +373,18 @@ export const sendBillingNotification = inngest.createFunction(
     // Send email via provider
     await step.run("send-email", async () => {
       const provider = await getEmailProvider()
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+      const idempotencyKey = `billing-${template}-${userId}-${event.id}`
 
       const result = await provider.send({
         from: sender.from,
         to: email,
         subject: emailContent.subject,
         html: emailContent.html,
+        headers: {
+          "X-Idempotency-Key": idempotencyKey,
+        },
+        unsubscribeUrl: `${appUrl}/settings/notifications`,
       })
 
       if (!result.success) {
@@ -339,6 +396,7 @@ export const sendBillingNotification = inngest.createFunction(
         userId,
         email,
         messageId: result.id,
+        idempotencyKey,
       })
 
       return result

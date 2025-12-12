@@ -36,6 +36,31 @@
     "subheadNoName": "Mektubun güvenle kaydedildi ve şifrelendi.",
     "letterTitleLabel": "Mektup başlığı",
     "whatsNext": "Sırada ne var?",
+    "greetingWithName": "Hoş geldin, {name}!",
+    "greetingNoName": "Mektup Oluşturuldu!",
+    "tagline": "Gelecekteki Kendine Mektuplar",
+    "savedMessage": "Mektubun kaydedildi ve şifrelendi.",
+    "schedulePrompt": "Gelecekte teslim için planlamaya hazır mısın?",
+    "yourLetter": "MEKTUBUN",
+    "stepsSection": {
+      "review": {
+        "title": "Mektubunu İncele",
+        "description": "Tam istediğin gibi olduğundan emin ol"
+      },
+      "schedule": {
+        "title": "Teslimatı Planla",
+        "description": "Gelecekteki kendinin ne zaman alacağını seç"
+      },
+      "receive": {
+        "title": "Al ve Düşün",
+        "description": "Geçmişteki kendinden bir hediye gelir"
+      }
+    },
+    "nav": {
+      "letters": "Mektuplarım",
+      "journey": "Yolculuk"
+    },
+    "sentWith": "Capsule Note ile gönderildi",
     "steps": [
       "📧 Mükemmel zamanda almak için teslimatı planla",
       "✏️ İlham geldiğinde düzenle veya detay ekle",
@@ -61,13 +86,83 @@
       "dashboard": "Panoya git"
     }
   },
+  "letterDelivery": {
+    "subject": "Mektubun Ulaştı ✉️",
+    "headline": "Mektup Teslim Edildi",
+    "tagline": "Gelecekteki Kendine Mektuplar",
+    "fromPastSelf": "Geçmişteki Kendinden",
+    "writtenOn": "{date} tarihinde yazıldı",
+    "viewFullLetter": "Mektubun Tamamını Gör",
+    "footer": {
+      "reason": "Bu e-postayı Capsule Note'ta kendinize bir mektup planladığınız için alıyorsunuz.",
+      "tagline": "Capsule Note - Gelecekteki kendine mektuplar"
+    },
+    "text": {
+      "headline": "CAPSULE NOTE",
+      "tagline": "Gelecekteki Kendine Mektuplar",
+      "delivered": "Mektup Teslim Edildi",
+      "fromPastSelf": "Geçmişteki Kendinden",
+      "writtenOn": "{date} tarihinde yazıldı",
+      "viewFullLetter": "Mektubun Tamamını Gör"
+    }
+  },
+  "billingNotifications": {
+    "trialEnding": {
+      "subject": "Ücretsiz denemeniz {days} gün içinde sona eriyor",
+      "headline": "Deneme Süreniz Bitiyor",
+      "body": "Capsule Note Pro 14 günlük ücretsiz deneme süreniz {days} gün içinde sona erecek.",
+      "trialEndsLabel": "Deneme Bitiş Tarihi",
+      "afterTrialNotice": "Bu tarihten sonra Pro özelliklerini kullanmaya devam etmek için aylık 9$ ücretlendirileceksiniz.",
+      "manageSubscription": "Aboneliği Yönet",
+      "cancelNotice": "Devam etmek istemiyorsanız, deneme süreniz bitmeden istediğiniz zaman iptal edebilirsiniz."
+    },
+    "paymentFailed": {
+      "subject": "Capsule Note aboneliğiniz için ödeme başarısız oldu",
+      "headline": "Ödeme Başarısız",
+      "body": "{amount} tutarındaki ödemenizi işleyemedik.",
+      "attemptLabel": "Deneme #{count}",
+      "retryNotice": "Ödeme yönteminiz otomatik olarak tekrar denenecek, ancak aboneliğinizin iptal edilmesini önlemek için lütfen güncelleyin.",
+      "updatePaymentMethod": "Ödeme Yöntemini Güncelle"
+    },
+    "subscriptionCanceled": {
+      "subject": "Capsule Note aboneliğiniz iptal edildi",
+      "headline": "Abonelik İptal Edildi",
+      "body": "Capsule Note Pro aboneliğiniz iptal edildi.",
+      "accessNotice": "Mevcut fatura döneminin sonuna kadar Pro özelliklerine erişmeye devam edeceksiniz. Mektuplarınız güvende ve şifreli kalıyor.",
+      "reactivate": "Aboneliği Yeniden Etkinleştir",
+      "comeBack": "Sizi tekrar aramızda görmekten mutluluk duyarız."
+    },
+    "paymentReceipt": {
+      "subject": "Capsule Note ödemeniz için makbuz",
+      "headline": "Ödeme Başarılı",
+      "body": "Ödemeniz için teşekkürler! İşte detaylar:",
+      "receiptLabel": "Makbuz",
+      "amountLabel": "Tutar",
+      "invoiceLabel": "Fatura",
+      "viewInvoice": "Faturayı Görüntüle",
+      "downloadPdf": "PDF İndir"
+    }
+  },
   "deliveryScheduled": {
     "subject": "✓ Teslimat planlandı: \"{title}\"",
     "headline": "✓ Teslimat planlandı",
     "subhead": "Gelecekteki kendine mektubun hazır!",
     "greeting": "Merhaba {name}",
+    "greetingDefault": "Merhaba",
+    "bodySummary": "teslimatını planladık. İşte özet:",
+    "tagline": "Düşünceleriniz İçin Zaman Kapsülü",
     "body": "Harika haber! \"{title}\" adlı mektubun teslimat için planlandı.",
     "detailsLabel": "Teslimat detayları",
+    "timeline": {
+      "now": "Şimdi",
+      "nowDescription": "Mektup şifrelendi ve planlandı",
+      "delivery": "Teslimat"
+    },
+    "labels": {
+      "letter": "Mektup",
+      "deliveryMethod": "Teslimat Yöntemi",
+      "recipient": "Alıcı"
+    },
     "fields": {
       "date": "Teslimat tarihi:",
       "method": "Teslimat yöntemi:",
@@ -76,6 +171,14 @@
     "methods": {
       "email": "E-posta",
       "mail": "Fiziksel posta"
+    },
+    "buttons": {
+      "viewDetails": "Detayları Gör",
+      "editDelivery": "Teslimatı Düzenle"
+    },
+    "nav": {
+      "letters": "Mektuplarım",
+      "journey": "Yolculuk"
     },
     "nextTitle": "Sırada ne olacak?",
     "bullets": [
@@ -88,13 +191,14 @@
     "dashboardCta": "panoya",
     "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için panonu ziyaret et.",
     "footer": {
-      "sentWith": "Capsule Note sevgisiyle gönderildi",
+      "sentWith": "Capsule Note ile gönderildi",
       "tagline": "Gelecekteki kendine mektuplar"
     },
     "text": {
       "headline": "✓ TESLİMAT PLANLANDI",
       "body": "Harika haber! \"{title}\" adlı mektubun teslimat için planlandı.",
       "details": "TESLİMAT DETAYLARI",
+      "deliveryTimeline": "TESLİMAT ZAMAN ÇİZELGESİ",
       "whatNext": "SIRADA NE OLACAK?",
       "bullets": [
         "Mektubun güvenle saklanır ve şifrelenir",
@@ -103,6 +207,8 @@
         "Panondan teslimatı istediğin zaman görebilir veya güncelleyebilirsin"
       ],
       "view": "TESLİMAT DETAYLARINI GÖR",
+      "viewUrl": "Teslimat detaylarını gör",
+      "editUrl": "Teslimatı düzenle",
       "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için panonu ziyaret et:"
     }
   }

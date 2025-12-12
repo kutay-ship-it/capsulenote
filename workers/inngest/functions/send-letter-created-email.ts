@@ -114,6 +114,7 @@ export const sendLetterCreatedEmail = inngest.createFunction(
             profile: {
               select: {
                 displayName: true,
+                locale: true,
               },
             },
           },
@@ -174,6 +175,24 @@ export const sendLetterCreatedEmail = inngest.createFunction(
       return true
     })
 
+    // Check if email is suppressed (bounced/complained)
+    const suppression = await step.run("check-suppression", async () => {
+      const { checkEmailSuppression } = await import(
+        "../../../apps/web/server/lib/email-suppression"
+      )
+      return checkEmailSuppression(user.email!)
+    })
+
+    if (suppression.isSuppressed) {
+      logger.info("Skipping letter-created email - address suppressed", {
+        letterId,
+        userId,
+        email: user.email,
+        reason: suppression.reason,
+      })
+      return { skipped: true, reason: `suppressed:${suppression.reason}` }
+    }
+
     // Generate email URLs
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
     const letterUrl = `${baseUrl}/letters/${letterId}?utm_source=email&utm_medium=notification&utm_campaign=letter_created`
@@ -181,7 +200,7 @@ export const sendLetterCreatedEmail = inngest.createFunction(
 
     // Generate email HTML and text
     const userLocale: Locale =
-      ((user.profile as any)?.preferredLocale as Locale | undefined) || "en"
+      (user.profile?.locale as Locale | undefined) || "en"
 
     const messages = await loadMessages(userLocale)
 

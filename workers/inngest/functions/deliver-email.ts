@@ -2,6 +2,7 @@ import { inngest } from "../client"
 import { prisma } from "@dearme/prisma"
 import { NonRetriableError } from "inngest"
 import { getEmailSender } from "../lib/email-config"
+import { loadMessages, type Locale } from "../lib/i18n/load-messages"
 import {
   WorkerError,
   InvalidDeliveryError,
@@ -530,11 +531,18 @@ export const deliverEmail = inngest.createFunction(
       const unlockUrl = `${process.env.NEXT_PUBLIC_APP_URL}/unlock/${delivery.letter.id}`
       const lettersUrl = `${process.env.NEXT_PUBLIC_APP_URL}/letters`
       const journeyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/journey`
-      const writtenDate = new Date(delivery.letter.createdAt).toLocaleDateString('en-US', {
+
+      // Get user's preferred locale for email content
+      const userLocale: Locale = (delivery.user.profile?.locale as Locale) || "en"
+      const messages = await loadMessages(userLocale)
+      const m = messages.emails.letterDelivery
+
+      // Format date in user's locale
+      const writtenDate = new Intl.DateTimeFormat(userLocale, {
         month: 'long',
         day: 'numeric',
         year: 'numeric'
-      })
+      }).format(new Date(delivery.letter.createdAt))
 
       // Generate plain text version for accessibility and email clients that prefer text
       // Strip HTML tags and convert basic formatting
@@ -559,15 +567,15 @@ export const deliverEmail = inngest.createFunction(
       const bodyText = stripHtml(decryptedContent.bodyHtml)
 
       const emailText = `
-CAPSULE NOTE
-Letters to Your Future Self
+${m.text.headline}
+${m.text.tagline}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✉️ Letter Delivered
+✉️ ${m.text.delivered}
 
-From Your Past Self
-Written on ${writtenDate}
+${m.text.fromPastSelf}
+${m.text.writtenOn.replace("{date}", writtenDate)}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -579,19 +587,18 @@ ${bodyText}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-View Full Letter: ${unlockUrl}
+${m.text.viewFullLetter}: ${unlockUrl}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Capsule Note
-Letters to your future self
+${m.footer.tagline}
 
 My Letters: ${lettersUrl}
 Journey: ${journeyUrl}
       `.trim()
       const emailHtml = `
 <!DOCTYPE html>
-<html>
+<html lang="${userLocale}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -606,7 +613,7 @@ Journey: ${journeyUrl}
           <tr>
             <td style="text-align: center; padding-bottom: 32px;">
               <span style="display: inline-block; background-color: #38C1B0; color: #ffffff; padding: 6px 16px; font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; border: 2px solid #383838; border-radius: 2px;">
-                &#9993; Letter Delivered
+                &#9993; ${m.headline}
               </span>
             </td>
           </tr>
@@ -621,8 +628,8 @@ Journey: ${journeyUrl}
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                       <tr>
                         <td>
-                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">From Your Past Self</div>
-                          <div style="font-size: 11px; color: #383838; margin-top: 4px;">Written on ${writtenDate}</div>
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666;">${m.fromPastSelf}</div>
+                          <div style="font-size: 11px; color: #383838; margin-top: 4px;">${m.writtenOn.replace("{date}", writtenDate)}</div>
                         </td>
                         <td style="text-align: right;">
                           <div style="width: 48px; height: 48px; background-color: #FFDE00; border: 2px solid #383838; border-radius: 2px; text-align: center; line-height: 44px; font-size: 20px; display: inline-block;">&#128140;</div>
@@ -657,7 +664,7 @@ Journey: ${journeyUrl}
                 <tr>
                   <td style="background-color: #F4EFE2; padding: 24px 32px; text-align: center; border-top: 1px solid rgba(56,56,56,0.1);">
                     <a href="${unlockUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 32px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                      View Full Letter &rarr;
+                      ${m.viewFullLetter} &rarr;
                     </a>
                   </td>
                 </tr>
@@ -670,7 +677,7 @@ Journey: ${journeyUrl}
             <td style="padding: 32px 0; text-align: center;">
               <div style="font-size: 18px; color: #383838; margin-bottom: 8px;">Capsule Note</div>
               <div style="font-size: 11px; color: #666666;">
-                Letters to your future self &middot;
+                ${m.tagline} &middot;
                 <a href="${lettersUrl}" style="color: #383838;">My Letters</a> &middot;
                 <a href="${journeyUrl}" style="color: #383838;">Journey</a>
               </div>

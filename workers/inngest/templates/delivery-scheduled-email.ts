@@ -29,7 +29,9 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
   const messages = await loadMessages(locale)
   const m = messages.emails.deliveryScheduled
 
-  const greeting = userFirstName ? `Hi ${escape(userFirstName)}` : "Hello"
+  const greeting = userFirstName
+    ? m.greeting.replace("{name}", escape(userFirstName))
+    : m.greetingDefault
   const methodText = m.methods[deliveryMethod]
 
   // Replace dashboard with letters/journey
@@ -54,7 +56,7 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
           <tr>
             <td style="text-align: center; padding-bottom: 32px;">
               <div style="font-size: 22px; font-weight: normal; color: #383838;">Capsule Note</div>
-              <div style="font-size: 11px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">Time Capsule for Your Thoughts</div>
+              <div style="font-size: 11px; color: #666666; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;">${m.tagline}</div>
             </td>
           </tr>
 
@@ -83,7 +85,7 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
                     </h1>
 
                     <p style="font-size: 15px; color: #666666; margin: 0 0 32px 0; line-height: 1.6;">
-                      ${greeting}, we've locked in your delivery. Here's the summary:
+                      ${greeting}, ${m.bodySummary}
                     </p>
 
                     <!-- Timeline Visual -->
@@ -97,8 +99,8 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
                                 <div style="width: 12px; height: 12px; background-color: #38C1B0; border: 2px solid #383838; border-radius: 50%;"></div>
                               </td>
                               <td style="padding-left: 12px;">
-                                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #38C1B0; font-weight: bold;">Now</div>
-                                <div style="font-size: 14px; color: #383838;">Letter encrypted &amp; scheduled</div>
+                                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #38C1B0; font-weight: bold;">${m.timeline.now}</div>
+                                <div style="font-size: 14px; color: #383838;">${m.timeline.nowDescription}</div>
                               </td>
                             </tr>
                           </table>
@@ -113,7 +115,7 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
                                 <div style="width: 12px; height: 12px; background-color: #6FC2FF; border: 2px solid #383838; border-radius: 50%;"></div>
                               </td>
                               <td style="padding-left: 12px;">
-                                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #6FC2FF; font-weight: bold;">Delivery</div>
+                                <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #6FC2FF; font-weight: bold;">${m.timeline.delivery}</div>
                                 <div style="font-size: 14px; color: #383838; font-weight: bold;">${escape(deliveryDate)}</div>
                               </td>
                             </tr>
@@ -126,19 +128,19 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-bottom: 32px;">
                       <tr>
                         <td style="padding: 12px 0; border-bottom: 1px solid rgba(56,56,56,0.1);">
-                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">Letter</div>
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">${m.labels.letter}</div>
                           <div style="font-size: 14px; color: #383838;">${escape(letterTitle)}</div>
                         </td>
                       </tr>
                       <tr>
                         <td style="padding: 12px 0; border-bottom: 1px solid rgba(56,56,56,0.1);">
-                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">Delivery Method</div>
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">${m.labels.deliveryMethod}</div>
                           <div style="font-size: 14px; color: #383838;">${methodText}</div>
                         </td>
                       </tr>
                       <tr>
                         <td style="padding: 12px 0;">
-                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">Recipient</div>
+                          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #666666; margin-bottom: 4px;">${m.labels.recipient}</div>
                           <div style="font-size: 14px; color: #383838;">${escape(recipientEmail)}</div>
                         </td>
                       </tr>
@@ -149,12 +151,12 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
                       <tr>
                         <td style="padding-right: 12px;">
                           <a href="${deliveryUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                            View Details
+                            ${m.buttons.viewDetails}
                           </a>
                         </td>
                         <td>
                           <a href="${deliveryUrl}/edit" style="display: inline-block; background-color: #ffffff; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                            Edit Delivery
+                            ${m.buttons.editDelivery}
                           </a>
                         </td>
                       </tr>
@@ -169,9 +171,9 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
           <tr>
             <td style="padding: 32px 0; text-align: center;">
               <div style="font-size: 11px; color: #666666;">
-                <a href="${lettersUrl}" style="color: #383838; text-decoration: none;">My Letters</a>
+                <a href="${lettersUrl}" style="color: #383838; text-decoration: none;">${m.nav.letters}</a>
                 <span style="margin: 0 8px; color: #383838;">&#183;</span>
-                <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">Journey</a>
+                <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">${m.nav.journey}</a>
               </div>
             </td>
           </tr>
@@ -199,7 +201,9 @@ export async function generateDeliveryScheduledEmailText(data: DeliveryScheduled
   const messages = await loadMessages(locale)
   const m = messages.emails.deliveryScheduled
 
-  const greeting = userFirstName ? `Hi ${userFirstName}` : "Hello"
+  const greeting = userFirstName
+    ? m.greeting.replace("{name}", userFirstName)
+    : m.greetingDefault
   const methodText = m.methods[deliveryMethod]
 
   // Replace dashboard with letters/journey
@@ -208,35 +212,35 @@ export async function generateDeliveryScheduledEmailText(data: DeliveryScheduled
 
   return `
 CAPSULE NOTE
-Time Capsule for Your Thoughts
+${m.tagline}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ${m.headline}
 
-${greeting}, we've locked in your delivery. Here's the summary:
+${greeting}, ${m.bodySummary}
 
-DELIVERY TIMELINE
+${m.text.deliveryTimeline}
 ─────────────────
-● Now: Letter encrypted & scheduled
+● ${m.timeline.now}: ${m.timeline.nowDescription}
 │
-○ Delivery: ${deliveryDate}
+○ ${m.timeline.delivery}: ${deliveryDate}
 
-DETAILS
+${m.text.details}
 ─────────────────
-Letter: ${letterTitle}
-Method: ${methodText}
-Recipient: ${recipientEmail}
+${m.labels.letter}: ${letterTitle}
+${m.labels.deliveryMethod}: ${methodText}
+${m.labels.recipient}: ${recipientEmail}
 
-View delivery details: ${deliveryUrl}
-Edit delivery: ${deliveryUrl}/edit
+${m.text.viewUrl}: ${deliveryUrl}
+${m.text.editUrl}: ${deliveryUrl}/edit
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-My Letters: ${lettersUrl}
-Journey: ${journeyUrl}
+${m.nav.letters}: ${lettersUrl}
+${m.nav.journey}: ${journeyUrl}
 
-Sent with Capsule Note
-Letters to your future self
+${m.footer.sentWith}
+${m.footer.tagline}
   `.trim()
 }
