@@ -1,6 +1,8 @@
+import type { Metadata } from "next"
 import type { Locale } from "@/i18n/routing"
 import { auth } from "@clerk/nextjs/server"
 import { headers } from "next/headers"
+import { getTranslations } from "next-intl/server"
 
 import { HeroSection } from "./_components/hero-section"
 import { LetterDemo } from "./_components/letter-demo"
@@ -13,10 +15,23 @@ import { NavbarV3 } from "./_components/navbar-v3"
 import { Footer } from "./_components/footer"
 import { LocaleDetector } from "@/components/locale"
 
-export const metadata = {
-  title: "Capsule Note - Send Letters to Your Future Self",
-  description:
-    "Write encrypted letters that arrive when you need them most. Schedule digital or physical mail delivery to your future self.",
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "metadata" })
+
+  return {
+    title: t("title.default"),
+    description: t("description"),
+    openGraph: {
+      title: t("openGraph.title"),
+      description: t("openGraph.description"),
+      type: "website",
+    },
+  }
 }
 
 export default async function MarketingPage({

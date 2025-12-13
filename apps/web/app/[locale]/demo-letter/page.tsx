@@ -1,3 +1,5 @@
+import type { Metadata } from "next"
+
 import {
   Letter,
   LetterHeader,
@@ -6,6 +8,12 @@ import {
   LetterContent,
   LetterFooter
 } from "@/components/ui/letter"
+
+export const metadata: Metadata = {
+  title: "Letter Components Demo",
+  description: "Internal showcase of Capsule Note letter components and variants.",
+  robots: { index: false, follow: false },
+}
 
 export default function DemoLetterPage() {
   return (

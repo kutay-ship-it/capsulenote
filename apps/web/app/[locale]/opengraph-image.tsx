@@ -7,7 +7,31 @@ export const size = {
 
 export const contentType = "image/png"
 
-export default function OgImage() {
+const content = {
+  en: {
+    tagline: "Write to your future self",
+    headline: "Letters that arrive when they matter most.",
+    description:
+      "Encrypt your thoughts, schedule the moment, and let Capsule Note deliver the promise.",
+    features: "Encrypted · Scheduled · Delivered",
+  },
+  tr: {
+    tagline: "Gelecekteki kendine yaz",
+    headline: "En önemli anlarda ulaşan mektuplar.",
+    description:
+      "Düşüncelerini şifrele, anı planla ve Capsule Note'un sözünü tutmasına izin ver.",
+    features: "Şifreli · Planlanmış · Teslim Edildi",
+  },
+}
+
+export default async function OgImage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const t = locale === "tr" ? content.tr : content.en
+
   return new ImageResponse(
     (
       <div
@@ -37,7 +61,7 @@ export default function OgImage() {
           }}
         >
           <span>Capsule Note</span>
-          <span style={{ fontSize: 18 }}>Write to your future self</span>
+          <span style={{ fontSize: 18 }}>{t.tagline}</span>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", marginTop: 32 }}>
@@ -50,7 +74,7 @@ export default function OgImage() {
               maxWidth: 760,
             }}
           >
-            Letters that arrive when they matter most.
+            {t.headline}
           </p>
           <p
             style={{
@@ -61,7 +85,7 @@ export default function OgImage() {
               lineHeight: 1.35,
             }}
           >
-            Encrypt your thoughts, schedule the moment, and let Capsule Note deliver the promise.
+            {t.description}
           </p>
         </div>
 
@@ -75,7 +99,7 @@ export default function OgImage() {
             textTransform: "uppercase",
           }}
         >
-          <span>Encrypted · Scheduled · Delivered</span>
+          <span>{t.features}</span>
           <span style={{ fontWeight: 700 }}>capsulenote.com</span>
         </div>
       </div>

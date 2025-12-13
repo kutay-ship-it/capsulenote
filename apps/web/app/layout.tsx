@@ -6,11 +6,12 @@ import { NextIntlClientProvider } from "next-intl"
 import { getLocale, getMessages, getTranslations } from "next-intl/server"
 
 import { Toaster } from "@/components/ui/sonner"
+import { WebsiteSchema, OrganizationSchema } from "@/components/seo/json-ld"
 import "@/styles/globals.css"
 import type { Locale } from "@/i18n/routing"
 import { routing } from "@/i18n/routing"
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://calsulenote.com"
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
 const defaultKeywords = ["future self", "time capsule", "letters", "journaling", "reflection"]
 
 export async function generateMetadata({
@@ -48,7 +49,7 @@ export async function generateMetadata({
     robots: { index: true, follow: true },
     alternates: { canonical: `/${locale}`, languages },
     icons: { icon: "/icon.png", apple: "/apple-touch-icon.png" },
-    manifest: "/manifest.json",
+    manifest: `/${locale}/manifest.webmanifest`,
     keywords,
   }
 }
@@ -71,6 +72,10 @@ export default async function RootLayout({
   return (
     <ClerkProvider localization={clerkLocalization}>
       <html lang={locale} suppressHydrationWarning>
+        <head>
+          <WebsiteSchema locale={locale} />
+          <OrganizationSchema />
+        </head>
         <body className="font-mono">
           <NextIntlClientProvider locale={locale} messages={messages}>
             {children}

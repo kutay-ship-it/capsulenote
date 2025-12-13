@@ -10,6 +10,7 @@ import { FeatureMatrixV3 } from "./_components/feature-matrix-v3"
 import { PricingFAQV3 } from "./_components/pricing-faq-v3"
 import { PricingCTAV3 } from "./_components/pricing-cta-v3"
 import { TrustSignalsV3 } from "./_components/trust-signals-v3"
+import { FAQSchema } from "@/components/seo/json-ld"
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -72,8 +73,10 @@ export default async function PricingPage({ params }: Props) {
   const ctaBadges = t.raw("cta.badges") as string[]
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream">
-      <NavbarV3 />
+    <>
+      <FAQSchema items={faqItems} />
+      <div className="flex min-h-screen flex-col bg-cream">
+        <NavbarV3 />
 
       <main className="flex-1">
         {/* Hero Section */}
@@ -149,7 +152,8 @@ export default async function PricingPage({ params }: Props) {
         </section>
       </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </>
   )
 }

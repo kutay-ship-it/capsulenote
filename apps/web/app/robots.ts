@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next"
 
-const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://calsulenote.com").replace(/\/$/, "")
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 const disallow = [
   "/api/",
   "/sandbox",
@@ -14,6 +14,7 @@ const disallow = [
   "/global-error",
   "/error",
   "/cron",
+  "/pricing",
 ]
 
 export default function robots(): MetadataRoute.Robots {
