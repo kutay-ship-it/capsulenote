@@ -212,12 +212,29 @@ const config = {
           "0%": { backgroundPosition: "-200% 0" },
           "100%": { backgroundPosition: "200% 0" },
         },
+        // Performance-optimized animations (replacing framer-motion)
+        "scale-x-in": {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
+        },
+        "bounce-slow": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        "scroll-indicator": {
+          "0%, 100%": { transform: "translateY(0)", opacity: "1" },
+          "50%": { transform: "translateY(12px)", opacity: "0.5" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "brutalist-hover": "brutalist-hover 0.12s ease-in-out forwards",
         shimmer: "shimmer 1.5s ease-in-out infinite",
+        // Performance-optimized animations (replacing framer-motion)
+        "scale-x-in": "scale-x-in 0.6s ease-out forwards",
+        "bounce-slow": "bounce-slow 2s ease-in-out infinite",
+        "scroll-indicator": "scroll-indicator 2s ease-in-out infinite",
       },
     },
   },

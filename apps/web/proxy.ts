@@ -20,7 +20,9 @@ const isProtectedRoute = createRouteMatcher([
   "/:locale/sandbox(.*)",
 ])
 
-export default clerkMiddleware(async (auth, req) => {
+// Next.js 16: proxy.ts replaces middleware.ts
+// Runs on Node.js runtime (not Edge)
+export const proxy = clerkMiddleware(async (auth, req) => {
   // Skip i18n for API routes (webhooks, Inngest, etc. don't need localization)
   if (req.nextUrl.pathname.startsWith("/api/")) {
     // Check if route is protected and enforce auth

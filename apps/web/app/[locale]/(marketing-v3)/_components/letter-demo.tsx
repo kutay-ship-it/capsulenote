@@ -17,7 +17,6 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react"
-import { motion, useInView } from "framer-motion"
 import { useTranslations, useLocale } from "next-intl"
 
 import { cn, getUserTimezone } from "@/lib/utils"
@@ -68,7 +67,24 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   const datePresets = t.raw("datePresets") as DatePreset[]
   const router = useRouter()
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const isInView = useInView(containerRef, { once: true, margin: "-100px" })
+  const [isInView, setIsInView] = React.useState(false)
+
+  // Simple IntersectionObserver instead of framer-motion useInView
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "-100px", threshold: 0 }
+    )
+    if (containerRef.current) {
+      observer.observe(containerRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
 
   // Form state - simplified (recipient is always "myself" for demo)
   const [title, setTitle] = React.useState("")
@@ -306,11 +322,13 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
     <section ref={containerRef} id="try-demo" className="bg-off-white py-20 md:py-32">
       <div className="container px-4 sm:px-6">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+        <div
+          className={cn(
+            "text-center mb-12 transition-all duration-500",
+            isInView
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-8"
+          )}
         >
           <span
             className="inline-flex items-center gap-2 border-2 border-charcoal bg-duck-yellow px-3 sm:px-4 py-1.5 sm:py-2 font-mono text-[10px] sm:text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)] mb-4 sm:mb-6"
@@ -325,14 +343,16 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
           <p className="mx-auto mt-3 sm:mt-4 max-w-2xl font-mono text-sm sm:text-base md:text-lg leading-relaxed text-charcoal/70">
             {t("description")}
           </p>
-        </motion.div>
+        </div>
 
         {/* Demo Editor */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mx-auto max-w-5xl"
+        <div
+          className={cn(
+            "mx-auto max-w-5xl transition-all duration-500 delay-200",
+            isInView
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-10"
+          )}
         >
           {/* Grid Layout: Editor Left, Settings Right */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr,340px] gap-6 items-start">
@@ -679,7 +699,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

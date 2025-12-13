@@ -1,9 +1,9 @@
 "use client"
 
-import { motion, useInView, AnimatePresence } from "framer-motion"
 import { Quote, ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { useRef, useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
 
 interface Testimonial {
   quote: string
@@ -17,35 +17,59 @@ export function TestimonialsSection() {
   const testimonials = t.raw("testimonials") as Testimonial[]
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
-  const headerRef = useRef(null)
-  const isHeaderInView = useInView(headerRef, { once: true, margin: "-100px" })
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+  const [isInView, setIsInView] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "-100px", threshold: 0 }
+    )
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
+
+  const changeSlide = (newIndex: number) => {
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setCurrentIndex(newIndex)
+      setIsTransitioning(false)
+    }, 200)
+  }
 
   const next = () => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length)
+    changeSlide((currentIndex + 1) % testimonials.length)
   }
 
   const prev = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+    changeSlide((currentIndex - 1 + testimonials.length) % testimonials.length)
   }
 
   useEffect(() => {
     if (!isAutoPlaying) return
     const interval = setInterval(next, 6000)
     return () => clearInterval(interval)
-  }, [isAutoPlaying])
+  }, [isAutoPlaying, currentIndex])
 
   const current = testimonials[currentIndex]!
 
   return (
-    <section className="bg-charcoal py-20 md:py-32 overflow-hidden">
+    <section ref={sectionRef} className="bg-charcoal py-20 md:py-32 overflow-hidden">
       <div className="container px-4 sm:px-6">
         {/* Section Header */}
-        <motion.div
-          ref={headerRef}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isHeaderInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto mb-12 max-w-3xl text-center md:mb-16"
+        <div
+          className={cn(
+            "mx-auto mb-12 max-w-3xl text-center md:mb-16 transition-all duration-500",
+            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          )}
         >
           <span
             className="mb-6 inline-flex items-center gap-2 border-2 border-white bg-white px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-charcoal"
@@ -65,7 +89,7 @@ export function TestimonialsSection() {
               />
             </span>
           </h2>
-        </motion.div>
+        </div>
 
         {/* Testimonial Carousel */}
         <div
@@ -86,54 +110,50 @@ export function TestimonialsSection() {
             className="relative border-2 border-white bg-white p-8 shadow-[8px_8px_0_theme(colors.duck-yellow)] sm:p-12"
             style={{ borderRadius: "2px" }}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4 }}
-                className="min-h-[200px] flex flex-col justify-center"
-              >
-                {/* Quote Text */}
-                <p className="mb-8 font-mono text-lg leading-relaxed text-charcoal sm:text-xl md:text-2xl">
-                  "{current.quote.split(current.highlight).map((part, i, arr) =>
-                    i === arr.length - 1 ? (
-                      part
-                    ) : (
-                      <span key={i}>
-                        {part}
-                        <span className="relative inline-block">
-                          <span className="relative z-10 font-bold">{current.highlight}</span>
-                          <span
-                            className="absolute bottom-0 left-0 right-0 h-2 bg-duck-yellow -z-0"
-                            style={{ borderRadius: "2px" }}
-                          />
-                        </span>
+            <div
+              className={cn(
+                "min-h-[200px] flex flex-col justify-center transition-all duration-300",
+                isTransitioning ? "opacity-0 translate-x-4" : "opacity-100 translate-x-0"
+              )}
+            >
+              {/* Quote Text */}
+              <p className="mb-8 font-mono text-lg leading-relaxed text-charcoal sm:text-xl md:text-2xl">
+                "{current.quote.split(current.highlight).map((part, i, arr) =>
+                  i === arr.length - 1 ? (
+                    part
+                  ) : (
+                    <span key={i}>
+                      {part}
+                      <span className="relative inline-block">
+                        <span className="relative z-10 font-bold">{current.highlight}</span>
+                        <span
+                          className="absolute bottom-0 left-0 right-0 h-2 bg-duck-yellow -z-0"
+                          style={{ borderRadius: "2px" }}
+                        />
                       </span>
-                    )
-                  )}"
-                </p>
+                    </span>
+                  )
+                )}"
+              </p>
 
-                {/* Attribution */}
-                <div className="flex items-center gap-4">
-                  <div
-                    className="flex h-12 w-12 items-center justify-center border-2 border-charcoal bg-teal-primary font-mono text-lg font-bold text-white"
-                    style={{ borderRadius: "2px" }}
-                  >
-                    {current.author.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-mono text-base font-bold text-charcoal">
-                      {current.author}
-                    </p>
-                    <p className="font-mono text-sm text-charcoal/60">
-                      {current.role}
-                    </p>
-                  </div>
+              {/* Attribution */}
+              <div className="flex items-center gap-4">
+                <div
+                  className="flex h-12 w-12 items-center justify-center border-2 border-charcoal bg-teal-primary font-mono text-lg font-bold text-white"
+                  style={{ borderRadius: "2px" }}
+                >
+                  {current.author.charAt(0)}
                 </div>
-              </motion.div>
-            </AnimatePresence>
+                <div>
+                  <p className="font-mono text-base font-bold text-charcoal">
+                    {current.author}
+                  </p>
+                  <p className="font-mono text-sm text-charcoal/60">
+                    {current.role}
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Navigation */}
             <div className="absolute bottom-8 right-8 flex items-center gap-2 sm:bottom-12 sm:right-12">
@@ -161,7 +181,7 @@ export function TestimonialsSection() {
             {testimonials.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setCurrentIndex(i)}
+                onClick={() => changeSlide(i)}
                 className={`h-2 transition-all duration-200 ${
                   i === currentIndex
                     ? "w-8 bg-duck-yellow"

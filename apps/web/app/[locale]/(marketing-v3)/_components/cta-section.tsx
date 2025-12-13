@@ -1,12 +1,12 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
 import { ArrowRight, Heart } from "lucide-react"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
+import { cn } from "@/lib/utils"
 
 interface CTASectionProps {
   isSignedIn: boolean
@@ -15,17 +15,33 @@ interface CTASectionProps {
 export function CTASection({ isSignedIn }: CTASectionProps) {
   const t = useTranslations("marketing.ctaSection")
   const stats = t.raw("stats") as Array<{ value: string; label: string }>
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const sectionRef = useRef<HTMLElement>(null)
+  const [isInView, setIsInView] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "-100px", threshold: 0 }
+    )
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <section ref={ref} className="bg-cream py-20 md:py-32">
+    <section ref={sectionRef} className="bg-cream py-20 md:py-32">
       <div className="container px-4 sm:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-          transition={{ duration: 0.6 }}
-          className="relative mx-auto max-w-4xl overflow-hidden"
+        <div
+          className={cn(
+            "relative mx-auto max-w-4xl overflow-hidden transition-all duration-500",
+            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}
         >
           {/* Decorative Background Shapes - Reduced offset on mobile */}
           <div
@@ -98,7 +114,7 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

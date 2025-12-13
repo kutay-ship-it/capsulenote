@@ -1,9 +1,9 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
 import { PenSquare, CalendarDays, Lock, Mail, ArrowRight, type LucideIcon } from "lucide-react"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
 
 const STEP_ICONS: LucideIcon[] = [PenSquare, CalendarDays, Lock, Mail]
 
@@ -20,24 +20,23 @@ interface StepCardProps {
   Icon: LucideIcon
   index: number
   isLast: boolean
+  isInView: boolean
 }
 
-function StepCard({ step, style, Icon, index, isLast }: StepCardProps) {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-50px" })
-
+function StepCard({ step, style, Icon, index, isLast, isInView }: StepCardProps) {
   return (
-    <div ref={ref} className="relative flex flex-col items-center">
+    <div className="relative flex flex-col items-center">
       {/* Connection Line (not for last item) */}
       {!isLast && (
         <div className="absolute left-1/2 top-24 hidden h-full w-0.5 -translate-x-1/2 bg-charcoal/10 lg:block" />
       )}
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
-        transition={{ duration: 0.5, delay: index * 0.15 }}
-        className="relative z-10 flex flex-col items-center text-center"
+      <div
+        className={cn(
+          "relative z-10 flex flex-col items-center text-center transition-all duration-500",
+          isInView ? "opacity-100 scale-100" : "opacity-0 scale-90"
+        )}
+        style={{ transitionDelay: `${index * 150}ms` }}
       >
         {/* Step Number */}
         <div
@@ -70,7 +69,7 @@ function StepCard({ step, style, Icon, index, isLast }: StepCardProps) {
             <ArrowRight className="h-6 w-6 text-charcoal/30" strokeWidth={2} />
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }
@@ -78,19 +77,34 @@ function StepCard({ step, style, Icon, index, isLast }: StepCardProps) {
 export function HowItWorksSection() {
   const t = useTranslations("marketing.howItWorksSteps")
   const steps = t.raw("steps") as Array<{ number: string; title: string; description: string }>
-  const headerRef = useRef(null)
-  const isHeaderInView = useInView(headerRef, { once: true, margin: "-100px" })
+  const sectionRef = useRef<HTMLElement>(null)
+  const [isInView, setIsInView] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "-100px", threshold: 0 }
+    )
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <section id="how-it-works" className="bg-off-white py-20 md:py-32">
+    <section ref={sectionRef} id="how-it-works" className="bg-off-white py-20 md:py-32">
       <div className="container px-4 sm:px-6">
         {/* Section Header */}
-        <motion.div
-          ref={headerRef}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isHeaderInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto mb-16 max-w-3xl text-center md:mb-20"
+        <div
+          className={cn(
+            "mx-auto mb-16 max-w-3xl text-center md:mb-20 transition-all duration-500",
+            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          )}
         >
           <span
             className="mb-6 inline-flex items-center gap-2 border-2 border-charcoal bg-duck-yellow px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
@@ -106,7 +120,7 @@ export function HowItWorksSection() {
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
             {t("description")}
           </p>
-        </motion.div>
+        </div>
 
         {/* Steps - Horizontal on Desktop, Vertical on Mobile */}
         <div className="grid gap-12 sm:gap-16 lg:grid-cols-4 lg:gap-8">
@@ -118,6 +132,7 @@ export function HowItWorksSection() {
               Icon={STEP_ICONS[index]!}
               index={index}
               isLast={index === steps.length - 1}
+              isInView={isInView}
             />
           ))}
         </div>

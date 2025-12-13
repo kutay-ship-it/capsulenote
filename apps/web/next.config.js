@@ -2,6 +2,10 @@ const path = require("path")
 const createNextIntlPlugin = require("next-intl/plugin")
 const { withSentryConfig } = require("@sentry/nextjs")
 
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+})
+
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts")
 
 /** @type {import('next').NextConfig} */
@@ -9,21 +13,32 @@ const nextConfig = {
   reactStrictMode: true,
   // Set workspace root to monorepo root to avoid lockfile detection issues
   outputFileTracingRoot: path.join(__dirname, "../../"),
-  eslint: {
-    // Disable ESLint during build (can be enabled later with proper config)
-    ignoreDuringBuilds: true,
-  },
+  // Next.js 16: eslint config removed (use eslint.config.js directly)
   typescript: {
     // Disable type checking during build (can be enabled later with proper fixes)
     ignoreBuildErrors: true,
   },
   // Mark packages as external that need special handling on serverless
   serverExternalPackages: [],
+  // Next.js 16: React Compiler for auto-memoization (major TBT reduction)
+  reactCompiler: true,
   experimental: {
-    ppr: false, // Partial Prerendering (requires Next.js canary)
+    // Next.js 16: ppr replaced by cacheComponents (not enabling yet)
     serverActions: {
       bodySizeLimit: "2mb",
     },
+  },
+  // Exclude sandbox/legacy/v2 directories from serverless function bundles
+  outputFileTracingExcludes: {
+    "*": [
+      "./app/**/sandbox/**",
+      "./app/**/credits-sandbox/**",
+      "./app/**/redesign/**",
+      "./app/**/landing-v2/**",
+      "./app/**/letter-v2/**",
+      "./app/**/(app-v2)/**",
+      "./app/**/(legacy)/**",
+    ],
   },
   // Security headers for all routes
   async headers() {
@@ -35,11 +50,11 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.clerk.com https://challenges.cloudflare.com https://js.stripe.com https://*.clerk.accounts.dev https://clerk.capsulenote.com https://*.posthog.com https://*.i.posthog.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.clerk.com https://challenges.cloudflare.com https://js.stripe.com https://*.clerk.accounts.dev https://clerk.capsulenote.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.clerk.com https://api.stripe.com https://api.resend.com https://*.upstash.io wss://*.clerk.com https://*.clerk.accounts.dev https://clerk.capsulenote.com https://*.posthog.com https://*.i.posthog.com",
+              "connect-src 'self' https://api.clerk.com https://api.stripe.com https://api.resend.com https://*.upstash.io wss://*.clerk.com https://*.clerk.accounts.dev https://clerk.capsulenote.com",
               "frame-src https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev https://clerk.capsulenote.com",
               "frame-ancestors 'none'",
               "worker-src 'self' blob:",
@@ -129,5 +144,8 @@ const sentryWebpackPluginOptions = {
   automaticVercelMonitors: true,
 }
 
-// Wrap with next-intl first, then with Sentry
-module.exports = withSentryConfig(withNextIntl(nextConfig), sentryWebpackPluginOptions)
+// Wrap with next-intl first, then bundle analyzer, then Sentry
+module.exports = withSentryConfig(
+  withBundleAnalyzer(withNextIntl(nextConfig)),
+  sentryWebpackPluginOptions
+)

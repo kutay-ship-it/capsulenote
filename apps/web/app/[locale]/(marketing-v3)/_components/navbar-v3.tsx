@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect, useRef } from "react"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 
@@ -18,6 +17,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
   const t = useTranslations("marketing.nav")
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
   // Avoid locale-insensitive uppercase transformations for Turkish text
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
@@ -27,12 +27,21 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
     { label: t("howItWorks"), href: "#how-it-works" },
   ]
 
+  // Use IntersectionObserver instead of scroll event listener for better performance
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When sentinel is not visible (scrolled past), navbar is "scrolled"
+        setIsScrolled(!entry?.isIntersecting)
+      },
+      { threshold: 0 }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
   }, [])
 
   // Scroll lock when mobile menu is open
@@ -49,6 +58,9 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
 
   return (
     <>
+      {/* Invisible sentinel element at top of page for scroll detection */}
+      <div ref={sentinelRef} className="absolute top-0 left-0 h-5 w-full pointer-events-none" aria-hidden="true" />
+
       <header
         className={cn(
           "fixed left-0 right-0 top-0 z-50 transition-all duration-200",
@@ -125,75 +137,80 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
         </nav>
       </header>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-cream pt-20 md:hidden overflow-y-auto"
-            style={{
-              paddingBottom: "env(safe-area-inset-bottom, 0px)",
-            }}
-          >
-            <div className="container px-4 pb-6">
-              <div className="flex flex-col gap-2 py-6">
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.label}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                  >
-                    <Link
-                      href={link.href as any}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={cn(
-                        "block border-b-2 border-charcoal/10 py-4 font-mono text-lg tracking-wide text-charcoal",
-                        uppercaseClass
-                      )}
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                ))}
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="flex flex-col gap-3 pt-4"
-              >
-                {isSignedIn ? (
-                  <Link href="/letters" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button className="w-full gap-2">
-                      {t("letters")}
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link href={"/#try-demo" as "/"} onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button className="w-full gap-2">
-                        {t("getStarted")}
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                    <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full">
-                        {t("signIn")}
-                      </Button>
-                    </Link>
-                  </>
-                )}
-              </motion.div>
-            </div>
-          </motion.div>
+      {/* Mobile Menu - CSS transitions instead of framer-motion */}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-cream pt-20 md:hidden overflow-y-auto transition-all duration-200",
+          isMobileMenuOpen
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-4 pointer-events-none"
         )}
-      </AnimatePresence>
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        }}
+        aria-hidden={!isMobileMenuOpen}
+      >
+        <div className="container px-4 pb-6">
+          <div className="flex flex-col gap-2 py-6">
+            {navLinks.map((link, i) => (
+              <div
+                key={link.label}
+                className={cn(
+                  "transition-all duration-200",
+                  isMobileMenuOpen
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 -translate-x-4"
+                )}
+                style={{ transitionDelay: isMobileMenuOpen ? `${i * 50}ms` : "0ms" }}
+              >
+                <Link
+                  href={link.href as any}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={cn(
+                    "block border-b-2 border-charcoal/10 py-4 font-mono text-lg tracking-wide text-charcoal",
+                    uppercaseClass
+                  )}
+                >
+                  {link.label}
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className={cn(
+              "flex flex-col gap-3 pt-4 transition-all duration-200",
+              isMobileMenuOpen
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
+            )}
+            style={{ transitionDelay: isMobileMenuOpen ? "150ms" : "0ms" }}
+          >
+            {isSignedIn ? (
+              <Link href="/letters" onClick={() => setIsMobileMenuOpen(false)}>
+                <Button className="w-full gap-2">
+                  {t("letters")}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href={"/#try-demo" as "/"} onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button className="w-full gap-2">
+                    {t("getStarted")}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    {t("signIn")}
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
     </>
   )
 }

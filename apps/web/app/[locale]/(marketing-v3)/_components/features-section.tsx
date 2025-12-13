@@ -1,19 +1,18 @@
 "use client"
 
-import { motion, useInView } from "framer-motion"
 import {
   PenSquare,
   Clock,
   ShieldCheck,
   Mail,
-  CalendarDays,
-  Sparkles,
   Lock,
+  Sparkles,
   Send,
   type LucideIcon,
 } from "lucide-react"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
+import { cn } from "@/lib/utils"
 
 const FEATURE_ICONS: LucideIcon[] = [PenSquare, Clock, ShieldCheck, Mail, Lock, Sparkles]
 
@@ -32,20 +31,17 @@ interface FeatureCardProps {
   Icon: LucideIcon
   index: number
   featureBadge: string
+  isInView: boolean
 }
 
-function FeatureCard({ feature, style, Icon, index, featureBadge }: FeatureCardProps) {
-  const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
-
+function FeatureCard({ feature, style, Icon, index, featureBadge, isInView }: FeatureCardProps) {
   return (
-    <motion.article
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`relative border-2 ${style.borderColor} ${style.bg} p-6 shadow-[2px_2px_0_theme(colors.charcoal)] transition-all duration-150 hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]`}
-      style={{ borderRadius: "2px" }}
+    <article
+      className={cn(
+        `relative border-2 ${style.borderColor} ${style.bg} p-6 shadow-[2px_2px_0_theme(colors.charcoal)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]`,
+        isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+      )}
+      style={{ borderRadius: "2px", transitionDelay: `${index * 100}ms` }}
     >
       {/* Floating Badge */}
       <div
@@ -73,26 +69,41 @@ function FeatureCard({ feature, style, Icon, index, featureBadge }: FeatureCardP
           {feature.description}
         </p>
       </div>
-    </motion.article>
+    </article>
   )
 }
 
 export function FeaturesSection() {
   const t = useTranslations("marketing.featuresSection")
   const features = t.raw("features") as Array<{ title: string; description: string }>
-  const headerRef = useRef(null)
-  const isHeaderInView = useInView(headerRef, { once: true, margin: "-100px" })
+  const sectionRef = useRef<HTMLElement>(null)
+  const [isInView, setIsInView] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "-100px", threshold: 0 }
+    )
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
 
   return (
-    <section id="features" className="bg-cream py-20 md:py-32">
+    <section ref={sectionRef} id="features" className="bg-cream py-20 md:py-32">
       <div className="container px-4 sm:px-6">
         {/* Section Header */}
-        <motion.div
-          ref={headerRef}
-          initial={{ opacity: 0, y: 30 }}
-          animate={isHeaderInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto mb-16 max-w-3xl text-center"
+        <div
+          className={cn(
+            "mx-auto mb-16 max-w-3xl text-center transition-all duration-500",
+            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          )}
         >
           <span
             className="mb-6 inline-flex items-center gap-2 border-2 border-charcoal bg-white px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-charcoal shadow-[2px_2px_0_theme(colors.charcoal)]"
@@ -117,7 +128,7 @@ export function FeaturesSection() {
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
             {t("description")}
           </p>
-        </motion.div>
+        </div>
 
         {/* Features Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -129,6 +140,7 @@ export function FeaturesSection() {
               Icon={FEATURE_ICONS[index]!}
               index={index}
               featureBadge={t("featureBadge")}
+              isInView={isInView}
             />
           ))}
         </div>

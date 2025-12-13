@@ -1,34 +1,8 @@
 // This file configures client-side instrumentation for analytics and error tracking.
 // The config you add here will be used whenever a user loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
-// https://posthog.com/docs/libraries/next-js
 
 import * as Sentry from "@sentry/nextjs"
-import posthog from "posthog-js"
-
-// Initialize PostHog for analytics
-if (
-  typeof window !== "undefined" &&
-  process.env.NEXT_PUBLIC_POSTHOG_KEY &&
-  process.env.NEXT_PUBLIC_POSTHOG_HOST
-) {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    // Use the 2025-05-24 defaults for best practices
-    defaults: "2025-05-24",
-    // Capture pageviews automatically
-    capture_pageview: true,
-    // Capture pageleave events for session recording
-    capture_pageleave: true,
-    // Disable in development unless explicitly enabled
-    loaded: (posthog) => {
-      if (process.env.NODE_ENV === "development") {
-        // Optionally disable in development
-        // posthog.opt_out_capturing()
-      }
-    },
-  })
-}
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
