@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "pnpm validate:seo && next build",
+    "build:skip-seo": "next build",
+    "validate:seo": "tsx scripts/validate-seo-quality.ts",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",
@@ -76,6 +78,7 @@
     "next-intl": "^4.5.5",
     "next-themes": "^0.2.1",
     "postcode-validator": "^3.10.5",
+    "posthog-js": "^1.306.1",
     "react": "^19.2.3",
     "react-day-picker": "^9.11.1",
     "react-dom": "^19.2.3",

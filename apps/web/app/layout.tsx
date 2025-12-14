@@ -7,6 +7,7 @@ import { getLocale, getMessages, getTranslations } from "next-intl/server"
 
 import { Toaster } from "@/components/ui/sonner"
 import { WebsiteSchema, OrganizationSchema } from "@/components/seo/json-ld"
+import { GoogleAnalytics, PostHogProvider } from "@/components/analytics"
 import "@/styles/globals.css"
 import type { Locale } from "@/i18n/routing"
 
@@ -47,7 +48,7 @@ export async function generateMetadata({
     // Note: canonical and hreflang MUST be set per-page, not globally
     // Each page should define its own alternates.canonical and alternates.languages
     // to avoid all pages canonicalizing to /{locale}
-    icons: { icon: "/icon.png", apple: "/apple-touch-icon.png" },
+    // Icons are auto-generated from app/icon.svg and app/apple-icon.svg
     manifest: `/${locale}/manifest.webmanifest`,
     keywords,
   }
@@ -74,11 +75,14 @@ export default async function RootLayout({
         <head>
           <WebsiteSchema locale={locale} />
           <OrganizationSchema />
+          <GoogleAnalytics />
         </head>
         <body className="font-mono">
           <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
-            <Toaster />
+            <PostHogProvider>
+              {children}
+              <Toaster />
+            </PostHogProvider>
           </NextIntlClientProvider>
         </body>
       </html>

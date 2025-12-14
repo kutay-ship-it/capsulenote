@@ -95,6 +95,10 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: z.string().default("/dashboard"),
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().optional(),
     NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+    // Analytics
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(), // Google Analytics 4 (G-XXXXXXXXXX)
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(), // PostHog project API key
+    NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(), // PostHog instance URL
   },
 
   /**
@@ -153,6 +157,9 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: process.env.NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL,
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
 
   /**

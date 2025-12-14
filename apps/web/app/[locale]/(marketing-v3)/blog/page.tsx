@@ -7,111 +7,25 @@ import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../_components/legal-page-layout"
 import { LegalHero } from "../_components/legal-hero"
 import { ItemListSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
+import { getAllBlogPosts, getFeaturedBlogPosts } from "@/lib/seo/blog-content"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
-// Blog posts (would come from CMS in production)
-const blogPosts = [
-  {
-    slug: "why-write-to-future-self",
-    category: "inspiration",
-    date: "2024-12-10",
-    readTime: 5,
-    featured: true,
-  },
-  {
-    slug: "new-year-letter-ideas",
-    category: "ideas",
-    date: "2024-12-05",
-    readTime: 7,
-    featured: true,
-  },
-  {
-    slug: "graduation-letters-guide",
-    category: "guides",
-    date: "2024-11-20",
-    readTime: 6,
-    featured: false,
-  },
-  {
-    slug: "physical-mail-vs-email",
-    category: "features",
-    date: "2024-11-15",
-    readTime: 4,
-    featured: false,
-  },
-  {
-    slug: "letter-writing-tips",
-    category: "tips",
-    date: "2024-11-01",
-    readTime: 8,
-    featured: false,
-  },
-]
-
-// Blog post metadata
-const postData: Record<string, {
-  en: { title: string; excerpt: string }
-  tr: { title: string; excerpt: string }
-}> = {
-  "why-write-to-future-self": {
-    en: {
-      title: "Why Write to Your Future Self? The Power of Time-Traveling Messages",
-      excerpt: "Discover the psychological benefits and transformative power of writing letters to your future self.",
-    },
-    tr: {
-      title: "Neden Gelecekteki Kendine Yazmalısın? Zaman Yolculuğu Mesajlarının Gücü",
-      excerpt: "Gelecekteki kendinize mektup yazmanın psikolojik faydalarını ve dönüştürücü gücünü keşfedin.",
-    },
-  },
-  "new-year-letter-ideas": {
-    en: {
-      title: "25 New Year's Letter Ideas for 2025",
-      excerpt: "Creative prompts and ideas to write a meaningful New Year's letter to your future self.",
-    },
-    tr: {
-      title: "2025 için 25 Yeni Yıl Mektubu Fikri",
-      excerpt: "Gelecekteki kendinize anlamlı bir Yeni Yıl mektubu yazmak için yaratıcı fikirler ve ipuçları.",
-    },
-  },
-  "graduation-letters-guide": {
-    en: {
-      title: "Graduation Letters: A Complete Guide",
-      excerpt: "How to write a powerful graduation letter that captures this milestone moment.",
-    },
-    tr: {
-      title: "Mezuniyet Mektupları: Kapsamlı Rehber",
-      excerpt: "Bu dönüm noktası anını yakalayan güçlü bir mezuniyet mektubu nasıl yazılır.",
-    },
-  },
-  "physical-mail-vs-email": {
-    en: {
-      title: "Physical Mail vs Email: Which is Better for Future Letters?",
-      excerpt: "Compare the experience of receiving a physical letter versus an email from your past self.",
-    },
-    tr: {
-      title: "Fiziksel Posta vs E-posta: Gelecek Mektupları için Hangisi Daha İyi?",
-      excerpt: "Geçmişteki benliğinizden fiziksel bir mektup almakla e-posta almayı karşılaştırın.",
-    },
-  },
-  "letter-writing-tips": {
-    en: {
-      title: "10 Tips for Writing Letters Your Future Self Will Love",
-      excerpt: "Expert tips to make your letters more meaningful, personal, and impactful.",
-    },
-    tr: {
-      title: "Gelecekteki Benliğinizin Seveceği Mektuplar için 10 İpucu",
-      excerpt: "Mektuplarınızı daha anlamlı, kişisel ve etkili hale getirmek için uzman ipuçları.",
-    },
-  },
-}
-
+// Category to color mapping
 const categoryColors: Record<string, string> = {
+  // Original categories
   inspiration: "bg-duck-yellow/20 text-charcoal",
   ideas: "bg-teal-primary/20 text-charcoal",
   guides: "bg-duck-blue/20 text-charcoal",
   features: "bg-purple-100 text-charcoal",
   tips: "bg-pink-100 text-charcoal",
+  // New cluster-based categories
+  "future-self": "bg-duck-yellow/20 text-charcoal",
+  psychology: "bg-teal-primary/20 text-charcoal",
+  "letter-craft": "bg-duck-blue/20 text-charcoal",
+  "life-events": "bg-purple-100 text-charcoal",
+  privacy: "bg-pink-100 text-charcoal",
+  "use-cases": "bg-orange-100 text-charcoal",
 }
 
 export async function generateMetadata({
@@ -171,13 +85,15 @@ export default async function BlogHubPage({
     minRead: isEnglish ? "min read" : "dk okuma",
   }
 
-  const featuredPosts = blogPosts.filter((p) => p.featured)
-  const recentPosts = blogPosts.filter((p) => !p.featured)
+  // Get posts from centralized content registry
+  const allPosts = getAllBlogPosts()
+  const featuredPosts = getFeaturedBlogPosts()
+  const recentPosts = allPosts.filter(({ data }) => !data.featured).slice(0, 10) // Show up to 10 recent posts
 
   // Schema.org data
-  const schemaItems = blogPosts.map((post, index) => ({
-    name: postData[post.slug]?.[locale === "tr" ? "tr" : "en"]?.title || post.slug,
-    url: `${appUrl}${locale === "en" ? "" : "/" + locale}/blog/${post.slug}`,
+  const schemaItems = allPosts.map(({ slug, data }, index) => ({
+    name: data[locale === "tr" ? "tr" : "en"]?.title || slug,
+    url: `${appUrl}${locale === "en" ? "" : "/" + locale}/blog/${slug}`,
     position: index + 1,
   }))
 
@@ -212,15 +128,13 @@ export default async function BlogHubPage({
           {t.featured}
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
-          {featuredPosts.map((post) => {
-            const postInfo = postData[post.slug]
-            if (!postInfo) return null
-            const data = postInfo[locale === "tr" ? "tr" : "en"]
+          {featuredPosts.map(({ slug, data: postData }) => {
+            const localizedData = postData[locale === "tr" ? "tr" : "en"]
 
             return (
               <Link
-                key={post.slug}
-                href={`/blog/${post.slug}` as any}
+                key={slug}
+                href={`/blog/${slug}` as any}
                 className={cn(
                   "group p-6 border-2 border-charcoal bg-white",
                   "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
@@ -228,27 +142,27 @@ export default async function BlogHubPage({
                 style={{ borderRadius: "2px" }}
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <span className={cn("px-2 py-1 font-mono text-xs", categoryColors[post.category])}>
-                    {post.category}
+                  <span className={cn("px-2 py-1 font-mono text-xs", categoryColors[postData.category] || "bg-gray-100 text-charcoal")}>
+                    {postData.category}
                   </span>
                   <span className="font-mono text-xs text-charcoal/50 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {new Date(post.date).toLocaleDateString(locale)}
+                    {new Date(postData.datePublished).toLocaleDateString(locale)}
                   </span>
                 </div>
 
                 <h3 className={cn("font-mono text-xl font-bold text-charcoal mb-3", uppercaseClass)}>
-                  {data.title}
+                  {localizedData.title}
                 </h3>
 
                 <p className="font-mono text-sm text-charcoal/70 leading-relaxed mb-4">
-                  {data.excerpt}
+                  {localizedData.description}
                 </p>
 
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs text-charcoal/50 flex items-center gap-1">
                     <Clock className="h-3 w-3" />
-                    {post.readTime} {t.minRead}
+                    {postData.readTime} {t.minRead}
                   </span>
                   <span className="flex items-center gap-2 text-charcoal font-mono text-sm group-hover:gap-3 transition-all">
                     {t.readMore}
@@ -267,15 +181,13 @@ export default async function BlogHubPage({
           {isEnglish ? "Recent Posts" : "Son Yazılar"}
         </h2>
         <div className="space-y-4">
-          {recentPosts.map((post) => {
-            const postInfo = postData[post.slug]
-            if (!postInfo) return null
-            const data = postInfo[locale === "tr" ? "tr" : "en"]
+          {recentPosts.map(({ slug, data: postData }) => {
+            const localizedData = postData[locale === "tr" ? "tr" : "en"]
 
             return (
               <Link
-                key={post.slug}
-                href={`/blog/${post.slug}` as any}
+                key={slug}
+                href={`/blog/${slug}` as any}
                 className={cn(
                   "group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border-2 border-charcoal bg-white",
                   "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
@@ -284,15 +196,15 @@ export default async function BlogHubPage({
               >
                 <div className="flex-grow">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className={cn("px-2 py-0.5 font-mono text-xs", categoryColors[post.category])}>
-                      {post.category}
+                    <span className={cn("px-2 py-0.5 font-mono text-xs", categoryColors[postData.category] || "bg-gray-100 text-charcoal")}>
+                      {postData.category}
                     </span>
                     <span className="font-mono text-xs text-charcoal/50">
-                      {new Date(post.date).toLocaleDateString(locale)}
+                      {new Date(postData.datePublished).toLocaleDateString(locale)}
                     </span>
                   </div>
                   <h3 className="font-mono text-base font-bold text-charcoal">
-                    {data.title}
+                    {localizedData.title}
                   </h3>
                 </div>
                 <ArrowRight className="h-5 w-5 text-charcoal/40 group-hover:text-charcoal group-hover:translate-x-1 transition-all flex-shrink-0" />
