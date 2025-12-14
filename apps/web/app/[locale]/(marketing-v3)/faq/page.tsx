@@ -8,12 +8,12 @@
 import * as React from "react"
 import type { Metadata } from "next"
 import { getLocale } from "next-intl/server"
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 
 import { FAQSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { LegalPageLayout } from "../_components/legal-page-layout"
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 // FAQ data with bilingual content
 const faqData = {

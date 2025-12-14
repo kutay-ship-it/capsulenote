@@ -1,5 +1,14 @@
 import type { MetadataRoute } from "next"
 
+import {
+  blogSlugs,
+  guideSlugs,
+  templateCategories,
+  templateDetailSlugs,
+  promptThemes,
+  type TemplateCategory,
+} from "@/lib/seo/content-registry"
+
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 const locales = ["en", "tr"] as const
@@ -31,61 +40,6 @@ const staticRoutes: Array<{
   // Legal pages
   { path: "/terms", priority: 0.4, changeFrequency: "monthly" },
   { path: "/privacy", priority: 0.4, changeFrequency: "monthly" },
-]
-
-// Template categories for programmatic SEO
-const templateCategories = [
-  "self-reflection",
-  "goals",
-  "gratitude",
-  "relationships",
-  "career",
-  "life-transitions",
-  "milestones",
-  "legacy",
-]
-
-// Template detail slugs by category (18 total templates)
-const templateDetailSlugs: Record<string, string[]> = {
-  "self-reflection": ["annual-self-check", "mindfulness-moment", "values-reflection"],
-  "goals": ["new-years-resolution", "five-year-vision", "monthly-goals"],
-  "gratitude": ["daily-gratitude", "people-im-thankful-for"],
-  "relationships": ["love-letter", "friendship-appreciation"],
-  "career": ["first-day-new-job", "career-milestone"],
-  "life-transitions": ["moving-to-new-city", "starting-fresh"],
-  "milestones": ["birthday-letter", "anniversary"],
-  "legacy": ["letter-to-future-child", "ethical-will"],
-}
-
-// Prompt themes for programmatic SEO
-const promptThemes = [
-  "self-esteem",
-  "grief",
-  "graduation",
-  "sobriety",
-  "new-year",
-  "birthday",
-  "career",
-  "relationships",
-]
-
-// Guide slugs for programmatic SEO
-const guideSlugs = [
-  "how-to-write-letter-to-future-self",
-  "science-of-future-self",
-  "time-capsule-vs-future-letter",
-  "privacy-security-best-practices",
-  "letters-for-mental-health",
-  "legacy-letters-guide",
-]
-
-// Blog post slugs for programmatic SEO
-const blogSlugs = [
-  "why-write-to-future-self",
-  "new-year-letter-ideas",
-  "graduation-letters-guide",
-  "physical-mail-vs-email",
-  "letter-writing-tips",
 ]
 
 // Build-time timestamp to avoid constantly changing lastModified dates
@@ -135,7 +89,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add template detail pages (programmatic SEO)
   for (const category of templateCategories) {
-    const slugs = templateDetailSlugs[category] || []
+    const slugs = templateDetailSlugs[category as TemplateCategory] || []
     for (const slug of slugs) {
       addLocalizedEntry(`/templates/${category}/${slug}`, 0.7, "monthly")
     }

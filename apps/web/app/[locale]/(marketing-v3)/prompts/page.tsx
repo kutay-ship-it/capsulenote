@@ -8,7 +8,7 @@ import { LegalPageLayout } from "../_components/legal-page-layout"
 import { LegalHero } from "../_components/legal-hero"
 import { ItemListSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 // Prompt themes with SEO-optimized metadata
 const promptThemes = [

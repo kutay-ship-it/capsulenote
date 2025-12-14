@@ -3,13 +3,13 @@ import { setRequestLocale } from "next-intl/server"
 import { ArrowLeft, ArrowRight, Clock, Calendar, Tag } from "lucide-react"
 import { notFound } from "next/navigation"
 
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../_components/legal-page-layout"
 import { ArticleSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { RelatedContent } from "@/components/seo/related-content"
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 // Valid blog post slugs
 const validSlugs = [

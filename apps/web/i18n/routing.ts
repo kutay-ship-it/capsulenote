@@ -80,6 +80,17 @@ export const routing = defineRouting({
     "/privacy": "/privacy",
     "/terms": "/terms",
     "/security": "/security",
+    "/faq": "/faq",
+    // SEO Content Hubs
+    "/blog": "/blog",
+    "/blog/[slug]": "/blog/[slug]",
+    "/guides": "/guides",
+    "/guides/[slug]": "/guides/[slug]",
+    "/templates": "/templates",
+    "/templates/[category]": "/templates/[category]",
+    "/templates/[category]/[slug]": "/templates/[category]/[slug]",
+    "/prompts": "/prompts",
+    "/prompts/[theme]": "/prompts/[theme]",
   },
 })
 

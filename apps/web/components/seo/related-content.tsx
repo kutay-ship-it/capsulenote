@@ -1,7 +1,7 @@
 "use client"
 
 import { ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
 interface RelatedItem {
@@ -47,7 +47,7 @@ export function RelatedContent({
           {items.slice(0, 5).map((item) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={item.href as "/"}
               className={cn(
                 "group flex items-center justify-between p-4 border-2 border-charcoal/20 bg-white",
                 "transition-all hover:border-charcoal hover:-translate-y-0.5 hover:shadow-[3px_3px_0_theme(colors.charcoal/20)]"
@@ -73,7 +73,7 @@ export function RelatedContent({
           {items.slice(0, 6).map((item) => (
             <Link
               key={item.href}
-              href={item.href}
+              href={item.href as "/"}
               className={cn(
                 "group p-5 border-2 border-charcoal/20 bg-white",
                 "transition-all hover:border-charcoal hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal/20)]"

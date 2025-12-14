@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 /**
  * SEO Metadata Utility
@@ -38,8 +38,8 @@ export function generateSeoMetadata({
   const url = `${appUrl}/${locale === "en" ? "" : locale + "/"}${path}`.replace(/\/$/, "")
   const canonicalUrl = `${appUrl}/${locale === "en" ? "" : locale + "/"}${path}`.replace(/\/$/, "")
 
-  // Default OG image
-  const ogImage = image || `${appUrl}/og-image.png`
+  // Default OG image - use the Next.js generated opengraph-image route
+  const ogImage = image || `${appUrl}/opengraph-image`
 
   const metadata: Metadata = {
     title,
@@ -224,7 +224,7 @@ export const defaultMetadata: Metadata = {
     description: "Write heartfelt letters to your future self and schedule delivery via email or physical mail.",
     images: [
       {
-        url: `${appUrl}/og-image.png`,
+        url: `${appUrl}/opengraph-image`,
         width: 1200,
         height: 630,
         alt: "Capsule Note - Letters to Your Future Self",
@@ -236,7 +236,7 @@ export const defaultMetadata: Metadata = {
     title: "Capsule Note | Letters to Your Future Self",
     description: "Write heartfelt letters to your future self and schedule delivery via email or physical mail.",
     creator: "@capsulenote",
-    images: [`${appUrl}/og-image.png`],
+    images: [`${appUrl}/opengraph-image`],
   },
   alternates: {
     canonical: appUrl,

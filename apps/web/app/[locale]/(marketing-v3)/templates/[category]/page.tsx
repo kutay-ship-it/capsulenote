@@ -3,12 +3,12 @@ import { setRequestLocale } from "next-intl/server"
 import { ArrowRight, ArrowLeft, FileText } from "lucide-react"
 import { notFound } from "next/navigation"
 
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../_components/legal-page-layout"
 import { HowToSchema, BreadcrumbSchema, ItemListSchema } from "@/components/seo/json-ld"
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 // Valid categories for static generation
 const validCategories = [
@@ -298,7 +298,7 @@ export default async function TemplateCategoryPage({
         {templates.map((template) => (
           <Link
             key={template.slug}
-            href={`/templates/${category}/${template.slug}`}
+            href={{ pathname: "/templates/[category]/[slug]", params: { category, slug: template.slug } }}
             className={cn(
               "group flex items-center justify-between p-5 border-2 border-charcoal bg-white",
               "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"

@@ -16,17 +16,32 @@ const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").re
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }): Promise<Metadata> {
   const { locale } = await params
+  const resolvedSearchParams = await searchParams
   const t = await getTranslations({ locale, namespace: "forms.writeLetter" })
 
+  // Check if there are tracking/template/prompt params that would cause index bloat
+  const hasIndexableParams = !!(
+    resolvedSearchParams.prompt ||
+    resolvedSearchParams.template ||
+    resolvedSearchParams.utm_source ||
+    resolvedSearchParams.utm_medium ||
+    resolvedSearchParams.utm_campaign
+  )
+
+  // Always canonical to the clean base URL (no query params) to prevent index bloat
   const canonicalPath = locale === "en" ? "/write-letter" : `/${locale}/write-letter`
 
   return {
     title: t("meta.title"),
     description: t("meta.description"),
+    // noindex parameterized variants to prevent duplicate content
+    ...(hasIndexableParams && { robots: "noindex, follow" }),
     openGraph: {
       title: t("meta.title"),
       description: t("meta.description"),

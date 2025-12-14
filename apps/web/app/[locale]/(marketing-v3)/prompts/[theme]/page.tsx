@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../_components/legal-page-layout"
 import { BreadcrumbSchema } from "@/components/seo/json-ld"
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 // Valid themes for static generation
 const validThemes = [
@@ -397,7 +397,7 @@ export default async function PromptThemePage({
         {data.prompts.map((prompt, index) => (
           <Link
             key={index}
-            href={`/write-letter?prompt=${encodeURIComponent(prompt)}` as any}
+            href={`/write-letter?prompt=${encodeURIComponent(prompt)}` as "/write-letter"}
             className={cn(
               "group flex items-start gap-4 p-5 border-2 border-charcoal bg-white",
               "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"

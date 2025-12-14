@@ -1,4 +1,4 @@
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 /**
  * Helper to render JSON-LD script tag
@@ -36,7 +36,7 @@ export function SoftwareApplicationSchema({ locale = "en" }: { locale?: string }
       ? "Gelecekteki kendine mektuplar yaz ve e-posta veya fiziksel posta ile gönder."
       : "Write letters to your future self and deliver via email or physical mail.",
     url: appUrl,
-    screenshot: `${appUrl}/og-image.png`,
+    screenshot: `${appUrl}/opengraph-image`,
     featureList: locale === "tr"
       ? ["Zamanlanmış e-posta teslimatı", "Fiziksel mektup gönderimi", "Uçtan uca şifreleme", "Çoklu dil desteği"]
       : ["Scheduled email delivery", "Physical letter delivery", "End-to-end encryption", "Multi-language support"],
@@ -207,11 +207,11 @@ export function ItemListSchema({
 }
 
 /**
- * WebSite schema for sitelinks search box and site info
+ * WebSite schema for site info
+ * NOTE: SearchAction removed - only add when /search route is implemented
+ * to avoid advertising non-functional sitelinks search box
  */
 export function WebsiteSchema({ locale = "en" }: { locale?: string }) {
-  const baseUrl = locale === "en" ? appUrl : `${appUrl}/${locale}`
-
   const data = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -226,16 +226,15 @@ export function WebsiteSchema({ locale = "en" }: { locale?: string }) {
       locale === "tr"
         ? "Gelecekteki kendine içten mektuplar yaz ve bunları e-posta ya da fiziksel posta ile planla."
         : "Write heartfelt letters to your future self and schedule delivery via email or physical mail.",
-    // SearchAction for Google Sitelinks Search Box
-    // Note: Requires site search functionality to be implemented
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${baseUrl}/search?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
+    // TODO: Add SearchAction when /search route is implemented
+    // potentialAction: {
+    //   "@type": "SearchAction",
+    //   target: {
+    //     "@type": "EntryPoint",
+    //     urlTemplate: `${appUrl}/search?q={search_term_string}`,
+    //   },
+    //   "query-input": "required name=search_term_string",
+    // },
   }
 
   return <JsonLd data={data} />
