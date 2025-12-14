@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server"
 import { getTranslations, setRequestLocale } from "next-intl/server"
 
 import { NavbarV3 } from "../_components/navbar-v3"
+
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 import { Footer } from "../_components/footer"
 import { PricingHeroV3 } from "./_components/pricing-hero-v3"
 import { PricingTiersV3 } from "./_components/pricing-tiers-v3"
@@ -20,6 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "pricing" })
 
+  // Canonical: default locale (en) has no prefix, others have locale prefix
+  const canonicalPath = locale === "en" ? "/pricing" : `/${locale}/pricing`
+
   return {
     title: t("metadata.title"),
     description: t("metadata.description"),
@@ -27,6 +32,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: t("metadata.title"),
       description: t("metadata.description"),
       type: "website",
+      url: `${appUrl}${canonicalPath}`,
+    },
+    alternates: {
+      canonical: `${appUrl}${canonicalPath}`,
+      languages: {
+        en: `${appUrl}/pricing`,
+        tr: `${appUrl}/tr/pricing`,
+        "x-default": `${appUrl}/pricing`,
+      },
     },
   }
 }

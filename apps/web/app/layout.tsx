@@ -9,7 +9,6 @@ import { Toaster } from "@/components/ui/sonner"
 import { WebsiteSchema, OrganizationSchema } from "@/components/seo/json-ld"
 import "@/styles/globals.css"
 import type { Locale } from "@/i18n/routing"
-import { routing } from "@/i18n/routing"
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
 const defaultKeywords = ["future self", "time capsule", "letters", "journaling", "reflection"]
@@ -22,8 +21,6 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "metadata" })
   const keywords = (t.raw?.("keywords") as string[]) || defaultKeywords
-
-  const languages = Object.fromEntries(routing.locales.map((loc) => [loc, `/${loc}`]))
 
   return {
     metadataBase: new URL(appUrl),
@@ -47,7 +44,9 @@ export async function generateMetadata({
       images: ["/opengraph-image"],
     },
     robots: { index: true, follow: true },
-    alternates: { canonical: `/${locale}`, languages },
+    // Note: canonical and hreflang MUST be set per-page, not globally
+    // Each page should define its own alternates.canonical and alternates.languages
+    // to avoid all pages canonicalizing to /{locale}
     icons: { icon: "/icon.png", apple: "/apple-touch-icon.png" },
     manifest: `/${locale}/manifest.webmanifest`,
     keywords,

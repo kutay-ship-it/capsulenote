@@ -27,7 +27,7 @@ export default async function manifest({
     name: t.name,
     short_name: t.short_name,
     description: t.description,
-    start_url: `/${locale}`,
+    start_url: locale === "en" ? "/" : `/${locale}`,
     scope: "/",
     display: "standalone",
     background_color: "#faf8f5",

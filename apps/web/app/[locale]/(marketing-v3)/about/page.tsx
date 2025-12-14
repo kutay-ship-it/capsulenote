@@ -8,6 +8,8 @@ import { LegalPageLayout } from "../_components/legal-page-layout"
 import { LegalHero } from "../_components/legal-hero"
 import { LegalSection, LegalParagraph, LegalHighlight } from "../_components/legal-section"
 
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
+
 export async function generateMetadata({
   params,
 }: {
@@ -16,6 +18,8 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "legal.about" })
 
+  const canonicalPath = locale === "en" ? "/about" : `/${locale}/about`
+
   return {
     title: t("meta.title"),
     description: t("meta.description"),
@@ -23,6 +27,15 @@ export async function generateMetadata({
       title: t("meta.title"),
       description: t("meta.description"),
       type: "website",
+      url: `${appUrl}${canonicalPath}`,
+    },
+    alternates: {
+      canonical: `${appUrl}${canonicalPath}`,
+      languages: {
+        en: `${appUrl}/about`,
+        tr: `${appUrl}/tr/about`,
+        "x-default": `${appUrl}/about`,
+      },
     },
   }
 }

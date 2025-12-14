@@ -1,7 +1,16 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import { getTranslations } from "next-intl/server"
 import { CustomSignInForm } from "@/components/auth/custom-sign-in"
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 interface PageProps {
   searchParams: Promise<{

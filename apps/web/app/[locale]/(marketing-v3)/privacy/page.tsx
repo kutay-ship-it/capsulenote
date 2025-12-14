@@ -14,6 +14,8 @@ import {
 } from "../_components/legal-section"
 import { LegalToc, LegalTocMobile } from "../_components/legal-toc"
 
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
+
 export async function generateMetadata({
   params,
 }: {
@@ -22,6 +24,8 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "legal.privacy" })
 
+  const canonicalPath = locale === "en" ? "/privacy" : `/${locale}/privacy`
+
   return {
     title: t("meta.title"),
     description: t("meta.description"),
@@ -29,6 +33,15 @@ export async function generateMetadata({
       title: t("meta.title"),
       description: t("meta.description"),
       type: "website",
+      url: `${appUrl}${canonicalPath}`,
+    },
+    alternates: {
+      canonical: `${appUrl}${canonicalPath}`,
+      languages: {
+        en: `${appUrl}/privacy`,
+        tr: `${appUrl}/tr/privacy`,
+        "x-default": `${appUrl}/privacy`,
+      },
     },
   }
 }

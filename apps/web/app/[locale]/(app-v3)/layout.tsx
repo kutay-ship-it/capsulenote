@@ -1,9 +1,18 @@
 import type { ReactNode } from "react"
+import type { Metadata } from "next"
 import { Mail } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 
 // Force dynamic rendering - this layout uses getCurrentUser() which requires headers()
 export const dynamic = "force-dynamic"
+
+// Prevent indexing of authenticated app pages
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 import { EmailLockGuard } from "@/components/auth/email-lock-guard"
 import { SettingsDropdown } from "@/components/v3/settings-dropdown"

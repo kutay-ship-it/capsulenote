@@ -1,6 +1,6 @@
 "use client"
 
-import { Mail, Github, Twitter } from "lucide-react"
+import { Mail } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
@@ -15,12 +15,18 @@ export function Footer() {
 
   const links = {
     product: [
+      { label: t("links.pricing"), href: "/pricing" },
+      { label: t("links.writeLetter"), href: "/write-letter" },
       { label: t("links.features"), href: "#features" },
-      { label: t("links.howItWorks"), href: "#how-it-works" },
+    ],
+    learn: [
+      { label: t("links.templates"), href: "/templates" },
+      { label: t("links.guides"), href: "/guides" },
+      { label: t("links.prompts"), href: "/prompts" },
+      { label: t("links.blog"), href: "/blog" },
     ],
     company: [
       { label: t("links.about"), href: "/about" },
-      { label: t("links.blog"), href: "#" },
       { label: t("links.contact"), href: "/contact" },
     ],
     legal: [
@@ -32,6 +38,7 @@ export function Footer() {
 
   const categoryLabels: Record<string, string> = {
     product: t("product"),
+    learn: t("learn"),
     company: t("company"),
     legal: t("legal"),
   }
@@ -40,7 +47,7 @@ export function Footer() {
     <footer className="border-t-2 border-charcoal bg-cream">
       {/* Main Footer */}
       <div className="container px-4 py-12 sm:px-6 sm:py-16">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand Column */}
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="mb-4">
@@ -52,21 +59,14 @@ export function Footer() {
               {t("tagline")}
             </p>
             <div className="flex gap-3">
-              {[
-                { icon: Mail, label: "Email", href: "mailto:hello@capsulenote.com" },
-                { icon: Twitter, label: "Twitter", href: "#" },
-                { icon: Github, label: "GitHub", href: "#" },
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white transition-all duration-fast hover:bg-charcoal hover:text-white"
-                  style={{ borderRadius: "2px" }}
-                  aria-label={social.label}
-                >
-                  <social.icon className="h-4 w-4" strokeWidth={2} />
-                </a>
-              ))}
+              <a
+                href="mailto:hello@capsulenote.com"
+                className="flex h-10 w-10 items-center justify-center border-2 border-charcoal bg-white transition-all duration-fast hover:bg-charcoal hover:text-white"
+                style={{ borderRadius: "2px" }}
+                aria-label="Email"
+              >
+                <Mail className="h-4 w-4" strokeWidth={2} />
+              </a>
             </div>
           </div>
 

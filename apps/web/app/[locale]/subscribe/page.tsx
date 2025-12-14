@@ -32,6 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: {
       canonical: "/subscribe",
     },
+    robots: {
+      index: false,
+      follow: false,
+    },
   }
 }
 

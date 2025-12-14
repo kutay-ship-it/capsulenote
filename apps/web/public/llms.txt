@@ -1,0 +1,98 @@
+# Capsule Note - Letters to Your Future Self
+
+> A privacy-first platform for writing heartfelt letters to your future self, delivered via email or physical mail.
+
+## About Capsule Note
+
+Capsule Note helps people write meaningful letters to their future selves. Whether it's a New Year's resolution, a graduation message, a letter of encouragement during tough times, or a legacy letter for loved ones - we deliver your words when they matter most.
+
+## Key Features
+
+- **Scheduled Email Delivery**: Write today, receive when you choose - 1 month, 1 year, 5 years, or any date
+- **Physical Mail Delivery**: Premium option to receive your letter as a beautiful printed keepsake
+- **End-to-End Encryption**: Your letters are encrypted so only you can read them
+- **Multi-language Support**: Available in English and Turkish
+
+## Use Cases
+
+### Personal Growth
+- New Year's reflections and goal-setting
+- Birthday letters to your future self
+- Graduation messages
+- Career milestone celebrations
+
+### Mental Health Support
+- Gratitude journaling
+- Self-compassion letters
+- Sobriety milestone celebrations
+- Grief processing
+
+### Legacy & Family
+- Letters to future children
+- Ethical will / legacy letters
+- Anniversary time capsules
+- Family milestone documentation
+
+## Content Sections
+
+### /templates
+Letter templates and frameworks for common occasions:
+- Self-reflection templates
+- Goal-setting frameworks
+- Gratitude letter templates
+- Relationship letters
+- Career milestone templates
+- Life transition letters
+- Legacy letter templates
+
+### /guides
+Educational content about future-self connection:
+- How to write a letter to your future self
+- The science of temporal self-continuity
+- Tips for meaningful reflection
+- Privacy and security best practices
+
+### /prompts
+Writing prompts organized by theme:
+- Self-esteem and confidence
+- Grief and loss processing
+- Graduation and transitions
+- Sobriety and recovery support
+- New Year's intentions
+- Birthday reflections
+- Career development
+- Relationship milestones
+
+### /blog
+Latest articles, research, and stories:
+- User success stories (with permission)
+- Psychology of future-self connection
+- Writing tips and inspiration
+- Product updates and features
+
+## Privacy & Security
+
+We take privacy seriously:
+- AES-256-GCM encryption for all letter content
+- We cannot read your letters - only you can
+- No selling of personal data
+- GDPR compliant with data export and deletion
+
+## Technical Information
+
+- Platform: Web application (responsive design)
+- Stack: Next.js, React, TypeScript
+- Hosting: Vercel (US/EU)
+- Database: PostgreSQL with encryption at rest
+- Email: Resend (transactional email)
+- Physical Mail: Lob (US postal service integration)
+
+## Contact
+
+- Website: https://capsulenote.com
+- Email: support@capsulenote.com
+- Twitter: @capsulenote
+
+## Sitemap
+
+For a complete list of pages, see: https://capsulenote.com/sitemap.xml

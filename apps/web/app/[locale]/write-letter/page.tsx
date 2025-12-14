@@ -8,10 +8,48 @@
  * - Expected conversion: 3% → 21% (7x improvement)
  */
 
+import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { AnonymousLetterTryout } from "@/components/anonymous-letter-tryout"
 
-export default async function WriteLetterPage() {
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "forms.writeLetter" })
+
+  const canonicalPath = locale === "en" ? "/write-letter" : `/${locale}/write-letter`
+
+  return {
+    title: t("meta.title"),
+    description: t("meta.description"),
+    openGraph: {
+      title: t("meta.title"),
+      description: t("meta.description"),
+      type: "website",
+      url: `${appUrl}${canonicalPath}`,
+    },
+    alternates: {
+      canonical: `${appUrl}${canonicalPath}`,
+      languages: {
+        en: `${appUrl}/write-letter`,
+        tr: `${appUrl}/tr/write-letter`,
+        "x-default": `${appUrl}/write-letter`,
+      },
+    },
+  }
+}
+
+export default async function WriteLetterPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
   const t = await getTranslations("forms.writeLetter")
 
   return (

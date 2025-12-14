@@ -15,6 +15,8 @@ import { NavbarV3 } from "./_components/navbar-v3"
 import { Footer } from "./_components/footer"
 import { LocaleDetector } from "@/components/locale"
 
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
+
 export async function generateMetadata({
   params,
 }: {
@@ -23,6 +25,9 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "metadata" })
 
+  // Canonical: default locale (en) has no prefix, others have locale prefix
+  const canonicalPath = locale === "en" ? "" : `/${locale}`
+
   return {
     title: t("title.default"),
     description: t("description"),
@@ -30,6 +35,15 @@ export async function generateMetadata({
       title: t("openGraph.title"),
       description: t("openGraph.description"),
       type: "website",
+      url: `${appUrl}${canonicalPath}`,
+    },
+    alternates: {
+      canonical: `${appUrl}${canonicalPath}`,
+      languages: {
+        en: appUrl,
+        tr: `${appUrl}/tr`,
+        "x-default": appUrl,
+      },
     },
   }
 }
