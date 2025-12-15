@@ -17,9 +17,10 @@ const defaultKeywords = ["future self", "time capsule", "letters", "journaling",
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: Locale }>
+  params: Promise<{ locale?: Locale }>
 }): Promise<Metadata> {
-  const { locale } = await params
+  const { locale: paramLocale } = await params
+  const locale = paramLocale || "en"
   const t = await getTranslations({ locale, namespace: "metadata" })
   const keywords = (t.raw?.("keywords") as string[]) || defaultKeywords
 
@@ -33,16 +34,16 @@ export async function generateMetadata({
     openGraph: {
       title: t("openGraph.title"),
       description: t("openGraph.description"),
-      url: `/${locale}`,
+      url: locale === "en" ? "/" : `/${locale}`,
       siteName: t("openGraph.siteName"),
       type: "website",
-      images: ["/opengraph-image"],
+      images: [`/${locale}/opengraph-image`],
     },
     twitter: {
       card: "summary_large_image",
       title: t("twitter.title"),
       description: t("twitter.description"),
-      images: ["/opengraph-image"],
+      images: [`/${locale}/opengraph-image`],
     },
     robots: { index: true, follow: true },
     // Note: canonical and hreflang MUST be set per-page, not globally
@@ -65,7 +66,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: ReactNode
 }>) {
-  const locale = await getLocale() as Locale
+  const locale = (await getLocale() || "en") as Locale
   const messages = await getMessages()
   const clerkLocalization = locale === "tr" ? trTR : enUS
 

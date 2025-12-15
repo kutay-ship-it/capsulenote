@@ -81,17 +81,17 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
             {/* Desktop Navigation */}
             <div className="hidden items-center gap-6 md:flex">
               {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href as any}
-              className={cn(
-                "font-mono text-sm tracking-wide text-charcoal transition-opacity hover:opacity-70",
-                uppercaseClass
-              )}
-            >
-              {link.label}
-            </Link>
-              ))}
+              <a
+                key={link.label}
+                href={link.href}
+                className={cn(
+                  "font-mono text-sm tracking-wide text-charcoal transition-opacity hover:opacity-70",
+                  uppercaseClass
+                )}
+              >
+                {link.label}
+              </a>
+            ))}
             </div>
 
             {/* Desktop CTA */}
@@ -110,12 +110,12 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                       {t("signIn")}
                     </Button>
                   </Link>
-                  <Link href={"/#try-demo" as "/"}>
+                  <a href="#try-demo">
                     <Button size="sm" className="gap-2">
                       {t("getStarted")}
                       <ArrowRight className="h-4 w-4" />
                     </Button>
-                  </Link>
+                  </a>
                 </>
               )}
             </div>
@@ -163,8 +163,8 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                 )}
                 style={{ transitionDelay: isMobileMenuOpen ? `${i * 50}ms` : "0ms" }}
               >
-                <Link
-                  href={link.href as any}
+                <a
+                  href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     "block border-b-2 border-charcoal/10 py-4 font-mono text-lg tracking-wide text-charcoal",
@@ -172,7 +172,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
                   )}
                 >
                   {link.label}
-                </Link>
+                </a>
               </div>
             ))}
           </div>
@@ -195,12 +195,12 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
               </Link>
             ) : (
               <>
-                <Link href={"/#try-demo" as "/"} onClick={() => setIsMobileMenuOpen(false)}>
+                <a href="#try-demo" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button className="w-full gap-2">
                     {t("getStarted")}
                     <ArrowRight className="h-4 w-4" />
                   </Button>
-                </Link>
+                </a>
                 <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
                     {t("signIn")}

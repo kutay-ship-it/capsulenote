@@ -58,7 +58,7 @@ export function PricingPreview() {
           </h2>
 
           <p className="mt-6 font-mono text-base leading-relaxed text-charcoal/70 sm:text-lg">
-            {t("subtitle")}
+            {t("description")}
           </p>
         </motion.div>
 

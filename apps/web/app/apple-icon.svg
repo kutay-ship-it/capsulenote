@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <!-- Background square with white fill and charcoal border -->
+  <rect x="4" y="4" width="172" height="172" rx="8" ry="8" fill="#FFFFFF" stroke="#383838" stroke-width="8"/>
+  <!-- C letter in monospace style -->
+  <text x="90" y="128" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="120" font-weight="700" text-anchor="middle" fill="#383838">C</text>
+</svg>

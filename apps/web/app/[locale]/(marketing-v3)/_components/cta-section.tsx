@@ -101,7 +101,7 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
 
               {/* CTA Button */}
               <div className="flex justify-center">
-                <Link href={"/#try-demo" as "/"}>
+                <a href="#try-demo">
                   <Button
                     variant="secondary"
                     size="lg"
@@ -110,7 +110,7 @@ export function CTASection({ isSignedIn }: CTASectionProps) {
                     {t("cta")}
                     <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
           </div>

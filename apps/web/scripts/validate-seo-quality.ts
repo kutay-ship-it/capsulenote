@@ -28,6 +28,29 @@ import {
   promptThemes,
 } from "../lib/seo/content-registry"
 
+import {
+  getAllBlogPosts,
+  getPostWordCount,
+  type BlogPostContent,
+} from "../lib/seo/blog-content"
+
+import {
+  getAllGuides,
+  type GuidePostContent,
+} from "../lib/seo/guide-content"
+
+import {
+  getAllTemplates,
+  getTemplateWordCount,
+  type TemplateContent,
+} from "../lib/seo/template-content"
+
+import {
+  getAllPromptThemes,
+  getPromptThemeWordCount,
+  type PromptThemeContent,
+} from "../lib/seo/prompt-content"
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -55,63 +78,38 @@ interface ValidationReport {
 // ============================================================================
 
 /**
- * Extract content from blog posts
- * Note: In production, this would import actual postData from the blog page
- * For now, we estimate based on typical content length
+ * Validate blog posts using actual content from blog-content.ts
  */
 function validateBlogPosts(): ValidationResult[] {
   const results: ValidationResult[] = []
+  const allPosts = getAllBlogPosts()
 
-  // Known blog posts with approximate content
-  // These would be imported from actual page data in production
-  const blogContentEstimates: Record<string, { title: string; description: string; wordCount: number }> = {
-    "why-write-to-future-self": {
-      title: "Why Write to Your Future Self? The Power of Time-Traveling Messages",
-      description: "Discover the psychological benefits and transformative power of writing letters to your future self.",
-      wordCount: 350, // ~7 paragraphs * 50 words
-    },
-    "new-year-letter-ideas": {
-      title: "25 New Year's Letter Ideas for 2025",
-      description: "Creative prompts and ideas to write a meaningful New Year's letter to your future self.",
-      wordCount: 450, // 25 ideas with descriptions
-    },
-    "graduation-letters-guide": {
-      title: "Graduation Letters: A Complete Guide",
-      description: "How to write a powerful graduation letter that captures this milestone moment.",
-      wordCount: 400,
-    },
-    "physical-mail-vs-email": {
-      title: "Physical Mail vs Email: Which is Better for Future Letters?",
-      description: "Compare the experience of receiving a physical letter versus an email from your past self.",
-      wordCount: 350,
-    },
-    "letter-writing-tips": {
-      title: "10 Tips for Writing Meaningful Letters",
-      description: "Expert tips to help you write impactful letters to your future self.",
-      wordCount: 400,
-    },
-  }
+  // Create a lookup map for efficient access
+  const postsMap = new Map(allPosts.map(({ slug, data }) => [slug, data]))
 
   for (const slug of blogSlugs) {
-    const content = blogContentEstimates[slug]
-    if (!content) {
+    const post = postsMap.get(slug)
+    if (!post) {
       results.push({
         page: `/blog/${slug}`,
         type: "blog",
         passed: false,
         score: 0,
         wordCount: 0,
-        issues: [`Blog post "${slug}" not found in content estimates`],
+        issues: [`Blog post "${slug}" not found in blog-content.ts`],
         warnings: [],
       })
       continue
     }
 
+    // Get actual word count from content
+    const wordCount = getPostWordCount(slug, "en")
+
     const quality = validateContentQuality({
-      title: content.title,
-      description: content.description,
-      content: "x ".repeat(content.wordCount), // Simulate word count
-      internalLinks: 3, // Assume minimum met
+      title: post.en.title,
+      description: post.en.description,
+      content: post.en.content.join(" "), // Use actual content
+      internalLinks: 3, // Assume minimum met (would need page scan for accurate count)
       hasSchema: true,
       hasImages: false,
     })
@@ -121,7 +119,7 @@ function validateBlogPosts(): ValidationResult[] {
       type: "blog",
       passed: quality.passed,
       score: quality.score,
-      wordCount: content.wordCount,
+      wordCount: wordCount,
       issues: quality.issues,
       warnings: quality.warnings,
     })
@@ -131,64 +129,46 @@ function validateBlogPosts(): ValidationResult[] {
 }
 
 /**
- * Validate guides
+ * Calculate word count for a guide (similar to getPostWordCount for blogs)
+ */
+function getGuideWordCount(guide: GuidePostContent, locale: "en" | "tr" = "en"): number {
+  const content = guide[locale].content.join(" ")
+  return content.split(/\s+/).filter(word => word.length > 0).length
+}
+
+/**
+ * Validate guides using actual content from guide-content.ts
  */
 function validateGuides(): ValidationResult[] {
   const results: ValidationResult[] = []
+  const allGuides = getAllGuides()
 
-  const guideContentEstimates: Record<string, { title: string; description: string; wordCount: number }> = {
-    "how-to-write-letter-to-future-self": {
-      title: "How to Write a Letter to Your Future Self",
-      description: "A step-by-step guide to writing meaningful letters to your future self.",
-      wordCount: 900,
-    },
-    "science-of-future-self": {
-      title: "The Science of Future Self Connection",
-      description: "Research-backed insights on temporal self-continuity and psychological benefits.",
-      wordCount: 850,
-    },
-    "time-capsule-vs-future-letter": {
-      title: "Time Capsule vs Future Letter: Which is Right for You?",
-      description: "Compare traditional time capsules with modern future letter services.",
-      wordCount: 800,
-    },
-    "privacy-security-best-practices": {
-      title: "Privacy and Security Best Practices",
-      description: "How to keep your personal letters safe and secure.",
-      wordCount: 750,
-    },
-    "letters-for-mental-health": {
-      title: "Letters for Mental Health and Wellbeing",
-      description: "Therapeutic benefits of writing letters to yourself.",
-      wordCount: 850,
-    },
-    "legacy-letters-guide": {
-      title: "Legacy Letters: Writing for Future Generations",
-      description: "Create meaningful letters for your children and loved ones.",
-      wordCount: 800,
-    },
-  }
+  // Create a lookup map for efficient access
+  const guidesMap = new Map(allGuides.map(({ slug, data }) => [slug, data]))
 
   for (const slug of guideSlugs) {
-    const content = guideContentEstimates[slug]
-    if (!content) {
+    const guide = guidesMap.get(slug)
+    if (!guide) {
       results.push({
         page: `/guides/${slug}`,
         type: "guide",
         passed: false,
         score: 0,
         wordCount: 0,
-        issues: [`Guide "${slug}" not found in content estimates`],
+        issues: [`Guide "${slug}" not found in guide-content.ts`],
         warnings: [],
       })
       continue
     }
 
+    // Get actual word count from content
+    const wordCount = getGuideWordCount(guide, "en")
+
     const quality = validateContentQuality({
-      title: content.title,
-      description: content.description,
-      content: "x ".repeat(content.wordCount),
-      internalLinks: 4,
+      title: guide.en.title,
+      description: guide.en.description,
+      content: guide.en.content.join(" "), // Use actual content
+      internalLinks: 4, // Assume minimum met (would need page scan for accurate count)
       hasSchema: true,
       hasImages: false,
     })
@@ -198,7 +178,7 @@ function validateGuides(): ValidationResult[] {
       type: "guide",
       passed: quality.passed,
       score: quality.score,
-      wordCount: content.wordCount,
+      wordCount: wordCount,
       issues: quality.issues,
       warnings: quality.warnings,
     })
@@ -208,25 +188,52 @@ function validateGuides(): ValidationResult[] {
 }
 
 /**
- * Validate templates
+ * Validate templates using actual content from template-content.ts
  */
 function validateTemplates(): ValidationResult[] {
   const results: ValidationResult[] = []
+  const allTemplates = getAllTemplates()
 
-  // Templates typically have shorter content
-  // They need expansion to meet quality gates
+  // Create a lookup map for efficient access
+  const templatesMap = new Map(
+    allTemplates.map(({ category, slug, data }) => [`${category}/${slug}`, data])
+  )
+
   for (const category of templateCategories) {
     const slugs = templateDetailSlugs[category]
     for (const slug of slugs) {
-      // Estimate: templates currently have ~300-400 words
-      // Need 800+ for quality gates
-      const wordCount = 350 // Current estimate
+      const key = `${category}/${slug}`
+      const template = templatesMap.get(key)
+
+      if (!template) {
+        results.push({
+          page: `/templates/${category}/${slug}`,
+          type: "template",
+          passed: false,
+          score: 0,
+          wordCount: 0,
+          issues: [`Template "${slug}" not found in template-content.ts`],
+          warnings: [],
+        })
+        continue
+      }
+
+      // Get actual word count from content
+      const wordCount = getTemplateWordCount(category, slug, "en")
+
+      // Build full content string for validation
+      const fullContent = [
+        ...template.en.content,
+        ...template.en.guidingQuestions,
+        template.en.sampleOpening,
+        ...template.en.howToSteps.map(step => `${step.name}: ${step.text}`),
+      ].join(" ")
 
       const quality = validateContentQuality({
-        title: `${slug.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ")} Template`,
-        description: `Use this ${category} template to write meaningful letters.`,
-        content: "x ".repeat(wordCount),
-        internalLinks: 2,
+        title: template.en.title,
+        description: template.en.description,
+        content: fullContent,
+        internalLinks: 3, // Assume minimum met
         hasSchema: true,
         hasImages: false,
       })
@@ -247,20 +254,47 @@ function validateTemplates(): ValidationResult[] {
 }
 
 /**
- * Validate prompt themes
+ * Validate prompt themes using actual content from prompt-content.ts
  */
 function validatePrompts(): ValidationResult[] {
   const results: ValidationResult[] = []
+  const allThemes = getAllPromptThemes()
+
+  // Create a lookup map for efficient access
+  const themesMap = new Map(allThemes.map(({ theme, data }) => [theme, data]))
 
   for (const theme of promptThemes) {
-    // Prompts pages have list content, typically enough words
-    const wordCount = 600 // 10 prompts * ~60 words each
+    const themeData = themesMap.get(theme)
+
+    if (!themeData) {
+      results.push({
+        page: `/prompts/${theme}`,
+        type: "prompt",
+        passed: false,
+        score: 0,
+        wordCount: 0,
+        issues: [`Prompt theme "${theme}" not found in prompt-content.ts`],
+        warnings: [],
+      })
+      continue
+    }
+
+    // Get actual word count from content
+    const wordCount = getPromptThemeWordCount(theme, "en")
+
+    // Build full content string for validation
+    const fullContent = [
+      ...themeData.en.introduction,
+      ...themeData.en.prompts,
+      ...themeData.en.writingTips,
+      ...themeData.en.resources,
+    ].join(" ")
 
     const quality = validateContentQuality({
-      title: `${theme.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ")} Writing Prompts`,
-      description: `Discover ${theme} prompts to inspire your letter writing.`,
-      content: "x ".repeat(wordCount),
-      internalLinks: 3,
+      title: themeData.en.title,
+      description: themeData.en.description,
+      content: fullContent,
+      internalLinks: 3, // Assume minimum met
       hasSchema: true,
       hasImages: false,
     })

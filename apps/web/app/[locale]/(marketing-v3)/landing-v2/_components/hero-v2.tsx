@@ -115,12 +115,12 @@ export function HeroV2({ isSignedIn }: HeroV2Props) {
                 </Button>
               </Link>
             ) : (
-              <Link href={"/#try-demo" as "/"}>
+              <a href="#try-demo">
                 <Button size="lg" className="group gap-3 text-lg shadow-md hover:shadow-lg px-8">
                   {t("startWritingFree")}
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
-              </Link>
+              </a>
             )}
           </motion.div>
 

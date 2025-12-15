@@ -48,7 +48,7 @@ export default async function manifest({
         purpose: "maskable",
       },
       {
-        src: "/apple-touch-icon.png",
+        src: "/apple-icon.png",
         sizes: "180x180",
         type: "image/png",
       },

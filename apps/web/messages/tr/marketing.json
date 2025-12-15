@@ -511,16 +511,18 @@
   },
   "footerV2": {
     "tagline": "Gelecekteki kendine mektup yaz. Şifreli, planlanmış ve tam ihtiyacın olduğunda teslim edilir.",
-    "product": "Ürün",
-    "legal": "Yasal",
-    "links": {
-      "pricing": "Fiyatlandırma",
-      "signUp": "Kayıt Ol",
-      "signIn": "Giriş Yap",
-      "privacy": "Gizlilik Politikası",
-      "terms": "Kullanım Şartları"
-    },
-    "copyright": "Capsule Note. Tüm hakları saklıdır.",
+    "productTitle": "Ürün",
+    "legalTitle": "Yasal",
+    "productLinks": [
+      { "label": "Fiyatlandırma", "href": "/pricing" },
+      { "label": "Kayıt Ol", "href": "/sign-up" },
+      { "label": "Giriş Yap", "href": "/sign-in" }
+    ],
+    "legalLinks": [
+      { "label": "Gizlilik Politikası", "href": "/privacy" },
+      { "label": "Kullanım Şartları", "href": "/terms" }
+    ],
+    "copyright": "© {year} Capsule Note. Tüm hakları saklıdır.",
     "madeWith": "Gelecekteki sen için {heart} ile yapıldı"
   },
   "pricingPreview": {
@@ -537,6 +539,8 @@
         "period": "sonsuza dek",
         "description": "İlk mektubunu yazmak için ideal",
         "cta": "Ücretsiz Başla",
+        "href": "/pricing",
+        "popular": false,
         "features": [
           "1 ücretsiz mektup",
           "E-posta teslimatı",
@@ -550,6 +554,8 @@
         "period": "/yıl",
         "description": "Sınırsız mektup ve fiziksel posta",
         "cta": "Premium'a Geç",
+        "href": "/pricing",
+        "popular": true,
         "features": [
           "Sınırsız mektup",
           "E-posta + fiziksel posta",

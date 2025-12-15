@@ -511,16 +511,18 @@
   },
   "footerV2": {
     "tagline": "Write letters to your future self. Encrypted, scheduled, delivered exactly when you need them most.",
-    "product": "Product",
-    "legal": "Legal",
-    "links": {
-      "pricing": "Pricing",
-      "signUp": "Sign Up",
-      "signIn": "Sign In",
-      "privacy": "Privacy Policy",
-      "terms": "Terms of Service"
-    },
-    "copyright": "Capsule Note. All rights reserved.",
+    "productTitle": "Product",
+    "legalTitle": "Legal",
+    "productLinks": [
+      { "label": "Pricing", "href": "/pricing" },
+      { "label": "Sign Up", "href": "/sign-up" },
+      { "label": "Sign In", "href": "/sign-in" }
+    ],
+    "legalLinks": [
+      { "label": "Privacy Policy", "href": "/privacy" },
+      { "label": "Terms of Service", "href": "/terms" }
+    ],
+    "copyright": "© {year} Capsule Note. All rights reserved.",
     "madeWith": "Made with {heart} for future-you"
   },
   "pricingPreview": {
@@ -537,6 +539,8 @@
         "period": "/year",
         "description": "Email delivery for personal letters",
         "cta": "Choose Digital",
+        "href": "/pricing",
+        "popular": false,
         "features": [
           "9 email credits / year",
           "Schedule up to 100 years",
@@ -550,6 +554,8 @@
         "period": "/year",
         "description": "Email + physical mail delivery",
         "cta": "Choose Paper & Pixels",
+        "href": "/pricing",
+        "popular": true,
         "features": [
           "24 email credits / year",
           "3 physical mail credits / year",

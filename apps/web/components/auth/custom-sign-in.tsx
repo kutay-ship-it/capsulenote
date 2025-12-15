@@ -110,10 +110,10 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
             {t("noAccount.message")}
           </p>
           <Button asChild className="mt-4 w-full" size="lg">
-            <Link href="/#try-demo">
+            <a href="/#try-demo">
               <PenLine className="mr-2 h-4 w-4" />
               {t("noAccount.cta")}
-            </Link>
+            </a>
           </Button>
           <p className="mt-3 text-sm text-muted-foreground">
             <Link href="/sign-up" className="text-primary underline hover:no-underline">

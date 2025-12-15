@@ -8,6 +8,8 @@ import {
   promptThemes,
   type TemplateCategory,
 } from "@/lib/seo/content-registry"
+import { getBlogPost } from "@/lib/seo/blog-content"
+import { getGuide } from "@/lib/seo/guide-content"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -53,7 +55,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   function addLocalizedEntry(
     path: string,
     priority: number,
-    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"]
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"],
+    lastModified?: Date | string
   ) {
     const languages: Record<string, string> = {}
 
@@ -63,11 +66,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
     languages["x-default"] = `${appUrl}${path}`
 
+    // Convert string dates to Date objects
+    const modifiedDate = lastModified
+      ? typeof lastModified === "string"
+        ? new Date(lastModified)
+        : lastModified
+      : BUILD_TIME
+
     for (const locale of locales) {
       const localePath = locale === defaultLocale ? path : `/${locale}${path}`
       sitemapEntries.push({
         url: `${appUrl}${localePath}`,
-        lastModified: BUILD_TIME,
+        lastModified: modifiedDate,
         changeFrequency,
         priority,
         alternates: {
@@ -100,14 +110,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addLocalizedEntry(`/prompts/${theme}`, 0.75, "weekly")
   }
 
-  // Add guide pages (programmatic SEO)
+  // Add guide pages (programmatic SEO) with per-guide dateModified
   for (const slug of guideSlugs) {
-    addLocalizedEntry(`/guides/${slug}`, 0.7, "monthly")
+    const guide = getGuide(slug)
+    addLocalizedEntry(`/guides/${slug}`, 0.7, "monthly", guide?.dateModified)
   }
 
-  // Add blog post pages (programmatic SEO)
+  // Add blog post pages (programmatic SEO) with per-post dateModified
   for (const slug of blogSlugs) {
-    addLocalizedEntry(`/blog/${slug}`, 0.7, "monthly")
+    const post = getBlogPost(slug)
+    addLocalizedEntry(`/blog/${slug}`, 0.7, "monthly", post?.dateModified)
   }
 
   return sitemapEntries

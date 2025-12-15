@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { auth } from "@clerk/nextjs/server"
 
 // Reuse existing NavbarV3 (it's already good)
@@ -16,16 +17,34 @@ import { FAQSection } from "./_components/faq-section"
 import { CTAV2 } from "./_components/cta-v2"
 import { FooterV2 } from "./_components/footer-v2"
 
-export const metadata = {
-  title: "Capsule Note - Write Letters to Your Future Self",
-  description:
-    "Send letters through time. Write to your future self and receive them in 1 year, 5 years, or 25 years. Email or physical mail delivery with military-grade encryption.",
-  openGraph: {
+const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}): Promise<Metadata> {
+  const { locale } = await params
+
+  return {
     title: "Capsule Note - Write Letters to Your Future Self",
     description:
-      "Send letters through time. Write to your future self and receive them when you need them most.",
-    type: "website",
-  },
+      "Send letters through time. Write to your future self and receive them in 1 year, 5 years, or 25 years. Email or physical mail delivery with military-grade encryption.",
+    openGraph: {
+      title: "Capsule Note - Write Letters to Your Future Self",
+      description:
+        "Send letters through time. Write to your future self and receive them when you need them most.",
+      type: "website",
+      url: `${appUrl}${locale === "en" ? "" : "/" + locale}/landing-v2`,
+    },
+    alternates: {
+      canonical: `${appUrl}${locale === "en" ? "" : "/" + locale}/landing-v2`,
+      languages: {
+        en: `${appUrl}/landing-v2`,
+        tr: `${appUrl}/tr/landing-v2`,
+      },
+    },
+  }
 }
 
 export default async function LandingPageV2() {

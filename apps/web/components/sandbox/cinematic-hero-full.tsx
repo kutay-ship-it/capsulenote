@@ -62,11 +62,11 @@ export function CinematicHeroFull() {
         </div>
 
         <div className="flex justify-center gap-4">
-          <Link href="#hero-editor">
+          <a href="#hero-editor">
             <Button size="lg" className="h-14 border-2 border-charcoal px-8 font-mono text-base uppercase">
               Start writing
             </Button>
-          </Link>
+          </a>
           <Button
             variant="outline"
             size="lg"
