@@ -292,12 +292,13 @@ describe("Arrive-By Mode Calculation", () => {
       const targetDate = new Date("2024-12-25T12:00:00Z") // Christmas
       const result = calculateArriveByDate(targetDate, "usps_first_class")
 
-      // First class: 5 transit + 3 buffer = 8 days before
-      const expectedSendDate = new Date("2024-12-17T12:00:00Z")
+      // First class: 5 transit + 3 buffer + 2 early arrival = 10 days before
+      const expectedSendDate = new Date("2024-12-15T12:00:00Z")
 
       expect(result.sendDate.toDateString()).toBe(expectedSendDate.toDateString())
       expect(result.transitDays).toBe(5)
       expect(result.bufferDays).toBe(3)
+      expect(result.earlyArrivalDays).toBe(2)
       expect(result.isTooLate).toBe(false)
     })
 
@@ -305,12 +306,13 @@ describe("Arrive-By Mode Calculation", () => {
       const targetDate = new Date("2024-12-25T12:00:00Z")
       const result = calculateArriveByDate(targetDate, "usps_standard")
 
-      // Standard: 8 transit + 4 buffer = 12 days before
-      const expectedSendDate = new Date("2024-12-13T12:00:00Z")
+      // Standard: 8 transit + 4 buffer + 2 early arrival = 14 days before
+      const expectedSendDate = new Date("2024-12-11T12:00:00Z")
 
       expect(result.sendDate.toDateString()).toBe(expectedSendDate.toDateString())
       expect(result.transitDays).toBe(8)
       expect(result.bufferDays).toBe(4)
+      expect(result.earlyArrivalDays).toBe(2)
     })
 
     it("should flag as too late when target is too soon", () => {
@@ -327,7 +329,7 @@ describe("Arrive-By Mode Calculation", () => {
 
       // Earliest should be now + totalLeadDays
       expect(result.earliestPossibleArrival).toBeDefined()
-      const leadDays = result.transitDays + result.bufferDays
+      const leadDays = result.transitDays + result.bufferDays + result.earlyArrivalDays
       const expectedEarliest = new Date("2024-12-01T12:00:00Z")
       expectedEarliest.setDate(expectedEarliest.getDate() + leadDays)
 
@@ -403,7 +405,7 @@ describe("Arrive-By Mode Calculation", () => {
 
       expect(estimate.transitDays).toBe(5)
       expect(estimate.bufferDays).toBe(3)
-      expect(estimate.totalLeadDays).toBe(8)
+      expect(estimate.totalLeadDays).toBe(10)
     })
 
     it("should return correct estimates for standard", () => {
@@ -411,7 +413,7 @@ describe("Arrive-By Mode Calculation", () => {
 
       expect(estimate.transitDays).toBe(8)
       expect(estimate.bufferDays).toBe(4)
-      expect(estimate.totalLeadDays).toBe(12)
+      expect(estimate.totalLeadDays).toBe(14)
     })
   })
 
@@ -478,11 +480,11 @@ describe("Date Validation", () => {
       const result = calculateArriveByDate(veryFarFuture, "usps_first_class")
 
       expect(result.isTooLate).toBe(false)
-      // Send date should be 8 days before target
+      // Send date should be 10 days before target (includes early arrival buffer)
       const daysDiff = Math.round(
         (veryFarFuture.getTime() - result.sendDate.getTime()) / (1000 * 60 * 60 * 24)
       )
-      expect(daysDiff).toBe(8)
+      expect(daysDiff).toBe(10)
     })
 
     it("should handle year 2100 edge case", () => {
@@ -501,9 +503,9 @@ describe("Date Validation", () => {
       const result = calculateArriveByDate(leapDay, "usps_first_class")
 
       expect(result.sendDate).toBeInstanceOf(Date)
-      // Send date should be 8 days before Feb 29, which is Feb 21
+      // Send date should be 10 days before Feb 29, which is Feb 19
       expect(result.sendDate.getMonth()).toBe(1) // February
-      expect(result.sendDate.getDate()).toBe(21)
+      expect(result.sendDate.getDate()).toBe(19)
     })
 
     it("should handle end of year transition", () => {
@@ -579,11 +581,11 @@ describe("Delivery Window Accuracy (±60s SLO)", () => {
       const result = calculateArriveByDate(target, "usps_first_class")
 
       // The calculation uses setDate() which preserves local time, not UTC
-      // So we check that the date difference is correct (8 days for first class)
+      // So we check that the date difference is correct (10 days for first class)
       const daysDiff = Math.round(
         (target.getTime() - result.sendDate.getTime()) / (1000 * 60 * 60 * 24)
       )
-      expect(daysDiff).toBe(8) // transitDays(5) + bufferDays(3)
+      expect(daysDiff).toBe(10) // transitDays(5) + bufferDays(3) + earlyArrivalDays(2)
 
       // Minutes should be preserved within same timezone
       expect(result.sendDate.getMinutes()).toBe(target.getMinutes())

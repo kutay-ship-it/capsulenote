@@ -3,7 +3,6 @@ import app from "./app.json"
 import common from "./common.json"
 import marketing from "./marketing.json"
 import metadata from "./metadata.json"
-import dashboard from "./dashboard.json"
 import auth from "./auth.json"
 import errors from "./errors.json"
 import dates from "./dates.json"
@@ -35,7 +34,6 @@ const messages = {
   common,
   checkout,
   components,
-  dashboard,
   deliveries,
   dates,
   emails,

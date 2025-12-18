@@ -6,13 +6,13 @@
   "hero": {
     "badge": "Yıllık Planlar",
     "title": "Kapsülünü Seç",
-    "description": "İki basit yıllık plan. Ücretsiz katman yok, reklam yok—sadece gelecekteki kendine (ve başkalarına) güvenilir teslimatlar."
+    "description": "İki basit yıllık plan. Reklam yok—sadece gelecekteki kendine (ve başkalarına) güvenilir teslimatlar."
   },
   "v3": {
     "hero": {
       "badge": "GÜVENLİ ÖDEME",
       "title": "PLANINI SEÇ",
-      "subtitle": "Zaman kapsülü yolculuğuna bugün başla. Basit fiyatlandırma, sürpriz yok.",
+      "subtitle": "Zaman kapsülü yolculuğuna bugün başla. Basit planlar, sürpriz yok.",
       "checkoutFor": "Ödeme yapılacak hesap:",
       "socialProof": "10.000+ mektup teslim edildi",
       "stats": {
@@ -43,7 +43,7 @@
           "name": "Dijital Kapsül",
           "tagline": "Kişisel yansımalar için",
           "features": {
-            "deliveries": "Yılda 6 dijital mektup teslimatı",
+            "deliveries": "Yılda 9 dijital mektup teslimatı",
             "recipients": "Kendine veya sevdiklerine gönder",
             "schedule": "100 yıl sonrasına kadar zamanla",
             "timezone": "Saat dilimine duyarlı teslimat",
@@ -208,13 +208,13 @@
       "title": "Ödeme Tamamlanmadı",
       "description": "Ödemen henüz tamamlanmadı. Lütfen ödeme talimatları için e-postanı kontrol et veya tekrar dene."
     },
-    "returnToPricing": "Fiyatlandırmaya Dön",
+    "returnToPricing": "Planlara Dön",
     "paymentSuccessful": "Ödeme Başarılı!",
     "subscriptionActivated": "{planName} aboneliğin aktif edildi.",
     "startWriting": "Artık gelecekteki kendine mektup yazmaya başlayabilirsin.",
     "whatsNext": "Şimdi Ne Yapmalıyım:",
-    "headToDashboard": "İlk mektubunu yazmak için paneline git.",
-    "goToDashboard": "Panele Git",
+    "headToDashboard": "İlk mektubunu yazmak için yolculuğuna git.",
+    "goToDashboard": "Yolculuğa Git",
     "redirecting": "5 saniye içinde otomatik yönlendiriliyorsun...",
     "unableToRetrieveEmail": {
       "title": "E-posta Alınamadı",

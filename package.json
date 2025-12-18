@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:web+worker": "turbo run dev --parallel --filter web --filter @dearme/inngest",
-    "dev:seed-subscription": "node --loader tsx ./scripts/seed-dev-subscription.ts",
+    "dev:seed-subscription": "node --import tsx ./scripts/seed-dev-subscription.ts",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",

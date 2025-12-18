@@ -168,6 +168,6 @@ export function generateDeliveryCalendarEvent(
     startTime: deliveryDate,
     endTime,
     attendeeEmail: recipientEmail,
-    url: "https://capsulenote.com/deliveries",
+    url: "https://capsulenote.com/journey",
   })
 }

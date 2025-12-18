@@ -47,9 +47,9 @@
     },
     "cta": {
       "title": "Ready to Write to Your Future Self?",
-      "description": "Start your first time capsule letter today. It's free to begin, and your words will be waiting exactly when you need them.",
+      "description": "Start your first time capsule letter today. Your words will be waiting exactly when you need them.",
       "primaryButton": "Write Your First Letter",
-      "secondaryButton": "See Pricing"
+      "secondaryButton": "See Plans"
     }
   },
 
@@ -483,7 +483,7 @@
         "title": "Disclaimers",
         "content": [
           "The Service is provided \"as is\" and \"as available\" without warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, and non-infringement.",
-          "We do not guarantee that the Service will be uninterrupted, secure, or error-free. We do not guarantee that letters will be delivered exactly on time in all circumstances, though we strive for 99.95% on-time delivery."
+          "We do not guarantee that the Service will be uninterrupted, secure, or without errors. We do not guarantee that letters will be delivered exactly on time in all circumstances, though we strive for 99.95% on-time delivery."
         ],
         "highlight": "While we strive for reliable delivery, factors outside our control (email filtering, server issues, etc.) may occasionally affect delivery timing."
       },

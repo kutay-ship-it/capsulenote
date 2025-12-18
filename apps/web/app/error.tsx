@@ -27,6 +27,7 @@ export default function Error({
   const [isAutoRetrying, setIsAutoRetrying] = useState(false)
   const [isSettling, setIsSettling] = useState(false) // Prevent retry overlap after reset
   const maxRetries = 3
+  const homeHref = pathname === '/tr' || pathname.startsWith('/tr/') ? '/tr' : '/'
 
   // Check if error is transient (network-related)
   const isTransientError = error.message.toLowerCase().includes('network') ||
@@ -62,8 +63,8 @@ export default function Error({
     // Auto-retry for transient errors with exponential backoff
     // isSettling prevents overlap when reset() triggers re-render
     if (isTransientError && retryCount < maxRetries && !isAutoRetrying && !isSettling) {
-      setIsAutoRetrying(true)
       const backoffMs = 1000 * Math.pow(2, retryCount) // 1s, 2s, 4s
+      const startRetryTimer = setTimeout(() => setIsAutoRetrying(true), 0)
 
       const timer = setTimeout(() => {
         setRetryCount((prev) => prev + 1)
@@ -74,7 +75,10 @@ export default function Error({
         setTimeout(() => setIsSettling(false), 100)
       }, backoffMs)
 
-      return () => clearTimeout(timer)
+      return () => {
+        clearTimeout(startRetryTimer)
+        clearTimeout(timer)
+      }
     }
   }, [error, pathname, searchParams, retryCount, isTransientError, isAutoRetrying, isSettling, reset])
 
@@ -178,7 +182,7 @@ export default function Error({
             {isAutoRetrying ? 'Retrying...' : 'Try Again'}
           </Button>
           <Button
-            onClick={() => window.location.href = '/'}
+            onClick={() => window.location.href = homeHref}
             variant="outline"
             size="lg"
             className="w-full sm:w-auto"

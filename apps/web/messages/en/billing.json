@@ -8,7 +8,7 @@
       "PAPER_PIXELS": "Paper & Pixels",
       "pro": "Pro",
       "enterprise": "Enterprise",
-      "none": "Free"
+      "none": "No plan"
     },
     "status": {
       "active": "Active",
@@ -18,15 +18,15 @@
       "incomplete": "Incomplete",
       "incomplete_expired": "Incomplete",
       "unpaid": "Unpaid",
-      "none": "Free"
+      "none": "No plan"
     },
-    "freeTitle": "Free Plan",
+    "freeTitle": "No plan",
     "freeDescription": "No active subscription",
-    "freeCta": "Upgrade to Pro for unlimited letters, scheduled deliveries, and physical mail.",
+    "freeCta": "Choose a plan to schedule deliveries and unlock credits.",
     "trialEnds": "Trial ends {date}",
     "trialHint": "Add a payment method before your trial ends to continue your subscription.",
     "cancelTitle": "Subscription will cancel on {date}",
-    "cancelHint": "You'll retain Pro access until this date. Reactivate anytime before then.",
+    "cancelHint": "You'll retain access until this date. Reactivate anytime before then.",
     "paymentFailedTitle": "Payment failed",
     "paymentFailedHint": "Please update your payment method to avoid service interruption.",
     "nextBilling": "Next billing date",
@@ -34,7 +34,7 @@
   },
   "manageButton": {
     "manage": "Manage Subscription",
-    "upgrade": "Upgrade to Pro",
+    "upgrade": "Choose a Plan",
     "loading": "Loading..."
   },
   "usage": {
@@ -88,29 +88,29 @@
     "portalUnexpected": "An unexpected error occurred. Please try again."
   },
   "upgradeModal": {
-    "quotaTitle": "Free Plan Limit Reached",
-    "subscriptionTitle": "Pro Subscription Required",
+    "quotaTitle": "Plan Limit Reached",
+    "subscriptionTitle": "Plan Required",
     "creditsTitle": "No Mail Credits",
     "defaultTitle": "Upgrade to Continue",
-    "defaultDescription": "Upgrade to Pro to unlock this feature",
+    "defaultDescription": "Choose a plan to unlock this feature",
     "currentUsage": "Current Usage",
-    "proIncludes": "Pro Plan Includes:",
+    "proIncludes": "Plan includes:",
     "features": {
       "unlimited": "Unlimited letters per month",
       "email": "Schedule email deliveries",
       "mail": "Physical mail delivery (2 credits/month)",
       "support": "Priority support",
-      "trial": "14-day free trial"
+      "trial": "14-day trial"
     },
     "cancel": "Cancel",
-    "upgrade": "Upgrade to Pro"
+    "upgrade": "Choose a Plan"
   },
   "quotaBanner": {
-    "limitReached": "Free Plan Limit Reached",
+    "limitReached": "Plan Limit Reached",
     "approaching": "Approaching Plan Limit",
-    "limitReachedDescription": "You've used all {max} letters for this month. Upgrade to Pro for unlimited letters.",
-    "approachingDescription": "You've used {used} of {max} letters this month. Upgrade to Pro for unlimited access.",
+    "limitReachedDescription": "You've reached your plan limit for this period. Choose a plan to continue.",
+    "approachingDescription": "You're approaching your plan limit for this period. Choose a plan for more access.",
     "lettersUsed": "Letters Used",
-    "upgrade": "Upgrade to Pro"
+    "upgrade": "Choose a Plan"
   }
 }

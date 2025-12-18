@@ -148,7 +148,7 @@
       "description": "{wordCount} kelime yazdın. Bu mektubu gelecekteki kendine planlamak ister misin?",
       "signUp": "Kaydetmek için Kaydol",
       "keepWriting": "Yazmaya Devam Et",
-      "features": "Sonsuza kadar ücretsiz • Kredi kartı gerekmez • Taslak yerel olarak kaydedilir"
+      "features": "Kayıt gerekmez • Taslak yerel olarak kaydedilir • İstediğin zaman devam et"
     },
     "editor": {
       "title": "Yazmaya Başla",
@@ -242,8 +242,8 @@
         },
         "free": {
           "icon": "🌱",
-          "title": "Sonsuza Kadar Ücretsiz Plan",
-          "description": "Ayda 5 mektup, her zaman ücretsiz. Sınırsız için istediğin zaman yükselt."
+          "title": "Kayıt Gerektirmez",
+          "description": "Hemen taslak oluştur. Teslimatı planlamaya hazır olduğunda hesap oluştur."
         }
       }
     }

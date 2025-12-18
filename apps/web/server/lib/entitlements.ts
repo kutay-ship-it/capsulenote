@@ -6,7 +6,7 @@
  * - Paper & Pixels: 24 email + 3 physical credits/year
  *
  * Notes:
- * - No free tier. Users without an active subscription have plan = 'none' and cannot schedule.
+ * - Users without an active subscription have plan = 'none' and cannot schedule.
  * - Credits are stored on the User record and decremented on scheduling.
  * - Addon credits are tracked separately and preserved on subscription renewal.
  * - All credit changes are logged to CreditTransaction for audit trail.
@@ -69,10 +69,6 @@ export class QuotaExceededError extends Error {
 // ============================================================================
 
 const CACHE_TTL_SECONDS = 300 // 5 minutes
-const PLAN_CREDITS: Record<PlanType, { email: number; physical: number }> = {
-  DIGITAL_CAPSULE: { email: 9, physical: 0 },
-  PAPER_PIXELS: { email: 24, physical: 3 },
-}
 const ACTIVE_SUBSCRIPTION_STATUSES: SubscriptionStatus[] = ["active", "trialing"]
 
 // ============================================================================
@@ -502,7 +498,6 @@ async function buildEntitlements(userId: string): Promise<Entitlements> {
   const status = subscription?.status
     ?? (hasValidCredits ? ("active" as const) : ("none" as const))
 
-  const planCredits = plan ? PLAN_CREDITS[plan] : { email: 0, physical: 0 }
   const lettersThisMonth = await prisma.letter.count({
     where: {
       userId,

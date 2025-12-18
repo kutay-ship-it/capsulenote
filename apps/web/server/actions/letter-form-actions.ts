@@ -4,6 +4,7 @@ import { createLetter } from "./letters"
 import { scheduleDelivery } from "./deliveries"
 import { redirect } from "next/navigation"
 import { fromZonedTime } from "date-fns-tz"
+import { getLocale } from "next-intl/server"
 import { getUserTimezone } from "@/lib/utils"
 
 export interface CreateLetterFormState {
@@ -109,7 +110,9 @@ export async function createLetterFormAction(
   }
 
   // Redirect to the created letter
-  redirect(`/letters/${letterId}`)
+  const locale = await getLocale()
+  const prefix = locale === "en" ? "" : `/${locale}`
+  redirect(`${prefix}/letters/${letterId}`)
 }
 
 /**

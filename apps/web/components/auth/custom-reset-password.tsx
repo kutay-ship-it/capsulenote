@@ -1,15 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { useSignIn } from "@clerk/nextjs"
 import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useRouter } from "@/i18n/routing"
 
 type Step = "request" | "reset"
+
+function getClerkErrorMessage(error: unknown): string | null {
+  if (!error || typeof error !== "object") return null
+  const message = (error as { errors?: Array<{ message?: unknown }> }).errors?.[0]?.message
+  return typeof message === "string" ? message : null
+}
 
 export function CustomResetPasswordForm() {
   const router = useRouter()
@@ -40,8 +46,8 @@ export function CustomResetPasswordForm() {
       } else {
         setError(t("errors.unableToStart"))
       }
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message || t("errors.startFailed"))
+    } catch (error) {
+      setError(getClerkErrorMessage(error) || t("errors.startFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -62,12 +68,12 @@ export function CustomResetPasswordForm() {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId })
-        router.push("/dashboard")
+        router.push("/journey")
       } else {
         setError(t("errors.invalidCodeOrPassword"))
       }
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message || t("errors.resetFailed"))
+    } catch (error) {
+      setError(getClerkErrorMessage(error) || t("errors.resetFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -131,4 +137,3 @@ export function CustomResetPasswordForm() {
     </div>
   )
 }
-

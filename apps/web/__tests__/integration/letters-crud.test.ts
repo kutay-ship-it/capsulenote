@@ -153,6 +153,7 @@ describe("Letters CRUD", () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       deletedAt: null,
+      deliveries: [],
     })
     mockPrisma.letter.update.mockResolvedValueOnce({
       id: "44444444-4444-4444-8444-444444444444",
@@ -205,6 +206,7 @@ describe("Letters CRUD", () => {
           })
         },
         delivery: {
+          findMany: vi.fn().mockResolvedValue([]),
           updateMany: vi.fn().mockResolvedValue({ count: 0 })
         }
       }

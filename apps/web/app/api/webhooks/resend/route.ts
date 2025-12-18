@@ -40,7 +40,7 @@ interface ResendWebhookEvent {
     to?: string[]
     subject?: string
     reason?: string
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 

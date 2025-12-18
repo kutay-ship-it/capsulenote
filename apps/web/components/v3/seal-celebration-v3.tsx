@@ -10,7 +10,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
 import { BrutalistConfetti } from "@/components/animations/brutalist-confetti"
 import { getDateFnsLocale } from "@/lib/date-formatting"
 
@@ -198,12 +197,12 @@ export function SealCelebrationV3({
                   <div className="min-w-0 flex-1">
                     <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50">
                       {t("yourLetter")}
-                    </p>
-                    <p className="font-mono text-xs font-bold text-charcoal truncate">
-                      "{letterTitle}"
-                    </p>
-                  </div>
-                </motion.div>
+	                    </p>
+	                    <p className="font-mono text-xs font-bold text-charcoal truncate">
+	                      &quot;{letterTitle}&quot;
+	                    </p>
+	                  </div>
+	                </motion.div>
 
                 {/* Delivery Date */}
                 <motion.div

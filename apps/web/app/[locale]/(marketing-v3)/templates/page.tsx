@@ -1,5 +1,5 @@
 import { Metadata } from "next"
-import { getTranslations, setRequestLocale } from "next-intl/server"
+import { setRequestLocale } from "next-intl/server"
 import { FileText, ArrowRight, Sparkles, Heart, Target, Users, Briefcase, Clock, Award, BookOpen } from "lucide-react"
 
 import { Link } from "@/i18n/routing"
@@ -75,8 +75,8 @@ export async function generateMetadata({
     : "Mektup Şablonları | Gelecekteki Kendine Yaz"
 
   const description = isEnglish
-    ? "Free letter templates for writing to your future self. Templates for self-reflection, goal-setting, gratitude, relationships, career milestones, and legacy letters."
-    : "Gelecekteki kendine yazmak için ücretsiz mektup şablonları. Öz-düşünce, hedef belirleme, şükran, ilişkiler, kariyer ve miras mektupları için şablonlar."
+    ? "Letter templates for writing to your future self. Templates for self-reflection, goal-setting, gratitude, relationships, career milestones, and legacy letters."
+    : "Gelecekteki kendine yazmak için mektup şablonları. Öz-düşünce, hedef belirleme, şükran, ilişkiler, kariyer ve miras mektupları için şablonlar."
 
   return {
     title,
@@ -213,14 +213,14 @@ export default async function TemplatesHubPage({
             const catData = t.categories[category.slug as keyof typeof t.categories]
             const Icon = category.icon
 
-            return (
-              <Link
-                key={category.slug}
-                href={`/templates/${category.slug}` as any}
-                className={cn(
-                  "group relative p-6 border-2 border-charcoal",
-                  "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
-                  category.color
+	            return (
+	              <Link
+	                key={category.slug}
+	                href={{ pathname: "/templates/[category]", params: { category: category.slug } }}
+	                className={cn(
+	                  "group relative p-6 border-2 border-charcoal",
+	                  "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+	                  category.color
                 )}
                 style={{ borderRadius: "2px" }}
               >

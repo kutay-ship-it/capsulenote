@@ -80,7 +80,7 @@ describe("Stripe Webhook Handler", () => {
   })
 
   afterEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
   })
 
   // --------------------------------------------------------------------------

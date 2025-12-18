@@ -7,57 +7,77 @@
     "stillProcessing": "Hâlâ işleniyor mu?",
     "safeToNavigate": "Güvenle başka bir sayfaya geçebilirsiniz - aboneliğiniz aktif olduğunda size bir e-posta onayı göndereceğiz.",
     "checkStatus": "Abonelik durumunuzu ayarlarda kontrol edebilirsiniz",
-    "goToDashboard": "Panele Git",
+    "goToDashboard": "Yolculuğa Git",
     "viewBilling": "Fatura Ayarlarını Gör",
     "verificationFailed": "Doğrulama Beklenenden Uzun Sürüyor",
     "verificationFailedDescription": "Ödemeniz başarılı oldu, ancak hesabınız hâlâ ayarlanıyor. Aboneliğiniz kısa süre içinde aktif olacak.",
     "contactSupport": "Birkaç dakika içinde aboneliğinizi göremezseniz, lütfen destekle iletişime geçin."
   },
   "success": {
-    "title": "Capsule Note Pro'ya Hoş geldin!",
+    "title": "Capsule Note'a Hoş geldin!",
     "subtitle": "Aboneliğin başarıyla aktif edildi",
     "subscriptionDetails": "Abonelik Detayları",
     "badge": {
       "trial": "Deneme Aktif",
       "active": "Aktif"
     },
-    "planName": "Capsule Note Pro",
-    "planDescription": "Sınırsız mektup, e-posta teslimatı ve fiziksel posta kredisi",
+    "plan": {
+      "DIGITAL_CAPSULE": {
+        "name": "Dijital Kapsül",
+        "description": "Kişisel yansıma için güvenilir dijital teslimat.",
+        "features": [
+          "Yılda 9 dijital teslimat",
+          "Kendine ya da sevdiklerine gönder",
+          "100 yıla kadar planla",
+          "Saat dilimine göre teslimat",
+          "Uçtan uca şifreleme",
+          "İstediğin zaman ek teslimat satın al"
+        ]
+      },
+      "PAPER_PIXELS": {
+        "name": "Kağıt ve Pikseller",
+        "description": "Anlamlı hatıralar için fiziksel posta ve öncelikli yönlendirme.",
+        "features": [
+          "Yılda 24 dijital teslimat",
+          "Yılda 3 fiziksel mektup",
+          "Kendine ya da sevdiklerine gönder",
+          "Adres doğrulama hatırlatmaları",
+          "Öncelikli posta yönlendirmesi",
+          "İstediğin zaman ek teslimat satın al"
+        ]
+      }
+    },
     "trial": {
-      "title": "14 Günlük Ücretsiz Deneme",
+      "title": "14 Günlük Deneme",
       "endsOn": "Deneme süren {date} tarihinde sona eriyor ({days} gün kaldı)",
       "endingSoon": "Deneme süren yakında sona eriyor",
       "noBilling": "Deneme süren bitene kadar ücret alınmayacak. O zamana kadar istediğin zaman iptal edebilirsin."
     },
     "features": {
-      "title": "Dahil olanlar:",
-      "unlimited": "Gelecekteki kendine sınırsız mektup yaz",
-      "emailDelivery": "Sınırsız e-posta teslimatı planla",
-      "mailCredits": "Ayda 2 fiziksel posta kredisi",
-      "support": "Öncelikli destek"
+      "title": "Dahil olanlar:"
     },
     "buttons": {
-      "dashboard": "Panele Git",
+      "dashboard": "Yolculuğa Git",
       "writeLetter": "İlk Mektubunu Yaz"
     },
     "confirmEmail": "Gelen kutuna bir onay e-postası gönderildi.",
-    "manageSubscription": "Aboneliğini istediğin zaman {link} üzerinden yönetebilirsin.",
+    "manageSubscription": "Aboneliğini istediğin zaman <link>fatura ayarları</link> üzerinden yönetebilirsin.",
     "billingSettings": "fatura ayarları"
   },
   "cancel": {
     "title": "Ödeme İptal Edildi",
-    "description": "Sorun değil! Fiyatlandırma sayfasına dönüp hazır olduğunda tekrar deneyebilirsin.",
-    "freePlanInfo": "Hesabın ücretsiz planda kalmaya devam ediyor. İstediğin zaman yükseltme yaparak şunları açabilirsin:",
+    "description": "Sorun değil! Planlar sayfasına dönüp hazır olduğunda tekrar deneyebilirsin.",
+    "freePlanInfo": "Hesabında aktif abonelik yok. Hazır olduğunda bir plan seçerek şunları açabilirsin:",
     "features": {
-      "unlimited": "Sınırsız mektup ve e-posta teslimatı",
-      "mail": "Fiziksel posta teslimatı",
-      "support": "Öncelikli destek"
+      "unlimited": "Mektupları geleceğe planla",
+      "mail": "Fiziksel posta teslimatını aç",
+      "support": "Öncelikli destek al"
     },
     "buttons": {
-      "dashboard": "Panele Dön",
-      "pricing": "Fiyatlandırmayı Gör"
+      "dashboard": "Yolculuğa Dön",
+      "pricing": "Planları Gör"
     },
-    "support": "Soruların mı var? {link}",
+    "support": "Soruların mı var? <link>Destekle iletişime geç</link>",
     "contactSupport": "Destekle iletişime geç"
   },
   "metadata": {

@@ -81,7 +81,7 @@ test.describe("Account Deletion: GDPR export → Delete → Verify cleanup", () 
         await codeInputs.first().fill(CLERK_TEST_VERIFICATION_CODE)
       }
 
-      await page.waitForURL(/\/(welcome|journey|letters|dashboard)/, { timeout: 30000 })
+      await page.waitForURL(/\/(welcome|journey|letters)/, { timeout: 30000 })
       await dismissDialogs(page)
     })
 

@@ -38,18 +38,59 @@ const lobTemplateId = env.LOB_TEMPLATE_ID
 const lobTemplateVersionId = env.LOB_TEMPLATE_VERSION_ID
 const LOB_HTML_CHAR_LIMIT = 10000
 
-// Debug: Log template config on module load
-console.log("[Lob] Module initialized", {
-  hasApiKey: !!lobApiKey,
-  templateId: lobTemplateId || "(not set)",
-  templateVersionId: lobTemplateVersionId || "(not set)",
-})
+// Debug: Log template config on module load (avoid noisy logs in production builds)
+if (process.env.NODE_ENV !== "production") {
+  console.log("[Lob] Module initialized", {
+    hasApiKey: !!lobApiKey,
+    templateId: lobTemplateId || "(not set)",
+    templateVersionId: lobTemplateVersionId || "(not set)",
+  })
+}
 
 export const lob = lobApiKey ? new Lob(lobApiKey) : null
 
 type LobApiError = Error & {
   statusCode?: number
   lobMessage?: string
+}
+
+type LobSdkError = {
+  status_code?: unknown
+  message?: unknown
+  _response?: {
+    body?: {
+      error?: {
+        message?: unknown
+        details?: unknown
+      }
+    }
+  }
+}
+
+function getErrorMessage(error: unknown): string {
+  if (typeof error === "string") return error
+  if (error instanceof Error) return error.message
+  if (!error || typeof error !== "object") return "Unknown error"
+  const message = (error as { message?: unknown }).message
+  return typeof message === "string" ? message : "Unknown error"
+}
+
+function getLobErrorInfo(error: unknown): { statusCode?: number; message: string; details?: unknown } {
+  if (!error || typeof error !== "object") {
+    return { message: getErrorMessage(error) }
+  }
+
+  const err = error as LobSdkError
+  const statusCode = typeof err.status_code === "number" ? err.status_code : undefined
+  const responseMessage = err._response?.body?.error?.message
+  const message =
+    typeof err.message === "string"
+      ? err.message
+      : typeof responseMessage === "string"
+        ? responseMessage
+        : getErrorMessage(error)
+
+  return { statusCode, message, details: err._response?.body?.error?.details }
 }
 
 export interface MailingAddress {
@@ -207,16 +248,12 @@ export async function sendLetter(options: MailOptions): Promise<SendLetterResult
       trackingNumber: (letter as { tracking_number?: string }).tracking_number,
       thumbnails: letter.thumbnails as unknown as { small: string; medium: string; large: string }[],
     }
-  } catch (error: any) {
-    const statusCode = error?.status_code
-    const lobMessage =
-      error?.message ||
-      error?._response?.body?.error?.message ||
-      (typeof error === "string" ? error : "Unknown Lob error")
+  } catch (error) {
+    const { statusCode, message: lobMessage, details } = getLobErrorInfo(error)
 
     console.error("Lob API error:", lobMessage, {
       statusCode,
-      details: error?._response?.body?.error?.details,
+      details,
     })
 
     const normalizedError = new Error(
@@ -270,12 +307,13 @@ export async function verifyUsAddress(
         : undefined,
       error: !isDeliverable ? verification.deliverability : undefined,
     }
-  } catch (error: any) {
-    console.error("US address verification error:", error?.message || error)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    console.error("US address verification error:", message)
     return {
       isValid: false,
       deliverability: "verification_failed",
-      error: error?.message || "Verification failed",
+      error: message || "Verification failed",
     }
   }
 }
@@ -318,12 +356,13 @@ export async function verifyIntlAddress(
         : undefined,
       error: !isDeliverable ? verification.deliverability : undefined,
     }
-  } catch (error: any) {
-    console.error("International address verification error:", error?.message || error)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    console.error("International address verification error:", message)
     return {
       isValid: false,
       deliverability: "verification_failed",
-      error: error?.message || "Verification failed",
+      error: message || "Verification failed",
     }
   }
 }
@@ -565,12 +604,8 @@ export async function createLobAddress(
       },
       dateCreated: lobAddress.date_created,
     }
-  } catch (error: any) {
-    const statusCode = error?.status_code
-    const lobMessage =
-      error?.message ||
-      error?._response?.body?.error?.message ||
-      "Unknown Lob error"
+  } catch (error) {
+    const { statusCode, message: lobMessage } = getLobErrorInfo(error)
 
     console.error("[Lob] Address creation error:", lobMessage, {
       statusCode,
@@ -622,9 +657,10 @@ export async function getLobAddress(addressId: string): Promise<LobAddressResult
       },
       dateCreated: lobAddress.date_created,
     }
-  } catch (error: any) {
-    console.error("[Lob] Get address error:", error?.message || error)
-    throw new Error(`Failed to retrieve Lob address: ${error?.message || "Unknown error"}`)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    console.error("[Lob] Get address error:", message)
+    throw new Error(`Failed to retrieve Lob address: ${message}`)
   }
 }
 
@@ -647,9 +683,10 @@ export async function deleteLobAddress(addressId: string): Promise<{ id: string;
       id: result.id,
       deleted: result.deleted,
     }
-  } catch (error: any) {
-    console.error("[Lob] Delete address error:", error?.message || error)
-    throw new Error(`Failed to delete Lob address: ${error?.message || "Unknown error"}`)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    console.error("[Lob] Delete address error:", message)
+    throw new Error(`Failed to delete Lob address: ${message}`)
   }
 }
 
@@ -1002,9 +1039,10 @@ export async function getLetter(letterId: string) {
       trackingEvents: letter.tracking_events || [],
       url: letter.url,
     }
-  } catch (error: any) {
-    console.error("Get letter error:", error?.message || error)
-    throw new Error(`Failed to retrieve letter: ${error?.message || "Unknown error"}`)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    console.error("Get letter error:", message)
+    throw new Error(`Failed to retrieve letter: ${message}`)
   }
 }
 
@@ -1024,9 +1062,10 @@ export async function cancelLetter(letterId: string) {
       id: result.id,
       deleted: result.deleted,
     }
-  } catch (error: any) {
-    console.error("Cancel letter error:", error?.message || error)
-    throw new Error(`Failed to cancel letter: ${error?.message || "Unknown error"}`)
+  } catch (error) {
+    const message = getErrorMessage(error)
+    console.error("Cancel letter error:", message)
+    throw new Error(`Failed to cancel letter: ${message}`)
   }
 }
 

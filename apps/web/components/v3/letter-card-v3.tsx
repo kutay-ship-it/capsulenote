@@ -100,7 +100,7 @@ export const LetterCardV3 = React.memo(function LetterCardV3({
   // Memoize status config to avoid recalculation on every render
   const statusConfig = React.useMemo(
     () => getStatusConfig(letter, t),
-    [letter.delivery?.status, letter.delivery?.deliverAt, t]
+    [letter, t]
   )
 
   const formattedDate = format(new Date(letter.createdAt), "MMM d, yyyy", { locale: dateFnsLocale })

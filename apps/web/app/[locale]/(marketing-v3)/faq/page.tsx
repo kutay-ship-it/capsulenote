@@ -7,11 +7,12 @@
 
 import * as React from "react"
 import type { Metadata } from "next"
-import { getLocale } from "next-intl/server"
+import { setRequestLocale } from "next-intl/server"
 import { Link } from "@/i18n/routing"
 
 import { FAQSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { LegalPageLayout } from "../_components/legal-page-layout"
+import type { Locale } from "@/i18n/routing"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -23,7 +24,7 @@ const faqData = {
       "Get answers to common questions about Capsule Note. Learn about letter delivery, encryption, physical mail, scheduling, and more.",
     pageTitle: "Frequently Asked Questions",
     pageDescription:
-      "Everything you need to know about sending letters to your future self. Find answers about delivery, security, pricing, and more.",
+      "Everything you need to know about sending letters to your future self. Find answers about delivery, security, scheduling, and more.",
     contactCta: "Still have questions?",
     contactLink: "Contact us",
     items: [
@@ -55,17 +56,17 @@ const faqData = {
       {
         question: "How does physical mail work?",
         answer:
-          "With our Premium plan, we print your letter on high-quality paper and mail it to any address worldwide. You can choose 'send on date' (mailed on a specific date) or 'arrive by date' (we calculate transit time to ensure arrival). Physical letters are printed from our secure facility and your content is never stored in plain text.",
+          "With our physical mail option, we print your letter on high-quality paper and mail it to any address worldwide. You can choose 'send on date' (mailed on a specific date) or 'arrive by date' (we calculate transit time to ensure arrival). Physical letters are printed from our secure facility and your content is never stored in plain text.",
       },
       {
         question: "Is there a refund policy?",
         answer:
-          "Yes. If you're not satisfied within 30 days of your Premium purchase, we'll refund you in full - no questions asked. For annual subscriptions, you can cancel anytime and continue using Premium features until your billing period ends.",
+          "Yes. If you're not satisfied within 30 days of purchase, we'll refund you in full - no questions asked. For annual subscriptions, you can cancel anytime and keep access until the end of your billing period.",
       },
       {
         question: "How far in the future can I schedule?",
         answer:
-          "Free users can schedule up to 5 years ahead. Premium users can schedule up to 50 years ahead. Yes, you can write a letter to yourself 50 years from now. We're committed to being around to deliver it.",
+          "Scheduling limits depend on your account. You can schedule letters years ahead — up to 50 years. Yes, you can write a letter to yourself 50 years from now. We're committed to being around to deliver it.",
       },
     ],
   },
@@ -75,7 +76,7 @@ const faqData = {
       "Capsule Note hakkında sık sorulan soruların yanıtlarını bulun. Mektup teslimatı, şifreleme, fiziksel posta ve planlama hakkında bilgi edinin.",
     pageTitle: "Sıkça Sorulan Sorular",
     pageDescription:
-      "Gelecekteki kendinize mektup göndermek hakkında bilmeniz gereken her şey. Teslimat, güvenlik, fiyatlandırma ve daha fazlası hakkında cevaplar.",
+      "Gelecekteki kendinize mektup göndermek hakkında bilmeniz gereken her şey. Teslimat, güvenlik, planlama ve daha fazlası hakkında cevaplar.",
     contactCta: "Hâlâ soruların mı var?",
     contactLink: "Bize ulaş",
     items: [
@@ -107,25 +108,29 @@ const faqData = {
       {
         question: "Fiziksel posta nasıl çalışıyor?",
         answer:
-          "Premium planla mektubunu yüksek kaliteli kağıda basıp dünyanın her yerine postalıyoruz. İki seçeneğin var: 'Belirli tarihte gönder' veya 'Belirli tarihte ulaşsın' (varış süresini biz hesaplarız). Mektuplar güvenli tesisimizde basılır ve içerik asla düz metin olarak saklanmaz.",
+          "Fiziksel posta seçeneğiyle mektubunu yüksek kaliteli kağıda basıp dünyanın her yerine postalıyoruz. İki seçeneğin var: 'Belirli tarihte gönder' veya 'Belirli tarihte ulaşsın' (varış süresini biz hesaplarız). Mektuplar güvenli tesisimizde basılır ve içerik asla düz metin olarak saklanmaz.",
       },
       {
         question: "İade politikanız var mı?",
         answer:
-          "Var! Premium satın alımından sonraki 30 gün içinde memnun kalmazsan, soru sormadan tam iade yapıyoruz. Yıllık aboneliklerde istediğin zaman iptal edebilir, fatura dönemin sonuna kadar Premium özelliklerini kullanmaya devam edebilirsin.",
+          "Var! Satın alımdan sonraki 30 gün içinde memnun kalmazsan, soru sormadan tam iade yapıyoruz. Yıllık aboneliklerde istediğin zaman iptal edebilir, fatura dönemin sonuna kadar erişimini koruyabilirsin.",
       },
       {
         question: "Geleceğe ne kadar ileri planlayabilirim?",
         answer:
-          "Ücretsiz hesapla 5 yıl, Premium ile 50 yıl sonrasına kadar planlayabilirsin. Evet, 50 yıl sonraki kendine mektup yazabilirsin! Ve biz o mektubu teslim etmek için burada olacağız.",
+          "Planlama sınırları hesabına göre değişir. Mektupları yıllar sonrasına — 50 yıla kadar — planlayabilirsin. Evet, 50 yıl sonraki kendine mektup yazabilirsin! Ve biz o mektubu teslim etmek için burada olacağız.",
       },
     ],
   },
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = (await getLocale()) as "en" | "tr"
-  const content = faqData[locale] || faqData.en
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const content = locale === "tr" ? faqData.tr : faqData.en
 
   const canonicalPath = "/faq"
   const canonicalUrl =
@@ -150,9 +155,14 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function FAQPage() {
-  const locale = (await getLocale()) as "en" | "tr"
-  const content = faqData[locale] || faqData.en
+export default async function FAQPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const content = locale === "tr" ? faqData.tr : faqData.en
 
   const breadcrumbs = [
     { name: locale === "tr" ? "Ana Sayfa" : "Home", href: "/" },
@@ -220,7 +230,7 @@ export default async function FAQPage() {
                 href="/pricing"
                 className="border-2 border-charcoal px-4 py-2 font-mono text-xs uppercase tracking-wide text-charcoal transition-colors hover:bg-charcoal hover:text-cream"
               >
-                {locale === "tr" ? "Fiyatlandırma" : "Pricing"}
+                {locale === "tr" ? "Planlar" : "Plans"}
               </Link>
               <Link
                 href="/guides"

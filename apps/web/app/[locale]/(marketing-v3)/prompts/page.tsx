@@ -7,11 +7,18 @@ import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../_components/legal-page-layout"
 import { LegalHero } from "../_components/legal-hero"
 import { ItemListSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
+import { getPromptThemeSlug, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
+import type { PromptTheme } from "@/lib/seo/content-registry"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 // Prompt themes with SEO-optimized metadata
-const promptThemes = [
+const promptThemes: Array<{
+  slug: PromptTheme
+  icon: typeof Star
+  color: string
+  promptCount: number
+}> = [
   {
     slug: "self-esteem",
     icon: Star,
@@ -72,13 +79,13 @@ const themeData: Record<string, {
       title: "Self-Esteem & Confidence",
       description: "Prompts to build self-worth, celebrate your achievements, and nurture self-compassion.",
       seoTitle: "Self-Esteem Writing Prompts | Letters to Future Self",
-      seoDescription: "Free self-esteem writing prompts for letters to your future self. Build confidence and self-worth with thoughtful reflection.",
+      seoDescription: "Self-esteem writing prompts for letters to your future self. Build confidence and self-worth with thoughtful reflection.",
     },
     tr: {
       title: "Özsaygı ve Güven",
       description: "Özsaygı oluşturmak, başarılarınızı kutlamak ve öz-şefkati beslemek için ipuçları.",
       seoTitle: "Özsaygı Yazma İpuçları | Gelecek Mektupları",
-      seoDescription: "Gelecekteki kendinize mektuplar için ücretsiz özsaygı yazma ipuçları. Düşünceli yansıma ile güven ve özsaygı oluşturun.",
+      seoDescription: "Gelecekteki kendinize mektuplar için özsaygı yazma ipuçları. Düşünceli yansıma ile güven ve özsaygı oluşturun.",
     },
   },
   "grief": {
@@ -194,8 +201,8 @@ export async function generateMetadata({
     : "Yazma İpuçları | Gelecekteki Kendine Mektuplar"
 
   const description = isEnglish
-    ? "Free writing prompts for letters to your future self. Explore themes like self-esteem, grief, graduation, sobriety, relationships, and more."
-    : "Gelecekteki kendinize mektuplar için ücretsiz yazma ipuçları. Özsaygı, keder, mezuniyet, ayıklık, ilişkiler ve daha fazlası gibi temaları keşfedin."
+    ? "Writing prompts for letters to your future self. Explore themes like self-esteem, grief, graduation, sobriety, relationships, and more."
+    : "Gelecekteki kendinize mektuplar için yazma ipuçları. Özsaygı, keder, mezuniyet, ayıklık, ilişkiler ve daha fazlası gibi temaları keşfedin."
 
   return {
     title,
@@ -227,6 +234,7 @@ export default async function PromptsHubPage({
   const { locale } = await params
   setRequestLocale(locale)
 
+  const seoLocale = normalizeSeoLocale(locale)
   const isEnglish = locale === "en"
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
 
@@ -243,7 +251,7 @@ export default async function PromptsHubPage({
   // Schema.org data
   const schemaItems = promptThemes.map((theme, index) => ({
     name: themeData[theme.slug]?.[locale === "tr" ? "tr" : "en"]?.title || theme.slug,
-    url: `${appUrl}${locale === "en" ? "" : "/" + locale}/prompts/${theme.slug}`,
+    url: `${appUrl}${locale === "en" ? "" : "/" + locale}/prompts/${getPromptThemeSlug(seoLocale, theme.slug)}`,
     position: index + 1,
   }))
 
@@ -280,15 +288,16 @@ export default async function PromptsHubPage({
             if (!themeInfo) return null
             const data = themeInfo[locale === "tr" ? "tr" : "en"]
             const Icon = theme.icon
+            const themeSlug = getPromptThemeSlug(seoLocale, theme.slug)
 
-            return (
-              <Link
-                key={theme.slug}
-                href={`/prompts/${theme.slug}` as any}
-                className={cn(
-                  "group relative p-6 border-2 border-charcoal",
-                  "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
-                  theme.color
+	            return (
+	              <Link
+	                key={theme.slug}
+	                href={{ pathname: "/prompts/[theme]", params: { theme: themeSlug } }}
+	                className={cn(
+	                  "group relative p-6 border-2 border-charcoal",
+	                  "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+	                  theme.color
                 )}
                 style={{ borderRadius: "2px" }}
               >

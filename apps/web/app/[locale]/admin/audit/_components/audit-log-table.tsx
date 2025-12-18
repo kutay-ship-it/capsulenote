@@ -34,7 +34,7 @@ interface AuditEvent {
   userId: string | null
   userEmail: string | null
   type: string
-  data: any
+  data: unknown
   ipAddress: string | null
   userAgent: string | null
   createdAt: Date
@@ -98,7 +98,7 @@ export function AuditLogTable({ events, currentPage, totalPages }: AuditLogTable
                   <TableCell>
                     {event.userEmail && event.userId ? (
                       <Link
-                        href={{ pathname: "/admin/users/[id]", params: { id: event.userId } }}
+                        href={{ pathname: "/admin/audit", query: { userId: event.userId } }}
                         className="text-sm hover:underline"
                       >
                         {event.userEmail}

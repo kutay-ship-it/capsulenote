@@ -52,14 +52,14 @@ export async function createCheckoutSession(input: {
 
     // 2. Validate price ID
     if (!isValidPriceId(input.priceId)) {
-      return {
-        success: false,
-        error: {
-          code: ErrorCodes.INVALID_INPUT,
-          message: "Invalid pricing plan selected. Please choose a valid plan.",
-        },
+        return {
+          success: false,
+          error: {
+            code: ErrorCodes.INVALID_INPUT,
+            message: "Invalid plan selected. Please choose a valid plan.",
+          },
+        }
       }
-    }
 
     // 3. Check for existing subscription
     const existingSubscription = await prisma.subscription.findFirst({

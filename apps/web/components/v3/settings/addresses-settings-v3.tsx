@@ -33,7 +33,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
 
   const handleAddAddress = async (
     data: ShippingAddressInput,
-    verification?: AddressVerificationResponse
+    _verification?: AddressVerificationResponse
   ) => {
     startTransition(async () => {
       const result = await createShippingAddress(data)
@@ -50,7 +50,7 @@ export function AddressesSettingsV3({ initialAddresses }: AddressesSettingsV3Pro
   const handleUpdateAddress = async (
     id: string,
     data: ShippingAddressInput,
-    verification?: AddressVerificationResponse
+    _verification?: AddressVerificationResponse
   ) => {
     startTransition(async () => {
       const result = await updateShippingAddress(id, data)

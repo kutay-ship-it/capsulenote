@@ -100,30 +100,30 @@ export function SubscribePricingNew({
           <div className="grid gap-8 md:grid-cols-3">
             {/* Testimonial 1 */}
             <div className="space-y-3 text-center">
-              <Quote className="h-6 w-6 text-duck-blue mx-auto" />
-              <p className="font-mono text-sm text-charcoal/80 italic leading-relaxed">
-                "{t("testimonials.items.sarah.quote")}"
-              </p>
+	              <Quote className="h-6 w-6 text-duck-blue mx-auto" />
+	              <p className="font-mono text-sm text-charcoal/80 italic leading-relaxed">
+	                &quot;{t("testimonials.items.sarah.quote")}&quot;
+	              </p>
               <p className="font-mono text-xs font-bold text-charcoal">
                 — {t("testimonials.items.sarah.author")}
               </p>
             </div>
             {/* Testimonial 2 */}
             <div className="space-y-3 text-center">
-              <Quote className="h-6 w-6 text-teal-primary mx-auto" />
-              <p className="font-mono text-sm text-charcoal/80 italic leading-relaxed">
-                "{t("testimonials.items.michael.quote")}"
-              </p>
+	              <Quote className="h-6 w-6 text-teal-primary mx-auto" />
+	              <p className="font-mono text-sm text-charcoal/80 italic leading-relaxed">
+	                &quot;{t("testimonials.items.michael.quote")}&quot;
+	              </p>
               <p className="font-mono text-xs font-bold text-charcoal">
                 — {t("testimonials.items.michael.author")}
               </p>
             </div>
             {/* Testimonial 3 */}
             <div className="space-y-3 text-center">
-              <Quote className="h-6 w-6 text-coral mx-auto" />
-              <p className="font-mono text-sm text-charcoal/80 italic leading-relaxed">
-                "{t("testimonials.items.emma.quote")}"
-              </p>
+	              <Quote className="h-6 w-6 text-coral mx-auto" />
+	              <p className="font-mono text-sm text-charcoal/80 italic leading-relaxed">
+	                &quot;{t("testimonials.items.emma.quote")}&quot;
+	              </p>
               <p className="font-mono text-xs font-bold text-charcoal">
                 — {t("testimonials.items.emma.author")}
               </p>

@@ -43,14 +43,14 @@ export default function DemoLetterPage() {
 
             <LetterContent>
               <p>
-                I'm writing this letter to remind you of where you were today. Remember the
+                I’m writing this letter to remind you of where you were today. Remember the
                 excitement of building something new, the challenges you faced, and the dreams
-                you're chasing right now.
+                you’re chasing right now.
               </p>
 
               <p>
-                By the time you read this, I hope you've made progress on your goals. Whether
-                you succeeded or learned from setbacks, I hope you're proud of the journey.
+                By the time you read this, I hope you’ve made progress on your goals. Whether
+                you succeeded or learned from setbacks, I hope you’re proud of the journey.
               </p>
 
               <p>
@@ -158,7 +158,7 @@ export default function DemoLetterPage() {
           <Letter variant="open" accentColor="blue" showStamp>
             <LetterHeader>
               <LetterTitle>Surprise! ✨</LetterTitle>
-              <LetterDate>To be opened on New Year's Day 2026</LetterDate>
+              <LetterDate>To be opened on New Year’s Day 2026</LetterDate>
             </LetterHeader>
 
             <LetterContent>

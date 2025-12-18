@@ -11,20 +11,40 @@
     "actions": {
       "tryAgain": "Tekrar Dene",
       "myLetters": "Mektuplarım",
-      "dashboard": "Panel"
+      "dashboard": "Yolculuk"
     },
     "help": "İşini kurtarmak için yardım mı lazım? {link}.",
     "contactSupport": "Destek ile iletişime geç"
   },
   "dashboard": {
-    "title": "Panel Hatası",
-    "message": "Panelini yüklerken bir sorun yaşadık. Verilerin güvenli.",
+    "title": "Yolculuk Hatası",
+    "message": "Yolculuğunu yüklerken bir sorun yaşadık. Verilerin güvenli.",
     "actions": {
-      "reload": "Paneli Yenile",
-      "goHome": "Panel Ana Sayfasına Git"
+      "reload": "Yolculuğu Yenile",
+      "goHome": "Yolculuğa Dön"
     },
     "help": "Bu sorun devam ederse, lütfen {link}.",
     "contactSupport": "destek ile iletişime geç"
+  },
+  "notFound": {
+    "metaTitle": "Sayfa Bulunamadı | Capsule Note",
+    "metaDescription": "Aradığın sayfa bulunamadı veya taşınmış olabilir. Gelecekteki kendine mektup yazmaya geri dön.",
+    "title": "Sayfa Bulunamadı",
+    "description": "Aradığın sayfa bulunamadı veya taşınmış olabilir. Seni tekrar doğru yere yönlendirelim.",
+    "returnHome": "Ana Sayfaya Dön",
+    "helpfulLinks": "Yararlı Bağlantılar",
+    "links": {
+      "templates": "Şablonlar",
+      "guides": "Rehberler",
+      "prompts": "İpuçları",
+      "blog": "Blog",
+      "writeLetter": "Mektup Yaz",
+      "contact": "İletişim"
+    },
+    "specific": "Belirli bir şey mi arıyorsun?",
+    "browseGuides": "Rehberlere göz at",
+    "or": "veya",
+    "exploreTemplates": "şablonları keşfet"
   },
   "fallback": {
     "defaultTitle": "Bir Şeyler Ters Gitti",

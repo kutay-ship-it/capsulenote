@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useMemo, useEffect, useCallback } from "react"
+import { useState, useTransition, useMemo, useEffect, useCallback, useId } from "react"
 import {
   Check,
   ChevronsUpDown,
@@ -192,6 +192,8 @@ function TimezoneOptionItem({
     <button
       type="button"
       onClick={onClick}
+      role="option"
+      aria-selected={isSelected}
       className={cn(
         "w-full flex items-center gap-3 p-3 text-left transition-all",
         "border-2 border-transparent hover:border-charcoal hover:bg-duck-yellow/10",
@@ -266,6 +268,7 @@ export function TimezoneSelectV3({
   const [isPending, startTransition] = useTransition()
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const locale = useLocale()
+  const listboxId = useId()
 
   // Update current time every minute
   useEffect(() => {
@@ -360,6 +363,8 @@ export function TimezoneSelectV3({
           type="button"
           role="combobox"
           aria-expanded={open}
+          aria-controls={listboxId}
+          aria-haspopup="listbox"
           disabled={isPending}
           className={cn(
             "group w-full flex items-center gap-4 p-4 text-left",
@@ -468,7 +473,7 @@ export function TimezoneSelectV3({
 
         {/* Timezone List */}
         <ScrollArea className="h-[320px]">
-          <div className="p-2">
+          <div id={listboxId} role="listbox" className="p-2">
             {filteredGroups.length === 0 ? (
               <div className="p-4 text-center">
                 <p className="font-mono text-sm text-charcoal/50">

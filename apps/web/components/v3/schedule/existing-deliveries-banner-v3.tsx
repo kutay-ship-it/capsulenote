@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { format } from "date-fns"
 import { Mail, FileText, Clock, ChevronDown, ChevronUp, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 import type { DeliveryChannel, DeliveryStatus } from "@prisma/client"
+import { Link } from "@/i18n/routing"
 
 interface DeliveryInfo {
   id: string
@@ -163,7 +163,7 @@ export function ExistingDeliveriesBannerV3({
       {/* Link to Letter Page */}
       <div className="mt-3 pt-3 border-t border-charcoal/10">
         <Link
-          href={`/letters/${letterId}`}
+          href={{ pathname: "/letters/[id]", params: { id: letterId } }}
           className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/70 hover:text-charcoal transition-colors"
         >
           {t("manageOnLetterPage")}

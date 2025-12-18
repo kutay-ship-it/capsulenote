@@ -13,20 +13,28 @@
 import * as React from "react"
 import type { Metadata } from "next"
 import { Link } from "@/i18n/routing"
-import { getTranslations } from "next-intl/server"
+import type { AppHref } from "@/i18n/routing"
+import { getTranslations, setRequestLocale } from "next-intl/server"
+import type { Locale } from "@/i18n/routing"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, XCircle, Clock, Mail, HelpCircle } from "lucide-react"
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("subscribe")
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "subscribe" })
+  const canonicalPath = locale === "en" ? "/subscribe/error" : `/${locale}/subscribe/error`
   return {
     title: t("error.metadata.title"),
     description: t("error.metadata.description"),
     alternates: {
-      canonical: "/subscribe/error",
+      canonical: canonicalPath,
     },
     robots: {
       index: false,
@@ -36,6 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface ErrorPageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{
     code?: string
     message?: string
@@ -54,25 +63,31 @@ const iconMap: Record<ErrorCode, React.ReactNode> = {
   unknown: <AlertCircle className="h-6 w-6 text-red-600" />,
 }
 
-function getActionHref(code: ErrorCode, email?: string): string {
+type SecondaryHref = AppHref | `mailto:${string}`
+
+function isMailtoHref(href: SecondaryHref): href is `mailto:${string}` {
+  return typeof href === "string" && href.startsWith("mailto:")
+}
+
+function getActionHref(code: ErrorCode, email?: string): AppHref {
   switch (code) {
     case "payment_failed":
-      return email ? `/subscribe?email=${encodeURIComponent(email)}` : "/subscribe"
+      return email ? { pathname: "/subscribe", query: { email } } : "/subscribe"
     case "session_expired":
       return "/subscribe"
     case "email_mismatch":
-      return email ? `/sign-in?email=${encodeURIComponent(email)}` : "/sign-in"
+      return email ? { pathname: "/sign-in", query: { email } } : "/sign-in"
     case "email_not_verified":
       return "/sign-in"
     case "pending_subscription_not_found":
-      return "/settings?tab=billing"
+      return { pathname: "/settings", query: { tab: "billing" } }
     case "unknown":
     default:
       return "/subscribe"
   }
 }
 
-function getSecondaryActionHref(code: ErrorCode): string | null {
+function getSecondaryActionHref(code: ErrorCode): SecondaryHref | null {
   switch (code) {
     case "payment_failed":
     case "pending_subscription_not_found":
@@ -85,10 +100,13 @@ function getSecondaryActionHref(code: ErrorCode): string | null {
   }
 }
 
-export default async function ErrorPage({ searchParams }: ErrorPageProps) {
-  const params = await searchParams
-  const { code = "unknown", message, email } = params
-  const t = await getTranslations("subscribe")
+export default async function ErrorPage({ params, searchParams }: ErrorPageProps) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
+  const resolvedSearchParams = await searchParams
+  const { code = "unknown", message, email } = resolvedSearchParams
+  const t = await getTranslations({ locale, namespace: "subscribe" })
 
   const errorCode = (["payment_failed", "session_expired", "email_mismatch", "email_not_verified", "pending_subscription_not_found"].includes(code) ? code : "unknown") as ErrorCode
 
@@ -128,13 +146,17 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
                 variant="secondary"
                 className="w-full"
               >
-                <Link href={actionHref as "/subscribe"}>{actionLabel}</Link>
+                <Link href={actionHref}>{actionLabel}</Link>
               </Button>
 
               {/* Secondary Action */}
               {secondaryActionLabel && secondaryActionHref && (
                 <Button asChild size="lg" variant="outline" className="w-full">
-                  <a href={secondaryActionHref}>{secondaryActionLabel}</a>
+                  {isMailtoHref(secondaryActionHref) ? (
+                    <a href={secondaryActionHref}>{secondaryActionLabel}</a>
+                  ) : (
+                    <Link href={secondaryActionHref}>{secondaryActionLabel}</Link>
+                  )}
                 </Button>
               )}
             </div>

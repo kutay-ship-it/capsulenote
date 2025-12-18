@@ -11,14 +11,13 @@ import {
   PenLine,
   Trash2,
   Lock,
-  CheckCircle2,
   ArrowRight,
   Stamp,
   MailOpen,
 } from "lucide-react"
-import { getTranslations, getLocale } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 
-import { Link } from "@/i18n/routing"
+import { Link, type Locale } from "@/i18n/routing"
 import { getDateFnsLocale } from "@/lib/date-formatting"
 import { getLetter } from "@/server/actions/letters"
 import { requireUser } from "@/server/lib/auth"
@@ -32,6 +31,7 @@ export const dynamic = "force-dynamic"
 
 interface PageProps {
   params: Promise<{
+    locale: Locale
     id: string
   }>
 }
@@ -157,9 +157,8 @@ function LetterDetailV3Skeleton() {
 /**
  * Async component for letter content
  */
-async function LetterDetailContent({ id }: { id: string }) {
-  const t = await getTranslations("letters")
-  const locale = await getLocale()
+async function LetterDetailContent({ id, locale }: { id: string; locale: Locale }) {
+  const t = await getTranslations({ locale, namespace: "letters" })
   const dateFnsLocale = getDateFnsLocale(locale)
 
   let letter
@@ -205,7 +204,7 @@ async function LetterDetailContent({ id }: { id: string }) {
 
   const hasBeenOpened = !!letter.firstOpenedAt
   const formattedOpenedDate = letter.firstOpenedAt
-    ? format(new Date(letter.firstOpenedAt), "MMMM d, yyyy 'at' h:mm a")
+    ? format(new Date(letter.firstOpenedAt), "PPpp", { locale: dateFnsLocale })
     : null
 
   // For scheduled letters, get preview (first 100 chars of plain text)
@@ -517,8 +516,8 @@ async function LetterDetailContent({ id }: { id: string }) {
 }
 
 export default async function LetterDetailV3Page({ params }: PageProps) {
-  const { id } = await params
-  const t = await getTranslations("letters")
+  const { locale, id } = await params
+  const t = await getTranslations({ locale, namespace: "letters" })
 
   // Verify user is authenticated
   await requireUser()
@@ -544,7 +543,7 @@ export default async function LetterDetailV3Page({ params }: PageProps) {
       {/* Letter Content */}
       <section className="pb-12">
         <Suspense fallback={<LetterDetailV3Skeleton />}>
-          <LetterDetailContent id={id} />
+          <LetterDetailContent id={id} locale={locale} />
         </Suspense>
       </section>
     </div>

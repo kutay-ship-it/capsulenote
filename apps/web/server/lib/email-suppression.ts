@@ -6,7 +6,7 @@
  */
 
 import { prisma } from "./db"
-import type { Prisma } from "@prisma/client"
+import { Prisma } from "@prisma/client"
 
 export interface SuppressionCheckResult {
   isSuppressed: boolean
@@ -175,7 +175,7 @@ export async function removeEmailFromSuppressionList(
     return true
   } catch (error) {
     // If not found, that's fine
-    if ((error as any)?.code === "P2025") {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
       return false
     }
     console.error("[Email Suppression] Failed to remove from suppression list:", error)

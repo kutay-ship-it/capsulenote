@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils"
 import {
   estimatePageCount,
   getPageStatus,
-  MAX_CONTENT_CHARS,
   type PageStatus,
 } from "@/lib/page-estimation"
 
@@ -180,7 +179,7 @@ export function LetterEditor({
       </div>
 
       {/* Editor Content */}
-      <div className="editor-wrapper">
+      <div className="editor-wrapper" style={{ minHeight }}>
         <EditorContent editor={editor} />
       </div>
 

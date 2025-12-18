@@ -12,7 +12,7 @@
 
 import * as React from "react"
 import type { Metadata } from "next"
-import { getTranslations } from "next-intl/server"
+import { getTranslations, setRequestLocale } from "next-intl/server"
 import { redirect } from "next/navigation"
 import { currentUser } from "@clerk/nextjs/server"
 import { stripe } from "@/server/providers/stripe/client"
@@ -25,14 +25,23 @@ import { CheckCircle, AlertCircle } from "lucide-react"
 
 import { CustomSignUpForm } from "@/components/auth/custom-sign-up"
 import { RedirectCountdown } from "../_components/redirect-countdown"
+import { Link } from "@/i18n/routing"
+import type { Locale } from "@/i18n/routing"
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("subscribe.success")
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "subscribe.success" })
+
+  const canonicalPath = locale === "en" ? "/subscribe/success" : `/${locale}/subscribe/success`
   return {
     title: t("metadata.title"),
     description: t("metadata.description"),
     alternates: {
-      canonical: "/subscribe/success",
+      canonical: canonicalPath,
     },
     robots: {
       index: false,
@@ -42,23 +51,28 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface SuccessPageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{
     session_id?: string
   }>
 }
 
-export default async function SuccessPage({ searchParams }: SuccessPageProps) {
-  const t = await getTranslations("subscribe.success")
-  const params = await searchParams
-  const { session_id } = params
+export default async function SuccessPage({ params, searchParams }: SuccessPageProps) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const prefix = locale === "en" ? "" : `/${locale}`
+
+  const t = await getTranslations({ locale, namespace: "subscribe.success" })
+  const resolvedSearchParams = await searchParams
+  const { session_id } = resolvedSearchParams
 
   // Redirect to subscribe if no session ID
   if (!session_id) {
-    redirect("/subscribe")
+    redirect(`${prefix}/subscribe`)
   }
 
   // Verify session with Stripe
-  let session: any
+  let session: Awaited<ReturnType<typeof stripe.checkout.sessions.retrieve>> | null = null
   let email: string | null = null
   let planName: string = "Pro"
 
@@ -103,7 +117,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
 
           <div className="text-center">
             <Button asChild variant="secondary">
-              <a href="/subscribe">{t("returnToPricing")}</a>
+              <Link href="/subscribe">{t("returnToPricing")}</Link>
             </Button>
           </div>
         </div>
@@ -123,7 +137,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
     }
 
     // User is authenticated - show success and redirect to journey
-    // The webhook or dashboard mount will link the subscription
+    // The webhook or journey mount will link the subscription
     return (
       <div className="container px-4 py-12 sm:px-6">
         <div className="mx-auto max-w-2xl space-y-8">
@@ -152,7 +166,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               </div>
 
               {/* Countdown with skip button - replaces hardcoded 5s script */}
-              <RedirectCountdown duration={3} targetUrl="/journey" />
+              <RedirectCountdown duration={3} targetHref="/journey" />
             </CardContent>
           </Card>
         </div>

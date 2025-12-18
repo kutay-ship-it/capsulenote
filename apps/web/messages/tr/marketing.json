@@ -89,10 +89,10 @@
   ],
   "cta": {
     "title": "Geleceğe bir mektup bırakmaya hazır mısın?",
-    "signedOutDescription": "Mektuplarını şifreli kasamızda güvenle sakla ve gelecekteki kendine planla. Ücretsiz hesap aç, hemen başla.",
+    "signedOutDescription": "Mektuplarını şifreli kasamızda güvenle sakla ve gelecekteki kendine planla. Hesap oluştur, hemen başla.",
     "signedInDescription": "Yarım kalan taslakları tamamla ya da yeni bir teslimat planla.",
-    "createAccount": "Ücretsiz hesap oluştur",
-    "goToDashboard": "Panoya git"
+    "createAccount": "Hesap oluştur",
+    "goToDashboard": "Mektuplara git"
   },
   "testimonial": {
     "title": "Sözler burada güzelce yaşlanır",
@@ -101,7 +101,7 @@
   },
   "ctaBottom": {
     "title": "Gelecekte bir mektup aç",
-    "description": "Ücretsiz başla, istediğin kadar yaz, teslimat planladığında öde.",
+    "description": "İstediğin kadar taslak yaz, hazır olduğunda teslimatı planla.",
     "primary": "İlk mektubunu yaz",
     "secondary": "Zaten hesabım var"
   },
@@ -226,7 +226,7 @@
     "company": "Şirket",
     "legal": "Yasal",
     "links": {
-      "pricing": "Fiyatlar",
+      "pricing": "Planlar",
       "writeLetter": "Mektup Yaz",
       "features": "Özellikler",
       "howItWorks": "Nasıl Çalışır",
@@ -301,7 +301,7 @@
     "years1": "1 yıl",
     "years5": "5 yıl",
     "years25": "25 yıl",
-    "goToDashboard": "Panoya Git",
+    "goToDashboard": "Mektuplara Git",
     "startWritingFree": "Hemen Yazmaya Başla",
     "tryItBelow": "Aşağıda dene",
     "stats": [
@@ -462,7 +462,7 @@
     "startWritingFree": "Hemen Yazmaya Başla",
     "noCreditCard": "Kredi kartı gerekmez. İstediğin zaman iptal et.",
     "stats": [
-      { "value": "Ücretsiz", "label": "İlk Mektup" },
+      { "value": "1", "label": "İlk Mektup" },
       { "value": "5 dk", "label": "Yazma Süresi" },
       { "value": "50 yıl", "label": "Maks. Süre" }
     ]
@@ -505,65 +505,7 @@
       },
       {
         "question": "Geleceğe ne kadar ileri planlayabilirim?",
-        "answer": "Ücretsiz hesapla 5 yıl, Premium ile 50 yıl sonrasına kadar planlayabilirsin. Evet, 50 yıl sonraki kendine mektup yazabilirsin! Ve biz o mektubu teslim etmek için burada olacağız."
-      }
-    ]
-  },
-  "footerV2": {
-    "tagline": "Gelecekteki kendine mektup yaz. Şifreli, planlanmış ve tam ihtiyacın olduğunda teslim edilir.",
-    "productTitle": "Ürün",
-    "legalTitle": "Yasal",
-    "productLinks": [
-      { "label": "Fiyatlandırma", "href": "/pricing" },
-      { "label": "Kayıt Ol", "href": "/sign-up" },
-      { "label": "Giriş Yap", "href": "/sign-in" }
-    ],
-    "legalLinks": [
-      { "label": "Gizlilik Politikası", "href": "/privacy" },
-      { "label": "Kullanım Şartları", "href": "/terms" }
-    ],
-    "copyright": "© {year} Capsule Note. Tüm hakları saklıdır.",
-    "madeWith": "Gelecekteki sen için {heart} ile yapıldı"
-  },
-  "pricingPreview": {
-    "badge": "Şeffaf Fiyatlandırma",
-    "title": "Ücretsiz Başla,",
-    "titleHighlight": "Hazır Olunca Yükselt",
-    "description": "İlk mektubun tamamen ücretsiz. Kredi kartı gerekmez.",
-    "mostPopular": "En Popüler",
-    "seeFullPricing": "Tüm fiyatlandırma detaylarını gör",
-    "tiers": [
-      {
-        "name": "Ücretsiz",
-        "price": "₺0",
-        "period": "sonsuza dek",
-        "description": "İlk mektubunu yazmak için ideal",
-        "cta": "Ücretsiz Başla",
-        "href": "/pricing",
-        "popular": false,
-        "features": [
-          "1 ücretsiz mektup",
-          "E-posta teslimatı",
-          "Temel şifreleme",
-          "5 yıl sonrasına kadar planla"
-        ]
-      },
-      {
-        "name": "Premium",
-        "price": "₺150",
-        "period": "/yıl",
-        "description": "Sınırsız mektup ve fiziksel posta",
-        "cta": "Premium'a Geç",
-        "href": "/pricing",
-        "popular": true,
-        "features": [
-          "Sınırsız mektup",
-          "E-posta + fiziksel posta",
-          "Gelişmiş şifreleme",
-          "50 yıl sonrasına kadar planla",
-          "Öncelikli teslimat",
-          "Yazı ipuçları"
-        ]
+        "answer": "Planlama sınırları hesabına göre değişir. Mektupları yıllar sonrasına — 50 yıla kadar — planlayabilirsin. Evet, 50 yıl sonraki kendine mektup yazabilirsin! Ve biz o mektubu teslim etmek için burada olacağız."
       }
     ]
   },

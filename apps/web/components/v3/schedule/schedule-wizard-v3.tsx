@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { format, setHours, setMinutes } from "date-fns"
+import { useSearchParams } from "next/navigation"
+import { setHours, setMinutes } from "date-fns"
 import { fromZonedTime } from "date-fns-tz"
 import { ArrowLeft, ArrowRight, Check } from "lucide-react"
 import { toast } from "sonner"
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
 import { getDeliveryEligibility } from "@/server/actions/entitlements"
+import { useRouter } from "@/i18n/routing"
 import { DateSelectorV3 } from "./date-selector-v3"
 import { DeliveryCountdownV3 } from "./delivery-countdown-v3"
 import { TimelineVisualizerV3 } from "./timeline-visualizer-v3"
@@ -92,8 +93,8 @@ export function ScheduleWizardV3({
   userBirthday,
   emailCredits,
   physicalCredits,
-  isPhysicalLocked = false,
-  canShowTrialOffer = false,
+  isPhysicalLocked: _isPhysicalLocked = false,
+  canShowTrialOffer: _canShowTrialOffer = false,
   isDigitalCapsule = false,
   canPurchasePhysicalTrial = false,
   hasUsedPhysicalTrial = false,
@@ -141,33 +142,35 @@ export function ScheduleWizardV3({
   })
 
   // Refresh eligibility data from server
-  const refreshEligibility = React.useCallback(async () => {
-    try {
-      const freshEligibility = await getDeliveryEligibility()
-      setCurrentEligibility({
-        physicalCredits: freshEligibility.physicalCredits,
+	  const refreshEligibility = React.useCallback(async () => {
+	    try {
+	      const freshEligibility = await getDeliveryEligibility()
+	      setCurrentEligibility({
+	        physicalCredits: freshEligibility.physicalCredits,
         canPurchasePhysicalTrial: freshEligibility.canPurchasePhysicalTrial,
         hasUsedPhysicalTrial: freshEligibility.hasUsedPhysicalTrial,
         isDigitalCapsule: freshEligibility.isDigitalCapsule,
       })
 
-      // If user was trying to select mail and now has credits, auto-select mail
-      if (pendingMailSelection && freshEligibility.physicalCredits > 0) {
-        if (!state.channels.includes("mail")) {
-          setState(prev => ({
-            ...prev,
-            channels: [...prev.channels, "mail"]
-          }))
-        }
-        setPendingMailSelection(false)
-        toast.success(t("toasts.physicalMailUnlocked"), {
-          description: t("toasts.physicalMailUnlockedDescription"),
-        })
-      }
-    } catch (error) {
-      console.error("Failed to refresh eligibility:", error)
-    }
-  }, [pendingMailSelection, state.channels])
+	      // If user was trying to select mail and now has credits, auto-select mail
+	      if (pendingMailSelection && freshEligibility.physicalCredits > 0) {
+	        setState((prev) =>
+	          prev.channels.includes("mail")
+	            ? prev
+	            : {
+	                ...prev,
+	                channels: [...prev.channels, "mail"],
+	              }
+	        )
+	        setPendingMailSelection(false)
+	        toast.success(t("toasts.physicalMailUnlocked"), {
+	          description: t("toasts.physicalMailUnlockedDescription"),
+	        })
+	      }
+	    } catch (error) {
+	      console.error("Failed to refresh eligibility:", error)
+	    }
+	  }, [pendingMailSelection, t])
 
   // Listen for credit updates from other tabs (e.g., after Stripe checkout)
   useCreditsUpdateListener(refreshEligibility)
@@ -264,7 +267,7 @@ export function ScheduleWizardV3({
       goToStep((currentStep - 1) as WizardStep)
     } else {
       // Go back to letter detail page
-      router.push(`/letters/${letterId}`)
+      router.push({ pathname: "/letters/[id]", params: { id: letterId } })
     }
   }
 
@@ -357,7 +360,7 @@ export function ScheduleWizardV3({
 
   // Celebration complete handler
   const handleCelebrationComplete = () => {
-    router.push(`/letters/${letterId}`)
+    router.push({ pathname: "/letters/[id]", params: { id: letterId } })
   }
 
   // Update state helpers

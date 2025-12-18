@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { MapPin, Plus, Pencil, Trash2, Loader2, CheckCircle2 } from "lucide-react"
+import { MapPin, Plus, Trash2, Loader2, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
@@ -69,7 +69,7 @@ export function AddressSelectorV3({
             description: result.error.message,
           })
         }
-      } catch (error) {
+      } catch {
         if (isMountedRef.current) {
           toast.error(t("loadFailed"))
         }
@@ -86,28 +86,6 @@ export function AddressSelectorV3({
       isMountedRef.current = false
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Reusable function for reloading addresses (after add/delete)
-  const reloadAddresses = async () => {
-    setIsLoading(true)
-    try {
-      const result = await listShippingAddresses()
-      if (result.success) {
-        setAddresses(result.data)
-        if (value && !result.data.find((a) => a.id === value)) {
-          onChange(null)
-        }
-      } else {
-        toast.error(t("loadFailed"), {
-          description: result.error.message,
-        })
-      }
-    } catch (error) {
-      toast.error(t("loadFailed"))
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleAddAddress = async (
     addressData: ShippingAddressInput,
@@ -127,7 +105,7 @@ export function AddressSelectorV3({
           description: result.error.message,
         })
       }
-    } catch (error) {
+    } catch {
       toast.error(t("saveFailed"))
     } finally {
       setIsSubmitting(false)
@@ -150,7 +128,7 @@ export function AddressSelectorV3({
           description: result.error.message,
         })
       }
-    } catch (error) {
+    } catch {
       toast.error(t("deleteFailed"))
     } finally {
       setDeletingId(null)

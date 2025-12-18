@@ -62,23 +62,23 @@ type Fixtures = {
  */
 export const test = base.extend<Fixtures>({
   // Generate unique test email with +clerk_test suffix for each test
-  testEmail: async ({}, use) => {
+  testEmail: async ({}, run) => {
     const timestamp = Date.now()
     const random = Math.random().toString(36).slice(2, 8)
     const email = `test-${timestamp}-${random}+clerk_test@example.com`
-    await use(email)
+    await run(email)
   },
 
   // Page with authenticated user (requires manual login in test)
-  authenticatedPage: async ({ page }, use) => {
+  authenticatedPage: async ({ page }, run) => {
     await page.goto("/")
-    await use(page)
+    await run(page)
   },
 
   // Page without authentication
-  anonymousPage: async ({ page }, use) => {
+  anonymousPage: async ({ page }, run) => {
     await page.goto("/")
-    await use(page)
+    await run(page)
   },
 })
 
@@ -124,7 +124,7 @@ export async function signUpWithClerkTest(
   }
 
   // Wait for verification to complete and redirect
-  await page.waitForURL(/\/(dashboard|letters|welcome|journey)/, { timeout: 15000 })
+  await page.waitForURL(/\/(journey|letters|welcome)/, { timeout: 15000 })
 }
 
 /**
@@ -154,7 +154,7 @@ export async function signInWithClerk(
   await page.click('button[type="submit"]')
 
   // Wait for redirect to authenticated area
-  await page.waitForURL(/\/(dashboard|letters|journey)/, { timeout: 15000 })
+  await page.waitForURL(/\/(journey|letters)/, { timeout: 15000 })
 }
 
 // ============================================================================
@@ -216,7 +216,7 @@ export async function completeStripeCheckout(
   await page.click('button[type="submit"]')
 
   // Wait for redirect back to app
-  await page.waitForURL(/\/subscribe\/success|\/dashboard|\/welcome/, {
+  await page.waitForURL(/\/subscribe\/success|\/journey|\/welcome/, {
     timeout: 60000,
   })
 }
@@ -524,7 +524,7 @@ export class DashboardPage {
   }
 
   async isLoaded() {
-    await expect(this.page).toHaveURL(/\/journey|\/letters|\/dashboard/)
+    await expect(this.page).toHaveURL(/\/journey|\/letters/)
   }
 }
 
@@ -630,41 +630,6 @@ export class SettingsPage {
 /**
  * Delivery Management interactions
  */
-export class DeliveryPage {
-  constructor(private page: Page) {}
-
-  async gotoDeliveries() {
-    await this.page.goto("/deliveries")
-  }
-
-  async getDeliveryByLetterId(letterId: string) {
-    return this.page.locator(`[data-delivery-letter="${letterId}"], [href*="${letterId}"]`)
-  }
-
-  async cancelDelivery(deliveryId: string) {
-    await this.page.click(`[data-delivery="${deliveryId}"] button:has-text("Cancel")`)
-
-    // Confirm cancellation
-    const confirmButton = this.page.locator('[role="dialog"] button:has-text("Cancel"), [role="alertdialog"] button:has-text("Yes")')
-    if (await confirmButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await confirmButton.click()
-    }
-  }
-
-  async rescheduleDelivery(deliveryId: string, newDate: string) {
-    await this.page.click(`[data-delivery="${deliveryId}"] button:has-text("Reschedule")`)
-
-    // Fill new date
-    const dateInput = this.page.locator('input[type="date"]')
-    if (await dateInput.isVisible()) {
-      await dateInput.fill(newDate)
-    }
-
-    // Confirm
-    await this.page.click('[role="dialog"] button:has-text("Save"), [role="dialog"] button:has-text("Confirm")')
-  }
-}
-
 // ============================================================================
 // Test Utilities
 // ============================================================================

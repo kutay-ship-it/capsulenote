@@ -151,14 +151,14 @@ export default async function GuidesHubPage({
               const localizedData = data[locale === "tr" ? "tr" : "en"]
               const Icon = iconMap[data.icon]
 
-              return (
-                <Link
-                  key={slug}
-                  href={`/guides/${slug}` as any}
-                  className={cn(
-                    "group p-6 border-2 border-charcoal",
-                    "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
-                    data.color
+	              return (
+	                <Link
+	                  key={slug}
+	                  href={{ pathname: "/guides/[slug]", params: { slug } }}
+	                  className={cn(
+	                    "group p-6 border-2 border-charcoal",
+	                    "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+	                    data.color
                   )}
                   style={{ borderRadius: "2px" }}
                 >
@@ -204,14 +204,14 @@ export default async function GuidesHubPage({
             const localizedData = data[locale === "tr" ? "tr" : "en"]
             const Icon = iconMap[data.icon]
 
-            return (
-              <Link
-                key={slug}
-                href={`/guides/${slug}` as any}
-                className={cn(
-                  "group flex flex-col sm:flex-row sm:items-center gap-4 p-6 border-2 border-charcoal",
-                  "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
-                  data.color
+	            return (
+	              <Link
+	                key={slug}
+	                href={{ pathname: "/guides/[slug]", params: { slug } }}
+	                className={cn(
+	                  "group flex flex-col sm:flex-row sm:items-center gap-4 p-6 border-2 border-charcoal",
+	                  "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
+	                  data.color
                 )}
                 style={{ borderRadius: "2px" }}
               >

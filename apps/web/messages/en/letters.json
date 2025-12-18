@@ -172,6 +172,21 @@
       "delivers": "Delivers {date}"
     }
   },
+  "edit": {
+    "heading": "Edit Letter",
+    "subtitle": "Update your draft before scheduling.",
+    "cancel": "Cancel",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "saved": {
+      "title": "Changes saved",
+      "description": "Your letter has been updated."
+    },
+    "errors": {
+      "titleRequired": "Title is required.",
+      "saveFailed": "Save failed"
+    }
+  },
   "schedule": {
     "badge": "Step 2: Schedule",
     "title": "Schedule Your Letter",

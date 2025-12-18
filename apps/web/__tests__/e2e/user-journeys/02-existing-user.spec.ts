@@ -46,7 +46,7 @@ test.describe("Existing User Journey: Login → View → Edit → Reschedule", (
       await signInWithClerk(page, testUserEmail, testUserPassword)
 
       // Verify we're in authenticated area
-      await expect(page).toHaveURL(/\/(journey|letters|dashboard)/)
+      await expect(page).toHaveURL(/\/(journey|letters)/)
     })
 
     // =========================================================================

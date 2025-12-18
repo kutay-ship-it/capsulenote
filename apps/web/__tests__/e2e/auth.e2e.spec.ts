@@ -68,8 +68,8 @@ test.describe("Authentication Flows", () => {
   // --------------------------------------------------------------------------
 
   test.describe("Protected Routes", () => {
-    test("should redirect /dashboard to sign-in when unauthenticated", async ({ page }) => {
-      await page.goto("/dashboard")
+    test("should redirect /journey to sign-in when unauthenticated", async ({ page }) => {
+      await page.goto("/journey")
 
       // Should redirect to sign-in
       await expect(page).toHaveURL(/\/sign-in/)
@@ -88,7 +88,7 @@ test.describe("Authentication Flows", () => {
     })
 
     test("should preserve return URL when redirecting to sign-in", async ({ page }) => {
-      await page.goto("/dashboard")
+      await page.goto("/journey")
 
       // Check for redirect_url or return_to parameter
       const url = new URL(page.url())
@@ -98,7 +98,7 @@ test.describe("Authentication Flows", () => {
 
       // Either the URL contains redirect info or we're at sign-in
       expect(
-        redirectUrl?.includes("dashboard") ||
+        redirectUrl?.includes("journey") ||
         page.url().includes("sign-in")
       ).toBe(true)
     })

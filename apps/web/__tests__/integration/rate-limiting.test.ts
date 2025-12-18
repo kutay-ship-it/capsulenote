@@ -239,6 +239,7 @@ describe('Rate Limiting Integration Tests', () => {
   describe('Rate Limit Configuration', () => {
     it('should initialize rate limiters with correct configuration', async () => {
       const { Ratelimit } = await import('@upstash/ratelimit')
+      const expectedAnalytics = process.env.NODE_ENV === "production"
 
       // Clear module cache to reinitialize
       vi.resetModules()
@@ -252,7 +253,7 @@ describe('Rate Limiting Integration Tests', () => {
             maxRequests: 100,
             window: '1 m',
           }),
-          analytics: true,
+          analytics: expectedAnalytics,
         })
       )
 
@@ -263,7 +264,7 @@ describe('Rate Limiting Integration Tests', () => {
             maxRequests: 10,
             window: '1 h',
           }),
-          analytics: true,
+          analytics: expectedAnalytics,
         })
       )
 
@@ -274,7 +275,7 @@ describe('Rate Limiting Integration Tests', () => {
             maxRequests: 20,
             window: '1 h',
           }),
-          analytics: true,
+          analytics: expectedAnalytics,
         })
       )
     })

@@ -128,7 +128,7 @@ describe("Billing Server Actions", () => {
         expect(result.success).toBe(false)
         if (!result.success) {
           expect(result.error.code).toBe(ErrorCodes.INVALID_INPUT)
-          expect(result.error.message).toContain("Invalid pricing plan")
+          expect(result.error.message).toContain("Invalid plan")
         }
       })
 

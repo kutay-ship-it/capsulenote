@@ -64,7 +64,7 @@ export async function getCurrentUser() {
         return null
       }
 
-      // Extract detected timezone from Clerk metadata (set by TimezoneDetector component)
+      // Extract detected timezone from Clerk metadata (set client-side)
       const detectedTimezone = getDetectedTimezoneFromMetadata(clerkUser.unsafeMetadata)
       const timezone =
         detectedTimezone && isValidTimezone(detectedTimezone)

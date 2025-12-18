@@ -8,22 +8,31 @@ import { cn } from "@/lib/utils"
 interface FeatureItem {
   name: string
   tooltip?: string
-  free: boolean | string
-  pro: boolean | string
+  digital: boolean | string
+  paper: boolean | string
   enterprise: boolean | string
 }
+
+type TierName = "digital" | "paper" | "enterprise"
 
 interface FeatureCategory {
   name: string
   features: FeatureItem[]
 }
 
+interface TierConfig {
+  name: TierName
+  label: string
+  isHighlighted?: boolean
+}
+
 interface FeatureMatrixV3Props {
   categories: FeatureCategory[]
+  tiers?: TierConfig[]
   headers?: {
     feature: string
-    free: string
-    pro: string
+    digital: string
+    paper: string
     enterprise: string
   }
   mobileNote?: string
@@ -58,7 +67,7 @@ function FeatureValue({ value, inline = false }: { value: boolean | string; inli
 
 // Mobile tier card component for accordion view
 interface MobileTierCardProps {
-  tierName: string
+  tierName: TierName
   tierLabel: string
   categories: FeatureCategory[]
   isExpanded: boolean
@@ -165,23 +174,34 @@ function MobileTierCard({
 
 export function FeatureMatrixV3({
   categories,
+  tiers,
   headers = {
     feature: "Feature",
-    free: "Free",
-    pro: "Pro",
+    digital: "Digital Capsule",
+    paper: "Paper & Pixels",
     enterprise: "Enterprise",
   },
   mobileNote = "Tap a plan to see features",
 }: FeatureMatrixV3Props) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const isInView = useInView(containerRef, { once: true, margin: "-50px" })
-  const [expandedTier, setExpandedTier] = React.useState<string | null>("pro") // Pro expanded by default
+  const resolvedTiers: TierConfig[] =
+    tiers && tiers.length > 0
+      ? tiers
+      : [
+          { name: "digital", label: headers.digital, isHighlighted: false },
+          { name: "paper", label: headers.paper, isHighlighted: true },
+          { name: "enterprise", label: headers.enterprise, isHighlighted: false },
+        ]
 
-  const tiers = [
-    { name: "free", label: headers.free, isHighlighted: false },
-    { name: "pro", label: headers.pro, isHighlighted: true },
-    { name: "enterprise", label: headers.enterprise, isHighlighted: false },
-  ]
+  const defaultExpandedTier =
+    resolvedTiers.find((tier) => tier.isHighlighted)?.name ?? resolvedTiers[0]?.name ?? null
+  const [expandedTier, setExpandedTier] = React.useState<TierName | null>(
+    defaultExpandedTier
+  )
+
+  const gridColsClass = resolvedTiers.length === 2 ? "grid-cols-3" : "grid-cols-4"
+  const spanClass = resolvedTiers.length === 2 ? "col-span-3" : "col-span-4"
 
   return (
     <div ref={containerRef} className="w-full">
@@ -190,7 +210,7 @@ export function FeatureMatrixV3({
         <p className="mb-4 font-mono text-xs text-charcoal/60 text-center">
           {mobileNote}
         </p>
-        {tiers.map((tier) => (
+        {resolvedTiers.map((tier) => (
           <MobileTierCard
             key={tier.name}
             tierName={tier.name}
@@ -212,21 +232,28 @@ export function FeatureMatrixV3({
           style={{ borderRadius: "2px" }}
         >
           {/* Header Row */}
-          <div className="grid grid-cols-4 border-b-2 border-charcoal bg-off-white">
+          <div className={cn("grid border-b-2 border-charcoal bg-off-white", gridColsClass)}>
             <div className="p-4 font-mono text-xs uppercase tracking-wider text-charcoal/70">
               {headers.feature}
             </div>
-            <div className="p-4 text-center font-mono text-xs uppercase tracking-wider text-charcoal/70 border-l-2 border-charcoal/20">
-              {headers.free}
-            </div>
-            <div className="p-4 text-center border-l-2 border-charcoal bg-duck-blue/20">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal">
-                {headers.pro}
-              </span>
-            </div>
-            <div className="p-4 text-center font-mono text-xs uppercase tracking-wider text-charcoal/70 border-l-2 border-charcoal/20">
-              {headers.enterprise}
-            </div>
+            {resolvedTiers.map((tier) => (
+              <div
+                key={tier.name}
+                className={cn(
+                  "p-4 text-center border-l-2 border-charcoal/20",
+                  tier.isHighlighted && "bg-duck-blue/20"
+                )}
+              >
+                <span
+                  className={cn(
+                    "font-mono text-xs uppercase tracking-wider",
+                    tier.isHighlighted ? "font-bold text-charcoal" : "text-charcoal/70"
+                  )}
+                >
+                  {tier.label}
+                </span>
+              </div>
+            ))}
           </div>
 
           {/* Categories */}
@@ -234,12 +261,12 @@ export function FeatureMatrixV3({
             <div key={category.name}>
               {/* Category Header */}
               <motion.div
-                className="grid grid-cols-4 border-b-2 border-charcoal/20 bg-cream"
+                className={cn("grid border-b-2 border-charcoal/20 bg-cream", gridColsClass)}
                 initial={{ opacity: 0 }}
                 animate={isInView ? { opacity: 1 } : { opacity: 0 }}
                 transition={{ delay: catIndex * 0.1 }}
               >
-                <div className="col-span-4 px-4 py-3">
+                <div className={cn(spanClass, "px-4 py-3")}>
                   <span className="font-mono text-sm font-bold uppercase tracking-wider text-charcoal">
                     {category.name}
                   </span>
@@ -251,7 +278,8 @@ export function FeatureMatrixV3({
                 <motion.div
                   key={feature.name}
                   className={cn(
-                    "group grid grid-cols-4 transition-colors duration-150",
+                    "group grid transition-colors duration-150",
+                    gridColsClass,
                     "hover:bg-duck-yellow/20",
                     featureIndex < category.features.length - 1 && "border-b border-charcoal/10"
                   )}
@@ -286,20 +314,19 @@ export function FeatureMatrixV3({
                     )}
                   </div>
 
-                  {/* Free Column */}
-                  <div className="flex items-center justify-center p-4 border-l-2 border-charcoal/10">
-                    <FeatureValue value={feature.free} />
-                  </div>
-
-                  {/* Pro Column (Highlighted) */}
-                  <div className="flex items-center justify-center p-4 border-l-2 border-charcoal/20 bg-duck-blue/10 group-hover:bg-duck-blue/30">
-                    <FeatureValue value={feature.pro} />
-                  </div>
-
-                  {/* Enterprise Column */}
-                  <div className="flex items-center justify-center p-4 border-l-2 border-charcoal/10">
-                    <FeatureValue value={feature.enterprise} />
-                  </div>
+                  {resolvedTiers.map((tier) => (
+                    <div
+                      key={tier.name}
+                      className={cn(
+                        "flex items-center justify-center p-4 border-l-2",
+                        tier.isHighlighted
+                          ? "border-charcoal/20 bg-duck-blue/10 group-hover:bg-duck-blue/30"
+                          : "border-charcoal/10"
+                      )}
+                    >
+                      <FeatureValue value={feature[tier.name] as boolean | string} />
+                    </div>
+                  ))}
                 </motion.div>
               ))}
             </div>

@@ -18,6 +18,19 @@
 import { prisma } from "@/server/lib/db"
 import { cookies } from "next/headers"
 import { requireUser } from "@/server/lib/auth"
+import { Prisma } from "@prisma/client"
+
+function isUniqueConstraintViolation(error: unknown): boolean {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return error.code === "P2002"
+  }
+
+  if (typeof error === "object" && error !== null && "code" in error) {
+    return (error as { code?: unknown }).code === "P2002"
+  }
+
+  return false
+}
 
 export interface DraftContent {
   title: string
@@ -115,9 +128,9 @@ export async function saveAnonymousDraft(
         }
 
         break // Success, exit loop
-      } catch (error: any) {
+      } catch (error) {
         // Handle race condition: another request created the draft between findFirst and create
-        if (error?.code === 'P2002') {
+        if (isUniqueConstraintViolation(error)) {
           attempts++
           console.log(`[saveAnonymousDraft] Race condition detected (attempt ${attempts}/${maxAttempts})`)
 

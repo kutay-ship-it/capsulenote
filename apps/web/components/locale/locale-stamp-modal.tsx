@@ -10,6 +10,7 @@ import { usePathname as useNextPathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { routing } from "@/i18n/routing"
 import { saveLocale, type Locale } from "./locale-detector"
+import { translateSeoPathnameForLocaleSwitch } from "@/lib/seo/localized-slugs"
 
 // ============================================================================
 // SHARED V3 COMPONENTS
@@ -167,7 +168,12 @@ export function LocaleStampModal({ isOpen, onClose }: LocaleStampModalProps) {
 
     // Navigate to the selected locale
     if (selectedLocale !== currentLocale) {
-      router.replace(internalPathname as Parameters<typeof router.replace>[0], { locale: selectedLocale })
+      const translatedPathname = translateSeoPathnameForLocaleSwitch(
+        internalPathname,
+        currentLocale as "en" | "tr",
+        selectedLocale as "en" | "tr"
+      )
+      router.replace(translatedPathname as Parameters<typeof router.replace>[0], { locale: selectedLocale })
       router.refresh()
     }
   }

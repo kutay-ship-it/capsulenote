@@ -11,20 +11,40 @@
     "actions": {
       "tryAgain": "Try Again",
       "myLetters": "My Letters",
-      "dashboard": "Dashboard"
+      "dashboard": "Journey"
     },
     "help": "Need help recovering your work? {link}.",
     "contactSupport": "Contact support"
   },
   "dashboard": {
-    "title": "Dashboard Error",
-    "message": "We encountered an issue loading your dashboard. Your data is safe.",
+    "title": "Journey Error",
+    "message": "We encountered an issue loading your journey. Your data is safe.",
     "actions": {
-      "reload": "Reload Dashboard",
-      "goHome": "Go to Dashboard Home"
+      "reload": "Reload Journey",
+      "goHome": "Go to Journey Home"
     },
     "help": "If this problem persists, please {link}.",
     "contactSupport": "contact support"
+  },
+  "notFound": {
+    "metaTitle": "Page Not Found | Capsule Note",
+    "metaDescription": "The page you're looking for doesn't exist or has been moved. Find your way back to writing letters to your future self.",
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
+    "returnHome": "Return Home",
+    "helpfulLinks": "Helpful Links",
+    "links": {
+      "templates": "Templates",
+      "guides": "Guides",
+      "prompts": "Prompts",
+      "blog": "Blog",
+      "writeLetter": "Write Letter",
+      "contact": "Contact"
+    },
+    "specific": "Looking for something specific?",
+    "browseGuides": "Browse our guides",
+    "or": "or",
+    "exploreTemplates": "explore templates"
   },
   "fallback": {
     "defaultTitle": "Something Went Wrong",

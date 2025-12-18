@@ -3,13 +3,14 @@ import type { Metadata, Viewport } from "next"
 import { ClerkProvider } from "@clerk/nextjs"
 import { enUS, trTR } from "@clerk/localizations"
 import { NextIntlClientProvider } from "next-intl"
-import { getLocale, getMessages, getTranslations } from "next-intl/server"
+import { hasLocale } from "next-intl"
+import { getMessages, getTranslations } from "next-intl/server"
 
 import { Toaster } from "@/components/ui/sonner"
 import { WebsiteSchema, OrganizationSchema } from "@/components/seo/json-ld"
 import { GoogleAnalytics, PostHogProvider } from "@/components/analytics"
 import "@/styles/globals.css"
-import type { Locale } from "@/i18n/routing"
+import { routing, type Locale } from "@/i18n/routing"
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
 const defaultKeywords = ["future self", "time capsule", "letters", "journaling", "reflection"]
@@ -63,11 +64,16 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: ReactNode
+  params: Promise<{ locale?: Locale }>
 }>) {
-  const locale = (await getLocale() || "en") as Locale
-  const messages = await getMessages()
+  const { locale: paramLocale } = await params
+  const locale =
+    paramLocale && hasLocale(routing.locales, paramLocale) ? paramLocale : routing.defaultLocale
+
+  const messages = await getMessages({ locale })
   const clerkLocalization = locale === "tr" ? trTR : enUS
 
   return (

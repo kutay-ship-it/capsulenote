@@ -305,7 +305,7 @@ describe("createAnonymousCheckout", () => {
       mockedIsValidPriceId.mockReturnValue(false)
 
       await expect(createAnonymousCheckout(input)).rejects.toThrow(
-        "Invalid pricing plan selected"
+        "Invalid plan selected"
       )
     })
 

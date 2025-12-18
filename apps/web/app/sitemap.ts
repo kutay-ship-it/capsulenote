@@ -10,6 +10,7 @@ import {
 } from "@/lib/seo/content-registry"
 import { getBlogPost } from "@/lib/seo/blog-content"
 import { getGuide } from "@/lib/seo/guide-content"
+import { getBlogPath, getPromptThemePath } from "@/lib/seo/localized-slugs"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -52,8 +53,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapEntries: MetadataRoute.Sitemap = []
 
   // Helper to create localized entries with hreflang
-  function addLocalizedEntry(
-    path: string,
+  function addLocalizedEntryByLocale(
+    paths: Record<(typeof locales)[number], string>,
     priority: number,
     changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"],
     lastModified?: Date | string
@@ -61,10 +62,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     const languages: Record<string, string> = {}
 
     for (const locale of locales) {
+      const path = paths[locale]
       const localePath = locale === defaultLocale ? path : `/${locale}${path}`
       languages[locale] = `${appUrl}${localePath}`
     }
-    languages["x-default"] = `${appUrl}${path}`
+    languages["x-default"] = `${appUrl}${paths[defaultLocale]}`
 
     // Convert string dates to Date objects
     const modifiedDate = lastModified
@@ -74,6 +76,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       : BUILD_TIME
 
     for (const locale of locales) {
+      const path = paths[locale]
       const localePath = locale === defaultLocale ? path : `/${locale}${path}`
       sitemapEntries.push({
         url: `${appUrl}${localePath}`,
@@ -85,6 +88,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
       })
     }
+  }
+
+  function addLocalizedEntry(
+    path: string,
+    priority: number,
+    changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"],
+    lastModified?: Date | string
+  ) {
+    addLocalizedEntryByLocale({ en: path, tr: path }, priority, changeFrequency, lastModified)
   }
 
   // Add all static routes
@@ -107,7 +119,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Add prompt theme pages (programmatic SEO)
   for (const theme of promptThemes) {
-    addLocalizedEntry(`/prompts/${theme}`, 0.75, "weekly")
+    addLocalizedEntryByLocale(
+      { en: getPromptThemePath("en", theme), tr: getPromptThemePath("tr", theme) },
+      0.75,
+      "weekly"
+    )
   }
 
   // Add guide pages (programmatic SEO) with per-guide dateModified
@@ -119,7 +135,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // Add blog post pages (programmatic SEO) with per-post dateModified
   for (const slug of blogSlugs) {
     const post = getBlogPost(slug)
-    addLocalizedEntry(`/blog/${slug}`, 0.7, "monthly", post?.dateModified)
+    addLocalizedEntryByLocale(
+      { en: getBlogPath("en", slug), tr: getBlogPath("tr", slug) },
+      0.7,
+      "monthly",
+      post?.dateModified
+    )
   }
 
   return sitemapEntries

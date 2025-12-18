@@ -38,7 +38,7 @@
     "planLabel": {
       "DIGITAL_CAPSULE": "Digital Capsule",
       "PAPER_PIXELS": "Paper & Pixels",
-      "none": "Free"
+      "none": "No subscription"
     },
     "badges": {
       "premium": "Premium",
@@ -122,7 +122,7 @@
       "status": "Status",
       "renews": "Renews",
       "unknown": "Unknown",
-      "freePlanMessage": "You're on the free plan. Upgrade to unlock more features.",
+      "freePlanMessage": "You're not subscribed yet. Upgrade to unlock more features.",
       "statusLabel": {
         "active": "Active",
         "trialing": "Trial",

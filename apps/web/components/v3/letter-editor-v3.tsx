@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { useTransition } from "react"
 import { useTranslations, useLocale } from "next-intl"
 import {
@@ -32,9 +32,8 @@ import {
 } from "@/lib/page-estimation"
 import { useCreditsUpdateListener } from "@/hooks/use-credits-broadcast"
 import { useLetterAutosave } from "@/hooks/use-letter-autosave"
-import { useDraftRestoration, emptyFormState } from "@/hooks/use-draft-restoration"
+import { useDraftRestoration } from "@/hooks/use-draft-restoration"
 import { clearLetterAutosave } from "@/lib/localStorage-letter"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LetterEditor } from "@/components/letter-editor"
 import { DatePicker } from "@/components/ui/date-picker"
@@ -46,6 +45,7 @@ import { TemplateSelectorV3 } from "@/components/v3/template-selector-v3"
 import { DeliveryTypeV3, type DeliveryChannel } from "@/components/v3/delivery-type-v3"
 import { AddressSelectorV3 } from "@/components/v3/address-selector-v3"
 import { LetterModals, LetterFormActions } from "@/components/v3/letter-editor"
+import { useRouter } from "@/i18n/routing"
 import type { PrintOptions } from "@/components/v3/print-options-v3"
 import type { LetterTemplate } from "@/server/actions/templates"
 import type { DeliveryEligibility } from "@/server/lib/entitlement-types"
@@ -268,10 +268,10 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const { title, bodyRich, bodyHtml, recipientType, recipientName, recipientEmail, deliveryChannels, deliveryDate, selectedPreset } = formState
   const { selectedAddressId, selectedAddress, printOptions } = physicalMailState
   const { showCustomDate, showSealConfirmation, showCelebration, showTrialModal, showUpgradeModal } = modalState
-  const { errors, restoredFromDraft, sealedLetterId } = uiState
+  const { errors, sealedLetterId } = uiState
 
   // Draft restoration hook - handles loading drafts from localStorage
-  const { draft, source, toastMessage, clearDraft } = useDraftRestoration()
+  const { draft, source, toastMessage } = useDraftRestoration()
 
   // State for first-time anonymous draft banner
   const [showDraftBanner, setShowDraftBanner] = React.useState(false)
@@ -284,7 +284,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   }, [source])
 
   // Auto-save hook - saves form state to localStorage
-  const { save: saveCurrentDraft, clear: clearAutosave } = useLetterAutosave(
+  const { save: saveCurrentDraft } = useLetterAutosave(
     {
       title,
       bodyRich,
@@ -652,7 +652,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
             toast.error(t("toasts.deliveryFailed"), {
               description: `${errorMessage}. ${t("toasts.retryFromPage")}`,
             })
-            router.push(`/letters/${letterId}`)
+            router.push({ pathname: "/letters/[id]", params: { id: letterId } })
           }
         } else {
           dispatchModal({ type: "SET_SEAL_CONFIRMATION", payload: false })
@@ -683,7 +683,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
   const handleCelebrationComplete = React.useCallback(() => {
     dispatchModal({ type: "SET_CELEBRATION", payload: false })
     if (sealedLetterId) {
-      router.push(`/letters/${sealedLetterId}`)
+      router.push({ pathname: "/letters/[id]", params: { id: sealedLetterId } })
     }
   }, [sealedLetterId, router])
 
@@ -692,7 +692,7 @@ export function LetterEditorV3({ eligibility, onRefreshEligibility }: LetterEdit
       {/* First-time user banner for anonymous drafts */}
       {showDraftBanner && (
         <div
-          className="mb-6 flex items-start gap-4 border-2 border-teal-primary bg-teal-primary/10 p-4 shadow-[2px_2px_0_theme(colors.teal.primary)]"
+          className="mb-6 flex items-start gap-4 border-2 border-teal-primary bg-teal-primary/10 p-4 shadow-[2px_2px_0_theme(colors.teal-primary)]"
           style={{ borderRadius: "2px" }}
         >
           <div

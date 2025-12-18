@@ -35,9 +35,9 @@ function EmptyStateHeroV3({ translations }: { translations: EmptyStateTranslatio
   const prompts = translations.prompts
 
   // Use day of year for consistent prompt per day
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  )
+  const now = new Date()
+  const startOfYear = new Date(now.getFullYear(), 0, 0)
+  const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000)
   const promptIndex = dayOfYear % prompts.length
 
   return (

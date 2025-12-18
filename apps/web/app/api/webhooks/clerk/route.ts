@@ -11,7 +11,7 @@ import { createReferralCodeForUser } from "@/server/actions/referral-codes"
 import { ratelimit } from "@/server/lib/redis"
 
 export async function POST(req: Request) {
-  // Get headers (Next.js 15 requires await)
+  // Next.js 16 async request APIs require await
   const headerPayload = await headers()
 
   // Rate limit by IP
@@ -100,7 +100,7 @@ export async function POST(req: Request) {
           return new Response("Email mismatch for locked signup", { status: 400 })
         }
 
-        // Extract detected timezone from Clerk metadata (set by TimezoneDetector component)
+        // Extract detected timezone from Clerk metadata (set client-side)
         const detectedTimezone = getDetectedTimezoneFromMetadata(unsafe_metadata)
         const timezone =
           detectedTimezone && isValidTimezone(detectedTimezone)

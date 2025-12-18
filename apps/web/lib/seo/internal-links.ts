@@ -14,14 +14,12 @@
 import {
   blogSlugs,
   guideSlugs,
-  templateCategories,
-  templateDetailSlugs,
-  promptThemes,
   type BlogSlug,
   type GuideSlug,
   type TemplateCategory,
   type PromptTheme,
 } from "./content-registry"
+import { getBlogPath, getPromptThemePath } from "./localized-slugs"
 
 // ============================================================================
 // Types
@@ -347,6 +345,76 @@ const guideTitles: Record<string, { en: string; tr: string }> = {
   },
 }
 
+const promptTitles: Record<PromptTheme, { en: string; tr: string }> = {
+  "self-esteem": {
+    en: "Self-Esteem Writing Prompts",
+    tr: "Özsaygı Yazma İpuçları",
+  },
+  "grief": {
+    en: "Grief Writing Prompts",
+    tr: "Keder Yazma İpuçları",
+  },
+  "graduation": {
+    en: "Graduation Writing Prompts",
+    tr: "Mezuniyet Yazma İpuçları",
+  },
+  "sobriety": {
+    en: "Sobriety Writing Prompts",
+    tr: "Ayıklık Yazma İpuçları",
+  },
+  "new-year": {
+    en: "New Year Writing Prompts",
+    tr: "Yeni Yıl Yazma İpuçları",
+  },
+  "birthday": {
+    en: "Birthday Writing Prompts",
+    tr: "Doğum Günü Yazma İpuçları",
+  },
+  "career": {
+    en: "Career Writing Prompts",
+    tr: "Kariyer Yazma İpuçları",
+  },
+  "relationships": {
+    en: "Relationship Writing Prompts",
+    tr: "İlişkiler Yazma İpuçları",
+  },
+}
+
+const templateCategoryTitles: Record<TemplateCategory, { en: string; tr: string }> = {
+  "self-reflection": {
+    en: "Self-Reflection",
+    tr: "Kendini Yansıtma",
+  },
+  "goals": {
+    en: "Goals",
+    tr: "Hedefler",
+  },
+  "gratitude": {
+    en: "Gratitude",
+    tr: "Şükran",
+  },
+  "relationships": {
+    en: "Relationships",
+    tr: "İlişkiler",
+  },
+  "career": {
+    en: "Career",
+    tr: "Kariyer",
+  },
+  "life-transitions": {
+    en: "Life Transitions",
+    tr: "Hayat Geçişleri",
+  },
+  "milestones": {
+    en: "Milestones",
+    tr: "Dönüm Noktaları",
+  },
+  "legacy": {
+    en: "Legacy",
+    tr: "Miras",
+  },
+}
+
 // ============================================================================
 // Link Generation Functions
 // ============================================================================
@@ -380,7 +448,8 @@ function getSameClusterContent(
   cluster: ClusterType,
   currentType: ContentType,
   currentSlug: string,
-  limit: number
+  limit: number,
+  locale: "en" | "tr"
 ): RelatedLink[] {
   const links: RelatedLink[] = []
 
@@ -388,10 +457,12 @@ function getSameClusterContent(
   if (currentType !== "blog") {
     for (const [slug, blogCluster] of Object.entries(blogClusterMap)) {
       if (blogCluster === cluster && blogSlugs.includes(slug as BlogSlug)) {
+        if (slug === currentSlug) continue
         const titles = blogTitles[slug]
         if (titles) {
+          const blogSlug = slug as BlogSlug
           links.push({
-            href: `/blog/${slug}`,
+            href: getBlogPath(locale, blogSlug),
             title: titles.en,
             titleTr: titles.tr,
             category: "Blog",
@@ -408,13 +479,14 @@ function getSameClusterContent(
   if (currentType !== "guide" && links.length < limit) {
     for (const [slug, guideCluster] of Object.entries(guideClusterMap)) {
       if (guideCluster === cluster && guideSlugs.includes(slug as GuideSlug)) {
+        if (slug === currentSlug) continue
         const titles = guideTitles[slug]
         if (titles) {
           links.push({
             href: `/guides/${slug}`,
             title: titles.en,
             titleTr: titles.tr,
-            category: "Guide",
+            category: locale === "tr" ? "Rehber" : "Guide",
             type: "guide",
             relevance: "high",
           })
@@ -428,10 +500,12 @@ function getSameClusterContent(
   if (currentType !== "template" && links.length < limit) {
     for (const [category, templateCluster] of Object.entries(templateCategoryClusterMap)) {
       if (templateCluster === cluster) {
+        const titles = templateCategoryTitles[category as TemplateCategory]
         links.push({
           href: `/templates/${category}`,
-          title: `${category.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ")} Templates`,
-          category: "Templates",
+          title: `${titles?.en ?? category} Templates`,
+          titleTr: titles ? `${titles.tr} Şablonları` : undefined,
+          category: locale === "tr" ? "Şablonlar" : "Templates",
           type: "template",
           relevance: "medium",
         })
@@ -444,10 +518,13 @@ function getSameClusterContent(
   if (currentType !== "prompt" && links.length < limit) {
     for (const [theme, promptCluster] of Object.entries(promptClusterMap)) {
       if (promptCluster === cluster) {
+        if (theme === currentSlug) continue
+        const titles = promptTitles[theme as PromptTheme]
         links.push({
-          href: `/prompts/${theme}`,
-          title: `${theme.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" ")} Prompts`,
-          category: "Prompts",
+          href: getPromptThemePath(locale, theme as PromptTheme),
+          title: titles?.en ?? `${theme} Prompts`,
+          titleTr: titles?.tr,
+          category: locale === "tr" ? "İpuçları" : "Prompts",
           type: "prompt",
           relevance: "medium",
         })
@@ -456,7 +533,7 @@ function getSameClusterContent(
     }
   }
 
-  return links.filter(link => !link.href.includes(currentSlug)).slice(0, limit)
+  return links.slice(0, limit)
 }
 
 /**
@@ -466,13 +543,14 @@ function getRelatedClusterContent(
   cluster: ClusterType,
   currentType: ContentType,
   currentSlug: string,
-  limit: number
+  limit: number,
+  locale: "en" | "tr"
 ): RelatedLink[] {
   const relatedClusters = clusterRelationships[cluster] || []
   const links: RelatedLink[] = []
 
   for (const relatedCluster of relatedClusters) {
-    const clusterLinks = getSameClusterContent(relatedCluster, currentType, currentSlug, 2)
+    const clusterLinks = getSameClusterContent(relatedCluster, currentType, currentSlug, 2, locale)
     links.push(...clusterLinks.map(link => ({ ...link, relevance: "low" as const })))
     if (links.length >= limit) break
   }
@@ -499,10 +577,10 @@ export function getRelatedContent(
   const links: RelatedLink[] = []
 
   // 1. Same cluster content (3 items, high relevance)
-  links.push(...getSameClusterContent(cluster, type, slug, 3))
+  links.push(...getSameClusterContent(cluster, type, slug, 3, locale))
 
   // 2. Related cluster content (2 items, low relevance)
-  links.push(...getRelatedClusterContent(cluster, type, slug, 2))
+  links.push(...getRelatedClusterContent(cluster, type, slug, 2, locale))
 
   // 3. Always add CTA (write-letter)
   links.push({
@@ -530,28 +608,28 @@ function getDefaultRelatedContent(locale: "en" | "tr"): RelatedLink[] {
     {
       href: "/guides/how-to-write-letter-to-future-self",
       title: locale === "tr" ? "Gelecekteki Kendine Nasıl Mektup Yazılır" : "How to Write a Letter to Your Future Self",
-      category: "Guide",
+      category: locale === "tr" ? "Rehber" : "Guide",
       type: "guide",
       relevance: "high",
     },
     {
       href: "/templates",
       title: locale === "tr" ? "Şablonlara Göz At" : "Browse Templates",
-      category: "Templates",
+      category: locale === "tr" ? "Şablonlar" : "Templates",
       type: "template",
       relevance: "medium",
     },
     {
-      href: "/prompts/new-year",
+      href: getPromptThemePath(locale, "new-year"),
       title: locale === "tr" ? "Yeni Yıl Yazı İpuçları" : "New Year Writing Prompts",
-      category: "Prompts",
+      category: locale === "tr" ? "İpuçları" : "Prompts",
       type: "prompt",
       relevance: "medium",
     },
     {
-      href: "/blog/why-write-to-future-self",
+      href: getBlogPath(locale, "why-write-to-future-self"),
       title: locale === "tr" ? "Neden Gelecekteki Kendine Yazmalısın?" : "Why Write to Your Future Self?",
-      category: "Blog",
+      category: locale === "tr" ? "Blog" : "Blog",
       type: "blog",
       relevance: "medium",
     },

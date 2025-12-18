@@ -12,7 +12,7 @@
 "use client"
 
 import { useTransition } from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { createAnonymousCheckout } from "../actions"
@@ -54,6 +54,8 @@ export function SubscribeButton({
   children,
 }: SubscribeButtonProps) {
   const [isPending, startTransition] = useTransition()
+  const locale = useLocale()
+  const prefix = locale === "en" ? "" : `/${locale}`
   const t = useTranslations("subscribe")
 
   function handleClick() {
@@ -86,7 +88,7 @@ export function SubscribeButton({
             })
             // Redirect to signup with email
             setTimeout(() => {
-              window.location.href = `/sign-up?email=${encodeURIComponent(email)}`
+              window.location.href = `${prefix}/sign-up?email=${encodeURIComponent(email)}`
             }, 2000)
             break
 

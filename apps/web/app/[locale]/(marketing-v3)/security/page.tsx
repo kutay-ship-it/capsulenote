@@ -5,7 +5,6 @@ import {
   Lock,
   Server,
   Key,
-  FileCheck,
   AlertTriangle,
   CheckCircle,
   Mail,

@@ -11,6 +11,7 @@
 
 import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 export default function GlobalError({
@@ -20,6 +21,10 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const pathname = usePathname()
+  const locale = pathname === '/tr' || pathname.startsWith('/tr/') ? 'tr' : 'en'
+  const homeHref = locale === 'tr' ? '/tr' : '/'
+
   useEffect(() => {
     // Log error to console in development
     console.error('Global error boundary caught:', error)
@@ -39,7 +44,7 @@ export default function GlobalError({
 
   return (
     // global-error MUST include html and body tags
-    <html lang="en">
+    <html lang={locale}>
       <body>
         <div className="flex min-h-screen items-center justify-center bg-cream p-4">
           <div
@@ -107,7 +112,7 @@ export default function GlobalError({
                 Reload Application
               </Button>
               <Button
-                onClick={() => window.location.href = '/'}
+                onClick={() => window.location.href = homeHref}
                 variant="outline"
                 size="lg"
                 className="w-full sm:w-auto"

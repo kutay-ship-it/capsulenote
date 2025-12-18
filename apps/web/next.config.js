@@ -14,11 +14,6 @@ const nextConfig = {
   reactStrictMode: true,
   // Set workspace root to monorepo root to avoid lockfile detection issues
   outputFileTracingRoot: path.join(__dirname, "../../"),
-  // Next.js 16: eslint config removed (use eslint.config.js directly)
-  typescript: {
-    // Disable type checking during build (can be enabled later with proper fixes)
-    ignoreBuildErrors: true,
-  },
   // Mark packages as external that need special handling on serverless
   serverExternalPackages: [],
   // Next.js 16: React Compiler for auto-memoization (major TBT reduction)
@@ -28,18 +23,6 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "2mb",
     },
-  },
-  // Exclude sandbox/legacy/v2 directories from serverless function bundles
-  outputFileTracingExcludes: {
-    "*": [
-      "./app/**/sandbox/**",
-      "./app/**/credits-sandbox/**",
-      "./app/**/redesign/**",
-      "./app/**/landing-v2/**",
-      "./app/**/letter-v2/**",
-      "./app/**/(app-v2)/**",
-      "./app/**/(legacy)/**",
-    ],
   },
   // Security headers for all routes
   async headers() {
@@ -71,6 +54,33 @@ const nextConfig = {
           { key: "X-DNS-Prefetch-Control", value: "on" },
         ],
       },
+    ]
+  },
+  async redirects() {
+    return [
+      // Legacy app routes → V3 equivalents
+      { source: "/dashboard", destination: "/journey", permanent: true },
+      { source: "/:locale(en|tr)/dashboard", destination: "/:locale/journey", permanent: true },
+      // Preserve nested legacy dashboard links (e.g. /dashboard/settings → /settings)
+      { source: "/dashboard/:path*", destination: "/:path*", permanent: true },
+      { source: "/:locale(en|tr)/dashboard/:path*", destination: "/:locale/:path*", permanent: true },
+      { source: "/deliveries", destination: "/letters", permanent: true },
+      { source: "/:locale(en|tr)/deliveries", destination: "/:locale/letters", permanent: true },
+      // Delivery IDs don't map cleanly; redirect to letters hub
+      { source: "/deliveries/:path*", destination: "/letters", permanent: true },
+      { source: "/:locale(en|tr)/deliveries/:path*", destination: "/:locale/letters", permanent: true },
+
+      // Deprecated support route (redirect to Contact)
+      { source: "/support", destination: "/contact", permanent: true },
+      { source: "/support/:path*", destination: "/contact", permanent: true },
+      { source: "/:locale(en|tr)/support", destination: "/:locale/contact", permanent: true },
+      { source: "/:locale(en|tr)/support/:path*", destination: "/:locale/contact", permanent: true },
+
+      // Deprecated marketing route (removed)
+      { source: "/landing-v2", destination: "/", permanent: true },
+      { source: "/landing-v2/:path*", destination: "/", permanent: true },
+      { source: "/:locale(en|tr)/landing-v2", destination: "/:locale", permanent: true },
+      { source: "/:locale(en|tr)/landing-v2/:path*", destination: "/:locale", permanent: true },
     ]
   },
   images: {

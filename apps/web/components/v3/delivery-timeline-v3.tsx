@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Calendar,
   Stamp,
-  Info,
 } from "lucide-react"
 import { toast } from "sonner"
 import { useTranslations, useLocale } from "next-intl"

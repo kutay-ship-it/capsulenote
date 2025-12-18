@@ -61,14 +61,18 @@ export function LettersListV3({
 
   // Load saved view preference from localStorage on mount
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
     try {
       const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY)
       if (saved === "grid" || saved === "list") {
-        setViewMode(saved)
+        timer = setTimeout(() => setViewMode(saved), 0)
       }
     } catch {
       // localStorage not available (private browsing, SSR, etc.)
       // Default to grid view - no action needed
+    }
+    return () => {
+      if (timer) clearTimeout(timer)
     }
   }, [])
 
@@ -100,9 +104,6 @@ export function LettersListV3({
       window.history.replaceState({}, "", url.toString())
     }
   }
-
-  // Get letters for the active filter
-  const activeLetters = lettersByFilter[activeFilter]
 
   return (
     <Tabs

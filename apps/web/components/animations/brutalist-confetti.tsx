@@ -12,6 +12,27 @@ const CONFETTI_COLORS = [
   "#383838", // charcoal
 ] as const
 
+function stringToSeed(input: string): number {
+  // FNV-1a 32-bit hash
+  let hash = 2166136261
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i)
+    hash = Math.imul(hash, 16777619)
+  }
+  return hash >>> 0
+}
+
+function mulberry32(seed: number): () => number {
+  let t = seed >>> 0
+  return () => {
+    t = (t + 0x6d2b79f5) >>> 0
+    let x = t
+    x = Math.imul(x ^ (x >>> 15), x | 1)
+    x ^= x + Math.imul(x ^ (x >>> 7), x | 61)
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296
+  }
+}
+
 interface ConfettiParticle {
   id: number
   isSquare: boolean
@@ -36,6 +57,8 @@ export function BrutalistConfetti({
   count = 50,
   onComplete,
 }: BrutalistConfettiProps) {
+  const instanceId = React.useId()
+
   // Check for reduced motion preference
   const prefersReducedMotion = React.useMemo(() => {
     if (typeof window === "undefined") return false
@@ -45,23 +68,25 @@ export function BrutalistConfetti({
   // Pre-generate all particle properties ONCE on mount
   // Uses pixel offsets for reliable burst animation from center
   const particles = React.useMemo<ConfettiParticle[]>(() => {
+    const rand = mulberry32(stringToSeed(`${instanceId}:${count}`))
+
     // Calculate burst distance based on viewport
     const burstX = typeof window !== "undefined" ? window.innerWidth * 0.5 : 400
     const burstY = typeof window !== "undefined" ? window.innerHeight * 0.6 : 500
 
     return Array.from({ length: count }, (_, i) => ({
       id: i,
-      isSquare: Math.random() > 0.3,
-      size: 8 + Math.random() * 14,
+      isSquare: rand() > 0.3,
+      size: 8 + rand() * 14,
       // Random burst direction from center
-      offsetX: (Math.random() - 0.5) * burstX * 2,
-      offsetY: (Math.random() - 0.3) * burstY * 2, // Bias slightly upward
-      rotation: Math.random() * 720 - 360,
-      duration: 1.5 + Math.random() * 1,
-      delay: Math.random() * 0.3,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)] ?? "#3D9A8B",
+      offsetX: (rand() - 0.5) * burstX * 2,
+      offsetY: (rand() - 0.3) * burstY * 2, // Bias slightly upward
+      rotation: rand() * 720 - 360,
+      duration: 1.5 + rand() * 1,
+      delay: rand() * 0.3,
+      color: CONFETTI_COLORS[Math.floor(rand() * CONFETTI_COLORS.length)] ?? "#3D9A8B",
     }))
-  }, [count])
+  }, [count, instanceId])
 
   // Track completed animations for onComplete callback
   const completedRef = React.useRef(0)

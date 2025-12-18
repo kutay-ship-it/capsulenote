@@ -26,12 +26,21 @@ vi.mock("@/env.mjs", () => ({
 
 // Mock prisma
 const mockQueryRaw = vi.fn()
-const mockDeliveryUpdate = vi.fn()
+const mockTxDeliveryFindUnique = vi.fn()
+const mockTxDeliveryUpdate = vi.fn()
+const mockDeliveryCount = vi.fn()
 vi.mock("@/server/lib/db", () => ({
   prisma: {
     $queryRaw: (...args: any[]) => mockQueryRaw(...args),
+    $transaction: (callback: any) =>
+      callback({
+        delivery: {
+          findUnique: (...args: any[]) => mockTxDeliveryFindUnique(...args),
+          update: (...args: any[]) => mockTxDeliveryUpdate(...args),
+        },
+      }),
     delivery: {
-      update: (...args: any[]) => mockDeliveryUpdate(...args),
+      count: (...args: any[]) => mockDeliveryCount(...args),
     },
   },
 }))
@@ -89,12 +98,17 @@ describe("Reconcile Deliveries Cron Job", () => {
     vi.clearAllMocks()
     process.env.CRON_SECRET = "test_cron_secret"
     mockTriggerInngestEvent.mockResolvedValue({ ids: ["test_event_id"] })
-    mockDeliveryUpdate.mockResolvedValue({})
+    mockTxDeliveryFindUnique.mockResolvedValue({
+      status: "scheduled",
+      updatedAt: new Date(0),
+    })
+    mockTxDeliveryUpdate.mockResolvedValue({})
+    mockDeliveryCount.mockResolvedValue(100_000)
     mockCreateAuditEvent.mockResolvedValue({})
   })
 
   afterEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     process.env.CRON_SECRET = originalEnv
   })
 
@@ -236,7 +250,7 @@ describe("Reconcile Deliveries Cron Job", () => {
       const request = createMockRequest("Bearer test_cron_secret")
       await GET(request)
 
-      expect(mockDeliveryUpdate).toHaveBeenCalledWith(
+      expect(mockTxDeliveryUpdate).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: "del_test_456" },
           data: expect.objectContaining({
@@ -369,6 +383,7 @@ describe("Reconcile Deliveries Cron Job", () => {
       // With count=1, rate = 1%, which is > 0.1%
       const stuckDeliveries = [createStuckDelivery({ id: "del_1" })]
       mockQueryRaw.mockResolvedValue(stuckDeliveries)
+      mockDeliveryCount.mockResolvedValueOnce(100)
 
       const request = createMockRequest("Bearer test_cron_secret")
       await GET(request)
@@ -428,7 +443,7 @@ describe("Reconcile Deliveries Cron Job", () => {
     it("should handle delivery update failures gracefully", async () => {
       const stuckDelivery = createStuckDelivery({ id: "del_update_fail" })
       mockQueryRaw.mockResolvedValue([stuckDelivery])
-      mockDeliveryUpdate.mockRejectedValue(new Error("Update failed"))
+      mockTxDeliveryUpdate.mockRejectedValueOnce(new Error("Update failed"))
 
       const request = createMockRequest("Bearer test_cron_secret")
       const response = await GET(request)

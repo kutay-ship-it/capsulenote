@@ -38,7 +38,7 @@
     "defaultMessage": "An unexpected error occurred. Please try again.",
     "buttons": {
       "newLetter": "Start New Letter",
-      "dashboard": "Go to Dashboard"
+      "dashboard": "Go to Journey"
     }
   }
 }

@@ -1,10 +1,8 @@
 "use server"
 
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/server/lib/db"
 import { requireUser } from "@/server/lib/auth"
-import { revalidatePath } from "next/cache"
-import { nanoid } from "nanoid"
-import { Prisma } from "@prisma/client"
 
 /**
  * Generate a unique referral code

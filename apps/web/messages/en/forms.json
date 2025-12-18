@@ -148,7 +148,7 @@
       "description": "You've written {wordCount} words. Want to schedule this letter to your future self?",
       "signUp": "Sign Up to Save",
       "keepWriting": "Keep Writing",
-      "features": "Free forever • No credit card needed • Draft saved locally"
+      "features": "No sign-up required • Draft saved locally • Continue anytime"
     },
     "editor": {
       "title": "Start Writing",
@@ -242,8 +242,8 @@
         },
         "free": {
           "icon": "🌱",
-          "title": "Free Forever Plan",
-          "description": "5 letters per month, always free. Upgrade anytime for unlimited."
+          "title": "No Sign-up Required",
+          "description": "Start drafting instantly. Create an account when you're ready to schedule delivery."
         }
       }
     }

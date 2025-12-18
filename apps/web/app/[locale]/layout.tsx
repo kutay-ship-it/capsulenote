@@ -13,7 +13,7 @@ export default async function LocaleLayout({
   children: ReactNode
   params: Promise<{ locale: string }>
 }) {
-  // Await params to satisfy Next.js 15 requirements (even if unused)
+  // Next.js 16 route props are async in the type system
   await params
   return children
 }

@@ -5,7 +5,6 @@ const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").re
 // Routes that should never be indexed
 const disallow = [
   "/api/",
-  "/sandbox",
   "/admin",
   "/subscribe",
   "/checkout",
@@ -16,7 +15,6 @@ const disallow = [
   "/global-error",
   "/error",
   "/cron",
-  "/dashboard",
   "/letters",
   "/settings",
   "/journey",

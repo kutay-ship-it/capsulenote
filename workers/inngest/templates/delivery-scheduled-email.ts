@@ -9,8 +9,10 @@ export interface DeliveryScheduledEmailData {
   deliveryMethod: "email" | "mail"
   recipientEmail: string
   userFirstName?: string
-  deliveryUrl: string
-  dashboardUrl: string
+  letterUrl: string
+  scheduleUrl: string
+  lettersUrl: string
+  journeyUrl: string
   locale?: Locale
 }
 
@@ -21,8 +23,10 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
     deliveryMethod,
     recipientEmail,
     userFirstName,
-    deliveryUrl,
-    dashboardUrl,
+    letterUrl,
+    scheduleUrl,
+    lettersUrl,
+    journeyUrl,
     locale = defaultLocale,
   } = data
 
@@ -33,10 +37,6 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
     ? m.greeting.replace("{name}", escape(userFirstName))
     : m.greetingDefault
   const methodText = m.methods[deliveryMethod]
-
-  // Replace dashboard with letters/journey
-  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
-  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
 
   return `
 <!DOCTYPE html>
@@ -147,19 +147,19 @@ export async function generateDeliveryScheduledEmail(data: DeliveryScheduledEmai
                     </table>
 
                     <!-- Buttons -->
-                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td style="padding-right: 12px;">
-                          <a href="${deliveryUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                            ${m.buttons.viewDetails}
-                          </a>
-                        </td>
-                        <td>
-                          <a href="${deliveryUrl}/edit" style="display: inline-block; background-color: #ffffff; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
-                            ${m.buttons.editDelivery}
-                          </a>
-                        </td>
-                      </tr>
+	                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+	                      <tr>
+	                        <td style="padding-right: 12px;">
+	                          <a href="${letterUrl}" style="display: inline-block; background-color: #6FC2FF; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+	                            ${m.buttons.viewDetails}
+	                          </a>
+	                        </td>
+	                        <td>
+	                          <a href="${scheduleUrl}" style="display: inline-block; background-color: #ffffff; color: #383838; padding: 14px 24px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; text-decoration: none; border: 2px solid #383838; border-radius: 2px;">
+	                            ${m.buttons.editDelivery}
+	                          </a>
+	                        </td>
+	                      </tr>
                     </table>
                   </td>
                 </tr>
@@ -193,8 +193,10 @@ export async function generateDeliveryScheduledEmailText(data: DeliveryScheduled
     deliveryMethod,
     recipientEmail,
     userFirstName,
-    deliveryUrl,
-    dashboardUrl,
+    letterUrl,
+    scheduleUrl,
+    lettersUrl,
+    journeyUrl,
     locale = defaultLocale,
   } = data
 
@@ -205,10 +207,6 @@ export async function generateDeliveryScheduledEmailText(data: DeliveryScheduled
     ? m.greeting.replace("{name}", userFirstName)
     : m.greetingDefault
   const methodText = m.methods[deliveryMethod]
-
-  // Replace dashboard with letters/journey
-  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
-  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
 
   return `
 CAPSULE NOTE
@@ -232,8 +230,8 @@ ${m.labels.letter}: ${letterTitle}
 ${m.labels.deliveryMethod}: ${methodText}
 ${m.labels.recipient}: ${recipientEmail}
 
-${m.text.viewUrl}: ${deliveryUrl}
-${m.text.editUrl}: ${deliveryUrl}/edit
+${m.text.viewUrl}: ${letterUrl}
+${m.text.editUrl}: ${scheduleUrl}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

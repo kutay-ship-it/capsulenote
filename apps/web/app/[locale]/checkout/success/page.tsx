@@ -12,8 +12,10 @@ import { requireUser } from "@/server/lib/auth"
 import { prisma } from "@/server/lib/db"
 import { CheckoutSuccess } from "./_components/checkout-success"
 import { CheckoutProcessing } from "./_components/checkout-processing"
+import type { Locale } from "@/i18n/routing"
 
 interface CheckoutSuccessPageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{
     session_id?: string
   }>
@@ -27,19 +29,22 @@ function wait(ms: number): Promise<void> {
 }
 
 // Force dynamic rendering - page requires auth and searchParams
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
 export default async function CheckoutSuccessPage({
+  params,
   searchParams,
 }: CheckoutSuccessPageProps) {
+  const { locale } = await params
+  const prefix = locale === "en" ? "" : `/${locale}`
   const user = await requireUser()
 
-  // Await searchParams (Next.js 15 async params)
+  // Next.js 16 route props are async in the type system
   const resolvedSearchParams = await searchParams
 
   // Require session_id parameter
   if (!resolvedSearchParams.session_id) {
-    redirect("/journey")
+    redirect(`${prefix}/journey`)
   }
 
   // Poll for subscription (webhook may still be processing)
@@ -74,7 +79,7 @@ export default async function CheckoutSuccessPage({
   }
 
   // Success! Show subscription details
-  return <CheckoutSuccess subscription={subscription} />
+  return <CheckoutSuccess subscription={subscription} locale={locale} />
 }
 
 /**

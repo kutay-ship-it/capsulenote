@@ -101,7 +101,7 @@ function FAQAccordionItem({
 export function PricingFAQV3({
   items,
   title = "FREQUENTLY ASKED QUESTIONS",
-  subtitle = "Everything you need to know about our pricing and plans",
+  subtitle = "Everything you need to know about plans, deliveries, and security",
   contactText = "Still have questions?",
   contactLinkText = "Contact us",
   contactEmail = "support@capsulenote.com",

@@ -6,10 +6,10 @@ import { getTranslations } from "next-intl/server"
 
 import { HeroSection } from "./_components/hero-section"
 import { LetterDemo } from "./_components/letter-demo"
-import { SocialProofV2 } from "./landing-v2/_components/social-proof-v2"
-import { HowItWorksV2 } from "./landing-v2/_components/how-it-works-v2"
-import { TrustSection } from "./landing-v2/_components/trust-section"
-import { FeaturesV2 } from "./landing-v2/_components/features-v2"
+import { SocialProofV2 } from "./_components/social-proof-v2"
+import { HowItWorksV2 } from "./_components/how-it-works-v2"
+import { TrustSection } from "./_components/trust-section"
+import { FeaturesV2 } from "./_components/features-v2"
 import { CTASection } from "./_components/cta-section"
 import { NavbarV3 } from "./_components/navbar-v3"
 import { Footer } from "./_components/footer"
@@ -53,6 +53,8 @@ export default async function MarketingPage({
 }: {
   params: Promise<{ locale: Locale }>
 }) {
+  // Await params to satisfy Next.js route contract (even if unused here)
+  await params
   const { userId } = await auth()
   const isSignedIn = Boolean(userId)
 

@@ -11,8 +11,26 @@
 import type { Metadata } from "next"
 import { getTranslations } from "next-intl/server"
 import { AnonymousLetterTryout } from "@/components/anonymous-letter-tryout"
+import { getTemplate } from "@/lib/seo/template-content"
+import { decodeTemplateId } from "@/lib/seo/template-ids"
+import { templateCategories, type TemplateCategory } from "@/lib/seo/content-registry"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
+
+function firstSearchParam(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value
+}
+
+function decodeLegacyTemplateParam(value: string): { category: TemplateCategory; slug: string } | null {
+  for (const category of templateCategories) {
+    const prefix = `${category}-`
+    if (value.startsWith(prefix)) {
+      const slug = value.slice(prefix.length)
+      return slug ? { category, slug } : null
+    }
+  }
+  return null
+}
 
 export async function generateMetadata({
   params,
@@ -29,6 +47,7 @@ export async function generateMetadata({
   const hasIndexableParams = !!(
     resolvedSearchParams.prompt ||
     resolvedSearchParams.template ||
+    resolvedSearchParams.templateId ||
     resolvedSearchParams.utm_source ||
     resolvedSearchParams.utm_medium ||
     resolvedSearchParams.utm_campaign
@@ -61,11 +80,40 @@ export async function generateMetadata({
 
 export default async function WriteLetterPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { locale } = await params
+  const resolvedSearchParams = await searchParams
   const t = await getTranslations("forms.writeLetter")
+
+  const prompt = firstSearchParam(resolvedSearchParams.prompt)
+  const templateId = firstSearchParam(resolvedSearchParams.templateId)
+  const legacyTemplate = firstSearchParam(resolvedSearchParams.template)
+
+  let initialTitle: string | undefined
+  let initialBody: string | undefined
+
+  // Template selection (preferred) → use a localized sample opening
+  const templateKey = templateId
+    ? decodeTemplateId(templateId)
+    : legacyTemplate
+      ? decodeLegacyTemplateParam(legacyTemplate)
+      : null
+
+  if (templateKey) {
+    const template = getTemplate(templateKey.category, templateKey.slug)
+    if (template) {
+      const localized = template[locale === "tr" ? "tr" : "en"]
+      initialTitle = localized.title
+      initialBody = localized.sampleOpening
+    }
+  } else if (prompt?.trim()) {
+    // Prompt selection → seed the editor with the prompt
+    initialBody = prompt.trim()
+  }
 
   return (
     <div className="min-h-screen bg-cream py-16 px-4">
@@ -81,7 +129,7 @@ export default async function WriteLetterPage({
         </div>
 
         {/* Anonymous Tryout Editor */}
-        <AnonymousLetterTryout />
+        <AnonymousLetterTryout initialTitle={initialTitle} initialBody={initialBody} />
 
         {/* Trust Indicators */}
         <section className="mt-16">

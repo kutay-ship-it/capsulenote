@@ -1,16 +1,17 @@
 import { Metadata } from "next"
 import { setRequestLocale } from "next-intl/server"
 import { ArrowLeft, ArrowRight, Clock, Calendar, Tag } from "lucide-react"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../_components/legal-page-layout"
 import { ArticleSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { RelatedContent } from "@/components/seo/related-content"
-import { blogSlugs, type BlogSlug } from "@/lib/seo/content-registry"
+import { blogSlugs } from "@/lib/seo/content-registry"
 import { getBlogPost } from "@/lib/seo/blog-content"
 import { getRelatedContent, toRelatedItems } from "@/lib/seo/internal-links"
+import { SEO_LOCALES, getBlogPath, getBlogSlug, getBlogSlugInfo, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -31,8 +32,34 @@ const categoryColors: Record<string, string> = {
   "use-cases": "bg-orange-100",
 }
 
+const categoryLabels: Record<string, { en: string; tr: string }> = {
+  inspiration: { en: "Inspiration", tr: "İlham" },
+  ideas: { en: "Ideas", tr: "Fikirler" },
+  guides: { en: "Guides", tr: "Rehberler" },
+  features: { en: "Features", tr: "Özellikler" },
+  tips: { en: "Tips", tr: "İpuçları" },
+  "future-self": { en: "Future Self", tr: "Gelecek Benlik" },
+  psychology: { en: "Psychology", tr: "Psikoloji" },
+  "letter-craft": { en: "Letter Craft", tr: "Mektup Yazımı" },
+  "life-events": { en: "Life Events", tr: "Hayat Olayları" },
+  privacy: { en: "Privacy", tr: "Gizlilik" },
+  "use-cases": { en: "Use Cases", tr: "Kullanım Senaryoları" },
+}
+
+function getCategoryLabel(category: string, locale: string) {
+  const labels = categoryLabels[category]
+  if (!labels) return category
+  return locale === "tr" ? labels.tr : labels.en
+}
+
 export async function generateStaticParams() {
-  return blogSlugs.map((slug) => ({ slug }))
+  const params: Array<{ locale: string; slug: string }> = []
+  for (const locale of SEO_LOCALES) {
+    for (const slug of blogSlugs) {
+      params.push({ locale, slug: getBlogSlug(locale, slug) })
+    }
+  }
+  return params
 }
 
 export async function generateMetadata({
@@ -42,12 +69,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params
 
-  const post = getBlogPost(slug)
+  const seoLocale = normalizeSeoLocale(locale)
+  const slugInfo = getBlogSlugInfo(seoLocale, slug)
+  if (!slugInfo) {
+    return { title: "Not Found" }
+  }
+
+  const post = getBlogPost(slugInfo.id)
   if (!post) {
     return { title: "Not Found" }
   }
 
   const data = post[locale === "tr" ? "tr" : "en"]
+  const canonicalPath = getBlogPath(seoLocale, slugInfo.id)
 
   return {
     title: `${data.title} | Capsule Note Blog`,
@@ -58,13 +92,13 @@ export async function generateMetadata({
       type: "article",
       publishedTime: post.datePublished,
       modifiedTime: post.dateModified,
-      url: `${appUrl}${locale === "en" ? "" : "/" + locale}/blog/${slug}`,
+      url: `${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${canonicalPath}`,
     },
     alternates: {
-      canonical: `${appUrl}${locale === "en" ? "" : "/" + locale}/blog/${slug}`,
+      canonical: `${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${canonicalPath}`,
       languages: {
-        en: `${appUrl}/blog/${slug}`,
-        tr: `${appUrl}/tr/blog/${slug}`,
+        en: `${appUrl}${getBlogPath("en", slugInfo.id)}`,
+        tr: `${appUrl}/tr${getBlogPath("tr", slugInfo.id)}`,
       },
     },
   }
@@ -77,7 +111,19 @@ export default async function BlogPostPage({
 }) {
   const { locale, slug } = await params
 
-  const post = getBlogPost(slug)
+  const seoLocale = normalizeSeoLocale(locale)
+  const slugInfo = getBlogSlugInfo(seoLocale, slug)
+  if (!slugInfo) {
+    notFound()
+  }
+
+  if (!slugInfo.isCanonical) {
+    const canonicalPath = getBlogPath(seoLocale, slugInfo.id)
+    const localePrefix = seoLocale === "en" ? "" : `/${seoLocale}`
+    permanentRedirect(`${localePrefix}${canonicalPath}`)
+  }
+
+  const post = getBlogPost(slugInfo.id)
   if (!post) {
     notFound()
   }
@@ -87,9 +133,10 @@ export default async function BlogPostPage({
   const isEnglish = locale === "en"
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
   const data = post[locale === "tr" ? "tr" : "en"]
+  const currentPath = getBlogPath(seoLocale, slugInfo.id)
 
   // Get related content using automated internal linking
-  const relatedLinks = getRelatedContent("blog", slug, undefined, locale === "tr" ? "tr" : "en")
+  const relatedLinks = getRelatedContent("blog", slugInfo.id, undefined, locale === "tr" ? "tr" : "en")
   const relatedItems = toRelatedItems(relatedLinks, locale === "tr" ? "tr" : "en")
 
   return (
@@ -102,14 +149,14 @@ export default async function BlogPostPage({
         datePublished={post.datePublished}
         dateModified={post.dateModified}
         authorName="Capsule Note Team"
-        url={`${appUrl}${locale === "en" ? "" : "/" + locale}/blog/${slug}`}
+        url={`${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${currentPath}`}
       />
       <BreadcrumbSchema
         locale={locale}
         items={[
           { name: isEnglish ? "Home" : "Ana Sayfa", href: "/" },
           { name: "Blog", href: "/blog" },
-          { name: data.title, href: `/blog/${slug}` },
+          { name: data.title, href: currentPath },
         ]}
       />
 
@@ -129,7 +176,7 @@ export default async function BlogPostPage({
         <div className="flex items-center gap-3 mb-4">
           <span className={cn("px-3 py-1 font-mono text-xs", categoryColors[post.category] || "bg-gray-100")}>
             <Tag className="inline h-3 w-3 mr-1" />
-            {post.category}
+            {getCategoryLabel(post.category, locale)}
           </span>
         </div>
         <h1 className={cn("font-mono text-3xl md:text-4xl text-charcoal mb-4", uppercaseClass)}>

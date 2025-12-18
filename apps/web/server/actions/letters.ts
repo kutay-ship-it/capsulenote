@@ -114,7 +114,7 @@ export async function createLetter(
       }
     }
 
-    // Create letter (no free-tier limits)
+    // Create letter
     let letter
     try {
       letter = await prisma.letter.create({
@@ -189,7 +189,7 @@ export async function createLetter(
 
     // Revalidate cached pages
     revalidatePath("/letters")
-    revalidatePath("/dashboard")
+    revalidatePath("/journey")
 
     return {
       success: true,
@@ -406,7 +406,7 @@ export async function updateLetter(
 
     revalidatePath(`/letters/${id}`)
     revalidatePath("/letters")
-    revalidatePath("/dashboard")
+    revalidatePath("/journey")
 
     return {
       success: true,
@@ -562,7 +562,7 @@ export async function deleteLetter(
     })
 
     revalidatePath("/letters")
-    revalidatePath("/dashboard")
+    revalidatePath("/journey")
 
     return {
       success: true,
@@ -659,7 +659,8 @@ export async function getLetter(letterId: string) {
       return { ...rest, mailDelivery: null }
     }
 
-    const { sealedCiphertext, sealedNonce, ...serializableMail } = mailDelivery
+    const { sealedCiphertext: _sealedCiphertext, sealedNonce: _sealedNonce, ...serializableMail } =
+      mailDelivery
     return { ...rest, mailDelivery: serializableMail }
   })
 
@@ -792,8 +793,8 @@ export async function markLetterAsOpened(
     })
 
     // Revalidate pages
-    revalidatePath(`/letters-v3/${letterId}`)
-    revalidatePath(`/unlock-v3/${letterId}`)
+    revalidatePath(`/letters/${letterId}`)
+    revalidatePath(`/unlock/${letterId}`)
 
     return {
       success: true,

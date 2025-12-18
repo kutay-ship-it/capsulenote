@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
-import { getTranslations, getLocale } from "next-intl/server"
+import { getTranslations } from "next-intl/server"
 import {
   User,
   Bell,
@@ -23,6 +23,7 @@ import { prisma } from "@/server/lib/db"
 import { getOrCreateReferralCode, getReferralStats } from "@/server/actions/referral-codes"
 import { buildReferralLink } from "@/server/actions/referrals"
 import { cn } from "@/lib/utils"
+import { Link, type Locale } from "@/i18n/routing"
 
 import { SettingsHeaderV3 } from "@/components/v3/settings/settings-header-v3"
 import { SettingsCardV3 } from "@/components/v3/settings/settings-card-v3"
@@ -43,6 +44,7 @@ export const dynamic = "force-dynamic"
 
 // Types
 interface SettingsPageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{ tab?: string }>
 }
 
@@ -516,26 +518,26 @@ function PrivacyContent({ translations }: PrivacyContentProps) {
         badgeText="text-charcoal"
       >
         <div className="flex flex-wrap gap-3">
-          <a
+          <Link
             href="/privacy"
             className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal hover:text-duck-blue transition-colors"
           >
             {translations.legal.privacyPolicy}
-          </a>
+          </Link>
           <span className="text-charcoal/30">|</span>
-          <a
+          <Link
             href="/terms"
             className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal hover:text-duck-blue transition-colors"
           >
             {translations.legal.terms}
-          </a>
+          </Link>
           <span className="text-charcoal/30">|</span>
-          <a
-            href="/gdpr"
+          <Link
+            href={{ pathname: "/privacy", hash: "gdpr" }}
             className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal hover:text-duck-blue transition-colors"
           >
             {translations.legal.gdpr}
-          </a>
+          </Link>
         </div>
       </SettingsCardV3>
 
@@ -708,15 +710,16 @@ function ReferralsContent({ referralCode, referralLink, stats, referrals, locale
 // MAIN PAGE
 // ============================================================================
 
-export default async function SettingsV3Page({ searchParams }: SettingsPageProps) {
-  const params = await searchParams
-  const initialTab = (params.tab || "account") as SettingsTab
-  const t = await getTranslations("settings")
-  const locale = await getLocale()
+export default async function SettingsV3Page({ params, searchParams }: SettingsPageProps) {
+  const { locale } = await params
+  const resolvedSearchParams = await searchParams
+  const initialTab = (resolvedSearchParams.tab || "account") as SettingsTab
+  const t = await getTranslations({ locale, namespace: "settings" })
+  const prefix = locale === "en" ? "" : `/${locale}`
 
   const user = await getCurrentUser()
   if (!user) {
-    redirect("/sign-in")
+    redirect(`${prefix}/sign-in`)
   }
 
   // Parallel fetch ALL tab data for instant tab switching

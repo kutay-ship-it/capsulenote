@@ -28,14 +28,14 @@ test.describe("Letter Creation & Management", () => {
 
   test.describe("Anonymous Journey (Landing → Editor)", () => {
     test("should display journey/editor page for anonymous users", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       // Journey page should be accessible to anonymous users
-      await expect(page).toHaveURL(/\/journey/)
+      await expect(page).toHaveURL(/\/write-letter/)
     })
 
     test("should have letter editor on journey page", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -50,7 +50,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should allow typing in anonymous editor", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -71,7 +71,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should have delivery date selector", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -86,7 +86,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should have recipient email input", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -101,7 +101,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("journey page should prompt for account creation", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -122,7 +122,7 @@ test.describe("Letter Creation & Management", () => {
 
   test.describe("Dashboard", () => {
     test("dashboard should redirect unauthenticated users", async ({ page }) => {
-      await page.goto("/dashboard")
+      await page.goto("/journey")
 
       // Should redirect to sign-in
       await expect(page).toHaveURL(/\/sign-in/)
@@ -147,7 +147,7 @@ test.describe("Letter Creation & Management", () => {
 
   test.describe("Letter Editor UI", () => {
     test("journey editor should have title input", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -162,7 +162,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should support rich text formatting", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -177,7 +177,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should have character/word count", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -197,7 +197,7 @@ test.describe("Letter Creation & Management", () => {
 
   test.describe("Draft Saving", () => {
     test("should auto-save draft to localStorage", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -225,7 +225,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should recover draft on page reload", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -264,7 +264,7 @@ test.describe("Letter Creation & Management", () => {
 
   test.describe("Delivery Scheduling", () => {
     test("should validate delivery date is in the future", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -289,7 +289,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should have minimum delivery date of next day", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -308,7 +308,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should show delivery preview/summary", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -328,7 +328,7 @@ test.describe("Letter Creation & Management", () => {
 
   test.describe("Recipient Email", () => {
     test("should validate email format", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -346,7 +346,7 @@ test.describe("Letter Creation & Management", () => {
     })
 
     test("should accept valid email addresses", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await waitForNetworkIdle(page)
 
@@ -371,7 +371,7 @@ test.describe("Letter Creation & Management", () => {
     test("journey page should be mobile responsive", async ({ page }) => {
       await page.setViewportSize({ width: 375, height: 667 })
 
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await expect(page.locator("body")).toBeVisible()
 
@@ -390,7 +390,7 @@ test.describe("Letter Creation & Management", () => {
     test("journey page should be tablet responsive", async ({ page }) => {
       await page.setViewportSize({ width: 768, height: 1024 })
 
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       await expect(page.locator("body")).toBeVisible()
     })
@@ -402,7 +402,7 @@ test.describe("Letter Creation & Management", () => {
 
   test.describe("Error Handling", () => {
     test("should handle network errors gracefully", async ({ page }) => {
-      await page.goto("/journey")
+      await page.goto("/write-letter")
 
       // Simulate offline
       await page.context().setOffline(true)

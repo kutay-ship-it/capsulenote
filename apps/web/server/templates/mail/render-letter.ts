@@ -9,7 +9,6 @@ import { format } from "date-fns"
 import {
   LETTER_TEMPLATE_HTML,
   LETTER_TEMPLATE_MINIMAL_HTML,
-  type LetterTemplateVariables,
 } from "./letter-template"
 
 export interface RenderLetterOptions {

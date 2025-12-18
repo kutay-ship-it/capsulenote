@@ -1,15 +1,15 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "@/i18n/routing"
 
 interface RedirectCountdownProps {
   /** Countdown duration in seconds */
   duration?: number
-  /** Target URL to redirect to */
-  targetUrl?: string
+  /** Target route to redirect to */
+  targetHref?: Parameters<ReturnType<typeof useRouter>["push"]>[0]
 }
 
 /**
@@ -18,16 +18,26 @@ interface RedirectCountdownProps {
  */
 export function RedirectCountdown({
   duration = 3,
-  targetUrl = "/journey"
+  targetHref = "/journey",
 }: RedirectCountdownProps) {
   const router = useRouter()
   const [countdown, setCountdown] = useState(duration)
   const [isNavigating, setIsNavigating] = useState(false)
+  const hasNavigatedRef = useRef(false)
+
+  const handleNavigate = () => {
+    if (hasNavigatedRef.current) return
+    hasNavigatedRef.current = true
+    setIsNavigating(true)
+    router.push(targetHref)
+  }
 
   // Countdown timer
   useEffect(() => {
+    if (hasNavigatedRef.current) return
     if (countdown <= 0) {
-      handleNavigate()
+      hasNavigatedRef.current = true
+      router.push(targetHref)
       return
     }
 
@@ -36,13 +46,7 @@ export function RedirectCountdown({
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [countdown])
-
-  const handleNavigate = () => {
-    if (isNavigating) return
-    setIsNavigating(true)
-    router.push(targetUrl)
-  }
+  }, [countdown, router, targetHref])
 
   // Calculate progress percentage (0 to 100, depleting)
   const progressPercent = (countdown / duration) * 100
@@ -66,7 +70,7 @@ export function RedirectCountdown({
           className="h-full bg-duck-blue transition-all duration-1000 ease-linear"
           style={{
             width: `${progressPercent}%`,
-            borderRadius: "2px"
+            borderRadius: "2px",
           }}
         />
       </div>

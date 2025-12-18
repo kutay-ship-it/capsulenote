@@ -65,7 +65,7 @@ test.describe("New User Journey: Landing → Subscribe → Write → Schedule", 
       if (await getStartedButton.first().isVisible()) {
         await getStartedButton.first().click()
       } else {
-        await page.goto("/journey")
+        await page.goto("/write-letter")
       }
 
       await waitForNetworkIdle(page)
@@ -164,7 +164,7 @@ test.describe("New User Journey: Landing → Subscribe → Write → Schedule", 
       }
 
       // Wait for account creation and redirect
-      await page.waitForURL(/\/(welcome|journey|letters|dashboard)/, { timeout: 30000 })
+      await page.waitForURL(/\/(welcome|journey|letters)/, { timeout: 30000 })
     })
 
     // =========================================================================
@@ -262,7 +262,7 @@ test.describe("New User Journey: Landing → Subscribe → Write → Schedule", 
     const draftContent = "This draft should persist after signup."
 
     // Write letter as anonymous user
-    await page.goto("/journey")
+    await page.goto("/write-letter")
     await waitForNetworkIdle(page)
     await dismissDialogs(page)
 
@@ -290,7 +290,7 @@ test.describe("New User Journey: Landing → Subscribe → Write → Schedule", 
   })
 
   test("should redirect unauthenticated users from dashboard to sign-in", async ({ page }) => {
-    await page.goto("/dashboard")
+    await page.goto("/journey")
     await expect(page).toHaveURL(/\/sign-in/)
   })
 

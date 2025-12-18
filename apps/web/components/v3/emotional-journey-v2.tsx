@@ -12,6 +12,12 @@ interface EmotionalJourneyV2Props {
   deliveries: DeliveryTimelineItem[]
 }
 
+interface CalculatedItem extends DeliveryTimelineItem {
+  x: number
+  isTop: boolean
+  date: Date
+}
+
 /**
  * Hook to detect mobile viewport
  * Returns true for screens < 640px (sm breakpoint)
@@ -245,7 +251,8 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
   // Ensure component is mounted before using scroll animations
   // This prevents the "Target ref is defined but not hydrated" error
   useEffect(() => {
-    setIsMounted(true)
+    const timer = setTimeout(() => setIsMounted(true), 0)
+    return () => clearTimeout(timer)
   }, [])
 
   // Calculate layout with "Elastic Time"
@@ -268,12 +275,10 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
     const startDate = startOfYear(firstDate)
 
     const pxPerDay = 3
-    const cardWidth = 288 // w-72 = 18rem = 288px
     const minCardGap = 380 // Generous spacing between cards
-    const nowGap = 350 // Balanced spacing around the NOW indicator
 
     let currentX = 200 // Initial padding
-    const calculatedItems: any[] = []
+    const calculatedItems: CalculatedItem[] = []
     const nowTime = now.getTime()
 
     // Split deliveries into past and future
@@ -316,15 +321,16 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
       let prevX
       let requiredGap
 
-      if (index === 0) {
-        // First future item: gap from last past item (or start)
-        prevX = lastPastX
-        requiredGap = gapForNow
-      } else {
-        // Subsequent future items: standard gap from previous future item
-        prevX = calculatedItems[calculatedItems.length - 1].x
-        requiredGap = minCardGap
-      }
+	      if (index === 0) {
+	        // First future item: gap from last past item (or start)
+	        prevX = lastPastX
+	        requiredGap = gapForNow
+	      } else {
+	        // Subsequent future items: standard gap from previous future item
+	        const previousItem = calculatedItems[calculatedItems.length - 1]
+	        prevX = previousItem ? previousItem.x : lastPastX
+	        requiredGap = minCardGap
+	      }
 
       // Continue the zigzag pattern based on total count
       const isTop = calculatedItems.length % 2 === 0
@@ -697,13 +703,20 @@ export function EmotionalJourneyV2({ deliveries }: EmotionalJourneyV2Props) {
                     let path = `M 0,${centerY}`
 
                     // Draw cubic Bezier curves for smooth S-curve transitions
-                    for (let i = 0; i < items.length; i++) {
-                      const currItem = items[i]
-                      const currY = currItem.isTop ? centerY - dotOffset : centerY + dotOffset
+	                    for (let i = 0; i < items.length; i++) {
+	                      const currItem = items[i]
+	                      if (!currItem) continue
 
-                      // Get previous position
-                      const prevX = i === 0 ? 0 : items[i - 1].x
-                      const prevY = i === 0 ? centerY : (items[i - 1].isTop ? centerY - dotOffset : centerY + dotOffset)
+	                      const currY = currItem.isTop ? centerY - dotOffset : centerY + dotOffset
+
+	                      // Get previous position
+	                      const prevItem = i === 0 ? undefined : items[i - 1]
+	                      const prevX = prevItem?.x ?? 0
+	                      const prevY = prevItem
+	                        ? prevItem.isTop
+	                          ? centerY - dotOffset
+	                          : centerY + dotOffset
+	                        : centerY
 
                       // Control points at horizontal midpoint
                       // cp1 at prevY ensures horizontal exit, cp2 at currY ensures horizontal entry

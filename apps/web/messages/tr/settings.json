@@ -38,7 +38,7 @@
     "planLabel": {
       "DIGITAL_CAPSULE": "Dijital Kapsül",
       "PAPER_PIXELS": "Kağıt & Pikseller",
-      "none": "Ücretsiz seviye"
+      "none": "Abonelik yok"
     },
     "badges": {
       "premium": "Premium",
@@ -122,7 +122,7 @@
       "status": "Durum",
       "renews": "Yenileme",
       "unknown": "Bilinmiyor",
-      "freePlanMessage": "Ücretsiz plandayken. Daha fazla özellik için yükselt.",
+      "freePlanMessage": "Henüz abone değilsin. Daha fazla özellik için yükselt.",
       "statusLabel": {
         "active": "Aktif",
         "trialing": "Deneme",

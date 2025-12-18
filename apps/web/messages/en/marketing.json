@@ -22,7 +22,7 @@
     "titlePart4": "Time",
     "description": "Write letters that arrive when you need them most. Digital delivery or real physical mail — your words, waiting in the future.",
     "goToLetters": "Go to Letters",
-    "startWriting": "Start Writing Free",
+    "startWriting": "Start Writing",
     "signIn": "Sign In",
     "scrollIndicator": "Try it below",
     "stats": [
@@ -89,10 +89,10 @@
   ],
   "cta": {
     "title": "Ready to schedule your letter?",
-    "signedOutDescription": "Create a free account to securely store your letters in our encrypted vault and schedule deliveries to your future self.",
-    "signedInDescription": "Jump back into your dashboard to keep drafting or scheduling future deliveries.",
-    "createAccount": "Create Free Account",
-    "goToDashboard": "Go to Dashboard"
+    "signedOutDescription": "Create an account to securely store your letters in our encrypted vault and schedule deliveries to your future self.",
+    "signedInDescription": "Jump back into your letters to keep drafting or scheduling future deliveries.",
+    "createAccount": "Create Account",
+    "goToDashboard": "Go to Letters"
   },
   "testimonial": {
     "title": "Your words age well here",
@@ -101,16 +101,16 @@
   },
   "ctaBottom": {
     "title": "Open a letter in your future inbox",
-    "description": "Start for free, draft as many letters as you like, and only pay when something gets scheduled for delivery.",
+    "description": "Draft as many letters as you like, and schedule delivery when you're ready.",
     "primary": "Create your first letter",
     "secondary": "I already have an account"
   },
   "miniDemo": {
     "subtitle": "Watch the flow",
     "title": "Four steps to future delivery",
-    "steps": ["Write your letter", "Choose delivery time", "We hold it securely", "Arrives exactly on time"],
-    "details": [
-      "Capture thoughts in our distraction-free editor",
+      "steps": ["Write your letter", "Choose delivery time", "We hold it securely", "Arrives exactly on time"],
+      "details": [
+      "Capture thoughts in our focused editor",
       "Pick a future milestone with timezone precision",
       "AES-256 encryption keeps it private until delivery",
       "Inngest ensures 99.97% on-time arrival"
@@ -137,7 +137,7 @@
     "features": [
       {
         "title": "Rich Text Editor",
-        "description": "Write your thoughts with a beautiful, distraction-free editor. Format your letters exactly how you want them."
+        "description": "Write your thoughts with a beautiful, focused editor. Format your letters exactly how you want them."
       },
       {
         "title": "Schedule Delivery",
@@ -226,7 +226,7 @@
     "company": "Company",
     "legal": "Legal",
     "links": {
-      "pricing": "Pricing",
+      "pricing": "Plans",
       "writeLetter": "Write a Letter",
       "features": "Features",
       "howItWorks": "How It Works",
@@ -255,7 +255,7 @@
       },
       "write": {
         "title": "Pour your heart out",
-        "description": "Write once inside a calm, distraction-free editor.",
+        "description": "Write once inside a calm, focused editor.",
         "detail": "Prompts nudge you past writer's block without stealing your voice."
       },
       "deliver": {
@@ -301,8 +301,8 @@
     "years1": "1 year",
     "years5": "5 years",
     "years25": "25 years",
-    "goToDashboard": "Go to Dashboard",
-    "startWritingFree": "Start Writing Free",
+    "goToDashboard": "Go to Letters",
+    "startWritingFree": "Start Writing",
     "tryItBelow": "Try it below",
     "stats": [
       { "value": "10,847", "label": "Letters Delivered" },
@@ -354,7 +354,7 @@
         "context": "Decade milestone letters"
       },
       {
-        "quote": "I wrote a 'victory letter' to myself during chemo. Reading it cancer-free two years later was the most powerful moment of my life. Keep writing to yourself. It matters.",
+        "quote": "I wrote a 'victory letter' to myself during chemo. Reading it two years later was the most powerful moment of my life. Keep writing to yourself. It matters.",
         "author": "Lisa M.",
         "role": "Cancer Survivor",
         "context": "Victory over illness"
@@ -459,10 +459,10 @@
     "description": "It takes just 5 minutes to plant a seed that will bloom in your future.",
     "question": "What will you tell yourself?",
     "writeNewLetter": "Write a New Letter",
-    "startWritingFree": "Start Writing Free",
+    "startWritingFree": "Start Writing",
     "noCreditCard": "No credit card required. Cancel anytime.",
     "stats": [
-      { "value": "Free", "label": "First Letter" },
+      { "value": "1", "label": "First Letter" },
       { "value": "5 min", "label": "To Write" },
       { "value": "50 yrs", "label": "Max Schedule" }
     ]
@@ -505,64 +505,7 @@
       },
       {
         "question": "How far in the future can I schedule?",
-        "answer": "Free users can schedule up to 5 years ahead. Premium users can schedule up to 50 years ahead. Yes, you can write a letter to yourself 50 years from now. We're committed to being around to deliver it."
-      }
-    ]
-  },
-  "footerV2": {
-    "tagline": "Write letters to your future self. Encrypted, scheduled, delivered exactly when you need them most.",
-    "productTitle": "Product",
-    "legalTitle": "Legal",
-    "productLinks": [
-      { "label": "Pricing", "href": "/pricing" },
-      { "label": "Sign Up", "href": "/sign-up" },
-      { "label": "Sign In", "href": "/sign-in" }
-    ],
-    "legalLinks": [
-      { "label": "Privacy Policy", "href": "/privacy" },
-      { "label": "Terms of Service", "href": "/terms" }
-    ],
-    "copyright": "© {year} Capsule Note. All rights reserved.",
-    "madeWith": "Made with {heart} for future-you"
-  },
-  "pricingPreview": {
-    "badge": "Simple Pricing",
-    "title": "Choose Your",
-    "titleHighlight": "Plan",
-    "description": "Start writing letters to your future self today.",
-    "mostPopular": "Most Popular",
-    "seeFullPricing": "See full pricing details",
-    "tiers": [
-      {
-        "name": "Digital Capsule",
-        "price": "$2.22",
-        "period": "/year",
-        "description": "Email delivery for personal letters",
-        "cta": "Choose Digital",
-        "href": "/pricing",
-        "popular": false,
-        "features": [
-          "9 email credits / year",
-          "Schedule up to 100 years",
-          "Encrypted storage",
-          "Timezone-aware delivery"
-        ]
-      },
-      {
-        "name": "Paper & Pixels",
-        "price": "$29",
-        "period": "/year",
-        "description": "Email + physical mail delivery",
-        "cta": "Choose Paper & Pixels",
-        "href": "/pricing",
-        "popular": true,
-        "features": [
-          "24 email credits / year",
-          "3 physical mail credits / year",
-          "Premium paper quality",
-          "Address verification",
-          "Priority support"
-        ]
+        "answer": "Scheduling limits depend on your account. You can schedule letters years ahead — up to 50 years. Yes, you can write a letter to yourself 50 years from now. We're committed to being around to deliver it."
       }
     ]
   },

@@ -2,10 +2,10 @@
 
 import * as React from "react"
 import { CheckCircle2, X } from "lucide-react"
-import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { broadcastCreditsUpdated } from "@/hooks/use-credits-broadcast"
+import { Link } from "@/i18n/routing"
 
 export default function CreditsSuccessPage() {
   const [canClose, setCanClose] = React.useState(false)
@@ -68,7 +68,7 @@ export default function CreditsSuccessPage() {
                 <Link href="/letters/new">Continue Writing</Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
-                <Link href="/journey">Go to Dashboard</Link>
+                <Link href="/journey">Go to Journey</Link>
               </Button>
             </>
           )}

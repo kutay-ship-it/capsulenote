@@ -172,6 +172,21 @@
       "delivers": "{date} tarihinde teslim edilecek"
     }
   },
+  "edit": {
+    "heading": "Mektubu Düzenle",
+    "subtitle": "Planlamadan önce taslağını güncelle.",
+    "cancel": "İptal",
+    "save": "Değişiklikleri kaydet",
+    "saving": "Kaydediliyor...",
+    "saved": {
+      "title": "Değişiklikler kaydedildi",
+      "description": "Mektubun güncellendi."
+    },
+    "errors": {
+      "titleRequired": "Başlık gerekli.",
+      "saveFailed": "Kaydetme başarısız"
+    }
+  },
   "schedule": {
     "badge": "Adım 2: Planla",
     "title": "Mektubunu planla",

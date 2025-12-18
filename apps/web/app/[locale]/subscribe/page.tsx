@@ -12,10 +12,11 @@
 
 import * as React from "react"
 import type { Metadata } from "next"
-import { getTranslations } from "next-intl/server"
+import { getTranslations, setRequestLocale } from "next-intl/server"
 import { redirect } from "next/navigation"
 import { prisma } from "@/server/lib/db"
 import { env } from "@/env.mjs"
+import type { Locale } from "@/i18n/routing"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent } from "@/components/ui/card"
@@ -24,13 +25,19 @@ import { AlertCircle, Info } from "lucide-react"
 import { EmailCaptureForm } from "./_components/email-capture-form"
 import { SubscribePricingWrapper } from "./_components/subscribe-pricing-wrapper"
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("subscribe")
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "subscribe" })
+  const canonicalPath = locale === "en" ? "/subscribe" : `/${locale}/subscribe`
   return {
     title: t("metadata.title"),
     description: t("metadata.description"),
     alternates: {
-      canonical: "/subscribe",
+      canonical: canonicalPath,
     },
     robots: {
       index: false,
@@ -40,6 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface SubscribePageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{
     email?: string
     letterId?: string
@@ -52,10 +60,15 @@ interface SubscribePageProps {
   }>
 }
 
-export default async function SubscribePage({ searchParams }: SubscribePageProps) {
-  const t = await getTranslations("subscribe")
-  const params = await searchParams
-  const { email, letterId, deliveryDate, deliveryType, timezone, recipientName, recipientType, view } = params
+export default async function SubscribePage({ params, searchParams }: SubscribePageProps) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const prefix = locale === "en" ? "" : `/${locale}`
+
+  const t = await getTranslations({ locale, namespace: "subscribe" })
+  const resolvedSearchParams = await searchParams
+  const { email, letterId, deliveryDate, deliveryType, timezone, recipientName, recipientType, view } =
+    resolvedSearchParams
 
   // If email already belongs to active subscriber, prompt sign-in instead of paywall
   if (email) {
@@ -69,12 +82,12 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
     })
 
     if (existingUser && existingUser.subscriptions.length > 0) {
-      redirect(`/sign-in?email=${encodeURIComponent(email)}&intent=resume`)
+      redirect(`${prefix}/sign-in?email=${encodeURIComponent(email)}&intent=resume`)
     }
   }
 
   // Check for pending subscriptions if email provided
-  let pendingSubscription: any = null
+  let pendingSubscription: Awaited<ReturnType<typeof prisma.pendingSubscription.findFirst>> = null
   if (email) {
     pendingSubscription = await prisma.pendingSubscription.findFirst({
       where: {
@@ -87,7 +100,7 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
 
   // If payment already complete, redirect to signup
   if (pendingSubscription?.status === "payment_complete") {
-    redirect(`/sign-up?email=${encodeURIComponent(email!)}`)
+    redirect(`${prefix}/sign-up?email=${encodeURIComponent(email!)}`)
   }
 
   // Pricing configuration (Capsule Note plans)

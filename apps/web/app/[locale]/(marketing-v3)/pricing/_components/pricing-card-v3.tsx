@@ -6,15 +6,14 @@ import { Check, ArrowRight, Sparkles } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Link } from "@/i18n/routing"
+import type { AppHref } from "@/i18n/routing"
 
 interface PricingCardV3Props {
   name: string
-  price: string | number
-  interval?: string
   description: string
   features: string[]
   cta: string
-  ctaHref?: string
+  ctaHref?: AppHref
   priceId?: string
   variant?: "default" | "popular" | "enterprise"
   popularBadgeText?: string
@@ -25,13 +24,11 @@ interface PricingCardV3Props {
 
 export function PricingCardV3({
   name,
-  price,
-  interval,
   description,
   features,
   cta,
   ctaHref = "/sign-up",
-  priceId,
+  priceId: _priceId,
   variant = "default",
   popularBadgeText,
   enterpriseBadgeText,
@@ -177,31 +174,6 @@ export function PricingCardV3({
           </h3>
         </div>
 
-        {/* Price */}
-        <div className="mb-6">
-          <div className="flex items-baseline gap-1">
-            {typeof price === "number" ? (
-              <>
-                <span className="font-mono text-5xl md:text-6xl font-normal tracking-tight">
-                  ${price}
-                </span>
-                {interval && (
-                  <span className={cn(
-                    "font-mono text-lg",
-                    isEnterprise ? "text-white/60" : "text-charcoal/60"
-                  )}>
-                    /{interval}
-                  </span>
-                )}
-              </>
-            ) : (
-              <span className="font-mono text-4xl md:text-5xl font-normal tracking-tight">
-                {price}
-              </span>
-            )}
-          </div>
-        </div>
-
         {/* Description */}
         <p className={cn(
           "mb-8 font-mono text-sm leading-relaxed",
@@ -267,7 +239,7 @@ export function PricingCardV3({
         </ul>
 
         {/* CTA Button */}
-        <Link href={ctaHref as any} className="w-full">
+        <Link href={ctaHref} className="w-full">
           <motion.button
             className={cn(
               "group w-full h-[54px] px-6",

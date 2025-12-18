@@ -58,8 +58,8 @@ export function MailConfigV3({
   selectedAddressId,
   onAddressChange,
   selectedAddress,
-  printOptions,
-  onPrintOptionsChange,
+  printOptions: _printOptions,
+  onPrintOptionsChange: _onPrintOptionsChange,
   transitDays: _transitDays, // Deprecated, now calculated from country
   disabled = false,
 }: MailConfigV3Props) {

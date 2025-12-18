@@ -55,7 +55,6 @@ const TRACKING_STAGES = [
   },
 ] as const
 
-type StageId = (typeof TRACKING_STAGES)[number]["id"]
 type StageStatus = "completed" | "current" | "pending" | "failed"
 
 interface MailTrackingRoadProps {

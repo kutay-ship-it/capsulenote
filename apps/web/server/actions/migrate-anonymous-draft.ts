@@ -119,7 +119,7 @@ export async function migrateAnonymousDraft(
 
     // Revalidate cached pages
     revalidatePath("/letters")
-    revalidatePath("/dashboard")
+    revalidatePath("/journey")
 
     return {
       success: true,

@@ -1,7 +1,14 @@
 # Legacy Component & Route Removal Plan
 
 > Generated: 2025-12-12
-> Status: Ready for review - DO NOT REMOVE YET
+> Status: Completed (2025-12-15)
+
+## Executed
+
+- Removed legacy app routes: `apps/web/app/[locale]/(legacy)/`
+- Removed deprecated `/landing-v2` route (kept `apps/web/app/[locale]/(marketing-v3)/landing-v2/_components` used by the landing page)
+- Removed legacy-only components under `apps/web/components/` (v2/redesign/dashboard/settings + legacy-only leaf components)
+- Added compatibility redirects for `/dashboard`, `/deliveries`, and `/support` and implemented `/letters/[id]/edit`
 
 ## Summary Statistics
 

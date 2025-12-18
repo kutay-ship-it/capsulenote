@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useCallback } from "react"
 import { AnimatePresence } from "framer-motion"
 import { markLetterAsOpened } from "@/server/actions/letters"
 import { UnlockSealedV3 } from "./unlock-sealed-v3"

@@ -15,7 +15,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "@/i18n/routing"
 import { Link } from "@/i18n/routing"
-import { CheckCircle2, Loader2, AlertCircle, Sparkles } from "lucide-react"
+import { CheckCircle2, Loader2, AlertCircle } from "lucide-react"
 import { checkSubscriptionStatus } from "@/server/actions/billing"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,8 @@ export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
   const router = useRouter()
   const t = useTranslations("checkout")
   const [verificationState, setVerificationState] = useState<VerificationState>("verifying")
-  const [pollCount, setPollCount] = useState(0)
+  void sessionId
+  const [, setPollCount] = useState(0)
   const maxPolls = 15 // Poll for up to 30 seconds (15 polls × 2s interval)
 
   useEffect(() => {
@@ -132,38 +133,9 @@ export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Plan Info */}
-          <div className="flex items-start gap-3">
-            <Sparkles className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <h3 className="font-semibold mb-1">{t("success.planName")}</h3>
-              <p className="text-sm text-muted-foreground">
-                {t("success.planDescription")}
-              </p>
-            </div>
-          </div>
-
-          {/* Features Summary */}
-          <div className="pt-4 border-t">
-            <h3 className="font-semibold mb-3">{t("success.features.title")}</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t("success.features.unlimited")}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t("success.features.emailDelivery")}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t("success.features.mailCredits")}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t("success.features.support")}</span>
-              </li>
-            </ul>
+          <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 text-sm text-muted-foreground">
+            <p>{t("processing.waiting")}</p>
+            <p className="mt-2">{t("processing.usuallyQuick")}</p>
           </div>
         </CardContent>
       </Card>
@@ -187,7 +159,7 @@ export function CheckoutProcessing({ sessionId }: CheckoutProcessingProps) {
           {t.rich("success.manageSubscription", {
             link: (chunks) => (
               <Link href={{ pathname: "/settings", query: { tab: "billing" } }} className="text-primary hover:underline">
-                {t("success.billingSettings")}
+                {chunks}
               </Link>
             ),
           })}

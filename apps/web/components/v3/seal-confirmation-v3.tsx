@@ -121,11 +121,11 @@ export function SealConfirmationV3({
           >
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-charcoal/50 mb-1">
               {t("yourLetter")}
-            </p>
-            <p className="font-mono text-sm font-bold text-charcoal line-clamp-1">
-              "{letterTitle}"
-            </p>
-          </div>
+	            </p>
+	            <p className="font-mono text-sm font-bold text-charcoal line-clamp-1">
+	              &quot;{letterTitle}&quot;
+	            </p>
+	          </div>
 
           {/* Details Grid */}
           <div className="space-y-2">

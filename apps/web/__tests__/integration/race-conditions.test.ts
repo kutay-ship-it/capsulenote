@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest"
 const mockPrisma = {
   user: {
     findUnique: vi.fn(),
-    create: vi.fn(),
+    upsert: vi.fn(),
   },
   pendingSubscription: {
     findFirst: vi.fn(),
@@ -75,14 +75,6 @@ describe("Race Condition Handling", () => {
       // First findUnique: user not found (triggers auto-sync)
       mockPrisma.user.findUnique.mockResolvedValueOnce(null)
 
-      // Mock create to fail with P2002 (unique constraint) to simulate race
-      const p2002Error = new Error("Unique constraint failed")
-      Object.assign(p2002Error, {
-        code: "P2002",
-        meta: { target: ["clerkUserId"] },
-      })
-      mockPrisma.user.create.mockRejectedValueOnce(p2002Error)
-
       // Mock Clerk user
       mockGetUser.mockResolvedValue({
         id: testClerkUserId,
@@ -95,8 +87,8 @@ describe("Race Condition Handling", () => {
         ],
       })
 
-      // On retry after P2002, findUnique should return the user created by concurrent request
-      mockPrisma.user.findUnique.mockResolvedValueOnce({
+      // Upsert handles concurrency atomically; return created record
+      mockPrisma.user.upsert.mockResolvedValueOnce({
         id: "user_123",
         clerkUserId: testClerkUserId,
         email: testEmail,
@@ -111,8 +103,8 @@ describe("Race Condition Handling", () => {
       // Verify retry logic worked
       expect(result).toBeDefined()
       expect(result?.clerkUserId).toBe(testClerkUserId)
-      expect(mockPrisma.user.create).toHaveBeenCalledTimes(1)
-      expect(mockPrisma.user.findUnique).toHaveBeenCalledTimes(2) // Initial + retry after P2002
+      expect(mockPrisma.user.upsert).toHaveBeenCalledTimes(1)
+      expect(mockPrisma.user.findUnique).toHaveBeenCalledTimes(1)
     })
 
     it("should handle concurrent Clerk webhook deliveries", async () => {
@@ -126,8 +118,8 @@ describe("Race Condition Handling", () => {
       // First webhook: user not found
       mockPrisma.user.findUnique.mockResolvedValueOnce(null)
 
-      // First webhook: successfully creates user
-      mockPrisma.user.create.mockResolvedValueOnce({
+      // Upsert returns the created or existing user
+      mockPrisma.user.upsert.mockResolvedValueOnce({
         id: "user_123",
         clerkUserId: testClerkUserId,
         email: testEmail,
@@ -150,7 +142,7 @@ describe("Race Condition Handling", () => {
 
       expect(result).toBeDefined()
       expect(result?.clerkUserId).toBe(testClerkUserId)
-      expect(mockPrisma.user.create).toHaveBeenCalledTimes(1)
+      expect(mockPrisma.user.upsert).toHaveBeenCalledTimes(1)
     })
   })
 

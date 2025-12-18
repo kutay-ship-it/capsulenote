@@ -86,7 +86,7 @@ export const promptContent: PromptContentRegistry = {
         "Books like 'Self-Compassion' by Kristin Neff provide excellent frameworks for building a healthier relationship with yourself.",
         "Remember that self-esteem isn't about feeling superior - it's about recognizing your equal inherent worth as a human being.",
         "If you struggle significantly with self-worth, consider working with a therapist who specializes in self-esteem and cognitive approaches.",
-        "The VIA Character Strengths survey (free online) can help identify your core strengths when you're struggling to articulate them yourself.",
+        "The VIA Character Strengths survey (available online) can help identify your core strengths when you're struggling to articulate them yourself.",
         "Research shows that self-compassion exercises are particularly effective when practiced during moments of failure or disappointment, not just success.",
       ],
     },

@@ -49,7 +49,7 @@ export PLAYWRIGHT_BASE_URL=http://localhost:3000
 5. **Complete signup**
    - Enter password (email pre-filled)
    - Submit signup form
-   - Verify redirected to `/dashboard`
+   - Verify redirected to `/journey`
 
 6. **Verify subscription activated**
    - Check subscription card shows "Pro" plan
@@ -64,7 +64,7 @@ export PLAYWRIGHT_BASE_URL=http://localhost:3000
 - [x] User created in database
 - [x] Subscription linked to user account
 - [x] PendingSubscription marked as `linked`
-- [x] User redirected to dashboard with active subscription
+- [x] User redirected to journey with active subscription
 
 ### Database Verification Queries
 
@@ -181,8 +181,8 @@ To reliably test this race condition:
    - On success page, submit signup form
    - DO NOT click email verification link
 
-3. **Attempt to access dashboard**
-   - Try navigating to `/dashboard`
+3. **Attempt to access journey**
+   - Try navigating to `/journey`
    - Verify redirected to error page
 
 4. **Verify error message**
@@ -192,7 +192,7 @@ To reliably test this race condition:
 
 5. **Verify email and retry**
    - Click verification link in email
-   - Return to dashboard
+   - Return to journey
    - Verify subscription now activated
 
 ### Expected Results
@@ -472,8 +472,8 @@ test.describe('Anonymous Checkout E2E', () => {
     await page.fill('input[name="password"]', 'SecurePassword123!')
     await page.click('button[type="submit"]')
 
-    // Verify dashboard redirect
-    await page.waitForURL('/dashboard')
+    // Verify journey redirect
+    await page.waitForURL('/journey')
 
     // Verify subscription active
     const subscriptionBadge = page.locator('[data-testid="subscription-badge"]')

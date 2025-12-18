@@ -7,57 +7,77 @@
     "stillProcessing": "Still processing?",
     "safeToNavigate": "You can safely navigate away - we'll send you an email confirmation once your subscription is active.",
     "checkStatus": "You can check your subscription status in settings",
-    "goToDashboard": "Go to Dashboard",
+    "goToDashboard": "Go to Journey",
     "viewBilling": "View Billing Settings",
     "verificationFailed": "Verification Taking Longer Than Expected",
     "verificationFailedDescription": "Your payment was successful, but we're still setting up your account. Your subscription will be active shortly.",
     "contactSupport": "If you don't see your subscription within a few minutes, please contact support."
   },
   "success": {
-    "title": "Welcome to Capsule Note Pro!",
+    "title": "Welcome to Capsule Note!",
     "subtitle": "Your subscription has been successfully activated",
     "subscriptionDetails": "Subscription Details",
     "badge": {
       "trial": "Trial Active",
       "active": "Active"
     },
-    "planName": "Capsule Note Pro",
-    "planDescription": "Unlimited letters, email deliveries, and physical mail credits",
+    "plan": {
+      "DIGITAL_CAPSULE": {
+        "name": "Digital Capsule",
+        "description": "For personal reflection with reliable digital delivery.",
+        "features": [
+          "9 digital deliveries per year",
+          "Send to yourself or loved ones",
+          "Schedule up to 100 years ahead",
+          "Timezone-aware delivery",
+          "End-to-end encryption",
+          "Purchase extra letters anytime"
+        ]
+      },
+      "PAPER_PIXELS": {
+        "name": "Paper & Pixels",
+        "description": "For meaningful keepsakes with physical mail and priority routing.",
+        "features": [
+          "24 digital deliveries per year",
+          "3 physical letters per year",
+          "Send to yourself or loved ones",
+          "Address confirmation reminders",
+          "Priority mail routing",
+          "Purchase extra letters anytime"
+        ]
+      }
+    },
     "trial": {
-      "title": "14-Day Free Trial",
+      "title": "14-Day Trial",
       "endsOn": "Your trial ends on {date} ({days} days remaining)",
       "endingSoon": "Your trial is ending soon",
       "noBilling": "You won't be charged until your trial ends. Cancel anytime before then."
     },
     "features": {
-      "title": "What's included:",
-      "unlimited": "Create unlimited letters to your future self",
-      "emailDelivery": "Schedule unlimited email deliveries",
-      "mailCredits": "2 physical mail credits per month",
-      "support": "Priority support"
+      "title": "What's included:"
     },
     "buttons": {
-      "dashboard": "Go to Dashboard",
+      "dashboard": "Go to Journey",
       "writeLetter": "Write Your First Letter"
     },
     "confirmEmail": "A confirmation email has been sent to your inbox.",
-    "manageSubscription": "Manage your subscription anytime in {link}.",
+    "manageSubscription": "Manage your subscription anytime in <link>billing settings</link>.",
     "billingSettings": "billing settings"
   },
   "cancel": {
     "title": "Checkout Canceled",
-    "description": "No worries! You can return to pricing and try again whenever you're ready.",
-    "freePlanInfo": "Your account remains on the free plan. You can upgrade at any time to unlock:",
+    "description": "No worries! You can return to plans and try again whenever you're ready.",
+    "freePlanInfo": "Your account remains without a subscription. You can choose a plan at any time to unlock:",
     "features": {
-      "unlimited": "Unlimited letters and email deliveries",
-      "mail": "Physical mail delivery",
-      "support": "Priority support"
+      "unlimited": "Schedule letters for future delivery",
+      "mail": "Unlock physical mail delivery",
+      "support": "Get priority support"
     },
     "buttons": {
-      "dashboard": "Return to Dashboard",
-      "pricing": "View Pricing"
+      "dashboard": "Return to Journey",
+      "pricing": "View Plans"
     },
-    "support": "Have questions? {link}",
+    "support": "Have questions? <link>Contact support</link>",
     "contactSupport": "Contact support"
   },
   "metadata": {

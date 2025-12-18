@@ -1,8 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
 import { useSignIn } from "@clerk/nextjs"
 import { useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -10,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PenLine } from "lucide-react"
+import { Link, useRouter } from "@/i18n/routing"
 
 interface CustomSignInFormProps {
   prefillEmail?: string
@@ -21,6 +20,15 @@ const USER_NOT_FOUND_CODES = [
   "identifier_not_found",
   "form_param_nil",
 ]
+
+function getClerkError(error: unknown): { code?: string; message?: string } {
+  if (!error || typeof error !== "object") return {}
+  const firstError = (error as { errors?: Array<{ code?: unknown; message?: unknown }> }).errors?.[0]
+  return {
+    code: typeof firstError?.code === "string" ? firstError.code : undefined,
+    message: typeof firstError?.message === "string" ? firstError.message : undefined,
+  }
+}
 
 export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
   const router = useRouter()
@@ -50,20 +58,20 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId })
-        router.push("/dashboard")
+        router.push("/journey")
       } else if (result.status === "needs_second_factor") {
         setNeedsSecondFactor(true)
         setError(null)
       } else {
         setError(t("errors.additionalVerification"))
       }
-    } catch (err: any) {
-      const errorCode = err?.errors?.[0]?.code
-      if (USER_NOT_FOUND_CODES.includes(errorCode)) {
+    } catch (error) {
+      const { code, message } = getClerkError(error)
+      if (code && USER_NOT_FOUND_CODES.includes(code)) {
         setShowNoAccountCta(true)
         setError(null)
       } else {
-        setError(err?.errors?.[0]?.message || t("errors.failed"))
+        setError(message || t("errors.failed"))
       }
     } finally {
       setIsSubmitting(false)
@@ -84,12 +92,12 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId })
-        router.push("/dashboard")
+        router.push("/journey")
       } else {
         setError(t("errors.invalidCode"))
       }
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message || t("errors.secondFactorFailed"))
+    } catch (error) {
+      setError(getClerkError(error).message || t("errors.secondFactorFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -110,10 +118,10 @@ export function CustomSignInForm({ prefillEmail }: CustomSignInFormProps) {
             {t("noAccount.message")}
           </p>
           <Button asChild className="mt-4 w-full" size="lg">
-            <a href="/#try-demo">
+            <Link href={{ pathname: "/", hash: "try-demo" }}>
               <PenLine className="mr-2 h-4 w-4" />
               {t("noAccount.cta")}
-            </a>
+            </Link>
           </Button>
           <p className="mt-3 text-sm text-muted-foreground">
             <Link href="/sign-up" className="text-primary underline hover:no-underline">

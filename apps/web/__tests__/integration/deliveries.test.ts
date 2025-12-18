@@ -62,6 +62,7 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
       findUnique: vi.fn(),
       findFirst: vi.fn(),
       update: vi.fn(),
+      count: vi.fn(),
       delete: vi.fn(),
     },
     emailDelivery: {
@@ -72,6 +73,7 @@ const { mockEntitlements, mockEntitlementsModule, mockPrisma } = vi.hoisted(() =
     },
     user: {
       update: vi.fn(),
+      updateMany: vi.fn(),
       findUnique: vi.fn(),
     },
     pendingSubscription: {
@@ -139,6 +141,7 @@ describe("Deliveries", () => {
     vi.clearAllMocks()
     mockPrisma.pendingSubscription.findFirst.mockResolvedValue(null)
     mockLinkPendingSubscription.mockResolvedValue({ success: true, subscriptionId: "sub_123" } as any)
+    mockPrisma.delivery.count.mockResolvedValue(0)
   })
 
   it("schedules email delivery successfully", async () => {
@@ -151,13 +154,10 @@ describe("Deliveries", () => {
     })
 
     // Mock user has credits (for transaction)
-    mockPrisma.user.findUnique.mockResolvedValueOnce({
-      id: mockUser.id,
-      emailCredits: 5,
-    })
+    mockPrisma.user.updateMany.mockResolvedValueOnce({ count: 1 })
+    mockPrisma.user.findUnique.mockResolvedValueOnce({ emailCredits: 4 })
 
     // Mock transaction operations
-    mockPrisma.user.update.mockResolvedValueOnce({})
     mockPrisma.creditTransaction.create.mockResolvedValueOnce({})
     mockPrisma.delivery.create.mockResolvedValueOnce({
       id: "delivery_123",
@@ -283,13 +283,10 @@ describe("Deliveries", () => {
     })
 
     // Mock user has credits (for transaction)
-    mockPrisma.user.findUnique.mockResolvedValueOnce({
-      id: mockUser.id,
-      emailCredits: 5,
-    })
+    mockPrisma.user.updateMany.mockResolvedValueOnce({ count: 1 })
+    mockPrisma.user.findUnique.mockResolvedValueOnce({ emailCredits: 4 })
 
     // Mock transaction operations
-    mockPrisma.user.update.mockResolvedValueOnce({})
     mockPrisma.creditTransaction.create.mockResolvedValueOnce({})
     mockPrisma.delivery.create.mockResolvedValueOnce({
       id: "delivery_auto",
@@ -364,7 +361,7 @@ describe("Deliveries", () => {
     const result = await scheduleDelivery({
       letterId: "11111111-1111-4111-8111-111111111111",
       channel: "mail",
-      deliverAt: new Date(Date.now() + 10 * 60 * 1000),
+      deliverAt: new Date(Date.now() + 31 * 24 * 60 * 60 * 1000),
       timezone: "UTC",
       shippingAddressId: "22222222-2222-4222-8222-222222222222",
     })
@@ -405,6 +402,7 @@ describe("Deliveries", () => {
     mockPrisma.delivery.findFirst.mockResolvedValueOnce({
       id: deliveryId,
       userId: mockUser.id,
+      letterId: "11111111-1111-4111-8111-111111111111",
       status: "scheduled",
       channel: "email",
       deliverAt: new Date(Date.now() + 10 * 60 * 1000),

@@ -40,11 +40,11 @@ export function TimelineVisualizerV3({
   lockWindowHours = LOCK_WINDOW_HOURS,
 }: TimelineVisualizerV3Props) {
   const t = useTranslations("schedule.timeline")
-  const now = new Date()
   const lockDate = subHours(deliveryDate, lockWindowHours)
 
   // Build timeline steps based on channel
   const steps: TimelineStep[] = React.useMemo(() => {
+    const now = new Date()
     const baseSteps: TimelineStep[] = [
       {
         id: "now",
@@ -157,7 +157,7 @@ export function TimelineVisualizerV3({
     }
 
     return baseSteps
-  }, [channel, deliveryDate, lockDate, mailDeliveryMode, mailSendDate, transitDays, lockWindowHours, now, t])
+  }, [channel, deliveryDate, lockDate, mailDeliveryMode, mailSendDate, transitDays, lockWindowHours, t])
 
   const colorClasses = {
     charcoal: "bg-charcoal text-white border-charcoal",

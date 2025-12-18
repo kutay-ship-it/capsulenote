@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { getTranslations, setRequestLocale, getFormatter } from "next-intl/server"
-import { FileText, CheckCircle, XCircle, AlertTriangle, Mail } from "lucide-react"
+import { FileText, XCircle, AlertTriangle, Mail } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../_components/legal-page-layout"

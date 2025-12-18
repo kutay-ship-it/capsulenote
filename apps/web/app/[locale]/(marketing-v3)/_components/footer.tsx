@@ -4,8 +4,15 @@ import { Mail } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
+import type { AppHref } from "@/i18n/routing"
 import { FooterLanguageButton } from "@/components/locale"
 import { cn } from "@/lib/utils"
+
+type FooterHref = AppHref | `#${string}`
+
+function isHashHref(href: FooterHref): href is `#${string}` {
+  return typeof href === "string" && href.startsWith("#")
+}
 
 export function Footer() {
   const locale = useLocale()
@@ -13,7 +20,7 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
 
-  const links = {
+  const links: Record<string, Array<{ label: string; href: FooterHref }>> = {
     product: [
       { label: t("links.pricing"), href: "/pricing" },
       { label: t("links.writeLetter"), href: "/write-letter" },
@@ -84,12 +91,21 @@ export function Footer() {
               <ul className="space-y-3">
                 {categoryLinks.map((link) => (
                   <li key={link.label}>
-                    <Link
-                      href={link.href as any}
-                      className="font-mono text-sm text-charcoal/70 transition-opacity hover:opacity-70"
-                    >
-                      {link.label}
-                    </Link>
+                    {isHashHref(link.href) ? (
+                      <a
+                        href={link.href}
+                        className="font-mono text-sm text-charcoal/70 transition-opacity hover:opacity-70"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="font-mono text-sm text-charcoal/70 transition-opacity hover:opacity-70"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

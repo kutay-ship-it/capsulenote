@@ -13,7 +13,6 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -22,6 +21,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Save, Check, Sparkles } from "lucide-react"
+import { useRouter } from "@/i18n/routing"
 import {
   saveAnonymousDraft,
   getAnonymousDraft,
@@ -31,18 +31,36 @@ import {
 } from "@/lib/localStorage-letter"
 import { cn, getUserTimezone } from "@/lib/utils"
 
-export function AnonymousLetterTryout() {
+interface AnonymousLetterTryoutProps {
+  initialTitle?: string
+  initialBody?: string
+}
+
+export function AnonymousLetterTryout({
+  initialTitle = "",
+  initialBody = "",
+}: AnonymousLetterTryoutProps) {
   const router = useRouter()
   const t = useTranslations("forms.anonymousTryout")
-  const [title, setTitle] = useState("")
-  const [body, setBody] = useState("")
+  const [title, setTitle] = useState(initialTitle)
+  const [body, setBody] = useState(initialBody)
   const [email, setEmail] = useState("")
   const [wordCount, setWordCount] = useState(0)
   const [lastSaved, setLastSaved] = useState<string | null>(null)
   const [showSaveIndicator, setShowSaveIndicator] = useState(false)
   const [showSignUpPrompt, setShowSignUpPrompt] = useState(false)
+  const titleRef = useRef(title)
+  const bodyRef = useRef(body)
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const saveIndicatorTimerRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    titleRef.current = title
+  }, [title])
+
+  useEffect(() => {
+    bodyRef.current = body
+  }, [body])
 
   // Load existing draft on mount
   useEffect(() => {
@@ -55,6 +73,17 @@ export function AnonymousLetterTryout() {
       setLastSaved(draft.lastSaved)
     }
   }, [])
+
+  // If navigated to a prefilled URL and there is no stored draft, seed initial content.
+  // Never overwrite user-entered content.
+  useEffect(() => {
+    const draft = getAnonymousDraft()
+    if (draft) return
+    if (titleRef.current.trim() || bodyRef.current.trim()) return
+
+    if (initialTitle.trim()) setTitle(initialTitle)
+    if (initialBody.trim()) setBody(initialBody)
+  }, [initialTitle, initialBody])
 
   // Auto-save function with debounce
   const performAutoSave = useCallback(() => {
@@ -113,7 +142,7 @@ export function AnonymousLetterTryout() {
   // Handle sign-up redirect
   const handleSignUp = () => {
     // Draft will be automatically loaded after sign-up via migration
-    router.push('/sign-up?intent=save-draft')
+    router.push({ pathname: "/sign-up", query: { intent: "save-draft" } })
   }
 
   const handleSendAndSchedule = () => {
@@ -128,7 +157,10 @@ export function AnonymousLetterTryout() {
     params.set("email", trimmedEmail)
     params.set("deliveryType", "email")
     params.set("timezone", timezone)
-    router.push(`/subscribe?${params.toString()}`)
+    router.push({
+      pathname: "/subscribe",
+      query: Object.fromEntries(params.entries()),
+    })
   }
 
   return (

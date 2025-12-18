@@ -5,7 +5,6 @@ import { useRef, useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 
 import { Button } from "@/components/ui/button"
-import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
 interface CTASectionProps {
@@ -13,6 +12,7 @@ interface CTASectionProps {
 }
 
 export function CTASection({ isSignedIn }: CTASectionProps) {
+  void isSignedIn
   const t = useTranslations("marketing.ctaSection")
   const stats = t.raw("stats") as Array<{ value: string; label: string }>
   const sectionRef = useRef<HTMLElement>(null)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useId } from "react"
 import { ChevronsUpDown, Search, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -35,6 +35,8 @@ function CountryOptionItem({
     <button
       type="button"
       onClick={onClick}
+      role="option"
+      aria-selected={isSelected}
       className={cn(
         "w-full flex items-center gap-2 px-3 py-2.5 text-left transition-all overflow-hidden",
         "hover:bg-duck-yellow/20",
@@ -83,6 +85,7 @@ export function CountrySelectorV3({
 }: CountrySelectorV3Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
+  const listboxId = useId()
 
   // Get display info for selected country
   const selectedCountry = useMemo(() => {
@@ -132,6 +135,8 @@ export function CountrySelectorV3({
           type="button"
           role="combobox"
           aria-expanded={open}
+          aria-controls={listboxId}
+          aria-haspopup="listbox"
           disabled={disabled}
           className={cn(
             "group w-full flex items-center gap-3 h-12 px-4 text-left",
@@ -207,7 +212,7 @@ export function CountrySelectorV3({
 
         {/* Country List */}
         <ScrollArea className="h-[320px]">
-          <div className="p-2 overflow-hidden">
+          <div id={listboxId} role="listbox" className="p-2 overflow-hidden">
             {filteredGroups.length === 0 ? (
               <div className="p-4 text-center">
                 <p className="font-mono text-sm text-charcoal/50">

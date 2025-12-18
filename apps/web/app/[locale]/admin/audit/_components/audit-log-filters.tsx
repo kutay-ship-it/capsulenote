@@ -35,13 +35,13 @@ export function AuditLogFilters() {
   const [endDate, setEndDate] = useState(searchParams.get("endDate") || "")
 
   const handleApplyFilters = () => {
-    const params = new URLSearchParams()
-    if (type) params.set("type", type)
-    if (userId) params.set("userId", userId)
-    if (startDate) params.set("startDate", startDate)
-    if (endDate) params.set("endDate", endDate)
+    const query: Record<string, string> = {}
+    if (type) query.type = type
+    if (userId) query.userId = userId
+    if (startDate) query.startDate = startDate
+    if (endDate) query.endDate = endDate
 
-    router.push(`/admin/audit?${params.toString()}` as "/admin/audit")
+    router.push({ pathname: "/admin/audit", query })
   }
 
   const handleClearFilters = () => {

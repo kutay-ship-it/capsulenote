@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Globe, X } from "lucide-react"
+import { X } from "lucide-react"
 import { useAuth } from "@clerk/nextjs"
-import { useRouter as useNextIntlRouter, usePathname } from "@/i18n/routing"
+import { useRouter as useNextIntlRouter } from "@/i18n/routing"
 import { usePathname as useNextPathname } from "next/navigation"
+import { useLocale } from "next-intl"
 import { cn } from "@/lib/utils"
 import { routing } from "@/i18n/routing"
+import { translateSeoPathnameForLocaleSwitch } from "@/lib/seo/localized-slugs"
 
 // ============================================================================
 // LOCALE STORAGE KEYS
@@ -64,34 +66,6 @@ function V3Button({
   )
 }
 
-function V3FloatingBadge({
-  icon,
-  label,
-  variant = "yellow",
-}: {
-  icon?: React.ReactNode
-  label: string
-  variant?: "yellow" | "blue" | "teal" | "dark"
-}) {
-  return (
-    <div
-      className={cn(
-        "absolute -top-3 left-4 flex items-center gap-1.5",
-        "px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider",
-        "border-2 border-charcoal",
-        variant === "yellow" && "bg-duck-yellow text-charcoal",
-        variant === "blue" && "bg-duck-blue text-charcoal",
-        variant === "teal" && "bg-teal-primary text-white",
-        variant === "dark" && "bg-charcoal text-white"
-      )}
-      style={{ borderRadius: "2px" }}
-    >
-      {icon}
-      <span>{label}</span>
-    </div>
-  )
-}
-
 // ============================================================================
 // LOCALE DETECTION UTILITIES
 // ============================================================================
@@ -103,7 +77,8 @@ function detectTurkishUser(): boolean {
   if (typeof window === "undefined") return false
 
   // 1. Check browser language
-  const browserLang = navigator.language || (navigator as any).userLanguage || ""
+  type NavigatorWithUserLanguage = Navigator & { userLanguage?: string }
+  const browserLang = navigator.language || (navigator as NavigatorWithUserLanguage).userLanguage || ""
   if (browserLang.toLowerCase().startsWith("tr")) {
     return true
   }
@@ -240,6 +215,7 @@ export function LocaleDetector({ serverCountry }: LocaleDetectorProps) {
   const [showBanner, setShowBanner] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const { isSignedIn } = useAuth()
+  const currentLocale = useLocale() as Locale
   const router = useNextIntlRouter()
   const pathname = useNextPathname()
 
@@ -255,24 +231,16 @@ export function LocaleDetector({ serverCountry }: LocaleDetectorProps) {
   const internalPathname = getPathnameWithoutLocale(pathname)
 
   useEffect(() => {
-    setIsClient(true)
-
-    // Check if user has already set a preference
     const savedLocale = getSavedLocale()
-    if (savedLocale) {
-      return // User has a preference, don't show banner
-    }
+    const shouldShowBanner =
+      !savedLocale && !wasBannerDismissed() && (serverCountry === "TR" || detectTurkishUser())
 
-    // Check if banner was previously dismissed
-    if (wasBannerDismissed()) {
-      return
-    }
+    const timer = setTimeout(() => {
+      setIsClient(true)
+      if (shouldShowBanner) setShowBanner(true)
+    }, 0)
 
-    // Check if we should show banner based on detection
-    const isTurkishUser = serverCountry === "TR" || detectTurkishUser()
-    if (isTurkishUser) {
-      setShowBanner(true)
-    }
+    return () => clearTimeout(timer)
   }, [serverCountry])
 
   const handleSelectLocale = async (locale: Locale) => {
@@ -291,7 +259,8 @@ export function LocaleDetector({ serverCountry }: LocaleDetectorProps) {
     }
 
     // Navigate to the selected locale
-    router.replace(internalPathname as Parameters<typeof router.replace>[0], { locale })
+    const translatedPathname = translateSeoPathnameForLocaleSwitch(internalPathname, currentLocale, locale)
+    router.replace(translatedPathname as Parameters<typeof router.replace>[0], { locale })
     router.refresh()
   }
 

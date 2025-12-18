@@ -38,7 +38,7 @@
     "defaultMessage": "Beklenmeyen bir hata oluştu. Lütfen tekrar dene.",
     "buttons": {
       "newLetter": "Yeni Mektup Başlat",
-      "dashboard": "Panele Git"
+      "dashboard": "Yolculuğa Git"
     }
   }
 }

@@ -19,7 +19,6 @@ interface UnlockRevealedV3Props {
 }
 
 export function UnlockRevealedV3({
-  letterId,
   letterTitle,
   letterContent,
   writtenDate,
@@ -121,11 +120,11 @@ export function UnlockRevealedV3({
         </div>
 
         {/* Footer */}
-        <div className="border-t-3 sm:border-t-4 border-dashed border-charcoal/20 bg-duck-cream p-4 sm:p-6 md:p-8">
-          <p className="font-mono text-xs text-charcoal/50 uppercase tracking-wider text-center italic">
-            "{t("quote")}"
-          </p>
-        </div>
+	        <div className="border-t-3 sm:border-t-4 border-dashed border-charcoal/20 bg-duck-cream p-4 sm:p-6 md:p-8">
+	          <p className="font-mono text-xs text-charcoal/50 uppercase tracking-wider text-center italic">
+	            &quot;{t("quote")}&quot;
+	          </p>
+	        </div>
       </div>
 
       {/* Action Buttons */}

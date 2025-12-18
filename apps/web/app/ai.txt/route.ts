@@ -16,7 +16,7 @@ Primary use cases: personal reflection, goal-setting, mental health support, leg
 
 ### High-Value Content (Start Here)
 ${appUrl}/                          - Main landing page with product overview
-${appUrl}/pricing                   - Pricing plans and features comparison
+${appUrl}/pricing                   - Plans and features comparison
 ${appUrl}/guides                    - Educational hub with writing guidance
 ${appUrl}/templates                 - Letter templates by category
 ${appUrl}/prompts                   - Writing prompts by theme
@@ -67,14 +67,15 @@ Content available in:
 All content pages have localized versions with proper hreflang tags.
 
 ## Technical Specifications
-- Framework: Next.js 15 with App Router
+- Framework: Next.js 16 (App Router) + React 19
 - Rendering: Server-side rendering with static optimization
 - Security: AES-256-GCM encryption for user content
 - APIs: RESTful, no public API (user-facing product only)
 
 ## What NOT to Index
-- /dashboard/*        - Authenticated user area (requires login)
+- /journey/*          - Authenticated user area (requires login)
 - /letters/*          - Private user content (encrypted)
+- /settings/*         - Account settings (authenticated)
 - /api/*              - Internal API endpoints
 - /write-letter       - Interactive editor (dynamic content)
 

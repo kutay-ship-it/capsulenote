@@ -110,6 +110,45 @@ vi.mock("@upstash/redis", () => ({
     incr: vi.fn(() => Promise.resolve(1)),
     expire: vi.fn(() => Promise.resolve(1)),
     ttl: vi.fn(() => Promise.resolve(-1)),
+    hset: vi.fn(() => Promise.resolve(1)),
+    scriptLoad: vi.fn(() => Promise.resolve("test_script_hash")),
+    evalsha: vi.fn((_hash: string, keys: unknown, args: unknown) => {
+      if (Array.isArray(keys) && Array.isArray(args)) {
+        // Sliding window limit script (RegionRatelimit): returns remaining tokens (number)
+        if (keys.length === 2 && args.length === 4) {
+          const tokens = Number(args[0])
+          return Promise.resolve(Number.isFinite(tokens) ? Math.max(0, tokens - 1) : 0)
+        }
+
+        // Remaining token scripts: return used tokens (number)
+        if (keys.length === 2 && args.length === 2) {
+          return Promise.resolve(0)
+        }
+
+        // Fixed window limit: returns used tokens after update (number)
+        if (keys.length === 1 && args.length === 2) {
+          return Promise.resolve(1)
+        }
+      }
+
+      return Promise.resolve(0)
+    }),
+    eval: vi.fn((_script: string, keys: unknown, args: unknown) => {
+      if (Array.isArray(keys) && Array.isArray(args)) {
+        if (keys.length === 2 && args.length === 4) {
+          const tokens = Number(args[0])
+          return Promise.resolve(Number.isFinite(tokens) ? Math.max(0, tokens - 1) : 0)
+        }
+        if (keys.length === 2 && args.length === 2) {
+          return Promise.resolve(0)
+        }
+        if (keys.length === 1 && args.length === 2) {
+          return Promise.resolve(1)
+        }
+      }
+
+      return Promise.resolve(0)
+    }),
   })),
 }))
 

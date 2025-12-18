@@ -133,7 +133,7 @@ describe("Email Credit Deduction", () => {
     it("should deduct 1 email credit for delivery", async () => {
       const user = createTestUser({ emailCredits: 9 })
       mockUserFindUnique.mockResolvedValue(user)
-      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 5 })
+      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 8 })
       mockCreditTransactionCreate.mockResolvedValue({})
 
       await trackEmailDelivery(user.id, "delivery_123")
@@ -147,7 +147,7 @@ describe("Email Credit Deduction", () => {
     it("should record credit transaction with correct details", async () => {
       const user = createTestUser({ emailCredits: 9 })
       mockUserFindUnique.mockResolvedValue(user)
-      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 5 })
+      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 8 })
       mockCreditTransactionCreate.mockResolvedValue({})
 
       await trackEmailDelivery(user.id, "delivery_123")
@@ -166,15 +166,15 @@ describe("Email Credit Deduction", () => {
     it("should track balance before and after in transaction", async () => {
       const user = createTestUser({ emailCredits: 9 })
       mockUserFindUnique.mockResolvedValue(user)
-      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 5 })
+      mockUserUpdate.mockResolvedValue({ ...user, emailCredits: 8 })
       mockCreditTransactionCreate.mockResolvedValue({})
 
       await trackEmailDelivery(user.id, "delivery_123")
 
       expect(mockCreditTransactionCreate).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          balanceBefore: 6,
-          balanceAfter: 5,
+          balanceBefore: 9,
+          balanceAfter: 8,
         }),
       })
     })

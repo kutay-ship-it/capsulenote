@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
+import { useRouter } from "@/i18n/routing"
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
 import { ONBOARDING_STEPS } from "./types"
 import { ProgressIndicator } from "./shared/progress-indicator"
 import { TrustBadges } from "./shared/trust-badges"
-import { CapsuleIllustration, FlowIllustration } from "./shared/capsule-illustration"
+import { CapsuleIllustration } from "./shared/capsule-illustration"
 import {
   X,
   ArrowRight,
@@ -73,7 +73,7 @@ export function TimeCapsuleRitual({
   }
 
   const handleSkip = () => {
-    onComplete()
+    onClose()
   }
 
   const stepVariants = {

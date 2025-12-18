@@ -163,7 +163,7 @@ export async function createAddOnCheckoutSession(input: {
     }
 
     return { success: true, data: { url: session.url } }
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: {

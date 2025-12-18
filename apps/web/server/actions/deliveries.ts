@@ -31,7 +31,6 @@ import { encrypt, decryptLetter } from "@/server/lib/encryption"
 import {
   sendTemplatedLetter,
   cancelLetter as lobCancelLetter,
-  isLobConfigured,
 } from "@/server/providers/lob"
 
 const LOCK_WINDOW_MS = 72 * 60 * 60 * 1000 // 72 hours
@@ -39,10 +38,13 @@ const MIN_DELAY_MS = 5 * 60 * 1000 // 5 minutes
 const MAX_DELAY_YEARS = 100
 const MIN_PHYSICAL_MAIL_LEAD_DAYS = 30 // Minimum 30 days advance notice for physical mail
 const LOB_MAX_SCHEDULE_DAYS = 180 // Lob's max send_date is 180 days in future
-const DEFERRED_HANDOFF_DAYS = 90 // Days before send date to hand off deferred letters to Lob
 
 function isLobHtmlSizeError(error: unknown): boolean {
-  const code = typeof error === "object" && error && "code" in error ? (error as any).code : null
+  const codeValue =
+    typeof error === "object" && error !== null && "code" in error
+      ? (error as { code?: unknown }).code
+      : null
+  const code = typeof codeValue === "string" ? codeValue : null
   const message =
     typeof error === "string"
       ? error
@@ -782,13 +784,17 @@ export async function scheduleDelivery(
           expectedDelivery: lobResult.expectedDeliveryDate,
         })
       } catch (lobError) {
-        const htmlLength =
-          typeof lobError === "object" &&
-          lobError &&
-          "details" in lobError &&
-          (lobError as any).details?.length
-            ? (lobError as any).details.length
+        const details =
+          typeof lobError === "object" && lobError !== null && "details" in lobError
+            ? (lobError as { details?: unknown }).details
             : undefined
+
+        const htmlLength =
+          Array.isArray(details)
+            ? details.length
+            : typeof details === "string"
+              ? details.length
+              : undefined
 
         // CRITICAL: Lob API failed - rollback delivery and refund
         await logger.error('Failed to send letter to Lob - rolling back', lobError, {
@@ -1024,8 +1030,8 @@ export async function scheduleDelivery(
     })
 
     revalidatePath(`/letters/${data.letterId}`)
-    revalidatePath("/deliveries")
-    revalidatePath("/dashboard")
+    revalidatePath("/letters")
+    revalidatePath("/journey")
 
     return {
       success: true,
@@ -1187,8 +1193,9 @@ export async function updateDelivery(
       deliveryId,
     })
 
-    revalidatePath(`/deliveries/${deliveryId}`)
-    revalidatePath("/deliveries")
+    revalidatePath(`/letters/${existing.letter.id}`)
+    revalidatePath("/letters")
+    revalidatePath("/journey")
 
     return {
       success: true,
@@ -1425,9 +1432,9 @@ export async function cancelDelivery(
       ...(existing.mailDelivery?.lobJobId && { lobCanceled }),
     })
 
-    revalidatePath(`/deliveries/${deliveryId}`)
-    revalidatePath("/deliveries")
-    revalidatePath("/dashboard")
+    revalidatePath(`/letters/${existing.letterId}`)
+    revalidatePath("/letters")
+    revalidatePath("/journey")
 
     return {
       success: true,
@@ -1554,9 +1561,9 @@ export async function retryDelivery(
       attemptCount: existing.attemptCount + 1,
     })
 
-    revalidatePath(`/deliveries/${deliveryId}`)
-    revalidatePath("/deliveries")
-    revalidatePath("/dashboard")
+    revalidatePath(`/letters/${existing.letterId}`)
+    revalidatePath("/letters")
+    revalidatePath("/journey")
 
     return {
       success: true,

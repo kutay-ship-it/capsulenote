@@ -6,6 +6,7 @@ import { ExternalLink, Loader2 } from "lucide-react"
 import { createBillingPortalSession } from "@/server/actions/billing"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
+import { useRouter } from "@/i18n/routing"
 
 interface ManageSubscriptionButtonProps {
   hasSubscription: boolean
@@ -14,11 +15,12 @@ interface ManageSubscriptionButtonProps {
 export function ManageSubscriptionButton({ hasSubscription }: ManageSubscriptionButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const t = useTranslations("billing")
+  const router = useRouter()
 
   const handleClick = async () => {
     if (!hasSubscription) {
       // Redirect to pricing for users without subscription
-      window.location.href = '/pricing'
+      router.push("/pricing")
       return
     }
 
@@ -36,7 +38,7 @@ export function ManageSubscriptionButton({ hasSubscription }: ManageSubscription
 
       // Redirect to Stripe portal
       window.location.href = result.data.url
-    } catch (error) {
+    } catch {
       toast.error(t("toasts.errorTitle"), {
         description: t("toasts.portalUnexpected"),
       })

@@ -6,18 +6,16 @@ import { routing } from "./i18n/routing"
 const intlMiddleware = createMiddleware(routing)
 
 const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/:locale/dashboard(.*)",
+  "/journey(.*)",
+  "/:locale/journey(.*)",
   "/letters(.*)",
   "/:locale/letters(.*)",
-  "/deliveries(.*)",
-  "/:locale/deliveries(.*)",
+  "/unlock(.*)",
+  "/:locale/unlock(.*)",
   "/settings(.*)",
   "/:locale/settings(.*)",
   "/admin(.*)",
   "/:locale/admin(.*)",
-  "/sandbox(.*)",
-  "/:locale/sandbox(.*)",
 ])
 
 // Next.js 16: proxy.ts replaces middleware.ts

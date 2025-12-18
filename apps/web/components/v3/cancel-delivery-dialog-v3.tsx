@@ -10,7 +10,6 @@ import { useTranslations, useLocale } from "next-intl"
 import { getDateFnsLocale } from "@/lib/date-formatting"
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -48,10 +47,17 @@ export function CancelDeliveryDialogV3({
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
+  const [referenceNowMs, setReferenceNowMs] = React.useState<number | null>(null)
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen)
+    setReferenceNowMs(nextOpen ? Date.now() : null)
+  }
 
   // Calculate if within lock window
   const deliveryDate = new Date(deliverAt)
-  const timeUntilDelivery = deliveryDate.getTime() - Date.now()
+  const timeUntilDelivery =
+    referenceNowMs === null ? Number.POSITIVE_INFINITY : deliveryDate.getTime() - referenceNowMs
   const isLocked = timeUntilDelivery <= LOCK_WINDOW_MS
   const hoursUntilDelivery = Math.floor(timeUntilDelivery / (1000 * 60 * 60))
   const daysUntilDelivery = Math.floor(hoursUntilDelivery / 24)
@@ -82,6 +88,7 @@ export function CancelDeliveryDialogV3({
       })
 
       setOpen(false)
+      setReferenceNowMs(null)
       onCanceled?.()
       router.refresh()
     } catch (error) {
@@ -94,7 +101,7 @@ export function CancelDeliveryDialogV3({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent
         className="max-w-md border-2 border-charcoal bg-white p-0 gap-0"

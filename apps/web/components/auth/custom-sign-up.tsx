@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { useSignUp } from "@clerk/nextjs"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { detectBrowserTimezone } from "@/lib/timezone"
+import { useRouter } from "@/i18n/routing"
 
 interface CustomSignUpFormProps {
   lockedEmail?: string
@@ -17,9 +17,17 @@ interface CustomSignUpFormProps {
 
 type Step = "form" | "verify"
 
+function getClerkErrorMessage(error: unknown): string | null {
+  if (!error || typeof error !== "object") return null
+  const message = (error as { errors?: Array<{ message?: unknown }> }).errors?.[0]?.message
+  return typeof message === "string" ? message : null
+}
+
 export function CustomSignUpForm({ lockedEmail, passwordHint }: CustomSignUpFormProps) {
   const router = useRouter()
   const { isLoaded, signUp, setActive } = useSignUp()
+  const locale = useLocale()
+  const prefix = locale === "en" ? "" : `/${locale}`
   const t = useTranslations("auth.signUp")
 
   const [email, setEmail] = useState(lockedEmail || "")
@@ -60,8 +68,8 @@ export function CustomSignUpForm({ lockedEmail, passwordHint }: CustomSignUpForm
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" })
       setStep("verify")
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message || t("errors.startFailed"))
+    } catch (error) {
+      setError(getClerkErrorMessage(error) || t("errors.startFailed"))
     } finally {
       setIsSubmitting(false)
     }
@@ -84,8 +92,8 @@ export function CustomSignUpForm({ lockedEmail, passwordHint }: CustomSignUpForm
       } else {
         setError(t("errors.verificationIncomplete"))
       }
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message || t("errors.invalidCode"))
+    } catch (error) {
+      setError(getClerkErrorMessage(error) || t("errors.invalidCode"))
     } finally {
       setIsSubmitting(false)
     }
@@ -104,11 +112,11 @@ export function CustomSignUpForm({ lockedEmail, passwordHint }: CustomSignUpForm
     try {
       await signUp.authenticateWithRedirect({
         strategy: "oauth_google",
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/dashboard",
+        redirectUrl: `${prefix}/sso-callback`,
+        redirectUrlComplete: `${prefix}/journey`,
       })
-    } catch (err: any) {
-      setError(err?.errors?.[0]?.message || t("errors.googleFailed"))
+    } catch (error) {
+      setError(getClerkErrorMessage(error) || t("errors.googleFailed"))
     }
   }
 

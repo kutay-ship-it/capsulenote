@@ -193,14 +193,22 @@ export const sendLetterCreatedEmail = inngest.createFunction(
       return { skipped: true, reason: `suppressed:${suppression.reason}` }
     }
 
-    // Generate email URLs
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
-    const letterUrl = `${baseUrl}/letters/${letterId}?utm_source=email&utm_medium=notification&utm_campaign=letter_created`
-    const dashboardUrl = `${baseUrl}/dashboard?utm_source=email&utm_medium=notification&utm_campaign=letter_created`
-
     // Generate email HTML and text
     const userLocale: Locale =
       (user.profile?.locale as Locale | undefined) || "en"
+
+    // Generate email URLs
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL!.replace(/\/$/, "")
+    const localePrefix = userLocale === "en" ? "" : `/${userLocale}`
+    const utm = new URLSearchParams({
+      utm_source: "email",
+      utm_medium: "notification",
+      utm_campaign: "letter_created",
+    }).toString()
+    const letterUrl = `${baseUrl}${localePrefix}/letters/${letterId}?${utm}`
+    const lettersUrl = `${baseUrl}${localePrefix}/letters?${utm}`
+    const journeyUrl = `${baseUrl}${localePrefix}/journey?${utm}`
+    const notificationsUrl = `${baseUrl}${localePrefix}/settings/notifications?${utm}`
 
     const messages = await loadMessages(userLocale)
 
@@ -209,7 +217,9 @@ export const sendLetterCreatedEmail = inngest.createFunction(
       letterId,
       userFirstName: user.profile?.displayName ?? undefined,
       letterUrl,
-      dashboardUrl,
+      lettersUrl,
+      journeyUrl,
+      notificationsUrl,
       locale: userLocale,
     })
 
@@ -218,7 +228,9 @@ export const sendLetterCreatedEmail = inngest.createFunction(
       letterId,
       userFirstName: user.profile?.displayName ?? undefined,
       letterUrl,
-      dashboardUrl,
+      lettersUrl,
+      journeyUrl,
+      notificationsUrl,
       locale: userLocale,
     })
 
@@ -255,7 +267,7 @@ export const sendLetterCreatedEmail = inngest.createFunction(
           headers: {
             "X-Idempotency-Key": idempotencyKey,
           },
-          unsubscribeUrl: `${baseUrl}/settings/notifications`,
+          unsubscribeUrl: `${baseUrl}${localePrefix}/settings/notifications`,
         })
 
         // Check if send was successful

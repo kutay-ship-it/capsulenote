@@ -29,7 +29,7 @@ interface CreateCheckoutSessionOptions {
  * Create a Stripe Checkout Session for subscription purchase
  *
  * Includes:
- * - 14-day free trial
+ * - 14-day trial
  * - Card payment only
  * - Promotion code support
  * - Auto-collect billing address

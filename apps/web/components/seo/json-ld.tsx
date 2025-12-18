@@ -22,14 +22,6 @@ export function SoftwareApplicationSchema({ locale = "en" }: { locale?: string }
     name: "Capsule Note",
     applicationCategory: "LifestyleApplication",
     operatingSystem: "Web",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-      description: locale === "tr"
-        ? "Ücretsiz başlayın, premium özellikler için yükseltin"
-        : "Start free, upgrade for premium features",
-    },
     // Note: aggregateRating removed - only include when real verified ratings exist
     // Adding fake ratings can trigger Google structured data penalties
     description: locale === "tr"

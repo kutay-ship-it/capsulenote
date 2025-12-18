@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import {
   Mail,
   Calendar,
@@ -26,14 +25,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LetterEditor } from "@/components/letter-editor"
 import { DatePicker } from "@/components/ui/date-picker"
+import { useRouter } from "@/i18n/routing"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-
-type RecipientType = "myself"
 
 // Form validation error types
 interface DemoFormErrors {
@@ -90,7 +88,6 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
   const [title, setTitle] = React.useState("")
   const [bodyRich, setBodyRich] = React.useState<Record<string, unknown> | null>(null)
   const [bodyHtml, setBodyHtml] = React.useState("")
-  const recipientType: RecipientType = "myself"
   const [recipientEmail, setRecipientEmail] = React.useState("")
   const [deliveryDate, setDeliveryDate] = React.useState<Date | undefined>(undefined)
   const [selectedPreset, setSelectedPreset] = React.useState<string | null>(null)
@@ -102,7 +99,6 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
 
   // Validation errors state
   const [errors, setErrors] = React.useState<DemoFormErrors>({})
-  const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false)
 
   // Helper to safely parse a date string and return undefined if invalid
   const parseDateSafe = (dateString: string | null | undefined): Date | undefined => {
@@ -227,9 +223,6 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
     // Prevent double-clicks
     if (isSealing) return
 
-    // Mark that user has attempted to submit (for showing persistent errors)
-    setHasAttemptedSubmit(true)
-
     // Validate form before proceeding
     if (!validateForm()) {
       // Scroll to first error (optional UX improvement)
@@ -246,8 +239,12 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
     // Stage 1: "Sealing..." animation
     setSealStage("sealing")
 
+    type NavigationDestination =
+      | { pathname: "/letters/new" }
+      | { pathname: "/subscribe"; query: Record<string, string> }
+
     // Perform localStorage operations during animation
-    const navigationUrl = await new Promise<string>((resolve) => {
+    const destination = await new Promise<NavigationDestination>((resolve) => {
       setTimeout(() => {
         // For signed-in users, go directly to new letter page
         if (isSignedIn) {
@@ -270,11 +267,11 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
             }
             try {
               localStorage.setItem("capsule-letter-autosave", JSON.stringify(draftData))
-            } catch (e) {
+            } catch {
               // Silently fail if localStorage is not available
             }
           }
-          resolve("/letters/new")
+          resolve({ pathname: "/letters/new" })
           return
         }
 
@@ -298,14 +295,13 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
         }
 
         // Build subscribe URL with email locked in
-        const params = new URLSearchParams()
-        if (trimmedEmail) {
-          params.set("email", trimmedEmail)
+        const query: Record<string, string> = {
+          deliveryType: "email",
+          timezone,
         }
-        params.set("deliveryType", "email")
-        params.set("timezone", timezone)
+        if (trimmedEmail) query.email = trimmedEmail
 
-        resolve(`/subscribe?${params.toString()}`)
+        resolve({ pathname: "/subscribe", query })
       }, 600) // Stage 1 duration
     })
 
@@ -314,7 +310,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
 
     // Navigate after brief success display
     setTimeout(() => {
-      router.push(navigationUrl)
+      router.push(destination)
     }, 400) // Stage 2 duration
   }
 

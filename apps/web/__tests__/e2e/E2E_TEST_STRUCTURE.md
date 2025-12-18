@@ -146,10 +146,9 @@ describe("Authentication Flows", () => {
   })
 
   describe("Protected Routes", () => {
-    test("should redirect /dashboard to sign-in")
+    test("should redirect /journey to sign-in")
     test("should redirect /letters to sign-in")
     test("should redirect /settings to sign-in")
-    test("should redirect /journey to sign-in")
     test("should preserve return URL in redirect")
   })
 

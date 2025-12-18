@@ -12,7 +12,7 @@
  * - use-cases: Therapy, corporate, education
  */
 
-import { blogSlugs, type BlogSlug } from "./content-registry"
+import { type BlogSlug } from "./content-registry"
 
 // ============================================================================
 // Types
@@ -443,7 +443,7 @@ const existingPosts: Partial<BlogContentRegistry> = {
 
         "Digital delivery also offers flexibility. You can schedule letters for any future date - from next week to decades away. The precision is exact: your letter arrives on the morning of your birthday, New Year's Day, or any date that holds significance. This reliability removes the uncertainty that can come with physical mail systems.",
 
-        "For those who move frequently or live internationally, email eliminates logistical challenges entirely. No worrying about forwarding addresses, international shipping costs, or whether a letter will make it through customs. Your future self receives the message regardless of where life has taken them.",
+        "For those who move frequently or live internationally, email eliminates logistical challenges entirely. No worrying about forwarding addresses, international mailing logistics, or whether a letter will make it through customs. Your future self receives the message regardless of where life has taken them.",
 
         "Email also enables multimedia possibilities. You can include links to songs that are meaningful right now, photos that capture this moment, or videos of yourself speaking directly to your future self. These digital additions create a richer time capsule than text alone could provide.",
 
@@ -715,7 +715,7 @@ const psychologyPosts: Partial<BlogContentRegistry> = {
         "The mechanism appears to work through emotional regulation and perspective-taking. When you write about interpersonal challenges, you naturally consider multiple viewpoints and process your emotions before reacting. This creates space for more thoughtful, less reactive responses in actual interactions.",
 
         "## How to Start a Therapeutic Journaling Practice",
-        "Begin with just 10-15 minutes of free writing. Don't worry about grammar, spelling, or making sense. Write continuously about whatever comes to mind - particularly emotions and experiences you've been avoiding or suppressing.",
+        "Begin with just 10-15 minutes of stream-of-consciousness writing. Don't worry about grammar, spelling, or making sense. Write continuously about whatever comes to mind - particularly emotions and experiences you've been avoiding or suppressing.",
 
         "Consistency matters more than duration. Daily writing, even briefly, produces better results than occasional long sessions. Set a regular time and create a ritual around your practice.",
 
@@ -3016,7 +3016,7 @@ const privacyPosts: Partial<BlogContentRegistry> = {
         "What happens to your letters after you're gone? For those writing legacy letters - messages to children, grandchildren, or loved ones meant to be read after your death - this question carries profound importance. Digital legacy planning ensures your words reach their intended recipients, even decades from now.",
 
         "## The Challenge of Digital Preservation",
-        "We live in a paradox: digital storage is incredibly cheap, yet digital preservation is surprisingly difficult. Platforms shut down, file formats become obsolete, passwords get lost, and accounts disappear. A letter saved on your computer today might be inaccessible in twenty years.",
+        "We live in a paradox: digital storage is incredibly plentiful, yet digital preservation is surprisingly difficult. Platforms shut down, file formats become obsolete, passwords get lost, and accounts disappear. A letter saved on your computer today might be inaccessible in twenty years.",
 
         "Physical letters face different challenges - fire, flood, loss during moves - but at least they don't require functioning technology to read. Digital legacy planning must account for the rapid pace of technological change.",
 
@@ -3341,7 +3341,7 @@ const useCasesPosts: Partial<BlogContentRegistry> = {
         "Follow-up is essential. When letters are delivered, provide structured time for reflection. Group discussions about the experience (not letter contents) can deepen collective learning.",
 
         "## ROI Considerations",
-        "Future-self letters are remarkably cost-effective compared to traditional team building. The primary investment is time, with minimal materials cost. Per-employee costs are negligible when using digital delivery platforms.",
+        "Future-self letters are remarkably resource-light compared to traditional team building. The primary investment is time, with minimal materials needed. Digital delivery platforms keep logistics simple even at scale.",
 
         "The ongoing impact distinguishes this investment from one-time activities. A letter written today continues generating value when delivered, and memories of the delivery experience persist long after.",
 

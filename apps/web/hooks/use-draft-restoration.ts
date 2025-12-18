@@ -143,36 +143,40 @@ export function useDraftRestoration(): UseDraftRestorationReturn {
     if (hasLoadedRef.current) return
     hasLoadedRef.current = true
 
-    // Priority 1: Anonymous draft (from homepage before signup)
-    const anonymousDraft = getAnonymousDraft()
-    if (anonymousDraft) {
-      const normalized = normalizeAnonymousDraft(anonymousDraft)
-      setDraft(normalized)
-      setSource("anonymous")
-      setRestoredFromDraft(true)
-      setToastMessage({
-        title: "Welcome! Your draft is ready",
-        description: `${anonymousDraft.wordCount} words restored from your homepage draft`,
-      })
+    const timer = setTimeout(() => {
+      // Priority 1: Anonymous draft (from homepage before signup)
+      const anonymousDraft = getAnonymousDraft()
+      if (anonymousDraft) {
+        const normalized = normalizeAnonymousDraft(anonymousDraft)
+        setDraft(normalized)
+        setSource("anonymous")
+        setRestoredFromDraft(true)
+        setToastMessage({
+          title: "Welcome! Your draft is ready",
+          description: `${anonymousDraft.wordCount} words restored from your homepage draft`,
+        })
 
-      // Clear anonymous draft after loading (migrate to authenticated flow)
-      clearAnonymousDraft()
-      return
-    }
+        // Clear anonymous draft after loading (migrate to authenticated flow)
+        clearAnonymousDraft()
+        return
+      }
 
-    // Priority 2: Authenticated user draft
-    const savedDraft = getLetterAutosave()
-    if (savedDraft) {
-      const normalized = normalizeAuthenticatedDraft(savedDraft)
-      setDraft(normalized)
-      setSource("authenticated")
-      setRestoredFromDraft(true)
-      setLastSavedText(formatLastSaved(savedDraft.lastSaved))
-      setToastMessage({
-        title: "Draft restored",
-        description: `Last saved ${formatLastSaved(savedDraft.lastSaved)}`,
-      })
-    }
+      // Priority 2: Authenticated user draft
+      const savedDraft = getLetterAutosave()
+      if (savedDraft) {
+        const normalized = normalizeAuthenticatedDraft(savedDraft)
+        setDraft(normalized)
+        setSource("authenticated")
+        setRestoredFromDraft(true)
+        setLastSavedText(formatLastSaved(savedDraft.lastSaved))
+        setToastMessage({
+          title: "Draft restored",
+          description: `Last saved ${formatLastSaved(savedDraft.lastSaved)}`,
+        })
+      }
+    }, 0)
+
+    return () => clearTimeout(timer)
   }, [])
 
   // Clear draft function

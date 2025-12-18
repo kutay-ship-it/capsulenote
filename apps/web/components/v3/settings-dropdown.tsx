@@ -3,7 +3,7 @@
 import { useClerk, useUser } from "@clerk/nextjs"
 import { useLocale, useTranslations } from "next-intl"
 import { usePathname as useNextPathname } from "next/navigation"
-import { Settings, User, Globe, LogOut, ChevronRight, Check, Sparkles } from "lucide-react"
+import { Settings, User, Globe, LogOut, Check, Sparkles } from "lucide-react"
 
 import {
   DropdownMenu,
@@ -15,10 +15,9 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu"
 import { Link, routing, useRouter } from "@/i18n/routing"
+import { translateSeoPathnameForLocaleSwitch } from "@/lib/seo/localized-slugs"
 
 type PlanType = "DIGITAL_CAPSULE" | "PAPER_PIXELS" | null
 
@@ -71,7 +70,12 @@ export function SettingsDropdown({ userName, userEmail, planType }: SettingsDrop
     }).catch(() => {})
 
     // Navigate to the same page with new locale and refresh
-    router.replace(internalPathname as Parameters<typeof router.replace>[0], { locale: targetLocale })
+    const translatedPathname = translateSeoPathnameForLocaleSwitch(
+      internalPathname,
+      currentLocale as "en" | "tr",
+      targetLocale as "en" | "tr"
+    )
+    router.replace(translatedPathname as Parameters<typeof router.replace>[0], { locale: targetLocale })
     router.refresh()
   }
 

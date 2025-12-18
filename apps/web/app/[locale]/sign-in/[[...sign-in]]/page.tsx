@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import { getTranslations } from "next-intl/server"
 import { CustomSignInForm } from "@/components/auth/custom-sign-in"
+import type { Locale } from "@/i18n/routing"
 
 export const metadata: Metadata = {
   title: "Sign In",
@@ -13,21 +14,25 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{
     email?: string
   }>
 }
 
-export default async function SignInPage({ searchParams }: PageProps) {
+export default async function SignInPage({ params, searchParams }: PageProps) {
+  const { locale } = await params
+  const prefix = locale === "en" ? "" : `/${locale}`
+
   // Redirect if already signed in
   const { userId } = await auth()
   if (userId) {
-    redirect("/dashboard")
+    redirect(`${prefix}/journey`)
   }
 
-  const params = await searchParams
-  const prefillEmail = params.email
-  const t = await getTranslations("auth.signInPage")
+  const resolvedSearchParams = await searchParams
+  const prefillEmail = resolvedSearchParams.email
+  const t = await getTranslations({ locale, namespace: "auth.signInPage" })
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-muted/20">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { differenceInSeconds, format } from "date-fns"
-import { Mail, ArrowRight, Clock } from "lucide-react"
+import { Mail, ArrowRight } from "lucide-react"
 import { useTranslations } from "next-intl"
 
 import { Link } from "@/i18n/routing"
@@ -32,8 +32,6 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-
     const calculateTimeLeft = () => {
       const now = new Date()
       const diff = differenceInSeconds(new Date(delivery.deliverAt), now)
@@ -48,13 +46,19 @@ export function CountdownHeroV3({ delivery }: CountdownHeroV3Props) {
       return { days, hours, minutes, seconds }
     }
 
-    setTimeLeft(calculateTimeLeft())
+    const initTimer = setTimeout(() => {
+      setMounted(true)
+      setTimeLeft(calculateTimeLeft())
+    }, 0)
 
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft())
     }, 1000)
 
-    return () => clearInterval(timer)
+    return () => {
+      clearTimeout(initTimer)
+      clearInterval(timer)
+    }
   }, [delivery.deliverAt])
 
   // Prevent hydration mismatch
@@ -226,9 +230,9 @@ export function EmptyStateHeroV3() {
   const t = useTranslations("app.journey.hero")
 
   // Use day of year for consistent prompt per day
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  )
+  const now = new Date()
+  const startOfYear = new Date(now.getFullYear(), 0, 0)
+  const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000)
   const promptIndex = dayOfYear % 5
 
   return (
@@ -274,9 +278,9 @@ export function EmptyStateHeroV3() {
 export function WritePromptBannerV3() {
   const t = useTranslations("app.journey.hero")
 
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  )
+  const now = new Date()
+  const startOfYear = new Date(now.getFullYear(), 0, 0)
+  const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000)
   const promptIndex = dayOfYear % 5
 
   return (

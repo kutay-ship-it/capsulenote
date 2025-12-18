@@ -14,11 +14,10 @@
  * - Comprehensive audit trail
  */
 
-import type { PlanType } from "@prisma/client"
+import { Prisma, type PlanType, type SubscriptionStatus } from "@prisma/client"
 import { stripe } from "@/server/providers/stripe/client"
 import { prisma } from "@/server/lib/db"
 import { createAuditEvent, AuditEventType } from "@/server/lib/audit"
-import type { Prisma } from "@prisma/client"
 import { env } from "@/env.mjs"
 import { invalidateEntitlementsCache, createUsageRecord } from "@/server/lib/stripe-helpers"
 import { isValidPriceId } from "@/server/providers/stripe/client"
@@ -34,6 +33,28 @@ import {
   PLAN_CREDITS,
   getSubscriptionPeriodDates,
 } from "@/server/lib/billing-constants"
+
+type StripeSubscriptionStatus = Awaited<ReturnType<typeof stripe.subscriptions.retrieve>>["status"]
+
+function mapStripeSubscriptionStatus(status: StripeSubscriptionStatus): SubscriptionStatus {
+  switch (status) {
+    case "trialing":
+      return "trialing"
+    case "active":
+      return "active"
+    case "past_due":
+      return "past_due"
+    case "canceled":
+      return "canceled"
+    case "unpaid":
+      return "unpaid"
+    case "paused":
+      return "paused"
+    default:
+      // Stripe can return states like "incomplete" / "incomplete_expired" for edge cases
+      return "past_due"
+  }
+}
 
 /**
  * Acquire PostgreSQL advisory lock with timeout
@@ -83,7 +104,7 @@ export async function createAnonymousCheckout(
     const validated = anonymousCheckoutSchema.parse(input)
 
     if (!isValidPriceId(validated.priceId)) {
-      throw new Error("Invalid pricing plan selected")
+      throw new Error("Invalid plan selected")
     }
 
     // 2. Check for existing PendingSubscription
@@ -234,7 +255,7 @@ export async function createAnonymousCheckout(
 /**
  * Link pending subscription to user account
  *
- * Called after user signup (from Clerk webhook or dashboard mount)
+ * Called after user signup (from Clerk webhook or journey mount)
  *
  * Flow:
  * 1. Get user and verify email
@@ -371,7 +392,7 @@ export async function linkPendingSubscription(
           data: {
             userId: user.id,
             stripeSubscriptionId: pending.stripeSubscriptionId!,
-            status: stripeSubscription.status as any, // Will be updated by webhook if different
+            status: mapStripeSubscriptionStatus(stripeSubscription.status),
             plan: pending.plan,
             currentPeriodEnd: periodEnd,
             cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
@@ -408,9 +429,9 @@ export async function linkPendingSubscription(
 
         return sub
       })
-    } catch (error: any) {
+    } catch (error) {
       // Handle race condition: another request already created this subscription
-      if (error?.code === 'P2002') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
         console.log("[linkPendingSubscription] Race condition detected, checking for existing subscription")
 
         // Small delay to ensure the other transaction committed

@@ -1,9 +1,10 @@
 import { notFound, redirect } from "next/navigation"
 import { getLetterForUnlock } from "@/server/actions/letters"
 import { LetterUnlockerV3 } from "@/components/v3/letter-unlocker-v3"
+import type { Locale } from "@/i18n/routing"
 
 interface UnlockPageProps {
-  params: Promise<{ id: string; locale: string }>
+  params: Promise<{ id: string; locale: Locale }>
   searchParams: Promise<{ replay?: string }>
 }
 
@@ -11,8 +12,9 @@ export default async function UnlockV3Page({
   params,
   searchParams,
 }: UnlockPageProps) {
-  const { id } = await params
+  const { id, locale } = await params
   const { replay } = await searchParams
+  const prefix = locale === "en" ? "" : `/${locale}`
 
   // Fetch letter with validation
   const result = await getLetterForUnlock(id)
@@ -25,7 +27,7 @@ export default async function UnlockV3Page({
 
     // If letter not delivered yet, redirect to letter detail with message
     if (result.error?.code === "VALIDATION_FAILED") {
-      redirect(`/letters/${id}`)
+      redirect(`${prefix}/letters/${id}`)
     }
 
     // For other errors, show not found

@@ -43,6 +43,7 @@ vi.mock('@/server/lib/db', () => ({
   prisma: {
     user: {
       create: vi.fn(),
+      upsert: vi.fn(),
       update: vi.fn(),
       findUnique: vi.fn(),
     },
@@ -59,6 +60,12 @@ vi.mock('@/server/lib/db', () => ({
     emailDelivery: {
       findFirst: vi.fn(),
       update: vi.fn(),
+    },
+    emailSuppressionList: {
+      upsert: vi.fn(),
+    },
+    auditEvent: {
+      create: vi.fn(),
     },
     pendingSubscription: {
       findFirst: vi.fn(),
@@ -292,7 +299,7 @@ describe('Webhook Integration Tests', () => {
       // Mock Svix verification
       mockVerify.mockReturnValueOnce(buildClerkEvent())
 
-      vi.mocked(prisma.user.create).mockResolvedValueOnce({
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
@@ -329,16 +336,14 @@ describe('Webhook Integration Tests', () => {
       const response = await POST(request)
 
       expect(response.status).toBe(200)
-      expect(prisma.user.create).toHaveBeenCalledWith({
-        data: {
+      expect(prisma.user.upsert).toHaveBeenCalledWith({
+        where: { clerkUserId: 'clerk_user_123' },
+        create: {
           clerkUserId: 'clerk_user_123',
           email: 'test@example.com',
-          profile: {
-            create: {
-              timezone: 'UTC',
-            },
-          },
+          profile: { create: { timezone: 'UTC' } },
         },
+        update: {},
       })
     })
 
@@ -353,7 +358,7 @@ describe('Webhook Integration Tests', () => {
 
       mockVerify.mockReturnValueOnce(buildClerkEvent())
 
-      vi.mocked(prisma.user.create).mockResolvedValueOnce({
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
@@ -413,14 +418,8 @@ describe('Webhook Integration Tests', () => {
 
       mockVerify.mockReturnValueOnce(buildClerkEvent())
 
-      // First attempt: race condition (P2002 = unique constraint violation)
-      vi.mocked(prisma.user.create).mockRejectedValueOnce({
-        code: 'P2002',
-        message: 'Unique constraint failed',
-      })
-
-      // Second attempt: find the user that was created by concurrent request
-      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({
+      // Upsert is atomic and handles concurrent webhook deliveries
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({
         id: 'user_123',
         clerkUserId: 'clerk_user_123',
         email: 'test@example.com',
@@ -457,10 +456,7 @@ describe('Webhook Integration Tests', () => {
       const response = await POST(request)
 
       expect(response.status).toBe(200)
-      expect(prisma.user.create).toHaveBeenCalledTimes(1)
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
-        where: { clerkUserId: 'clerk_user_123' },
-      })
+      expect(prisma.user.upsert).toHaveBeenCalledTimes(1)
     })
 
     it('should update user email on user.updated event', async () => {
@@ -481,20 +477,7 @@ describe('Webhook Integration Tests', () => {
         })
       )
 
-      vi.mocked(prisma.user.update).mockResolvedValueOnce({
-        id: 'user_123',
-        clerkUserId: 'clerk_user_123',
-        email: 'newemail@example.com',
-        planType: null,
-        emailCredits: 0,
-        physicalCredits: 0,
-        emailAddonCredits: 0,
-        physicalAddonCredits: 0,
-        creditExpiresAt: null,
-        timezone: "UTC",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as any)
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({} as any)
 
       const request = new Request('http://localhost:3000/api/webhooks/clerk', {
         method: 'POST',
@@ -516,9 +499,14 @@ describe('Webhook Integration Tests', () => {
       const response = await POST(request)
 
       expect(response.status).toBe(200)
-      expect(prisma.user.update).toHaveBeenCalledWith({
+      expect(prisma.user.upsert).toHaveBeenCalledWith({
         where: { clerkUserId: 'clerk_user_123' },
-        data: { email: 'newemail@example.com' },
+        update: { email: 'newemail@example.com' },
+        create: {
+          clerkUserId: 'clerk_user_123',
+          email: 'newemail@example.com',
+          profile: { create: { timezone: 'UTC' } },
+        },
       })
     })
 
@@ -617,7 +605,7 @@ describe('Webhook Integration Tests', () => {
       expect(text).toBe('Invalid signature')
     })
 
-    // FIXME: mockHeadersContext({}) doesn't properly simulate missing headers in Next.js 15
+    // FIXME: mockHeadersContext({}) doesn't properly simulate missing headers in Next.js 16
     // The handler doesn't see the empty headers and processes the webhook normally
     it.skip('should reject webhook with missing svix headers', async () => {
       mockHeadersContext({})

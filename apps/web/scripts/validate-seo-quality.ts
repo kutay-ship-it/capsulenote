@@ -15,9 +15,7 @@
 
 import {
   validateContentQuality,
-  countWords,
   QUALITY_THRESHOLDS,
-  type ContentQualityResult,
 } from "../lib/seo/quality-gates"
 
 import {
@@ -28,28 +26,13 @@ import {
   promptThemes,
 } from "../lib/seo/content-registry"
 
-import {
-  getAllBlogPosts,
-  getPostWordCount,
-  type BlogPostContent,
-} from "../lib/seo/blog-content"
+import { getAllBlogPosts, getPostWordCount } from "../lib/seo/blog-content"
 
-import {
-  getAllGuides,
-  type GuidePostContent,
-} from "../lib/seo/guide-content"
+import { getAllGuides, type GuidePostContent } from "../lib/seo/guide-content"
 
-import {
-  getAllTemplates,
-  getTemplateWordCount,
-  type TemplateContent,
-} from "../lib/seo/template-content"
+import { getAllTemplates, getTemplateWordCount } from "../lib/seo/template-content"
 
-import {
-  getAllPromptThemes,
-  getPromptThemeWordCount,
-  type PromptThemeContent,
-} from "../lib/seo/prompt-content"
+import { getAllPromptThemes, getPromptThemeWordCount } from "../lib/seo/prompt-content"
 
 // ============================================================================
 // Types

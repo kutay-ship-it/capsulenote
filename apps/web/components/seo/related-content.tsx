@@ -56,7 +56,7 @@ export function RelatedContent({
             >
               <div className="flex items-center gap-3">
                 {item.category && (
-                  <span className="font-mono text-xs text-charcoal/40 uppercase">
+                  <span className={cn("font-mono text-xs text-charcoal/40", uppercaseClass)}>
                     {item.category}
                   </span>
                 )}
@@ -81,7 +81,7 @@ export function RelatedContent({
               style={{ borderRadius: "2px" }}
             >
               {item.category && (
-                <span className="font-mono text-xs text-charcoal/40 uppercase block mb-2">
+                <span className={cn("font-mono text-xs text-charcoal/40 block mb-2", uppercaseClass)}>
                   {item.category}
                 </span>
               )}

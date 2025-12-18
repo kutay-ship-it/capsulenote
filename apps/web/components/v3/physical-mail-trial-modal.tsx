@@ -6,7 +6,6 @@ import {
   Mail,
   Sparkles,
   Check,
-  ArrowRight,
   X,
   Clock,
   Gift,

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../../_components/legal-page-layout"
 import { HowToSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { RelatedContent } from "@/components/seo/related-content"
+import { encodeTemplateId } from "@/lib/seo/template-ids"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -1189,9 +1190,10 @@ export default async function TemplateDetailPage({
   if (!validCategories.includes(category as Category)) {
     notFound()
   }
+  const categoryId = category as Category
 
   // Validate slug exists for this category
-  const categoryTemplates = templateData[category as Category]
+  const categoryTemplates = templateData[categoryId]
   if (!categoryTemplates || !categoryTemplates[slug]) {
     notFound()
   }
@@ -1202,8 +1204,8 @@ export default async function TemplateDetailPage({
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
   const template = categoryTemplates[slug]
   const data = template[locale === "tr" ? "tr" : "en"]
-  const categoryDisplayName = categoryNames[category as Category][locale === "tr" ? "tr" : "en"]
-  const relatedTemplates = getRelatedTemplates(category as Category, slug, locale)
+  const categoryDisplayName = categoryNames[categoryId][locale === "tr" ? "tr" : "en"]
+  const relatedTemplates = getRelatedTemplates(categoryId, slug, locale)
 
   return (
     <LegalPageLayout>
@@ -1222,15 +1224,15 @@ export default async function TemplateDetailPage({
         items={[
           { name: isEnglish ? "Home" : "Ana Sayfa", href: "/" },
           { name: isEnglish ? "Templates" : "Şablonlar", href: "/templates" },
-          { name: categoryDisplayName, href: `/templates/${category}` },
-          { name: data.title, href: `/templates/${category}/${slug}` },
+          { name: categoryDisplayName, href: `/templates/${categoryId}` },
+          { name: data.title, href: `/templates/${categoryId}/${slug}` },
         ]}
       />
 
       {/* Back link */}
       <div className="mb-6">
         <Link
-          href={{ pathname: "/templates/[category]", params: { category } }}
+          href={{ pathname: "/templates/[category]", params: { category: categoryId } }}
           className="inline-flex items-center gap-2 font-mono text-sm text-charcoal/60 hover:text-charcoal transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -1296,11 +1298,11 @@ export default async function TemplateDetailPage({
           <h2 className={cn("font-mono text-lg text-charcoal mb-3 flex items-center gap-2", uppercaseClass)}>
             <FileText className="h-5 w-5" />
             {isEnglish ? "Sample Opening" : "Ornek Acilis"}
-          </h2>
-          <p className="font-mono text-sm text-charcoal/80 italic">
-            "{data.sampleOpening}"
-          </p>
-        </section>
+	          </h2>
+	          <p className="font-mono text-sm text-charcoal/80 italic">
+	            &quot;{data.sampleOpening}&quot;
+	          </p>
+	        </section>
 
         {/* How to Use Steps */}
         <section>
@@ -1355,7 +1357,7 @@ export default async function TemplateDetailPage({
               : "Bu sablonu rehberiniz olarak kullanin. Editorumuz gelecekteki kendinize anlamli bir mektup yazmaniza yardimci olacak."}
           </p>
           <Link
-            href={`/write-letter?template=${category}-${slug}` as "/write-letter"}
+            href={`/write-letter?templateId=${encodeTemplateId(categoryId, slug)}` as "/write-letter"}
             className={cn(
               "inline-flex items-center gap-2 px-6 py-3",
               "border-2 border-charcoal bg-charcoal text-white",

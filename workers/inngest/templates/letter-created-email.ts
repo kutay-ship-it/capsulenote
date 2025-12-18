@@ -7,7 +7,9 @@ export interface LetterCreatedEmailProps {
   letterId: string
   userFirstName?: string
   letterUrl: string
-  dashboardUrl: string
+  lettersUrl: string
+  journeyUrl: string
+  notificationsUrl: string
   locale?: Locale
 }
 
@@ -15,7 +17,9 @@ export async function generateLetterCreatedEmail({
   letterTitle,
   userFirstName,
   letterUrl,
-  dashboardUrl,
+  lettersUrl,
+  journeyUrl,
+  notificationsUrl,
   locale = defaultLocale,
 }: LetterCreatedEmailProps): Promise<string> {
   const sanitizedTitle = escape(letterTitle)
@@ -26,11 +30,6 @@ export async function generateLetterCreatedEmail({
   const greeting = sanitizedFirstName
     ? m.greetingWithName.replace("{name}", sanitizedFirstName)
     : m.greetingNoName
-
-  // Replace dashboard with letters/journey
-  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
-  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
-  const settingsUrl = dashboardUrl.replace("/dashboard", "/settings")
 
   return `<!DOCTYPE html>
 <html lang="${locale}">
@@ -193,7 +192,7 @@ export async function generateLetterCreatedEmail({
                 <a href="${journeyUrl}" style="color: #383838; text-decoration: none;">${m.nav.journey}</a>
               </div>
               <div style="font-size: 11px; color: #666666;">
-                <a href="${settingsUrl}/notifications" style="color: #383838; text-decoration: underline;">${m.footer.manage}</a>
+                <a href="${notificationsUrl}" style="color: #383838; text-decoration: underline;">${m.footer.manage}</a>
               </div>
             </td>
           </tr>
@@ -210,7 +209,9 @@ export async function generateLetterCreatedEmailText({
   letterTitle,
   userFirstName,
   letterUrl,
-  dashboardUrl,
+  lettersUrl,
+  journeyUrl,
+  notificationsUrl,
   locale = defaultLocale,
 }: LetterCreatedEmailProps): Promise<string> {
   const messages = await loadMessages(locale)
@@ -220,11 +221,6 @@ export async function generateLetterCreatedEmailText({
   const greeting = userFirstName
     ? m.greetingWithName.replace("{name}", userFirstName)
     : m.greetingNoName
-
-  // Replace dashboard with letters/journey
-  const lettersUrl = dashboardUrl.replace("/dashboard", "/letters")
-  const journeyUrl = dashboardUrl.replace("/dashboard", "/journey")
-  const settingsUrl = dashboardUrl.replace("/dashboard", "/settings")
 
   return `
 CAPSULE NOTE
@@ -254,7 +250,7 @@ ${m.viewLetter}: ${letterUrl}
 ${m.nav.letters}: ${lettersUrl}
 ${m.nav.journey}: ${journeyUrl}
 
-${m.footer.manage}: ${settingsUrl}/notifications
+${m.footer.manage}: ${notificationsUrl}
 
 ${m.sentWith}
   `.trim()

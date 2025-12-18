@@ -43,7 +43,7 @@ test.describe("Gift Flow: Write letter → Send to someone else", () => {
     // =========================================================================
     await test.step("Sign in to account", async () => {
       await signInWithClerk(page, testUserEmail, testUserPassword)
-      await expect(page).toHaveURL(/\/(journey|letters|dashboard)/)
+      await expect(page).toHaveURL(/\/(journey|letters)/)
     })
 
     // =========================================================================

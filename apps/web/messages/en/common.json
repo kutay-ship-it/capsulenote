@@ -15,11 +15,11 @@
     "plans": {
       "digitalCapsule": "Digital Capsule",
       "paperPixels": "Paper & Pixels",
-      "free": "Free"
+      "free": "Basic"
     }
   },
   "actions": {
-    "dashboard": "Dashboard",
+    "dashboard": "Journey",
     "signIn": "Sign In",
     "signUp": "Get Started",
     "getStarted": "Get Started",
@@ -28,7 +28,7 @@
     "howItWorks": "How It Works",
     "switchTo": "Switch to {language}",
     "createAccount": "Create Account",
-    "goToDashboard": "Go to Dashboard",
+    "goToDashboard": "Go to Journey",
     "addToCalendar": "Add to Calendar"
   },
   "footer": {

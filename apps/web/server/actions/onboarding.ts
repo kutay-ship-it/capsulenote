@@ -39,8 +39,8 @@ export async function completeOnboarding(): Promise<ActionResult<{ success: true
       userId: user.id,
     })
 
-    // Revalidate dashboard to reflect changes
-    revalidatePath('/dashboard')
+    // Revalidate journey to reflect changes
+    revalidatePath("/journey")
 
     return {
       success: true,

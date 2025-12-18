@@ -1,31 +1,19 @@
 import { Metadata } from "next"
 import { setRequestLocale } from "next-intl/server"
 import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../_components/legal-page-layout"
 import { BreadcrumbSchema } from "@/components/seo/json-ld"
+import { SEO_LOCALES, getPromptThemePath, getPromptThemeSlug, getPromptThemeSlugInfo, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
+import { promptThemes, type PromptTheme } from "@/lib/seo/content-registry"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
-// Valid themes for static generation
-const validThemes = [
-  "self-esteem",
-  "grief",
-  "graduation",
-  "sobriety",
-  "new-year",
-  "birthday",
-  "career",
-  "relationships",
-] as const
-
-type Theme = (typeof validThemes)[number]
-
 // Theme metadata with prompts
-const themeData: Record<Theme, {
+const themeData: Record<PromptTheme, {
   en: { title: string; description: string; prompts: string[] }
   tr: { title: string; description: string; prompts: string[] }
 }> = {
@@ -304,7 +292,13 @@ const themeData: Record<Theme, {
 }
 
 export async function generateStaticParams() {
-  return validThemes.map((theme) => ({ theme }))
+  const params: Array<{ locale: string; theme: string }> = []
+  for (const locale of SEO_LOCALES) {
+    for (const theme of promptThemes) {
+      params.push({ locale, theme: getPromptThemeSlug(locale, theme) })
+    }
+  }
+  return params
 }
 
 export async function generateMetadata({
@@ -314,11 +308,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, theme } = await params
 
-  if (!validThemes.includes(theme as Theme)) {
+  const seoLocale = normalizeSeoLocale(locale)
+  const themeInfo = getPromptThemeSlugInfo(seoLocale, theme)
+  if (!themeInfo) {
     return { title: "Not Found" }
   }
 
-  const data = themeData[theme as Theme][locale === "tr" ? "tr" : "en"]
+  const data = themeData[themeInfo.id][locale === "tr" ? "tr" : "en"]
+  const canonicalPath = getPromptThemePath(seoLocale, themeInfo.id)
 
   return {
     title: `${data.title} | Capsule Note`,
@@ -327,13 +324,13 @@ export async function generateMetadata({
       title: data.title,
       description: data.description,
       type: "website",
-      url: `${appUrl}${locale === "en" ? "" : "/" + locale}/prompts/${theme}`,
+      url: `${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${canonicalPath}`,
     },
     alternates: {
-      canonical: `${appUrl}${locale === "en" ? "" : "/" + locale}/prompts/${theme}`,
+      canonical: `${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${canonicalPath}`,
       languages: {
-        en: `${appUrl}/prompts/${theme}`,
-        tr: `${appUrl}/tr/prompts/${theme}`,
+        en: `${appUrl}${getPromptThemePath("en", themeInfo.id)}`,
+        tr: `${appUrl}/tr${getPromptThemePath("tr", themeInfo.id)}`,
       },
     },
   }
@@ -346,15 +343,24 @@ export default async function PromptThemePage({
 }) {
   const { locale, theme } = await params
 
-  if (!validThemes.includes(theme as Theme)) {
+  const seoLocale = normalizeSeoLocale(locale)
+  const themeInfo = getPromptThemeSlugInfo(seoLocale, theme)
+  if (!themeInfo) {
     notFound()
+  }
+
+  if (!themeInfo.isCanonical) {
+    const canonicalPath = getPromptThemePath(seoLocale, themeInfo.id)
+    const localePrefix = seoLocale === "en" ? "" : `/${seoLocale}`
+    permanentRedirect(`${localePrefix}${canonicalPath}`)
   }
 
   setRequestLocale(locale)
 
   const isEnglish = locale === "en"
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
-  const data = themeData[theme as Theme][locale === "tr" ? "tr" : "en"]
+  const data = themeData[themeInfo.id][locale === "tr" ? "tr" : "en"]
+  const currentPath = getPromptThemePath(seoLocale, themeInfo.id)
 
   return (
     <LegalPageLayout>
@@ -363,15 +369,15 @@ export default async function PromptThemePage({
         locale={locale}
         items={[
           { name: isEnglish ? "Home" : "Ana Sayfa", href: "/" },
-          { name: isEnglish ? "Prompts" : "İpuçları", href: "/prompts" as any },
-          { name: data.title, href: `/prompts/${theme}` as any },
+          { name: isEnglish ? "Prompts" : "İpuçları", href: "/prompts" },
+          { name: data.title, href: currentPath },
         ]}
       />
 
       {/* Back link */}
       <div className="mb-6">
         <Link
-          href={"/prompts" as any}
+          href="/prompts"
           className="inline-flex items-center gap-2 font-mono text-sm text-charcoal/60 hover:text-charcoal transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

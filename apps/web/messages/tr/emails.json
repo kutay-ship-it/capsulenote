@@ -67,7 +67,7 @@
       "➕ Farklı tarihler için yeni mektuplar oluştur"
     ],
     "viewLetter": "Mektubunu gör",
-    "dashboard": "Panoya git",
+    "dashboard": "Yolculuğa git",
     "footer": {
       "reason": "Bu e-postayı Capsule Note'ta bir mektup oluşturduğun için alıyorsun.",
       "manage": "E-posta tercihlerini yönet",
@@ -83,7 +83,7 @@
         "Farklı tarihler için yeni mektuplar oluştur"
       ],
       "view": "Mektubunu gör",
-      "dashboard": "Panoya git"
+      "dashboard": "Yolculuğa git"
     }
   },
   "letterDelivery": {
@@ -108,11 +108,11 @@
   },
   "billingNotifications": {
     "trialEnding": {
-      "subject": "Ücretsiz denemeniz {days} gün içinde sona eriyor",
+      "subject": "Deneme süreniz {days} gün içinde sona eriyor",
       "headline": "Deneme Süreniz Bitiyor",
-      "body": "Capsule Note Pro 14 günlük ücretsiz deneme süreniz {days} gün içinde sona erecek.",
+      "body": "Capsule Note 14 günlük deneme süreniz {days} gün içinde sona erecek.",
       "trialEndsLabel": "Deneme Bitiş Tarihi",
-      "afterTrialNotice": "Bu tarihten sonra Pro özelliklerini kullanmaya devam etmek için aylık 9$ ücretlendirileceksiniz.",
+      "afterTrialNotice": "Bu tarihten sonra aboneliğiniz, iptal etmediğiniz sürece devam eder.",
       "manageSubscription": "Aboneliği Yönet",
       "cancelNotice": "Devam etmek istemiyorsanız, deneme süreniz bitmeden istediğiniz zaman iptal edebilirsiniz."
     },
@@ -127,8 +127,8 @@
     "subscriptionCanceled": {
       "subject": "Capsule Note aboneliğiniz iptal edildi",
       "headline": "Abonelik İptal Edildi",
-      "body": "Capsule Note Pro aboneliğiniz iptal edildi.",
-      "accessNotice": "Mevcut fatura döneminin sonuna kadar Pro özelliklerine erişmeye devam edeceksiniz. Mektuplarınız güvende ve şifreli kalıyor.",
+      "body": "Capsule Note aboneliğiniz iptal edildi.",
+      "accessNotice": "Mevcut fatura döneminin sonuna kadar erişiminiz devam eder. Mektuplarınız güvende ve şifreli kalır.",
       "reactivate": "Aboneliği Yeniden Etkinleştir",
       "comeBack": "Sizi tekrar aramızda görmekten mutluluk duyarız."
     },
@@ -185,11 +185,11 @@
       "Mektubun güvenle saklanır ve şifrelenir",
       "Planlanan tarihte {channel} {recipient} adresine gönderilir",
       "Gönderildiğinde teslimat onayı alırsın",
-      "Panondan teslimatı istediğin zaman görebilir veya güncelleyebilirsin"
+      "Yolculuğundan teslimatı istediğin zaman görebilir veya güncelleyebilirsin"
     ],
     "cta": "Teslimat detaylarını gör →",
-    "dashboardCta": "panoya",
-    "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için panonu ziyaret et.",
+    "dashboardCta": "yolculuğa",
+    "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için yolculuğunu ziyaret et.",
     "footer": {
       "sentWith": "Capsule Note ile gönderildi",
       "tagline": "Gelecekteki kendine mektuplar"
@@ -204,12 +204,12 @@
         "Mektubun güvenle saklanır ve şifrelenir",
         "Planlanan tarihte {channel} {recipient} adresine gönderilir",
         "Gönderildiğinde teslimat onayı alırsın",
-        "Panondan teslimatı istediğin zaman görebilir veya güncelleyebilirsin"
+        "Yolculuğundan teslimatı istediğin zaman görebilir veya güncelleyebilirsin"
       ],
       "view": "TESLİMAT DETAYLARINI GÖR",
       "viewUrl": "Teslimat detaylarını gör",
       "editUrl": "Teslimatı düzenle",
-      "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için panonu ziyaret et:"
+      "change": "Değişiklik mi gerekli? Tüm mektuplarını ve teslimatlarını yönetmek için yolculuğunu ziyaret et:"
     }
   }
 }

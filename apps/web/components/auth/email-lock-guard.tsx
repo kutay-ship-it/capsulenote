@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useUser, useClerk } from "@clerk/nextjs"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
+import { useRouter } from "@/i18n/routing"
 
 /**
  * Client-side guard to ensure lockedEmail (from checkout) matches current Clerk email.
@@ -19,7 +19,7 @@ export function EmailLockGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoaded || !user) return
 
-    const lockedEmail = (user.unsafeMetadata as any)?.lockedEmail as string | undefined
+    const lockedEmail = (user.unsafeMetadata as { lockedEmail?: string } | null | undefined)?.lockedEmail
     if (lockedEmail) {
       const primaryEmail = user.primaryEmailAddress?.emailAddress?.toLowerCase()
       if (primaryEmail && primaryEmail !== lockedEmail.toLowerCase()) {

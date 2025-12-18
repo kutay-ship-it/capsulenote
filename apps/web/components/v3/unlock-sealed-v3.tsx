@@ -119,11 +119,11 @@ export function UnlockSealedV3({
         >
           <p className="font-mono text-xs font-bold uppercase tracking-wider text-charcoal/60">
             Your Letter
-          </p>
-          <p className="font-mono text-sm font-bold text-charcoal truncate max-w-[250px]">
-            "{letterTitle}"
-          </p>
-        </div>
+	          </p>
+	          <p className="font-mono text-sm font-bold text-charcoal truncate max-w-[250px]">
+	            &quot;{letterTitle}&quot;
+	          </p>
+	        </div>
 
         {/* Dates */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">

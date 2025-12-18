@@ -15,8 +15,8 @@ export default function SSOCallbackPage() {
     <>
       <TimezoneDetectionOnAuth />
       <AuthenticateWithRedirectCallback
-        signInFallbackRedirectUrl="/dashboard"
-        signUpFallbackRedirectUrl="/dashboard"
+        signInFallbackRedirectUrl="/journey"
+        signUpFallbackRedirectUrl="/journey"
       />
     </>
   )

@@ -15,11 +15,11 @@
     "plans": {
       "digitalCapsule": "Dijital Kapsül",
       "paperPixels": "Kağıt & Piksel",
-      "free": "Ücretsiz"
+      "free": "Temel"
     }
   },
   "actions": {
-    "dashboard": "Panel",
+    "dashboard": "Yolculuk",
     "signIn": "Giriş Yap",
     "signUp": "Hemen Başla",
     "getStarted": "Hemen Başla",
@@ -28,7 +28,7 @@
     "howItWorks": "Nasıl Çalışır",
     "switchTo": "{language} diline geç",
     "createAccount": "Hesap Oluştur",
-    "goToDashboard": "Panoya Git",
+    "goToDashboard": "Yolculuğa Git",
     "addToCalendar": "Takvime ekle"
   },
   "footer": {

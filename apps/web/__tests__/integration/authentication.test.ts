@@ -36,6 +36,7 @@ vi.mock('@/server/lib/db', () => ({
     user: {
       findUnique: vi.fn(),
       create: vi.fn(),
+      upsert: vi.fn(),
     },
     pendingSubscription: {
       findFirst: vi.fn(),
@@ -53,6 +54,8 @@ vi.mock('@/app/[locale]/subscribe/actions', () => ({
 describe('Authentication Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockClerkAuth.mockReset()
+    mockGetUser.mockReset()
   })
 
   describe('getCurrentUser()', () => {
@@ -131,7 +134,7 @@ describe('Authentication Integration Tests', () => {
       })
 
       // Mock successful user creation
-      vi.mocked(prisma.user.create).mockResolvedValueOnce({
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({
         id: 'user_new_123',
         clerkUserId: 'clerk_user_new',
         email: 'newuser@example.com',
@@ -166,16 +169,14 @@ describe('Authentication Integration Tests', () => {
 
       expect(user).not.toBeNull()
       expect(user?.email).toBe('newuser@example.com')
-      expect(prisma.user.create).toHaveBeenCalledWith({
-        data: {
+      expect(prisma.user.upsert).toHaveBeenCalledWith({
+        where: { clerkUserId: 'clerk_user_new' },
+        create: {
           clerkUserId: 'clerk_user_new',
           email: 'newuser@example.com',
-          profile: {
-            create: {
-              timezone: 'UTC',
-            },
-          },
+          profile: { create: { timezone: 'UTC' } },
         },
+        update: {},
         include: {
           profile: true,
         },
@@ -229,14 +230,8 @@ describe('Authentication Integration Tests', () => {
         ],
       })
 
-      // Mock race condition on create (P2002 = unique constraint violation)
-      vi.mocked(prisma.user.create).mockRejectedValueOnce({
-        code: 'P2002',
-        message: 'Unique constraint failed',
-      })
-
-      // Second findUnique: user now exists (created by concurrent request)
-      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({
+      // Upsert handles concurrency atomically; return the created/existing user
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({
         id: 'user_race_123',
         clerkUserId: 'clerk_user_race',
         email: 'race@example.com',
@@ -271,8 +266,8 @@ describe('Authentication Integration Tests', () => {
 
       expect(user).not.toBeNull()
       expect(user?.email).toBe('race@example.com')
-      expect(prisma.user.create).toHaveBeenCalledTimes(1)
-      expect(prisma.user.findUnique).toHaveBeenCalledTimes(2)
+      expect(prisma.user.upsert).toHaveBeenCalledTimes(1)
+      expect(prisma.user.findUnique).toHaveBeenCalledTimes(1)
     })
 
     it('should auto-link pending subscription for newly synced user', async () => {
@@ -298,7 +293,7 @@ describe('Authentication Integration Tests', () => {
       })
 
       // Mock user creation (without stripeCustomerId)
-      vi.mocked(prisma.user.create).mockResolvedValueOnce({
+      vi.mocked(prisma.user.upsert).mockResolvedValueOnce({
         id: 'user_pending_123',
         clerkUserId: 'clerk_user_pending',
         email: 'pending@example.com',

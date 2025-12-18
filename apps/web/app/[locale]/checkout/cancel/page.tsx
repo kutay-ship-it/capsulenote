@@ -11,16 +11,23 @@ import { Link } from "@/i18n/routing"
 import { XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { getTranslations } from "next-intl/server"
+import { getTranslations, setRequestLocale } from "next-intl/server"
 import type { Metadata } from "next"
+import type { Locale } from "@/i18n/routing"
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("checkout")
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "checkout" })
+  const canonicalPath = locale === "en" ? "/checkout/cancel" : `/${locale}/checkout/cancel`
   return {
     title: t("metadata.cancelTitle"),
     description: t("metadata.cancelDescription"),
     alternates: {
-      canonical: "/checkout/cancel",
+      canonical: canonicalPath,
     },
     robots: {
       index: false,
@@ -29,8 +36,14 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function CheckoutCancelPage() {
-  const t = await getTranslations("checkout")
+export default async function CheckoutCancelPage({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}) {
+  const { locale } = await params
+  setRequestLocale(locale)
+  const t = await getTranslations({ locale, namespace: "checkout" })
 
   return (
     <div className="container max-w-2xl mx-auto py-16">
@@ -71,8 +84,8 @@ export default async function CheckoutCancelPage() {
             <p className="text-xs text-muted-foreground">
               {t.rich("cancel.support", {
                 link: (chunks) => (
-                  <Link href="/support" className="text-primary hover:underline">
-                    {t("cancel.contactSupport")}
+                  <Link href="/contact" className="text-primary hover:underline">
+                    {chunks}
                   </Link>
                 ),
               })}

@@ -8,7 +8,7 @@
       "PAPER_PIXELS": "Kağıt ve Pikseller",
       "pro": "Pro",
       "enterprise": "Kurumsal",
-      "none": "Ücretsiz"
+      "none": "Plan yok"
     },
     "status": {
       "active": "Aktif",
@@ -18,15 +18,15 @@
       "incomplete": "Eksik",
       "incomplete_expired": "Eksik",
       "unpaid": "Ödenmemiş",
-      "none": "Ücretsiz"
+      "none": "Plan yok"
     },
-    "freeTitle": "Ücretsiz plan",
+    "freeTitle": "Plan yok",
     "freeDescription": "Aktif abonelik yok",
-    "freeCta": "Sınırsız mektup, planlı teslimatlar ve fiziksel posta için Pro'ya yükselt.",
+    "freeCta": "Teslimat planlamak ve kredileri açmak için bir plan seç.",
     "trialEnds": "Deneme bitişi {date}",
     "trialHint": "Aboneliğe devam etmek için deneme bitmeden ödeme yöntemi ekle.",
     "cancelTitle": "Abonelik {date} tarihinde sona erecek",
-    "cancelHint": "Bu tarihe kadar Pro erişimin devam eder. Öncesinde yeniden etkinleştirebilirsin.",
+    "cancelHint": "Bu tarihe kadar erişimin devam eder. Öncesinde yeniden etkinleştirebilirsin.",
     "paymentFailedTitle": "Ödeme başarısız",
     "paymentFailedHint": "Hizmet kesintisi yaşamaman için ödeme yöntemini güncelle.",
     "nextBilling": "Sonraki fatura tarihi",
@@ -34,7 +34,7 @@
   },
   "manageButton": {
     "manage": "ABONELİĞİ YÖNET",
-    "upgrade": "PRO'YA YÜKSELT",
+    "upgrade": "PLAN SEÇ",
     "loading": "YÜKLENİYOR..."
   },
   "usage": {
@@ -88,29 +88,29 @@
     "portalUnexpected": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."
   },
   "upgradeModal": {
-    "quotaTitle": "Ücretsiz Plan Limitine Ulaşıldı",
-    "subscriptionTitle": "Pro Abonelik Gerekli",
+    "quotaTitle": "Plan Limitine Ulaşıldı",
+    "subscriptionTitle": "Plan Gerekli",
     "creditsTitle": "Posta Kredisi Yok",
     "defaultTitle": "Devam Etmek İçin Yükselt",
-    "defaultDescription": "Bu özelliği açmak için Pro'ya yükselt",
+    "defaultDescription": "Bu özelliği açmak için bir plan seç",
     "currentUsage": "Mevcut Kullanım",
-    "proIncludes": "Pro Plana Dahil:",
+    "proIncludes": "Plana Dahil:",
     "features": {
       "unlimited": "Ayda sınırsız mektup",
       "email": "E-posta teslimatı planla",
       "mail": "Fiziksel posta teslimatı (ayda 2 kredi)",
       "support": "Öncelikli destek",
-      "trial": "14 günlük ücretsiz deneme"
+      "trial": "14 günlük deneme"
     },
     "cancel": "İptal",
-    "upgrade": "Pro'ya Yükselt"
+    "upgrade": "Plan Seç"
   },
   "quotaBanner": {
-    "limitReached": "Ücretsiz Plan Limitine Ulaşıldı",
+    "limitReached": "Plan Limitine Ulaşıldı",
     "approaching": "Plan Limitine Yaklaşıyorsun",
-    "limitReachedDescription": "Bu ay için {max} mektubun tümünü kullandın. Sınırsız mektup için Pro'ya yükselt.",
-    "approachingDescription": "Bu ay {max} mektuptan {used} tanesini kullandın. Sınırsız erişim için Pro'ya yükselt.",
+    "limitReachedDescription": "Bu dönem için plan limitine ulaştın. Devam etmek için bir plan seç.",
+    "approachingDescription": "Bu dönem için plan limitine yaklaşıyorsun. Daha fazla erişim için bir plan seç.",
     "lettersUsed": "Kullanılan Mektuplar",
-    "upgrade": "Pro'ya Yükselt"
+    "upgrade": "Plan Seç"
   }
 }

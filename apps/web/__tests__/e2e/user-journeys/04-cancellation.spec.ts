@@ -41,7 +41,7 @@ test.describe("Cancellation Flow: Schedule → Cancel before delivery", () => {
     // =========================================================================
     await test.step("Sign in to account", async () => {
       await signInWithClerk(page, testUserEmail, testUserPassword)
-      await expect(page).toHaveURL(/\/(journey|letters|dashboard)/)
+      await expect(page).toHaveURL(/\/(journey|letters)/)
     })
 
     // =========================================================================

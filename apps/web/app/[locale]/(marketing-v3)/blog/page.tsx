@@ -8,6 +8,8 @@ import { LegalPageLayout } from "../_components/legal-page-layout"
 import { LegalHero } from "../_components/legal-hero"
 import { ItemListSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { getAllBlogPosts, getFeaturedBlogPosts } from "@/lib/seo/blog-content"
+import { getBlogSlug, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
+import type { BlogSlug } from "@/lib/seo/content-registry"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -26,6 +28,26 @@ const categoryColors: Record<string, string> = {
   "life-events": "bg-purple-100 text-charcoal",
   privacy: "bg-pink-100 text-charcoal",
   "use-cases": "bg-orange-100 text-charcoal",
+}
+
+const categoryLabels: Record<string, { en: string; tr: string }> = {
+  inspiration: { en: "Inspiration", tr: "İlham" },
+  ideas: { en: "Ideas", tr: "Fikirler" },
+  guides: { en: "Guides", tr: "Rehberler" },
+  features: { en: "Features", tr: "Özellikler" },
+  tips: { en: "Tips", tr: "İpuçları" },
+  "future-self": { en: "Future Self", tr: "Gelecek Benlik" },
+  psychology: { en: "Psychology", tr: "Psikoloji" },
+  "letter-craft": { en: "Letter Craft", tr: "Mektup Yazımı" },
+  "life-events": { en: "Life Events", tr: "Hayat Olayları" },
+  privacy: { en: "Privacy", tr: "Gizlilik" },
+  "use-cases": { en: "Use Cases", tr: "Kullanım Senaryoları" },
+}
+
+function getCategoryLabel(category: string, locale: string) {
+  const labels = categoryLabels[category]
+  if (!labels) return category
+  return locale === "tr" ? labels.tr : labels.en
 }
 
 export async function generateMetadata({
@@ -71,6 +93,7 @@ export default async function BlogHubPage({
   const { locale } = await params
   setRequestLocale(locale)
 
+  const seoLocale = normalizeSeoLocale(locale)
   const isEnglish = locale === "en"
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
 
@@ -93,7 +116,7 @@ export default async function BlogHubPage({
   // Schema.org data
   const schemaItems = allPosts.map(({ slug, data }, index) => ({
     name: data[locale === "tr" ? "tr" : "en"]?.title || slug,
-    url: `${appUrl}${locale === "en" ? "" : "/" + locale}/blog/${slug}`,
+    url: `${appUrl}${locale === "en" ? "" : "/" + locale}/blog/${getBlogSlug(seoLocale, slug as BlogSlug)}`,
     position: index + 1,
   }))
 
@@ -129,49 +152,55 @@ export default async function BlogHubPage({
         </h2>
         <div className="grid gap-6 md:grid-cols-2">
           {featuredPosts.map(({ slug, data: postData }) => {
-            const localizedData = postData[locale === "tr" ? "tr" : "en"]
+	            const localizedData = postData[locale === "tr" ? "tr" : "en"]
+	            const localizedSlug = getBlogSlug(seoLocale, slug as BlogSlug)
 
-            return (
-              <Link
-                key={slug}
-                href={`/blog/${slug}` as any}
-                className={cn(
-                  "group p-6 border-2 border-charcoal bg-white",
-                  "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
-                )}
-                style={{ borderRadius: "2px" }}
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <span className={cn("px-2 py-1 font-mono text-xs", categoryColors[postData.category] || "bg-gray-100 text-charcoal")}>
-                    {postData.category}
-                  </span>
-                  <span className="font-mono text-xs text-charcoal/50 flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {new Date(postData.datePublished).toLocaleDateString(locale)}
-                  </span>
-                </div>
+		            return (
+		              <Link
+		                key={slug}
+		                href={{ pathname: "/blog/[slug]", params: { slug: localizedSlug } }}
+		                className={cn(
+		                  "group p-6 border-2 border-charcoal bg-white",
+		                  "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
+		                )}
+	                style={{ borderRadius: "2px" }}
+	              >
+	                <div className="flex items-center gap-3 mb-4">
+	                  <span
+	                    className={cn(
+	                      "px-2 py-1 font-mono text-xs",
+	                      categoryColors[postData.category] || "bg-gray-100 text-charcoal"
+	                    )}
+	                  >
+	                    {getCategoryLabel(postData.category, locale)}
+	                  </span>
+	                  <span className="font-mono text-xs text-charcoal/50 flex items-center gap-1">
+	                    <Calendar className="h-3 w-3" />
+	                    {new Date(postData.datePublished).toLocaleDateString(locale)}
+	                  </span>
+	                </div>
 
-                <h3 className={cn("font-mono text-xl font-bold text-charcoal mb-3", uppercaseClass)}>
-                  {localizedData.title}
-                </h3>
+	                <h3 className={cn("font-mono text-xl font-bold text-charcoal mb-3", uppercaseClass)}>
+	                  {localizedData.title}
+	                </h3>
 
-                <p className="font-mono text-sm text-charcoal/70 leading-relaxed mb-4">
-                  {localizedData.description}
-                </p>
+	                <p className="font-mono text-sm text-charcoal/70 leading-relaxed mb-4">
+	                  {localizedData.description}
+	                </p>
 
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs text-charcoal/50 flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {postData.readTime} {t.minRead}
-                  </span>
-                  <span className="flex items-center gap-2 text-charcoal font-mono text-sm group-hover:gap-3 transition-all">
-                    {t.readMore}
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </div>
-              </Link>
-            )
-          })}
+	                <div className="flex items-center justify-between">
+	                  <span className="font-mono text-xs text-charcoal/50 flex items-center gap-1">
+	                    <Clock className="h-3 w-3" />
+	                    {postData.readTime} {t.minRead}
+	                  </span>
+	                  <span className="flex items-center gap-2 text-charcoal font-mono text-sm group-hover:gap-3 transition-all">
+	                    {t.readMore}
+	                    <ArrowRight className="h-4 w-4" />
+	                  </span>
+	                </div>
+	              </Link>
+	            )
+	          })}
         </div>
       </section>
 
@@ -182,35 +211,41 @@ export default async function BlogHubPage({
         </h2>
         <div className="space-y-4">
           {recentPosts.map(({ slug, data: postData }) => {
-            const localizedData = postData[locale === "tr" ? "tr" : "en"]
+	            const localizedData = postData[locale === "tr" ? "tr" : "en"]
+	            const localizedSlug = getBlogSlug(seoLocale, slug as BlogSlug)
 
-            return (
-              <Link
-                key={slug}
-                href={`/blog/${slug}` as any}
-                className={cn(
-                  "group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border-2 border-charcoal bg-white",
-                  "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
-                )}
-                style={{ borderRadius: "2px" }}
-              >
-                <div className="flex-grow">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span className={cn("px-2 py-0.5 font-mono text-xs", categoryColors[postData.category] || "bg-gray-100 text-charcoal")}>
-                      {postData.category}
-                    </span>
-                    <span className="font-mono text-xs text-charcoal/50">
-                      {new Date(postData.datePublished).toLocaleDateString(locale)}
-                    </span>
-                  </div>
-                  <h3 className="font-mono text-base font-bold text-charcoal">
-                    {localizedData.title}
-                  </h3>
-                </div>
-                <ArrowRight className="h-5 w-5 text-charcoal/40 group-hover:text-charcoal group-hover:translate-x-1 transition-all flex-shrink-0" />
-              </Link>
-            )
-          })}
+		            return (
+		              <Link
+		                key={slug}
+		                href={{ pathname: "/blog/[slug]", params: { slug: localizedSlug } }}
+		                className={cn(
+		                  "group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border-2 border-charcoal bg-white",
+		                  "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]"
+		                )}
+	                style={{ borderRadius: "2px" }}
+	              >
+	                <div className="flex-grow">
+	                  <div className="flex items-center gap-3 mb-2">
+	                    <span
+	                      className={cn(
+	                        "px-2 py-0.5 font-mono text-xs",
+	                        categoryColors[postData.category] || "bg-gray-100 text-charcoal"
+	                      )}
+	                    >
+	                      {getCategoryLabel(postData.category, locale)}
+	                    </span>
+	                    <span className="font-mono text-xs text-charcoal/50">
+	                      {new Date(postData.datePublished).toLocaleDateString(locale)}
+	                    </span>
+	                  </div>
+	                  <h3 className="font-mono text-base font-bold text-charcoal">
+	                    {localizedData.title}
+	                  </h3>
+	                </div>
+	                <ArrowRight className="h-5 w-5 text-charcoal/40 group-hover:text-charcoal group-hover:translate-x-1 transition-all flex-shrink-0" />
+	              </Link>
+	            )
+	          })}
         </div>
       </section>
 

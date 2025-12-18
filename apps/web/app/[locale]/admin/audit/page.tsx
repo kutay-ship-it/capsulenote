@@ -13,14 +13,21 @@
 
 import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
+import type { Prisma } from "@prisma/client"
 import { prisma } from "@/server/lib/db"
 import { AuditLogTable } from "./_components/audit-log-table"
 import { AuditLogFilters } from "./_components/audit-log-filters"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getTranslations } from "next-intl/server"
+import type { Locale } from "@/i18n/routing"
 
-export async function generateMetadata() {
-  const t = await getTranslations("admin.audit")
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>
+}) {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "admin.audit" })
   return {
     title: t("pageTitle"),
     description: t("pageDescription"),
@@ -29,6 +36,7 @@ export async function generateMetadata() {
 }
 
 interface PageProps {
+  params: Promise<{ locale: Locale }>
   searchParams: Promise<{
     type?: string
     userId?: string
@@ -38,10 +46,13 @@ interface PageProps {
   }>
 }
 
-export default async function AdminAuditPage({ searchParams }: PageProps) {
+export default async function AdminAuditPage({ params, searchParams }: PageProps) {
+  const { locale } = await params
+  const prefix = locale === "en" ? "" : `/${locale}`
+
   const { userId: clerkUserId, sessionClaims } = await auth()
   if (!clerkUserId) {
-    redirect("/dashboard")
+    redirect(`${prefix}/sign-in`)
   }
 
   const user = await prisma.user.findUnique({
@@ -56,19 +67,19 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
   const isAllowlisted = user?.email ? allowlist.includes(user.email.toLowerCase()) : false
 
   if (!hasAdminRole && !isAllowlisted) {
-    redirect("/dashboard")
+    redirect(`${prefix}/journey`)
   }
 
-  const t = await getTranslations("admin.audit")
+  const t = await getTranslations({ locale, namespace: "admin.audit" })
 
-  // Await searchParams (Next.js 15 async params)
+  // Next.js 16 route props are async in the type system
   const resolvedSearchParams = await searchParams
   const page = parseInt(resolvedSearchParams.page || "1", 10)
   const limit = 50
   const offset = (page - 1) * limit
 
   // Build filter conditions
-  const where: any = {}
+  const where: Prisma.AuditEventWhereInput = {}
   if (resolvedSearchParams.type) {
     where.type = resolvedSearchParams.type
   }

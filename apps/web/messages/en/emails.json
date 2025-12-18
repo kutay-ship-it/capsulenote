@@ -68,7 +68,7 @@
       "➕ Create more letters for different future dates"
     ],
     "viewLetter": "View Your Letter",
-    "dashboard": "Go to Dashboard",
+    "dashboard": "Go to Journey",
     "footer": {
       "reason": "You're receiving this email because you created a letter on Capsule Note.",
       "manage": "Manage email preferences",
@@ -84,7 +84,7 @@
         "Create more letters for different future dates"
       ],
       "view": "View Your Letter",
-      "dashboard": "Go to Dashboard"
+      "dashboard": "Go to Journey"
     }
   },
   "letterDelivery": {
@@ -109,11 +109,11 @@
   },
   "billingNotifications": {
     "trialEnding": {
-      "subject": "Your free trial ends in {days} days",
+      "subject": "Your trial ends in {days} days",
       "headline": "Your Trial is Ending Soon",
-      "body": "Your 14-day free trial of Capsule Note Pro will end in {days} days.",
+      "body": "Your 14-day trial of Capsule Note will end in {days} days.",
       "trialEndsLabel": "Trial Ends",
-      "afterTrialNotice": "After this date, you'll be charged $9/month to continue using Pro features.",
+      "afterTrialNotice": "After this date, your subscription will continue unless you cancel.",
       "manageSubscription": "Manage Subscription",
       "cancelNotice": "If you do not want to continue, you can cancel anytime before your trial ends."
     },
@@ -128,8 +128,8 @@
     "subscriptionCanceled": {
       "subject": "Your Capsule Note subscription has been canceled",
       "headline": "Subscription Canceled",
-      "body": "Your Capsule Note Pro subscription has been canceled.",
-      "accessNotice": "You will continue to have access to Pro features until the end of your current billing period. Your letters remain safe and encrypted.",
+      "body": "Your Capsule Note subscription has been canceled.",
+      "accessNotice": "You will continue to have access until the end of your current billing period. Your letters remain safe and encrypted.",
       "reactivate": "Reactivate Subscription",
       "comeBack": "We'd love to have you back anytime."
     },
@@ -186,11 +186,11 @@
       "Your letter is safely stored and encrypted",
       "On the scheduled date, it will be {channel} to {recipient}",
       "You'll receive a delivery confirmation when it's sent",
-      "You can view or update the delivery anytime from your dashboard"
+      "You can view or update the delivery anytime from your journey"
     ],
     "cta": "View Delivery Details →",
-    "dashboardCta": "dashboard",
-    "change": "Need to make changes? Visit your dashboard to manage all your letters and deliveries.",
+    "dashboardCta": "journey",
+    "change": "Need to make changes? Visit your journey to manage all your letters and deliveries.",
     "footer": {
       "sentWith": "Sent with Capsule Note",
       "tagline": "Letters to your future self"
@@ -205,12 +205,12 @@
         "Your letter is safely stored and encrypted",
         "On the scheduled date, it will be {channel} to {recipient}",
         "You'll receive a delivery confirmation when it's sent",
-        "You can view or update the delivery anytime from your dashboard"
+        "You can view or update the delivery anytime from your journey"
       ],
       "view": "VIEW DELIVERY DETAILS",
       "viewUrl": "View delivery details",
       "editUrl": "Edit delivery",
-      "change": "Need to make changes? Visit your dashboard to manage all your letters and deliveries:"
+      "change": "Need to make changes? Visit your journey to manage all your letters and deliveries:"
     }
   }
 }

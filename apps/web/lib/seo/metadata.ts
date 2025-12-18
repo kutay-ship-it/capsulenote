@@ -102,11 +102,11 @@ export function generateHubMetadata({
     templates: {
       en: {
         title: "Letter Templates | Write to Your Future Self",
-        description: "Free letter templates for writing to your future self. Templates for self-reflection, goal-setting, gratitude, relationships, and more.",
+        description: "Letter templates for writing to your future self. Templates for self-reflection, goal-setting, gratitude, relationships, and more.",
       },
       tr: {
         title: "Mektup Şablonları | Gelecekteki Kendine Yaz",
-        description: "Gelecekteki kendine yazmak için ücretsiz mektup şablonları. Öz-düşünce, hedef belirleme, şükran, ilişkiler ve daha fazlası için şablonlar.",
+        description: "Gelecekteki kendine yazmak için mektup şablonları. Öz-düşünce, hedef belirleme, şükran, ilişkiler ve daha fazlası için şablonlar.",
       },
     },
     guides: {
@@ -122,11 +122,11 @@ export function generateHubMetadata({
     prompts: {
       en: {
         title: "Writing Prompts | Letters to Your Future Self",
-        description: "Free writing prompts for letters to your future self. Explore themes like self-esteem, grief, graduation, sobriety, relationships, and more.",
+        description: "Writing prompts for letters to your future self. Explore themes like self-esteem, grief, graduation, sobriety, relationships, and more.",
       },
       tr: {
         title: "Yazma İpuçları | Gelecekteki Kendine Mektuplar",
-        description: "Gelecekteki kendinize mektuplar için ücretsiz yazma ipuçları. Özsaygı, keder, mezuniyet, ayıklık, ilişkiler ve daha fazlası gibi temaları keşfedin.",
+        description: "Gelecekteki kendinize mektuplar için yazma ipuçları. Özsaygı, keder, mezuniyet, ayıklık, ilişkiler ve daha fazlası gibi temaları keşfedin.",
       },
     },
     blog: {
@@ -172,7 +172,7 @@ export function generateArticleMetadata({
   dateModified?: string
   author?: string
 }): Metadata {
-  return generateSeoMetadata({
+  const metadata = generateSeoMetadata({
     title: `${title} | Capsule Note`,
     description,
     locale,
@@ -181,6 +181,11 @@ export function generateArticleMetadata({
     publishedTime: datePublished,
     modifiedTime: dateModified,
   })
+
+  return {
+    ...metadata,
+    authors: [{ name: author }],
+  }
 }
 
 /**

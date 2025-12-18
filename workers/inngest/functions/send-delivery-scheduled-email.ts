@@ -143,6 +143,7 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
             },
             letter: {
               select: {
+                id: true,
                 title: true,
               },
             },
@@ -210,13 +211,21 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
       ? (delivery.emailDelivery?.toEmail ?? delivery.user.email!)
       : delivery.user.email!
 
-    // Generate email URLs
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
-    const deliveryUrl = `${baseUrl}/deliveries?utm_source=email&utm_medium=notification&utm_campaign=delivery_scheduled`
-    const dashboardUrl = `${baseUrl}/dashboard?utm_source=email&utm_medium=notification&utm_campaign=delivery_scheduled`
-
     const userLocale: Locale =
       (delivery.user.profile?.locale as Locale | undefined) || "en"
+
+    // Generate email URLs
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL!.replace(/\/$/, "")
+    const localePrefix = userLocale === "en" ? "" : `/${userLocale}`
+    const utm = new URLSearchParams({
+      utm_source: "email",
+      utm_medium: "notification",
+      utm_campaign: "delivery_scheduled",
+    }).toString()
+    const letterUrl = `${baseUrl}${localePrefix}/letters/${delivery.letter.id}?${utm}`
+    const scheduleUrl = `${baseUrl}${localePrefix}/letters/${delivery.letter.id}/schedule?${utm}`
+    const lettersUrl = `${baseUrl}${localePrefix}/letters?${utm}`
+    const journeyUrl = `${baseUrl}${localePrefix}/journey?${utm}`
 
     const deliveryDate = formatDeliveryDate(new Date(delivery.deliverAt), userLocale)
 
@@ -228,8 +237,10 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
       deliveryMethod: delivery.channel,
       recipientEmail,
       userFirstName: delivery.user.profile?.displayName ?? undefined,
-      deliveryUrl,
-      dashboardUrl,
+      letterUrl,
+      scheduleUrl,
+      lettersUrl,
+      journeyUrl,
       locale: userLocale,
     })
 
@@ -240,8 +251,10 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
       deliveryMethod: delivery.channel,
       recipientEmail,
       userFirstName: delivery.user.profile?.displayName ?? undefined,
-      deliveryUrl,
-      dashboardUrl,
+      letterUrl,
+      scheduleUrl,
+      lettersUrl,
+      journeyUrl,
       locale: userLocale,
     })
 
@@ -279,7 +292,7 @@ export const sendDeliveryScheduledEmail = inngest.createFunction(
           headers: {
             "X-Idempotency-Key": idempotencyKey,
           },
-          unsubscribeUrl: `${baseUrl}/settings/notifications`,
+          unsubscribeUrl: `${baseUrl}${localePrefix}/settings/notifications`,
         })
 
         if (!result.success) {

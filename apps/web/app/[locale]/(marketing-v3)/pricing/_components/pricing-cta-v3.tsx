@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion"
 import { ArrowRight, Shield, RefreshCw, Mail, Sparkles, LucideIcon } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/i18n/routing"
+import type { AppHref } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
 interface PricingCTAV3Props {
@@ -12,9 +13,9 @@ interface PricingCTAV3Props {
   description?: string
   badges?: string[]
   primaryCta?: string
-  primaryCtaHref?: string
+  primaryCtaHref?: AppHref
   secondaryCta?: string
-  secondaryCtaHref?: string
+  secondaryCtaHref?: AppHref
   contactText?: string
   contactLinkText?: string
 }
@@ -32,7 +33,7 @@ export function PricingCTAV3({
   primaryCta,
   primaryCtaHref = "/sign-up",
   secondaryCta,
-  secondaryCtaHref = "/demo",
+  secondaryCtaHref = "/demo-letter",
   contactText,
   contactLinkText,
 }: PricingCTAV3Props) {
@@ -174,7 +175,7 @@ export function PricingCTAV3({
               transition={{ duration: 0.5, delay: 0.8 }}
             >
               {/* Primary CTA */}
-              <Link href={primaryCtaHref as any}>
+              <Link href={primaryCtaHref}>
                 <motion.button
                   className={cn(
                     "group h-[58px] px-8 flex items-center justify-center gap-3",
@@ -194,7 +195,7 @@ export function PricingCTAV3({
               </Link>
 
               {/* Secondary CTA */}
-              <Link href={secondaryCtaHref as any}>
+              <Link href={secondaryCtaHref}>
                 <motion.button
                   className={cn(
                     "h-[58px] px-8 flex items-center justify-center",
