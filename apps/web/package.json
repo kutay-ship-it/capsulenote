@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm validate:seo && next build --webpack",
-    "build:skip-seo": "next build --webpack",
+    "build": "next build --webpack",
+    "build:with-seo": "pnpm validate:seo && next build --webpack",
     "validate:seo": "node --import tsx scripts/validate-seo-quality.ts",
     "analyze": "ANALYZE=true next build --webpack",
     "start": "next start",
