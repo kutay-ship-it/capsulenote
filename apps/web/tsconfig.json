@@ -66,6 +66,8 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "__tests__/**/*",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "../../workers/**/*",
+    "../../packages/**/*"
   ]
 }
