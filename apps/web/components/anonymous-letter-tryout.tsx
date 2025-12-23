@@ -330,7 +330,7 @@ export function AnonymousLetterTryout({
               <Button
                 onClick={handleSendAndSchedule}
                 disabled={body.trim().length === 0}
-                className="border-2 border-charcoal bg-charcoal font-mono text-sm uppercase hover:bg-gray-800"
+                className="border-2 border-charcoal bg-coral hover:bg-coral/90 text-white font-mono text-sm uppercase shadow-[4px_4px_0_theme(colors.charcoal)] hover:shadow-[6px_6px_0_theme(colors.charcoal)] hover:-translate-y-0.5 transition-all"
                 style={{ borderRadius: "2px" }}
               >
                 {t("actions.sendSchedule")}
