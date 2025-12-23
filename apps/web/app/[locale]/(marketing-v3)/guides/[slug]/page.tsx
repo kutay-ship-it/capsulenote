@@ -48,6 +48,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}/guides/${slug}`,
         tr: `${appUrl}/tr/guides/${slug}`,
+        "x-default": `${appUrl}/guides/${slug}`,
       },
     },
   }

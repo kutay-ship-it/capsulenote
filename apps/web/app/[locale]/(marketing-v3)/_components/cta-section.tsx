@@ -7,12 +7,7 @@ import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-interface CTASectionProps {
-  isSignedIn: boolean
-}
-
-export function CTASection({ isSignedIn }: CTASectionProps) {
-  void isSignedIn
+export function CTASection() {
   const t = useTranslations("marketing.ctaSection")
   const stats = t.raw("stats") as Array<{ value: string; label: string }>
   const sectionRef = useRef<HTMLElement>(null)

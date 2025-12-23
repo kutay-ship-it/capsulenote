@@ -1174,6 +1174,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}/templates/${category}/${slug}`,
         tr: `${appUrl}/tr/templates/${category}/${slug}`,
+        "x-default": `${appUrl}/templates/${category}/${slug}`,
       },
     },
   }

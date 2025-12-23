@@ -99,6 +99,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}${getBlogPath("en", slugInfo.id)}`,
         tr: `${appUrl}/tr${getBlogPath("tr", slugInfo.id)}`,
+        "x-default": `${appUrl}${getBlogPath("en", slugInfo.id)}`,
       },
     },
   }

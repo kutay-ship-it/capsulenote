@@ -331,6 +331,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}${getPromptThemePath("en", themeInfo.id)}`,
         tr: `${appUrl}/tr${getPromptThemePath("tr", themeInfo.id)}`,
+        "x-default": `${appUrl}${getPromptThemePath("en", themeInfo.id)}`,
       },
     },
   }

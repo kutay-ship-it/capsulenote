@@ -3,18 +3,17 @@
 import { useState, useEffect, useRef } from "react"
 import { Menu, X, ArrowRight } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl"
+import { useAuth } from "@clerk/nextjs"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 
-interface NavbarV3Props {
-  isSignedIn?: boolean
-}
-
-export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
+export function NavbarV3() {
   const locale = useLocale()
   const t = useTranslations("marketing.nav")
+  const { isSignedIn, isLoaded } = useAuth()
+  const isAuthenticated = isLoaded && isSignedIn
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
@@ -96,7 +95,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
 
             {/* Desktop CTA */}
             <div className="hidden items-center gap-3 md:flex">
-              {isSignedIn ? (
+              {isAuthenticated ? (
                 <Link href="/letters">
                   <Button size="sm" className="gap-2">
                     {t("letters")}
@@ -186,7 +185,7 @@ export function NavbarV3({ isSignedIn = false }: NavbarV3Props) {
             )}
             style={{ transitionDelay: isMobileMenuOpen ? "150ms" : "0ms" }}
           >
-            {isSignedIn ? (
+            {isAuthenticated ? (
               <Link href="/letters" onClick={() => setIsMobileMenuOpen(false)}>
                 <Button className="w-full gap-2">
                   {t("letters")}

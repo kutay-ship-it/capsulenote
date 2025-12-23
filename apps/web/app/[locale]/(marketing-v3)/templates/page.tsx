@@ -95,6 +95,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}/templates`,
         tr: `${appUrl}/tr/templates`,
+        "x-default": `${appUrl}/templates`,
       },
     },
   }

@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next"
 
+import { routing } from "@/i18n/routing"
+
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 // Routes that should never be indexed
@@ -20,19 +22,29 @@ const disallow = [
   "/journey",
 ]
 
+const nonDefaultLocales = routing.locales.filter((locale) => locale !== routing.defaultLocale)
+const localizedDisallow = nonDefaultLocales.flatMap((locale) =>
+  disallow.map((path) => `/${locale}${path}`)
+)
+const disallowWithLocales = Array.from(new Set([...disallow, ...localizedDisallow]))
+
 // Content routes that AI crawlers can access for training/search
 const aiAllowedRoutes = [
-  "/",
   "/pricing",
   "/about",
   "/contact",
   "/security",
-  "/blog/",
-  "/guides/",
-  "/templates/",
-  "/prompts/",
+  "/blog",
+  "/guides",
+  "/templates",
+  "/prompts",
   "/write-letter",
 ]
+const aiAllowedLocalized = nonDefaultLocales.flatMap((locale) =>
+  aiAllowedRoutes.map((path) => `/${locale}${path}`)
+)
+const aiAllowedRoot = ["/$", ...nonDefaultLocales.map((locale) => `/${locale}$`)]
+const aiAllowlist = Array.from(new Set([...aiAllowedRoot, ...aiAllowedRoutes, ...aiAllowedLocalized]))
 
 export default function robots(): MetadataRoute.Robots {
   const isProduction = process.env.VERCEL_ENV === "production"
@@ -53,33 +65,33 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: ["/"],
-        disallow,
+        disallow: disallowWithLocales,
       },
       // AI crawlers - allow content pages for AI search/training
       {
         userAgent: "GPTBot",
-        allow: aiAllowedRoutes,
-        disallow,
+        allow: aiAllowlist,
+        disallow: ["/"],
       },
       {
         userAgent: "ChatGPT-User",
-        allow: aiAllowedRoutes,
-        disallow,
+        allow: aiAllowlist,
+        disallow: ["/"],
       },
       {
         userAgent: "Claude-Web",
-        allow: aiAllowedRoutes,
-        disallow,
+        allow: aiAllowlist,
+        disallow: ["/"],
       },
       {
         userAgent: "PerplexityBot",
-        allow: aiAllowedRoutes,
-        disallow,
+        allow: aiAllowlist,
+        disallow: ["/"],
       },
       {
         userAgent: "Amazonbot",
-        allow: aiAllowedRoutes,
-        disallow,
+        allow: aiAllowlist,
+        disallow: ["/"],
       },
     ],
     sitemap: `${appUrl}/sitemap.xml`,

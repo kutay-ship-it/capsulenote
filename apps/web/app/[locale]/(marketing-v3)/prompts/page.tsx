@@ -221,6 +221,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}/prompts`,
         tr: `${appUrl}/tr/prompts`,
+        "x-default": `${appUrl}/prompts`,
       },
     },
   }

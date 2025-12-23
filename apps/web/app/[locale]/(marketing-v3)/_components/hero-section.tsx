@@ -2,18 +2,17 @@
 
 import { ArrowRight, Mail, Clock, Star, Sparkles } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@clerk/nextjs"
 
 import { Button } from "@/components/ui/button"
 import { Link } from "@/i18n/routing"
 
 const STAT_ICONS = [Mail, Clock, Star]
 
-interface HeroSectionProps {
-  isSignedIn: boolean
-}
-
-export function HeroSection({ isSignedIn }: HeroSectionProps) {
+export function HeroSection() {
   const t = useTranslations("marketing.heroV3")
+  const { isSignedIn, isLoaded } = useAuth()
+  const isAuthenticated = isLoaded && isSignedIn
 
   // Get stats from translations
   const stats = t.raw("stats") as Array<{ value: string; label: string }>
@@ -80,7 +79,7 @@ export function HeroSection({ isSignedIn }: HeroSectionProps) {
 
           {/* CTA Buttons */}
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-700">
-            {isSignedIn ? (
+            {isAuthenticated ? (
               <Link href="/letters">
                 <Button size="lg" className="group gap-3 text-lg shadow-md hover:shadow-lg">
                   {t("goToLetters")}

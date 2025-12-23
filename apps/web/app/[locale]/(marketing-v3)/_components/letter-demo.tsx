@@ -17,6 +17,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { useTranslations, useLocale } from "next-intl"
+import { useAuth } from "@clerk/nextjs"
 
 import { cn, getUserTimezone } from "@/lib/utils"
 import { getIntlLocale } from "@/lib/date-formatting"
@@ -54,13 +55,11 @@ const MONTHS_BY_KEY: Record<string, number> = {
   "10yr": 120,
 }
 
-interface LetterDemoProps {
-  isSignedIn: boolean
-}
-
-export function LetterDemo({ isSignedIn }: LetterDemoProps) {
+export function LetterDemo() {
   const t = useTranslations("marketing.letterDemo")
   const locale = useLocale()
+  const { isSignedIn, isLoaded } = useAuth()
+  const isAuthenticated = isLoaded && isSignedIn
   const intlLocale = getIntlLocale(locale)
   const datePresets = t.raw("datePresets") as DatePreset[]
   const router = useRouter()
@@ -111,6 +110,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
 
   // Restore draft from localStorage on mount
   React.useEffect(() => {
+    if (!isLoaded) return
     if (isSignedIn) {
       // For signed-in users, check capsule-letter-autosave
       const autosave = getLetterAutosave()
@@ -143,7 +143,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
         }
       }
     }
-  }, [isSignedIn])
+  }, [isLoaded, isSignedIn])
 
   // Word/char count
   const plainText = bodyHtml.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim()
@@ -247,7 +247,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
     const destination = await new Promise<NavigationDestination>((resolve) => {
       setTimeout(() => {
         // For signed-in users, go directly to new letter page
-        if (isSignedIn) {
+        if (isAuthenticated) {
           // Save as authenticated user draft format
           if (hasContent) {
             const draftData = {
@@ -673,7 +673,7 @@ export function LetterDemo({ isSignedIn }: LetterDemoProps) {
                     {sealStage === "idle" && (
                       <>
                         <Stamp className="h-4 w-4" strokeWidth={2} />
-                        {isSignedIn ? t("buttons.continueWriting") : t("buttons.sealSchedule")}
+                        {isAuthenticated ? t("buttons.continueWriting") : t("buttons.sealSchedule")}
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </>
                     )}

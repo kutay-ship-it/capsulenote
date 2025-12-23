@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 import type { Locale } from "@/i18n/routing"
-import { auth } from "@clerk/nextjs/server"
-import { headers } from "next/headers"
 import { getTranslations } from "next-intl/server"
 
 import { HeroSection } from "./_components/hero-section"
@@ -55,22 +53,16 @@ export default async function MarketingPage({
 }) {
   // Await params to satisfy Next.js route contract (even if unused here)
   await params
-  const { userId } = await auth()
-  const isSignedIn = Boolean(userId)
-
-  // Get server-detected country from Vercel's geo headers
-  const headersList = await headers()
-  const serverCountry = headersList.get("x-vercel-ip-country") || undefined
 
   return (
     <div className="flex min-h-screen flex-col bg-cream">
       {/* Locale detection banner for first-time Turkish visitors */}
-      <LocaleDetector serverCountry={serverCountry} />
+      <LocaleDetector />
 
-      <NavbarV3 isSignedIn={isSignedIn} />
+      <NavbarV3 />
       <main className="flex-1">
-        <HeroSection isSignedIn={isSignedIn} />
-        <LetterDemo isSignedIn={isSignedIn} />
+        <HeroSection />
+        <LetterDemo />
         <SocialProofV2 />
         <div id="how-it-works">
           <HowItWorksV2 />
@@ -79,7 +71,7 @@ export default async function MarketingPage({
         <div id="features">
           <FeaturesV2 />
         </div>
-        <CTASection isSignedIn={isSignedIn} />
+        <CTASection />
       </main>
       <Footer />
     </div>

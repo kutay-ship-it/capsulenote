@@ -75,6 +75,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}/guides`,
         tr: `${appUrl}/tr/guides`,
+        "x-default": `${appUrl}/guides`,
       },
     },
   }

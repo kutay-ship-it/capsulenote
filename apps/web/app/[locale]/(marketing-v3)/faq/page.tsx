@@ -144,6 +144,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}${canonicalPath}`,
         tr: `${appUrl}/tr${canonicalPath}`,
+        "x-default": `${appUrl}${canonicalPath}`,
       },
     },
     openGraph: {

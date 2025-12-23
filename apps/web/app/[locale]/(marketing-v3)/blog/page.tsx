@@ -80,6 +80,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}/blog`,
         tr: `${appUrl}/tr/blog`,
+        "x-default": `${appUrl}/blog`,
       },
     },
   }

@@ -222,6 +222,7 @@ export async function generateMetadata({
       languages: {
         en: `${appUrl}/templates/${category}`,
         tr: `${appUrl}/tr/templates/${category}`,
+        "x-default": `${appUrl}/templates/${category}`,
       },
     },
   }
