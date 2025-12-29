@@ -19,7 +19,7 @@ import {
   type TemplateCategory,
   type PromptTheme,
 } from "./content-registry"
-import { getBlogPath, getPromptThemePath } from "./localized-slugs"
+import { getBlogPath, getGuidePath, getPromptThemePath } from "./localized-slugs"
 
 // ============================================================================
 // Types
@@ -482,8 +482,9 @@ function getSameClusterContent(
         if (slug === currentSlug) continue
         const titles = guideTitles[slug]
         if (titles) {
+          const guideSlug = slug as GuideSlug
           links.push({
-            href: `/guides/${slug}`,
+            href: getGuidePath(locale, guideSlug),
             title: titles.en,
             titleTr: titles.tr,
             category: locale === "tr" ? "Rehber" : "Guide",
@@ -606,7 +607,7 @@ export function getRelatedContent(
 function getDefaultRelatedContent(locale: "en" | "tr"): RelatedLink[] {
   return [
     {
-      href: "/guides/how-to-write-letter-to-future-self",
+      href: getGuidePath(locale, "how-to-write-letter-to-future-self"),
       title: locale === "tr" ? "Gelecekteki Kendine Nasıl Mektup Yazılır" : "How to Write a Letter to Your Future Self",
       category: locale === "tr" ? "Rehber" : "Guide",
       type: "guide",

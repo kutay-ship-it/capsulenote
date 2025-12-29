@@ -1,7 +1,9 @@
 import {
   isValidBlogSlug,
+  isValidGuideSlug,
   isValidPromptTheme,
   type BlogSlug,
+  type GuideSlug,
   type PromptTheme,
 } from "./content-registry"
 
@@ -68,6 +70,35 @@ const PROMPT_THEMES_TR_REVERSE = new Map<string, PromptTheme>(
   Object.entries(PROMPT_THEMES_TR).map(([enSlug, trSlug]) => [trSlug, enSlug as PromptTheme])
 )
 
+// =============================================================================
+// GUIDE SLUG LOCALIZATION
+// =============================================================================
+
+const GUIDE_SLUGS_TR: Record<GuideSlug, string> = {
+  // EXISTING (6)
+  "how-to-write-letter-to-future-self": "gelecekteki-kendine-mektup-nasil-yazilir",
+  "science-of-future-self": "gelecek-benlik-bilimi",
+  "time-capsule-vs-future-letter": "zaman-kapsulu-ve-gelecek-mektubu",
+  "privacy-security-best-practices": "gizlilik-guvenlik-en-iyi-uygulamalar",
+  "letters-for-mental-health": "ruh-sagligi-icin-mektuplar",
+  "legacy-letters-guide": "miras-mektuplari-rehberi",
+
+  // NEW (9)
+  "complete-beginners-guide": "yeni-baslayanlar-icin-rehber",
+  "letter-delivery-timing-guide": "mektup-teslimat-zamanlama-rehberi",
+  "physical-mail-delivery-guide": "fiziksel-posta-teslimat-rehberi",
+  "template-customization-guide": "sablon-ozellestirme-rehberi",
+  "multiple-recipients-guide": "birden-fazla-alici-rehberi",
+  "international-delivery-guide": "uluslararasi-teslimat-rehberi",
+  "business-use-cases-guide": "kurumsal-kullanim-senaryolari-rehberi",
+  "family-history-letters-guide": "aile-tarihi-mektuplari-rehberi",
+  "mental-health-journaling-guide": "ruh-sagligi-gunluk-rehberi",
+}
+
+const GUIDE_SLUGS_TR_REVERSE = new Map<string, GuideSlug>(
+  Object.entries(GUIDE_SLUGS_TR).map(([enSlug, trSlug]) => [trSlug, enSlug as GuideSlug])
+)
+
 export function getBlogSlug(locale: SeoLocale, id: BlogSlug): string {
   return locale === "tr" ? BLOG_SLUGS_TR[id] : id
 }
@@ -114,6 +145,35 @@ export function getPromptThemeSlugInfo(
   return { id, canonicalSlug, isCanonical: themeParam === canonicalSlug }
 }
 
+// =============================================================================
+// GUIDE SLUG FUNCTIONS
+// =============================================================================
+
+export function getGuideSlug(locale: SeoLocale, id: GuideSlug): string {
+  return locale === "tr" ? GUIDE_SLUGS_TR[id] : id
+}
+
+export function getGuidePath(locale: SeoLocale, id: GuideSlug): string {
+  return `/guides/${getGuideSlug(locale, id)}`
+}
+
+export function getGuideSlugInfo(
+  locale: SeoLocale,
+  slugParam: string
+): { id: GuideSlug; canonicalSlug: string; isCanonical: boolean } | null {
+  const id =
+    isValidGuideSlug(slugParam)
+      ? slugParam
+      : locale === "tr"
+        ? GUIDE_SLUGS_TR_REVERSE.get(slugParam)
+        : null
+
+  if (!id) return null
+
+  const canonicalSlug = getGuideSlug(locale, id)
+  return { id, canonicalSlug, isCanonical: slugParam === canonicalSlug }
+}
+
 /**
  * Translate SEO pathnames that contain locale-specific slugs (e.g. `/blog/:slug`)
  * when switching locales on the client.
@@ -139,6 +199,15 @@ export function translateSeoPathnameForLocaleSwitch(
     if (!themeParam) return pathname
     const themeInfo = getPromptThemeSlugInfo(fromLocale, themeParam)
     return themeInfo ? getPromptThemePath(toLocale, themeInfo.id) : pathname
+  }
+
+  // Guide pattern: /guides/:slug
+  const guideMatch = pathname.match(/^\/guides\/([^/]+?)(?:\/)?$/)
+  if (guideMatch) {
+    const slugParam = guideMatch[1]
+    if (!slugParam) return pathname
+    const slugInfo = getGuideSlugInfo(fromLocale, slugParam)
+    return slugInfo ? getGuidePath(toLocale, slugInfo.id) : pathname
   }
 
   return pathname

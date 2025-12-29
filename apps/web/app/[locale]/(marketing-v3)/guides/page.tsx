@@ -23,6 +23,8 @@ import { LegalPageLayout } from "../_components/legal-page-layout"
 import { LegalHero } from "../_components/legal-hero"
 import { ItemListSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { getAllGuides, getFeaturedGuides, type GuidePostContent } from "@/lib/seo/guide-content"
+import { getGuideSlug, getGuidePath, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
+import type { GuideSlug } from "@/lib/seo/content-registry"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -91,6 +93,7 @@ export default async function GuidesHubPage({
 
   const isEnglish = locale === "en"
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
+  const seoLocale = normalizeSeoLocale(locale)
 
   const t = {
     badge: isEnglish ? "Guides" : "Rehberler",
@@ -109,10 +112,10 @@ export default async function GuidesHubPage({
   const featuredGuides = getFeaturedGuides()
   const nonFeaturedGuides = allGuides.filter(({ data }) => !data.featured)
 
-  // Schema.org data
+  // Schema.org data - use localized slugs
   const schemaItems = allGuides.map(({ slug, data }, index) => ({
     name: data[locale === "tr" ? "tr" : "en"]?.title || slug,
-    url: `${appUrl}${locale === "en" ? "" : "/" + locale}/guides/${slug}`,
+    url: `${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${getGuidePath(seoLocale, slug as GuideSlug)}`,
     position: index + 1,
   }))
 
@@ -151,11 +154,12 @@ export default async function GuidesHubPage({
             {featuredGuides.map(({ slug, data }) => {
               const localizedData = data[locale === "tr" ? "tr" : "en"]
               const Icon = iconMap[data.icon]
+              const localizedSlug = getGuideSlug(seoLocale, slug as GuideSlug)
 
 	              return (
 	                <Link
 	                  key={slug}
-	                  href={{ pathname: "/guides/[slug]", params: { slug } }}
+	                  href={{ pathname: "/guides/[slug]", params: { slug: localizedSlug } }}
 	                  className={cn(
 	                    "group p-6 border-2 border-charcoal",
 	                    "transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",
@@ -204,11 +208,12 @@ export default async function GuidesHubPage({
           {nonFeaturedGuides.map(({ slug, data }) => {
             const localizedData = data[locale === "tr" ? "tr" : "en"]
             const Icon = iconMap[data.icon]
+            const localizedSlug = getGuideSlug(seoLocale, slug as GuideSlug)
 
 	            return (
 	              <Link
 	                key={slug}
-	                href={{ pathname: "/guides/[slug]", params: { slug } }}
+	                href={{ pathname: "/guides/[slug]", params: { slug: localizedSlug } }}
 	                className={cn(
 	                  "group flex flex-col sm:flex-row sm:items-center gap-4 p-6 border-2 border-charcoal",
 	                  "transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_theme(colors.charcoal)]",

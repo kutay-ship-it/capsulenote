@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import { setRequestLocale } from "next-intl/server"
 import { ArrowLeft, ArrowRight, Clock, Calendar } from "lucide-react"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 
 import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
@@ -11,11 +11,18 @@ import { RelatedContent } from "@/components/seo/related-content"
 import { guideSlugs } from "@/lib/seo/content-registry"
 import { getGuide } from "@/lib/seo/guide-content"
 import { getRelatedContent, toRelatedItems } from "@/lib/seo/internal-links"
+import { SEO_LOCALES, getGuidePath, getGuideSlug, getGuideSlugInfo, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
 export async function generateStaticParams() {
-  return guideSlugs.map((slug) => ({ slug }))
+  const params: Array<{ locale: string; slug: string }> = []
+  for (const locale of SEO_LOCALES) {
+    for (const slug of guideSlugs) {
+      params.push({ locale, slug: getGuideSlug(locale, slug) })
+    }
+  }
+  return params
 }
 
 export async function generateMetadata({
@@ -25,12 +32,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params
 
-  const guide = getGuide(slug)
+  const seoLocale = normalizeSeoLocale(locale)
+  const slugInfo = getGuideSlugInfo(seoLocale, slug)
+  if (!slugInfo) {
+    return { title: "Not Found" }
+  }
+
+  const guide = getGuide(slugInfo.id)
   if (!guide) {
     return { title: "Not Found" }
   }
 
   const data = guide[locale === "tr" ? "tr" : "en"]
+  const canonicalPath = getGuidePath(seoLocale, slugInfo.id)
 
   return {
     title: `${data.title} | Capsule Note Guides`,
@@ -41,14 +55,14 @@ export async function generateMetadata({
       type: "article",
       publishedTime: guide.datePublished,
       modifiedTime: guide.dateModified,
-      url: `${appUrl}${locale === "en" ? "" : "/" + locale}/guides/${slug}`,
+      url: `${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${canonicalPath}`,
     },
     alternates: {
-      canonical: `${appUrl}${locale === "en" ? "" : "/" + locale}/guides/${slug}`,
+      canonical: `${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${canonicalPath}`,
       languages: {
-        en: `${appUrl}/guides/${slug}`,
-        tr: `${appUrl}/tr/guides/${slug}`,
-        "x-default": `${appUrl}/guides/${slug}`,
+        en: `${appUrl}${getGuidePath("en", slugInfo.id)}`,
+        tr: `${appUrl}/tr${getGuidePath("tr", slugInfo.id)}`,
+        "x-default": `${appUrl}${getGuidePath("en", slugInfo.id)}`,
       },
     },
   }
@@ -61,7 +75,20 @@ export default async function GuidePage({
 }) {
   const { locale, slug } = await params
 
-  const guide = getGuide(slug)
+  const seoLocale = normalizeSeoLocale(locale)
+  const slugInfo = getGuideSlugInfo(seoLocale, slug)
+  if (!slugInfo) {
+    notFound()
+  }
+
+  // Redirect non-canonical slugs to canonical version
+  if (!slugInfo.isCanonical) {
+    const canonicalPath = getGuidePath(seoLocale, slugInfo.id)
+    const localePrefix = seoLocale === "en" ? "" : `/${seoLocale}`
+    permanentRedirect(`${localePrefix}${canonicalPath}`)
+  }
+
+  const guide = getGuide(slugInfo.id)
   if (!guide) {
     notFound()
   }
@@ -71,9 +98,10 @@ export default async function GuidePage({
   const isEnglish = locale === "en"
   const uppercaseClass = locale === "tr" ? "" : "uppercase"
   const data = guide[locale === "tr" ? "tr" : "en"]
+  const currentPath = getGuidePath(seoLocale, slugInfo.id)
 
   // Get related content using automated internal linking
-  const relatedLinks = getRelatedContent("guide", slug, undefined, locale === "tr" ? "tr" : "en")
+  const relatedLinks = getRelatedContent("guide", slugInfo.id, undefined, locale === "tr" ? "tr" : "en")
   const relatedItems = toRelatedItems(relatedLinks, locale === "tr" ? "tr" : "en")
 
   return (
@@ -86,14 +114,14 @@ export default async function GuidePage({
         datePublished={guide.datePublished}
         dateModified={guide.dateModified}
         authorName="Capsule Note Team"
-        url={`${appUrl}${locale === "en" ? "" : "/" + locale}/guides/${slug}`}
+        url={`${appUrl}${seoLocale === "en" ? "" : "/" + seoLocale}${currentPath}`}
       />
       <BreadcrumbSchema
         locale={locale}
         items={[
           { name: isEnglish ? "Home" : "Ana Sayfa", href: "/" },
           { name: isEnglish ? "Guides" : "Rehberler", href: "/guides" },
-          { name: data.title, href: `/guides/${slug}` },
+          { name: data.title, href: currentPath },
         ]}
       />
 

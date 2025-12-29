@@ -10,7 +10,7 @@ import {
 } from "@/lib/seo/content-registry"
 import { getBlogPost } from "@/lib/seo/blog-content"
 import { getGuide } from "@/lib/seo/guide-content"
-import { getBlogPath, getPromptThemePath } from "@/lib/seo/localized-slugs"
+import { getBlogPath, getGuidePath, getPromptThemePath } from "@/lib/seo/localized-slugs"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -126,10 +126,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     )
   }
 
-  // Add guide pages (programmatic SEO) with per-guide dateModified
+  // Add guide pages (programmatic SEO) with per-guide dateModified and localized slugs
   for (const slug of guideSlugs) {
     const guide = getGuide(slug)
-    addLocalizedEntry(`/guides/${slug}`, 0.7, "monthly", guide?.dateModified)
+    addLocalizedEntryByLocale(
+      { en: getGuidePath("en", slug), tr: getGuidePath("tr", slug) },
+      0.7,
+      "monthly",
+      guide?.dateModified
+    )
   }
 
   // Add blog post pages (programmatic SEO) with per-post dateModified
