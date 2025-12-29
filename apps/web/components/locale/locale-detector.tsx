@@ -4,12 +4,11 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X } from "lucide-react"
 import { useAuth } from "@clerk/nextjs"
-import { useRouter as useNextIntlRouter } from "@/i18n/routing"
-import { usePathname as useNextPathname } from "next/navigation"
+import { usePathname as useNextPathname, useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { cn } from "@/lib/utils"
-import { routing } from "@/i18n/routing"
 import { translateSeoPathnameForLocaleSwitch } from "@/lib/seo/localized-slugs"
+import { buildLocalePathWithQuery, stripLocalePrefix } from "@/lib/locale-paths"
 
 // ============================================================================
 // LOCALE STORAGE KEYS
@@ -216,19 +215,10 @@ export function LocaleDetector({ serverCountry }: LocaleDetectorProps) {
   const [isClient, setIsClient] = useState(false)
   const { isSignedIn } = useAuth()
   const currentLocale = useLocale() as Locale
-  const router = useNextIntlRouter()
+  const router = useRouter()
   const pathname = useNextPathname()
 
-  // Get pathname without locale prefix for navigation
-  const getPathnameWithoutLocale = (path: string): string => {
-    for (const loc of routing.locales) {
-      if (path === `/${loc}`) return "/"
-      if (path.startsWith(`/${loc}/`)) return path.slice(loc.length + 1)
-    }
-    return path
-  }
-
-  const internalPathname = getPathnameWithoutLocale(pathname)
+  const internalPathname = stripLocalePrefix(pathname)
 
   useEffect(() => {
     const savedLocale = getSavedLocale()
@@ -258,9 +248,11 @@ export function LocaleDetector({ serverCountry }: LocaleDetectorProps) {
       }).catch(() => {})
     }
 
-    // Navigate to the selected locale
+    // Navigate to the selected locale, preserving query string and hash
     const translatedPathname = translateSeoPathnameForLocaleSwitch(internalPathname, currentLocale, locale)
-    router.replace(translatedPathname as Parameters<typeof router.replace>[0], { locale })
+    const search = typeof window !== "undefined" ? window.location.search : ""
+    const hash = typeof window !== "undefined" ? window.location.hash : ""
+    router.replace(buildLocalePathWithQuery(translatedPathname, locale, search, hash))
     router.refresh()
   }
 

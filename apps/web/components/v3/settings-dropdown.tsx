@@ -2,7 +2,7 @@
 
 import { useClerk, useUser } from "@clerk/nextjs"
 import { useLocale, useTranslations } from "next-intl"
-import { usePathname as useNextPathname } from "next/navigation"
+import { usePathname as useNextPathname, useRouter } from "next/navigation"
 import { Settings, User, Globe, LogOut, Check, Sparkles } from "lucide-react"
 
 import {
@@ -16,7 +16,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu"
-import { Link, routing, useRouter } from "@/i18n/routing"
+import { Link, routing } from "@/i18n/routing"
+import { buildLocalePathWithQuery, stripLocalePrefix } from "@/lib/locale-paths"
 import { translateSeoPathnameForLocaleSwitch } from "@/lib/seo/localized-slugs"
 
 type PlanType = "DIGITAL_CAPSULE" | "PAPER_PIXELS" | null
@@ -48,16 +49,7 @@ export function SettingsDropdown({ userName, userEmail, planType }: SettingsDrop
   }
   const planLabel = getPlanLabel()
 
-  // Get pathname without locale prefix for language switching
-  const getPathnameWithoutLocale = (path: string): string => {
-    for (const loc of routing.locales) {
-      if (path === `/${loc}`) return "/"
-      if (path.startsWith(`/${loc}/`)) return path.slice(loc.length + 1)
-    }
-    return path
-  }
-
-  const internalPathname = getPathnameWithoutLocale(pathname)
+  const internalPathname = stripLocalePrefix(pathname)
 
   // Handle locale change with proper navigation and refresh
   const handleLocaleChange = (targetLocale: string) => {
@@ -69,13 +61,15 @@ export function SettingsDropdown({ userName, userEmail, planType }: SettingsDrop
       keepalive: true,
     }).catch(() => {})
 
-    // Navigate to the same page with new locale and refresh
+    // Navigate to the same page with new locale, preserving query string and hash
     const translatedPathname = translateSeoPathnameForLocaleSwitch(
       internalPathname,
       currentLocale as "en" | "tr",
       targetLocale as "en" | "tr"
     )
-    router.replace(translatedPathname as Parameters<typeof router.replace>[0], { locale: targetLocale })
+    const search = typeof window !== "undefined" ? window.location.search : ""
+    const hash = typeof window !== "undefined" ? window.location.hash : ""
+    router.replace(buildLocalePathWithQuery(translatedPathname, targetLocale as "en" | "tr", search, hash))
     router.refresh()
   }
 

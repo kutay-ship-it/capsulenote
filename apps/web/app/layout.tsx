@@ -1,27 +1,19 @@
 import type { ReactNode } from "react"
 import type { Metadata, Viewport } from "next"
-import { ClerkProvider } from "@clerk/nextjs"
-import { enUS, trTR } from "@clerk/localizations"
-import { NextIntlClientProvider } from "next-intl"
-import { hasLocale } from "next-intl"
-import { getMessages, getTranslations } from "next-intl/server"
+import { getLocale, getTranslations } from "next-intl/server"
 
-import { Toaster } from "@/components/ui/sonner"
 import { WebsiteSchema, OrganizationSchema } from "@/components/seo/json-ld"
 import { GoogleAnalytics, PostHogProvider } from "@/components/analytics"
 import "@/styles/globals.css"
-import { routing, type Locale } from "@/i18n/routing"
+import { type Locale } from "@/i18n/routing"
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com"
 const defaultKeywords = ["future self", "time capsule", "letters", "journaling", "reflection"]
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale?: Locale }>
-}): Promise<Metadata> {
-  const { locale: paramLocale } = await params
-  const locale = paramLocale || "en"
+export async function generateMetadata(): Promise<Metadata> {
+  // Use getLocale() to get locale from next-intl middleware context
+  // This works correctly even though the root layout doesn't have [locale] segment
+  const locale = (await getLocale()) as Locale
   const t = await getTranslations({ locale, namespace: "metadata" })
   const keywords = (t.raw?.("keywords") as string[]) || defaultKeywords
 
@@ -64,35 +56,23 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: ReactNode
-  params: Promise<{ locale?: Locale }>
 }>) {
-  const { locale: paramLocale } = await params
-  const locale =
-    paramLocale && hasLocale(routing.locales, paramLocale) ? paramLocale : routing.defaultLocale
-
-  const messages = await getMessages({ locale })
-  const clerkLocalization = locale === "tr" ? trTR : enUS
+  // Use getLocale() to get locale from next-intl middleware context
+  // This is the correct way to get locale in root layout (above [locale] segment)
+  const locale = (await getLocale()) as Locale
 
   return (
-    <ClerkProvider localization={clerkLocalization}>
-      <html lang={locale} suppressHydrationWarning>
-        <head>
-          <WebsiteSchema locale={locale} />
-          <OrganizationSchema />
-          <GoogleAnalytics />
-        </head>
-        <body className="font-mono">
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <PostHogProvider>
-              {children}
-              <Toaster />
-            </PostHogProvider>
-          </NextIntlClientProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        <WebsiteSchema locale={locale} />
+        <OrganizationSchema />
+        <GoogleAnalytics />
+      </head>
+      <body className="font-mono">
+        <PostHogProvider>{children}</PostHogProvider>
+      </body>
+    </html>
   )
 }

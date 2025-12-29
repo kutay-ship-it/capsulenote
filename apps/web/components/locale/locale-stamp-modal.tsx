@@ -5,12 +5,11 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Globe, X, Check, ArrowRight, Stamp } from "lucide-react"
 import { useAuth } from "@clerk/nextjs"
 import { useLocale } from "next-intl"
-import { useRouter as useNextIntlRouter } from "@/i18n/routing"
-import { usePathname as useNextPathname } from "next/navigation"
+import { usePathname as useNextPathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { routing } from "@/i18n/routing"
 import { saveLocale, type Locale } from "./locale-detector"
 import { translateSeoPathnameForLocaleSwitch } from "@/lib/seo/localized-slugs"
+import { buildLocalePathWithQuery, stripLocalePrefix } from "@/lib/locale-paths"
 
 // ============================================================================
 // SHARED V3 COMPONENTS
@@ -134,19 +133,10 @@ export function LocaleStampModal({ isOpen, onClose }: LocaleStampModalProps) {
   const [selectedLocale, setSelectedLocale] = useState<Locale>(currentLocale as Locale)
   const [rememberChoice, setRememberChoice] = useState(true)
   const { isSignedIn } = useAuth()
-  const router = useNextIntlRouter()
+  const router = useRouter()
   const pathname = useNextPathname()
 
-  // Get pathname without locale prefix for navigation
-  const getPathnameWithoutLocale = (path: string): string => {
-    for (const loc of routing.locales) {
-      if (path === `/${loc}`) return "/"
-      if (path.startsWith(`/${loc}/`)) return path.slice(loc.length + 1)
-    }
-    return path
-  }
-
-  const internalPathname = getPathnameWithoutLocale(pathname)
+  const internalPathname = stripLocalePrefix(pathname)
 
   const handleConfirm = async () => {
     // Save to localStorage if remember is checked
@@ -166,14 +156,16 @@ export function LocaleStampModal({ isOpen, onClose }: LocaleStampModalProps) {
 
     onClose()
 
-    // Navigate to the selected locale
+    // Navigate to the selected locale, preserving query string and hash
     if (selectedLocale !== currentLocale) {
       const translatedPathname = translateSeoPathnameForLocaleSwitch(
         internalPathname,
         currentLocale as "en" | "tr",
         selectedLocale as "en" | "tr"
       )
-      router.replace(translatedPathname as Parameters<typeof router.replace>[0], { locale: selectedLocale })
+      const search = typeof window !== "undefined" ? window.location.search : ""
+      const hash = typeof window !== "undefined" ? window.location.hash : ""
+      router.replace(buildLocalePathWithQuery(translatedPathname, selectedLocale, search, hash))
       router.refresh()
     }
   }
