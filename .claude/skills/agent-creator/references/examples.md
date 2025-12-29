@@ -862,4 +862,3 @@ Architecture report:
 
 ## Recommendations
 [Prioritized improvements]
-```

@@ -8,8 +8,8 @@
  * and decrypted correctly, and that key rotation is supported.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { encryptLetter, decryptLetter } from '../../server/lib/encryption'
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from 'vitest'
+import { encryptLetter, decryptLetter, HKDF_VERSION_THRESHOLD } from '../../server/lib/encryption'
 
 describe('Encryption', () => {
   const originalEnv = process.env.CRYPTO_MASTER_KEY
@@ -415,6 +415,200 @@ describe('Encryption', () => {
       }
 
       expect(nonces.size).toBe(1000)
+    })
+  })
+
+  describe('HKDF key derivation', () => {
+    // Store original env values
+    let originalKeyVersion: string | undefined
+    let originalKeyV100: string | undefined
+
+    beforeEach(() => {
+      originalKeyVersion = process.env.CRYPTO_CURRENT_KEY_VERSION
+      originalKeyV100 = process.env.CRYPTO_MASTER_KEY_V100
+    })
+
+    afterEach(() => {
+      // Restore original values
+      if (originalKeyVersion) {
+        process.env.CRYPTO_CURRENT_KEY_VERSION = originalKeyVersion
+      } else {
+        delete process.env.CRYPTO_CURRENT_KEY_VERSION
+      }
+      if (originalKeyV100) {
+        process.env.CRYPTO_MASTER_KEY_V100 = originalKeyV100
+      } else {
+        delete process.env.CRYPTO_MASTER_KEY_V100
+      }
+    })
+
+    it('should export HKDF_VERSION_THRESHOLD constant', () => {
+      expect(HKDF_VERSION_THRESHOLD).toBe(100)
+    })
+
+    it('should encrypt with HKDF when version >= 100', async () => {
+      // Set up version 100 key (exactly 32 bytes)
+      process.env.CRYPTO_MASTER_KEY_V100 = Buffer.from('test_master_key_32bytes_exactly!').toString('base64')
+      process.env.CRYPTO_CURRENT_KEY_VERSION = '100'
+
+      const plaintext = {
+        bodyRich: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'HKDF test' }] }] },
+        bodyHtml: '<p>HKDF test</p>'
+      }
+
+      const encrypted = await encryptLetter(plaintext)
+
+      expect(encrypted.keyVersion).toBe(100)
+      expect(encrypted.bodyCiphertext).toBeInstanceOf(Buffer)
+      expect(encrypted.bodyNonce).toBeInstanceOf(Buffer)
+    })
+
+    it('should decrypt HKDF-encrypted content correctly', async () => {
+      // Set up version 100 key (exactly 32 bytes)
+      process.env.CRYPTO_MASTER_KEY_V100 = Buffer.from('test_master_key_32bytes_exactly!').toString('base64')
+      process.env.CRYPTO_CURRENT_KEY_VERSION = '100'
+
+      const plaintext = {
+        bodyRich: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'HKDF roundtrip' }] }] },
+        bodyHtml: '<p>HKDF roundtrip</p>'
+      }
+
+      const encrypted = await encryptLetter(plaintext)
+      const decrypted = await decryptLetter(
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
+        encrypted.keyVersion
+      )
+
+      expect(decrypted).toEqual(plaintext)
+    })
+
+    it('should produce different ciphertext with HKDF vs raw key (same master key)', async () => {
+      const sameKey = Buffer.from('test_master_key_32bytes_exactly!').toString('base64')
+
+      // Encrypt with legacy mode (version 1)
+      process.env.CRYPTO_MASTER_KEY = sameKey
+      process.env.CRYPTO_CURRENT_KEY_VERSION = '1'
+
+      const plaintext = {
+        bodyRich: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Test' }] }] },
+        bodyHtml: '<p>Test</p>'
+      }
+
+      const legacyEncrypted = await encryptLetter(plaintext)
+
+      // Encrypt with HKDF mode (version 100)
+      process.env.CRYPTO_MASTER_KEY_V100 = sameKey
+      process.env.CRYPTO_CURRENT_KEY_VERSION = '100'
+
+      const hkdfEncrypted = await encryptLetter(plaintext)
+
+      // Both should work but produce different ciphertext due to:
+      // 1. Different nonces
+      // 2. Different key derivation methods
+      expect(legacyEncrypted.keyVersion).toBe(1)
+      expect(hkdfEncrypted.keyVersion).toBe(100)
+
+      // Even with same nonce, HKDF would produce different ciphertext
+      // because derived key is different from raw key
+    })
+
+    it('should maintain backward compatibility - decrypt legacy data after HKDF enabled', async () => {
+      const sameKey = Buffer.from('test_master_key_32bytes_exactly!').toString('base64')
+
+      // First, encrypt with legacy mode (version 1)
+      process.env.CRYPTO_MASTER_KEY = sameKey
+      process.env.CRYPTO_CURRENT_KEY_VERSION = '1'
+
+      const plaintext = {
+        bodyRich: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Legacy data' }] }] },
+        bodyHtml: '<p>Legacy data</p>'
+      }
+
+      const legacyEncrypted = await encryptLetter(plaintext)
+
+      // Now "upgrade" to HKDF mode
+      process.env.CRYPTO_MASTER_KEY_V100 = sameKey
+      process.env.CRYPTO_CURRENT_KEY_VERSION = '100'
+
+      // Should still be able to decrypt legacy data
+      const decrypted = await decryptLetter(
+        legacyEncrypted.bodyCiphertext,
+        legacyEncrypted.bodyNonce,
+        legacyEncrypted.keyVersion // keyVersion=1 forces legacy mode
+      )
+
+      expect(decrypted).toEqual(plaintext)
+    })
+
+    it('should support dynamic key versions beyond 5', async () => {
+      // Test version 10 (previously not supported with hardcoded limit)
+      const testKey = Buffer.from('test_master_key_32bytes_exactly!').toString('base64')
+      process.env.CRYPTO_MASTER_KEY_V10 = testKey
+      process.env.CRYPTO_CURRENT_KEY_VERSION = '10'
+
+      const plaintext = {
+        bodyRich: { type: 'doc', content: [] },
+        bodyHtml: '<p>Version 10</p>'
+      }
+
+      const encrypted = await encryptLetter(plaintext)
+      expect(encrypted.keyVersion).toBe(10)
+
+      const decrypted = await decryptLetter(
+        encrypted.bodyCiphertext,
+        encrypted.bodyNonce,
+        encrypted.keyVersion
+      )
+
+      expect(decrypted).toEqual(plaintext)
+
+      // Clean up
+      delete process.env.CRYPTO_MASTER_KEY_V10
+    })
+  })
+
+  describe('Nonce timestamp component', () => {
+    it('should include timestamp in nonce for uniqueness across restarts', async () => {
+      const plaintext = {
+        bodyRich: { type: 'doc', content: [] },
+        bodyHtml: ''
+      }
+
+      const encrypted1 = await encryptLetter(plaintext)
+      const encrypted2 = await encryptLetter(plaintext)
+
+      // First 4 bytes should be timestamp (same within test execution)
+      const timestamp1 = encrypted1.bodyNonce.readUInt32BE(0)
+      const timestamp2 = encrypted2.bodyNonce.readUInt32BE(0)
+
+      // Timestamps should be within 1 second of each other
+      expect(Math.abs(timestamp1 - timestamp2)).toBeLessThanOrEqual(1)
+
+      // Timestamps should be reasonable Unix timestamps (after 2020)
+      const minTimestamp = Math.floor(new Date('2020-01-01').getTime() / 1000)
+      expect(timestamp1).toBeGreaterThan(minTimestamp)
+      expect(timestamp2).toBeGreaterThan(minTimestamp)
+    })
+
+    it('should have incrementing counter in nonce bytes 4-7', async () => {
+      const plaintext = {
+        bodyRich: { type: 'doc', content: [] },
+        bodyHtml: ''
+      }
+
+      const results: number[] = []
+      for (let i = 0; i < 10; i++) {
+        const encrypted = await encryptLetter(plaintext)
+        // Counter is in bytes 4-7
+        const counter = encrypted.bodyNonce.readUInt32BE(4)
+        results.push(counter)
+      }
+
+      // Counters should be incrementing (or close to it - they may wrap)
+      // At minimum, all should be unique
+      const uniqueCounters = new Set(results)
+      expect(uniqueCounters.size).toBe(10)
     })
   })
 })

@@ -6,10 +6,116 @@ const crypto = webcrypto as unknown as Crypto
 
 /**
  * Module-level counter for nonce generation
- * Combined with random bytes to ensure uniqueness within process lifetime
+ * Combined with timestamp and random bytes to ensure uniqueness
  * This provides defense-in-depth against nonce reuse
  */
 let nonceCounter = 0n
+
+/**
+ * HKDF threshold version - key versions >= this value use HKDF derivation
+ * Versions below this use raw master key (backward compatibility)
+ *
+ * To enable HKDF for new encryptions:
+ * 1. Set CRYPTO_MASTER_KEY_V100 environment variable
+ * 2. Set CRYPTO_CURRENT_KEY_VERSION=100
+ * 3. Existing data with keyVersion < 100 will still decrypt correctly
+ */
+export const HKDF_VERSION_THRESHOLD = 100
+
+/**
+ * Fixed salt for HKDF derivation (application-specific)
+ * This provides domain separation between different applications
+ */
+const HKDF_SALT = new TextEncoder().encode("capsulenote-v1")
+
+/**
+ * Derive an AES-256-GCM key from master key using HKDF
+ *
+ * HKDF provides:
+ * - Key derivation from high-entropy input
+ * - Purpose-specific subkeys via 'info' parameter
+ * - Defense-in-depth: master key compromise doesn't directly expose derived keys
+ *
+ * @param masterKey - Raw 32-byte master key
+ * @param purpose - Purpose string for key derivation (e.g., "letter-encryption")
+ * @returns CryptoKey suitable for AES-GCM operations
+ */
+async function deriveKeyWithHKDF(
+  masterKey: Uint8Array,
+  purpose: string
+): Promise<CryptoKey> {
+  // Import master key as HKDF base key
+  const baseKey = await crypto.subtle.importKey(
+    "raw",
+    masterKey.buffer.slice(masterKey.byteOffset, masterKey.byteOffset + masterKey.byteLength) as ArrayBuffer,
+    "HKDF",
+    false,
+    ["deriveKey"]
+  )
+
+  // Derive AES-GCM key using HKDF-SHA256
+  return crypto.subtle.deriveKey(
+    {
+      name: "HKDF",
+      hash: "SHA-256",
+      salt: HKDF_SALT,
+      info: new TextEncoder().encode(purpose),
+    },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  )
+}
+
+/**
+ * Import raw master key directly as AES-GCM key (legacy mode)
+ * Used for backward compatibility with existing encrypted data
+ *
+ * @param masterKey - Raw 32-byte master key
+ * @param usage - Key usage: "encrypt" | "decrypt" | "both"
+ * @returns CryptoKey suitable for AES-GCM operations
+ */
+async function importRawKey(
+  masterKey: Uint8Array,
+  usage: "encrypt" | "decrypt" | "both" = "both"
+): Promise<CryptoKey> {
+  const keyUsages: KeyUsage[] = usage === "both"
+    ? ["encrypt", "decrypt"]
+    : [usage]
+
+  return crypto.subtle.importKey(
+    "raw",
+    masterKey.buffer.slice(masterKey.byteOffset, masterKey.byteOffset + masterKey.byteLength) as ArrayBuffer,
+    { name: "AES-GCM", length: 256 },
+    false,
+    keyUsages
+  )
+}
+
+/**
+ * Get encryption key for the given version
+ * - Versions < HKDF_VERSION_THRESHOLD: Use raw master key (backward compat)
+ * - Versions >= HKDF_VERSION_THRESHOLD: Use HKDF-derived key
+ *
+ * @param keyVersion - Key version number
+ * @param usage - Key usage type
+ * @returns CryptoKey for encryption/decryption
+ */
+async function getEncryptionKey(
+  keyVersion: number,
+  usage: "encrypt" | "decrypt" | "both" = "both"
+): Promise<CryptoKey> {
+  const masterKey = getMasterKey(keyVersion)
+
+  if (keyVersion >= HKDF_VERSION_THRESHOLD) {
+    // New HKDF-based key derivation
+    return deriveKeyWithHKDF(masterKey, "letter-encryption")
+  }
+
+  // Legacy: raw key import for backward compatibility
+  return importRawKey(masterKey, usage)
+}
 
 /**
  * Get the current (latest) key version for new encryptions
@@ -24,9 +130,10 @@ function getCurrentKeyVersion(): number {
  *
  * Environment variables expected:
  * - CRYPTO_MASTER_KEY (or CRYPTO_MASTER_KEY_V1): Key version 1 (legacy/default)
- * - CRYPTO_MASTER_KEY_V2: Key version 2 (after first rotation)
- * - CRYPTO_MASTER_KEY_V3: Key version 3 (after second rotation)
+ * - CRYPTO_MASTER_KEY_V{N}: Key version N (dynamically discovered)
  * - CRYPTO_CURRENT_KEY_VERSION: Active version for new encryptions
+ *
+ * Note: No hardcoded version limit - supports unlimited key versions
  *
  * @param keyVersion - Key version to retrieve (defaults to current version)
  * @returns Decoded 32-byte master key
@@ -36,18 +143,18 @@ function getMasterKey(keyVersion?: number): Uint8Array {
   const version = keyVersion ?? getCurrentKeyVersion()
   const runtimeOnly = process.env.CRYPTO_MASTER_KEY_RUNTIME_ONLY === "true"
 
-  // Map of key versions to environment variable names
-  const keyEnvVars: Record<number, string | undefined> = {
-    1: process.env.CRYPTO_MASTER_KEY_V1 || process.env.CRYPTO_MASTER_KEY,
-    2: process.env.CRYPTO_MASTER_KEY_V2,
-    3: process.env.CRYPTO_MASTER_KEY_V3,
-    4: process.env.CRYPTO_MASTER_KEY_V4,
-    5: process.env.CRYPTO_MASTER_KEY_V5,
+  // Dynamic key lookup - no hardcoded version limit
+  let base64Key: string | undefined
+
+  if (version === 1) {
+    // Version 1 has legacy support for CRYPTO_MASTER_KEY without suffix
+    base64Key = process.env.CRYPTO_MASTER_KEY_V1 || process.env.CRYPTO_MASTER_KEY
+  } else {
+    // All other versions use versioned environment variable
+    base64Key = process.env[`CRYPTO_MASTER_KEY_V${version}`]
   }
 
-  let base64Key = keyEnvVars[version]
-
-  // Allow fallback to env snapshot unless explicitly disabled
+  // Allow fallback to env snapshot unless explicitly disabled (version 1 only)
   if (!base64Key && !runtimeOnly && version === 1) {
     base64Key = env.CRYPTO_MASTER_KEY
   }
@@ -74,23 +181,33 @@ function getMasterKey(keyVersion?: number): Uint8Array {
 
 /**
  * Generate a nonce for AES-GCM encryption
- * Uses counter + random bytes hybrid approach for nonce uniqueness:
- * - First 8 bytes: incrementing counter (ensures uniqueness within process)
- * - Last 4 bytes: random (adds entropy and uniqueness across processes)
+ * Uses timestamp + counter + random hybrid approach for nonce uniqueness:
+ * - Bytes 0-3: Unix timestamp (seconds) - uniqueness across process restarts
+ * - Bytes 4-7: Incrementing counter - uniqueness within same second
+ * - Bytes 8-11: Random bytes - additional entropy
  *
  * This provides defense-in-depth against nonce reuse:
- * - Counter prevents collision within same process
- * - Random bytes add protection across process restarts
+ * - Timestamp ensures different nonces after process restart
+ * - Counter prevents collision within same second
+ * - Random bytes add protection against identical timestamps
+ *
+ * Collision probability:
+ * - Same second + same counter value: only if random 32 bits collide (~1 in 4 billion)
+ * - Different seconds: guaranteed unique prefix
  */
 function generateNonce(): Uint8Array {
   const nonce = new Uint8Array(12) // 96-bit nonce for AES-GCM
-
-  // First 8 bytes: incrementing counter (big-endian)
-  const counter = nonceCounter++
   const view = new DataView(nonce.buffer)
-  view.setBigUint64(0, counter, false)
 
-  // Last 4 bytes: random for additional entropy
+  // Bytes 0-3: Unix timestamp in seconds (big-endian)
+  const timestamp = Math.floor(Date.now() / 1000)
+  view.setUint32(0, timestamp, false)
+
+  // Bytes 4-7: Incrementing counter (big-endian, wraps at 32 bits)
+  const counter = Number(nonceCounter++ & 0xFFFFFFFFn)
+  view.setUint32(4, counter, false)
+
+  // Bytes 8-11: Random for additional entropy
   const randomPart = crypto.getRandomValues(new Uint8Array(4))
   nonce.set(randomPart, 8)
 
@@ -110,6 +227,10 @@ export function validateNonce(nonce: Uint8Array | Buffer): void {
 /**
  * Encrypt data using AES-256-GCM
  *
+ * Key derivation mode is determined by key version:
+ * - Versions < 100: Raw master key (backward compatibility)
+ * - Versions >= 100: HKDF-derived key (enhanced security)
+ *
  * Always uses the current (latest) key version for new encryptions.
  * The keyVersion parameter is ignored and exists only for backward compatibility.
  *
@@ -126,17 +247,9 @@ export async function encrypt(plaintext: string, _keyVersion?: number): Promise<
   const currentVersion = getCurrentKeyVersion()
 
   try {
-    const masterKey = getMasterKey(currentVersion)
+    // Get encryption key (uses HKDF if version >= 100)
+    const cryptoKey = await getEncryptionKey(currentVersion, "encrypt")
     const nonce = generateNonce()
-
-    // Import master key - cast to ArrayBuffer to satisfy BufferSource type
-    const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      masterKey.buffer.slice(masterKey.byteOffset, masterKey.byteOffset + masterKey.byteLength) as ArrayBuffer,
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["encrypt"]
-    )
 
     // Encrypt
     const plaintextBuffer = new TextEncoder().encode(plaintext)
@@ -156,6 +269,7 @@ export async function encrypt(plaintext: string, _keyVersion?: number): Promise<
     // Log error metadata only (no sensitive data)
     await logger.error("[Encryption] Failed to encrypt data", error, {
       keyVersion: currentVersion,
+      usesHKDF: currentVersion >= HKDF_VERSION_THRESHOLD,
     })
     throw new Error("Failed to encrypt data")
   }
@@ -163,6 +277,10 @@ export async function encrypt(plaintext: string, _keyVersion?: number): Promise<
 
 /**
  * Decrypt data using AES-256-GCM
+ *
+ * Key derivation mode is determined by key version:
+ * - Versions < 100: Raw master key (backward compatibility)
+ * - Versions >= 100: HKDF-derived key (enhanced security)
  *
  * Uses the specified key version to decrypt data. This allows reading
  * data encrypted with old keys after key rotation.
@@ -179,17 +297,8 @@ export async function decrypt(
   keyVersion: number = 1
 ): Promise<string> {
   try {
-    // Get the specific key version used to encrypt this data
-    const masterKey = getMasterKey(keyVersion)
-
-    // Import master key - cast to ArrayBuffer to satisfy BufferSource type
-    const cryptoKey = await crypto.subtle.importKey(
-      "raw",
-      masterKey.buffer.slice(masterKey.byteOffset, masterKey.byteOffset + masterKey.byteLength) as ArrayBuffer,
-      { name: "AES-GCM", length: 256 },
-      false,
-      ["decrypt"]
-    )
+    // Get decryption key (uses HKDF if version >= 100)
+    const cryptoKey = await getEncryptionKey(keyVersion, "decrypt")
 
     // Decrypt - ensure proper ArrayBuffer types for nonce and ciphertext
     const nonceView = new Uint8Array(nonce.buffer.slice(nonce.byteOffset, nonce.byteOffset + nonce.byteLength))
@@ -205,6 +314,7 @@ export async function decrypt(
     // Log error metadata only (no sensitive data)
     await logger.error("[Encryption] Failed to decrypt data", error, {
       keyVersion,
+      usesHKDF: keyVersion >= HKDF_VERSION_THRESHOLD,
       ciphertextLength: ciphertext.length,
       nonceLength: nonce.length,
     })
