@@ -7,6 +7,8 @@ import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../_components/legal-page-layout"
 import { BreadcrumbSchema, ItemListSchema } from "@/components/seo/json-ld"
+import { RelatedContent } from "@/components/seo/related-content"
+import { getRelatedContent, toRelatedItems } from "@/lib/seo/internal-links"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -246,6 +248,10 @@ export default async function TemplateCategoryPage({
   const data = categoryData[category as Category][locale === "tr" ? "tr" : "en"]
   const templates = getTemplatesForCategory(category as Category, locale)
 
+  // Get related content using automated internal linking
+  const relatedLinks = getRelatedContent("template", category as Category, category as Category, locale === "tr" ? "tr" : "en")
+  const relatedItems = toRelatedItems(relatedLinks, locale === "tr" ? "tr" : "en")
+
   return (
     <LegalPageLayout>
       {/* Breadcrumb Schema */}
@@ -323,6 +329,16 @@ export default async function TemplateCategoryPage({
             : "Yakında daha fazla şablon! Anlamlı mektuplar yazmanıza yardımcı olmak için sürekli yeni çerçeveler ekliyoruz."}
         </p>
       </div>
+
+      {/* Related Content Section */}
+      {relatedItems.length > 0 && (
+        <RelatedContent
+          items={relatedItems}
+          title={isEnglish ? "Related Content" : "İlgili İçerikler"}
+          locale={locale}
+          variant="compact"
+        />
+      )}
 
       {/* CTA */}
       <div className="mt-10 pt-8 border-t-2 border-charcoal/10">

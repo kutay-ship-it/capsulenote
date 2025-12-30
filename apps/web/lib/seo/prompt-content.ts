@@ -460,7 +460,7 @@ export const promptContent: PromptContentRegistry = {
         "Gelecekteki benliginizin hatirlamasini istediginiz mesaj nedir?",
       ],
       writingTips: [
-        "Yansima dogal olarak geldiginde ve dikkat dagiticilar minimal oldugunda Noel ile Yilbasi arasindaki sessiz gunlerde yazin.",
+        "Yansima dogal olarak geldiginde ve dikkat dagiticilar minimal oldugunda yilbasi ile Yeni Yil arasindaki sessiz gunlerde yazin.",
         "Hedeflere gecmeden once minnettarlikla baslayin. Nerede oldugunuzu takdir etmek, nereye gittiginiz icin daha guclu bir temel olusturur.",
         "Hedefleriniz hakkinda spesifik olun ama kisitlamalariniz hakkinda gercekci olun. Gelecekteki benliginiz yanlis iyimserlik yerine durustlugu takdir edecektir.",
         "Onumuzdeki yil hakkinda tahminler ekleyin - bazi dogru, bazilari yanlis olacak ve kontrast daha sonra buyuleyici bir okuma saglar.",

@@ -9,6 +9,7 @@ import { LegalHero } from "../_components/legal-hero"
 import { ItemListSchema, BreadcrumbSchema } from "@/components/seo/json-ld"
 import { getPromptThemeSlug, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
 import type { PromptTheme } from "@/lib/seo/content-registry"
+import { RelatedContent } from "@/components/seo/related-content"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -256,6 +257,29 @@ export default async function PromptsHubPage({
     position: index + 1,
   }))
 
+  const relatedItems = [
+    {
+      title: locale === "tr" ? "Gelecekteki Kendine Nasıl Mektup Yazılır" : "How to Write a Letter to Your Future Self",
+      href: locale === "tr" ? "/tr/rehberler/gelecekteki-kendine-nasil-mektup-yazilir" : "/guides/how-to-write-letter-to-future-self",
+      category: locale === "tr" ? "Rehber" : "Guide",
+    },
+    {
+      title: locale === "tr" ? "Neden Gelecekteki Kendine Yazmalısın?" : "Why Write to Your Future Self?",
+      href: locale === "tr" ? "/tr/blog/gelecekteki-kendine-neden-yazmalisin" : "/blog/why-write-to-future-self",
+      category: locale === "tr" ? "Blog" : "Blog",
+    },
+    {
+      title: locale === "tr" ? "Şablonlara Göz At" : "Browse Templates",
+      href: "/templates",
+      category: locale === "tr" ? "Şablonlar" : "Templates",
+    },
+    {
+      title: locale === "tr" ? "Mektup Yaz" : "Write a Letter",
+      href: "/write-letter",
+      category: locale === "tr" ? "Başla" : "Get Started",
+    },
+  ]
+
   return (
     <LegalPageLayout>
       {/* Schema.org */}
@@ -360,6 +384,15 @@ export default async function PromptsHubPage({
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
+      </section>
+
+      {/* Related Content */}
+      <section className="mt-12">
+        <RelatedContent
+          items={relatedItems}
+          title={locale === "tr" ? "Daha Fazla Keşfedin" : "Explore More"}
+          locale={locale}
+        />
       </section>
     </LegalPageLayout>
   )

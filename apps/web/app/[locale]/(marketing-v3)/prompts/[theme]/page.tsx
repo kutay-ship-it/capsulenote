@@ -7,8 +7,10 @@ import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { LegalPageLayout } from "../../_components/legal-page-layout"
 import { BreadcrumbSchema } from "@/components/seo/json-ld"
+import { RelatedContent } from "@/components/seo/related-content"
 import { SEO_LOCALES, getPromptThemePath, getPromptThemeSlug, getPromptThemeSlugInfo, normalizeSeoLocale } from "@/lib/seo/localized-slugs"
 import { promptThemes, type PromptTheme } from "@/lib/seo/content-registry"
+import { getRelatedContent, toRelatedItems } from "@/lib/seo/internal-links"
 
 const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://capsulenote.com").replace(/\/$/, "")
 
@@ -363,6 +365,10 @@ export default async function PromptThemePage({
   const data = themeData[themeInfo.id][locale === "tr" ? "tr" : "en"]
   const currentPath = getPromptThemePath(seoLocale, themeInfo.id)
 
+  // Get related content using automated internal linking
+  const relatedLinks = getRelatedContent("prompt", themeInfo.id, undefined, locale === "tr" ? "tr" : "en")
+  const relatedItems = toRelatedItems(relatedLinks, locale === "tr" ? "tr" : "en")
+
   return (
     <LegalPageLayout>
       {/* Schema.org - Breadcrumbs only, no ItemListSchema to avoid query URL bloat */}
@@ -457,6 +463,14 @@ export default async function PromptThemePage({
           </Link>
         </div>
       </div>
+
+      {/* Related Content Section */}
+      {relatedItems.length > 0 && (
+        <RelatedContent
+          items={relatedItems}
+          locale={locale}
+        />
+      )}
     </LegalPageLayout>
   )
 }
