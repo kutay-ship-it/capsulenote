@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
     // Each page should define its own alternates.canonical and alternates.languages
     // to avoid all pages canonicalizing to /{locale}
     // Icons are auto-generated from app/icon.svg and app/apple-icon.svg
-    manifest: `/${locale}/manifest.webmanifest`,
+    manifest: "/manifest.json",
     keywords,
   }
 }
