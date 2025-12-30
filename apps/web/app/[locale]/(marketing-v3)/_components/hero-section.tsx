@@ -18,7 +18,7 @@ export function HeroSection() {
   const stats = t.raw("stats") as Array<{ value: string; label: string }>
 
   return (
-    <section className="relative min-h-[90vh] overflow-hidden bg-cream">
+    <section className="relative min-h-[90vh] overflow-hidden bg-cream" style={{ contain: "paint layout" }}>
       {/* Animated Background Shapes - CSS animations instead of framer-motion */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none hidden sm:block">
         <div

@@ -66,7 +66,7 @@ export function PricingCTAV3({
       ]
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="w-full overflow-hidden">
       {/* Layered Card Design */}
       <div className="relative max-w-4xl mx-auto">
         {/* Background Layer 1 - Charcoal */}

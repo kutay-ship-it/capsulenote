@@ -41,21 +41,22 @@ export function PricingHeroV3() {
     <section
       ref={containerRef}
       className="relative overflow-hidden py-20 md:py-28 lg:py-32"
+      style={{ contain: "paint layout" }}
     >
-      {/* Background Decorative Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Large Circle - Top Right */}
+      {/* Background Decorative Elements - Hidden on mobile to prevent overflow scroll */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Large Circle - Top Right - Hidden on mobile */}
         <motion.div
-          className="absolute -top-20 -right-20 w-96 h-96 border-2 border-charcoal/10"
+          className="hidden md:block absolute -top-20 -right-20 w-96 h-96 border-2 border-charcoal/10"
           style={{
             borderRadius: "50%",
             y: useTransform(scrollYProgress, [0, 1], [0, 100]),
           }}
         />
 
-        {/* Small Square - Left */}
+        {/* Small Square - Left - Safe positioning */}
         <motion.div
-          className="absolute top-1/4 left-10 w-16 h-16 border-2 border-duck-yellow bg-duck-yellow/20"
+          className="absolute top-1/4 left-4 md:left-10 w-12 md:w-16 h-12 md:h-16 border-2 border-duck-yellow bg-duck-yellow/20"
           style={{
             borderRadius: "2px",
             rotate: 12,
@@ -63,9 +64,9 @@ export function PricingHeroV3() {
           }}
         />
 
-        {/* Medium Square - Right */}
+        {/* Medium Square - Right - Hidden on mobile */}
         <motion.div
-          className="absolute bottom-1/4 right-20 w-24 h-24 border-2 border-duck-blue bg-duck-blue/20"
+          className="hidden sm:block absolute bottom-1/4 right-4 md:right-20 w-16 md:w-24 h-16 md:h-24 border-2 border-duck-blue bg-duck-blue/20"
           style={{
             borderRadius: "2px",
             rotate: -8,
