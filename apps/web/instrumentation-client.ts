@@ -54,11 +54,6 @@ Sentry.init({
       blockAllMedia: true,
     }),
     Sentry.browserTracingIntegration(),
-    Sentry.feedbackIntegration({
-      colorScheme: "system",
-      isNameRequired: false,
-      isEmailRequired: false,
-    }),
   ],
 
   // Filter out noisy errors
