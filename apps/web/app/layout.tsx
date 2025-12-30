@@ -47,9 +47,11 @@ export async function generateMetadata({
       images: ["/opengraph-image"],
     },
     robots: { index: true, follow: true },
-    alternates: { canonical: `/${locale}`, languages },
-    icons: { icon: "/icon.png", apple: "/apple-touch-icon.png" },
-    manifest: `/${locale}/manifest.webmanifest`,
+    // Note: canonical and hreflang MUST be set per-page, not globally
+    // Each page should define its own alternates.canonical and alternates.languages
+    // to avoid all pages canonicalizing to /{locale}
+    // Icons are auto-generated from app/icon.svg and app/apple-icon.svg
+    manifest: "/manifest.json",
     keywords,
   }
 }

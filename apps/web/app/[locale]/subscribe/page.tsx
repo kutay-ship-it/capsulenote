@@ -87,8 +87,15 @@ export default async function SubscribePage({ searchParams }: SubscribePageProps
   }
 
   // Pricing configuration (Capsule Note plans)
+  // Validate required Stripe price IDs before rendering
   const digitalPriceId = env.STRIPE_PRICE_DIGITAL_ANNUAL
   const paperPriceId = env.STRIPE_PRICE_PAPER_ANNUAL
+
+  if (!digitalPriceId || !paperPriceId) {
+    throw new Error(
+      "Stripe pricing not configured. Please set STRIPE_PRICE_DIGITAL_ANNUAL and STRIPE_PRICE_PAPER_ANNUAL environment variables."
+    )
+  }
 
   const checkoutMetadata: Record<string, string> = {}
   if (letterId) checkoutMetadata.letterId = letterId

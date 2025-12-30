@@ -39,7 +39,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.clerk.com https://api.stripe.com https://api.resend.com https://*.upstash.io wss://*.clerk.com https://*.clerk.accounts.dev https://clerk.capsulenote.com https://*.posthog.com https://*.i.posthog.com",
+              "connect-src 'self' https://api.clerk.com https://api.stripe.com https://api.resend.com https://*.upstash.io wss://*.clerk.com https://*.clerk.accounts.dev https://clerk.capsulenote.com https://*.posthog.com https://eu.i.posthog.com https://us.i.posthog.com",
               "frame-src https://challenges.cloudflare.com https://js.stripe.com https://hooks.stripe.com https://*.clerk.accounts.dev https://clerk.capsulenote.com",
               "frame-ancestors 'none'",
               "worker-src 'self' blob:",
